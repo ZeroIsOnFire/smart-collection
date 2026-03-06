@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      mongodb:
+        image: mongo:7
+        ports:
+          - 27017:27017
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+    env:
+      RAILS_ENV: test
+      MONGODB_URI: mongodb://localhost:27017/smart_collection_catalog_test
+      REDIS_URL: redis://localhost:6379/0
+      SECRET_KEY_BASE: ci_test_secret_key_base_placeholder
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
+
+      - name: Install JS dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Run RSpec
+        run: bundle exec rspec --format documentation
+
+      - name: Run RuboCop
+        run: bundle exec rubocop --parallel
+
+      - name: Audit gems for vulnerabilities
+        run: bundle exec bundler-audit check --update
+
+      - name: Rails Best Practices
+        run: bundle exec rails_best_practices .
+
+  docker-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t smart-collection-catalog:ci .

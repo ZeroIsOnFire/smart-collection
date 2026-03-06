@@ -1,0 +1,124 @@
+pt-BR:
+  # ── Geral ──────────────────────────────────────────────
+  hello: "Olá, mundo!"
+  welcome: "Bem-vindo ao Smart Collection Catalog"
+
+  # ── Navegação ──────────────────────────────────────────
+  nav:
+    home: "Início"
+    collections: "Coleções"
+    profile: "Perfil"
+    sign_in: "Entrar"
+    sign_out: "Sair"
+    sign_up: "Criar conta"
+    settings: "Configurações"
+    language: "Idioma"
+
+  # ── Ações comuns ───────────────────────────────────────
+  actions:
+    save: "Salvar"
+    edit: "Editar"
+    delete: "Excluir"
+    cancel: "Cancelar"
+    back: "Voltar"
+    create: "Criar"
+    update: "Atualizar"
+    search: "Buscar"
+    filter: "Filtrar"
+    export: "Exportar"
+    share: "Compartilhar"
+    confirm: "Confirmar"
+    show: "Visualizar"
+    new: "Novo"
+    close: "Fechar"
+
+  # ── Mensagens flash ────────────────────────────────────
+  flash:
+    created: "%{resource} criado(a) com sucesso."
+    updated: "%{resource} atualizado(a) com sucesso."
+    deleted: "%{resource} excluído(a) com sucesso."
+    error: "Ocorreu um erro. Tente novamente."
+    not_found: "%{resource} não encontrado(a)."
+    unauthorized: "Você não tem permissão para realizar esta ação."
+
+  # ── Coleções ───────────────────────────────────────────
+  collections:
+    title: "Coleções"
+    new: "Nova Coleção"
+    edit: "Editar Coleção"
+    name: "Nome"
+    description: "Descrição"
+    items_count: "Itens"
+    created_at: "Criado em"
+    empty: "Nenhuma coleção encontrada."
+    delete_confirm: "Tem certeza que deseja excluir esta coleção?"
+    export_pdf: "Exportar PDF"
+    export_csv: "Exportar CSV"
+
+  # ── Itens de coleção ───────────────────────────────────
+  items:
+    title: "Itens"
+    new: "Novo Item"
+    edit: "Editar Item"
+    type: "Tipo"
+    brand: "Marca"
+    model: "Modelo"
+    description: "Descrição"
+    tags: "Tags"
+    photo: "Foto"
+    empty: "Nenhum item encontrado."
+    delete_confirm: "Tem certeza que deseja excluir este item?"
+    scan_photo: "Escanear foto"
+    scan_success: "Dados extraídos da foto com sucesso."
+
+  # ── Devise ─────────────────────────────────────────────
+  devise:
+    sessions:
+      new:
+        title: "Entrar"
+        sign_in: "Entrar"
+        remember_me: "Lembrar de mim"
+        forgot_password: "Esqueceu a senha?"
+        no_account: "Não tem conta?"
+    registrations:
+      new:
+        title: "Criar conta"
+        sign_up: "Criar conta"
+        already_have_account: "Já tem conta?"
+    passwords:
+      new:
+        title: "Esqueceu a senha?"
+        send_instructions: "Enviar instruções"
+    shared:
+      links:
+        sign_in: "Entrar"
+        sign_up: "Criar conta"
+        forgot_password: "Esqueceu a senha?"
+
+  # ── ActiveRecord ───────────────────────────────────────
+  activerecord:
+    models:
+      user:
+        one: "Usuário"
+        other: "Usuários"
+      collection:
+        one: "Coleção"
+        other: "Coleções"
+      item:
+        one: "Item"
+        other: "Itens"
+    attributes:
+      user:
+        email: "E-mail"
+        password: "Senha"
+        password_confirmation: "Confirmação de senha"
+        remember_me: "Lembrar de mim"
+      collection:
+        name: "Nome"
+        description: "Descrição"
+      item:
+        type: "Tipo"
+        brand: "Marca"
+        model: "Modelo"
+        description: "Descrição"
+        tags: "Tags"
