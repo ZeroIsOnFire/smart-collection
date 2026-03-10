@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Smart Collection - Admin</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <style>
+      body { font-family: sans-serif; margin: 0; display: flex; }
+      .sidebar { width: 250px; background: #2c3e50; color: white; height: 100vh; padding: 20px; }
+      .main-content { flex: 1; padding: 20px; background: #ecf0f1; }
+      .placeholder-img { background: #bdc3c7; width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
+    </style>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body>
+    <div class="sidebar">
+      <div class="placeholder-img">Logo</div>
+      <h2>Admin Panel</h2>
+      <nav>
+        <ul>
+          <li>Dashboard</li>
+          <li>Users</li>
+          <li>Settings</li>
+        </ul>
+      </nav>
+      <hr>
+      <%= link_to "Logout", destroy_user_session_path, data: { turbo_method: :delete }, style: "color: #e74c3c;" %>
+    </div>
+    <div class="main-content">
+      <p class="notice"><%= notice %></p>
+      <p class="alert"><%= alert %></p>
+      <%= yield %>
+    </div>
+  </body>
+</html>

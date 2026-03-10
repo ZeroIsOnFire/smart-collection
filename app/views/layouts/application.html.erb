@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Smart Collection</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <style>
+      body { font-family: 'Inter', sans-serif; background-color: #f8f9fa; margin: 0; }
+      .navbar { background: white; padding: 1rem 2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+      .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+      .placeholder-hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); height: 300px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem; margin-bottom: 2rem; }
+    </style>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body>
+    <header class="navbar">
+      <div style="font-weight: bold; font-size: 1.5rem;">Smart Collection</div>
+      <div>
+        <% if user_signed_in? %>
+          Welcome, <%= current_user.email %> | 
+          <%= link_to "Logout", destroy_user_session_path, data: { turbo_method: :delete } %>
+        <% else %>
+          <%= link_to "Login", new_user_session_path %> | 
+          <%= link_to "Sign Up", new_user_registration_path %>
+        <% end %>
+      </div>
+    </header>
+
+    <div class="container">
+      <p class="notice"><%= notice %></p>
+      <p class="alert"><%= alert %></p>
+      <%= yield %>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,10 @@
+<h1>Admin Dashboard</h1>
+<p>Welcome to the administrative area.</p>
+
+<div style="background: white; padding: 20px; border-radius: 8px; margin-top: 20px;">
+  <h3>System Statistics</h3>
+  <ul>
+    <li>Total Users: <%= User.count %></li>
+    <li>Total Admins: <%= User.where(admin: true).count %></li>
+  </ul>
+</div>

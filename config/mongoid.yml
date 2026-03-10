@@ -1,0 +1,12 @@
+development:
+  clients:
+    default:
+      uri: <%= ENV['MONGODB_URI'] %>
+      options:
+        server_selection_timeout: 5
+test:
+  clients:
+    default:
+      uri: mongodb://<%= ENV.fetch('MONGODB_USERNAME', 'scc_admin') %>:<%= ENV.fetch('MONGODB_PASSWORD', 'scc_dev') %>@mongodb:27017/smart_collection_catalog_test?authSource=admin
+      options:
+        server_selection_timeout: 5

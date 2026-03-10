@@ -12,7 +12,8 @@ require "action_mailer/railtie"
 # require "action_text/engine"
 require "action_view/railtie"
 require "action_cable/engine"
-require "rails/test_unit/railtie"
+# require "mongoid/railtie"
+# require "rails/test_unit/railtie"
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
@@ -22,6 +23,11 @@ module SmartCollectionCatalog
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 7.1
+
+    if ENV['RAILS_ENV'] == 'test' || Rails.env.test?
+      config.hosts = [/.*/]
+      config.action_controller.allow_forgery_protection = false
+    end
 
     # Please, add to the `ignore` list any other `lib` subdirectories that do
     # not contain `.rb` files, or that should not be reloaded or eager loaded.
@@ -39,6 +45,22 @@ module SmartCollectionCatalog
     # Only loads a smaller set of middleware suitable for API only apps.
     # Middleware like session, flash, cookies can be added back manually.
     # Skip views, helpers and assets when generating a new resource.
-    config.api_only = true
+    config.api_only = false
+
+    # Configuration for Mongoid
+    config.generators.orm :mongoid
+
+    # Configuration for Devise
+
+    config.generators do |g|
+      g.test_framework :rspec,
+        fixtures: true,
+        view_specs: false,
+        helper_specs: false,
+        routing_specs: false,
+        controller_specs: false,
+        request_specs: true
+      g.fixture_replacement :factory_bot, dir: "spec/factories"
+    end
   end
 end
