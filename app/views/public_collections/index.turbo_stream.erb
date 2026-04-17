@@ -1,0 +1,36 @@
+<% if @page > 1 %>
+  <%# Se for paginação (infinite scroll), apenas anexamos os novos carros %>
+  <%= turbo_stream.append "cars_grid_inner" do %>
+    <%= render partial: "cars/car", collection: @cars, locals: { public: true } %>
+  <% end %>
+
+  <% if @has_more %>
+    <%= turbo_stream.replace "cars_sentinel" do %>
+      <%= render partial: "cars/sentinel", locals: { next_page: @page + 1, url: public_share_path(@user.share_token, page: @page + 1, q: params[:q], format: :turbo_stream) } %>
+    <% end %>
+  <% else %>
+    <%= turbo_stream.remove "cars_sentinel" %>
+  <% end %>
+
+<% else %>
+  <%# Se for uma busca (primeira página) ou limpar busca, substituímos toda a grade %>
+  <%= turbo_stream.update "cars_list_container" do %>
+    <% if @cars.any? %>
+      <div id="cars_grid_inner" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4 mt-2">
+        <%= render partial: "cars/car", collection: @cars, locals: { public: true } %>
+      </div>
+      <% if @has_more %>
+        <div id="cars_sentinel" class="row mt-4">
+          <%= render partial: "cars/sentinel", locals: { next_page: @page + 1, url: public_share_path(@user.share_token, page: @page + 1, q: params[:q], format: :turbo_stream) } %>
+        </div>
+      <% end %>
+    <% else %>
+      <div class="text-center py-5">
+        <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-white shadow-sm mb-4" style="width: 80px; height: 80px;">
+          <i class="bi bi-search fs-2 text-muted opacity-50"></i>
+        </div>
+        <h4 class="fw-bold mb-2">Nenhum veículo encontrado</h4>
+      </div>
+    <% end %>
+  <% end %>
+<% end %>

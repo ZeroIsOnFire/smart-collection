@@ -1,0 +1,42 @@
+<div class="card premium-card border-0 shadow-sm rounded-4 overflow-hidden">
+  <div class="card-body p-4">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+      <div>
+        <h5 class="fw-bold mb-1 d-flex align-items-center gap-2">
+          <i class="bi bi-share text-primary"></i>
+          Compartilhar Coleção
+        </h5>
+        <p class="text-muted small mb-0">
+          <% if current_user.sharing_enabled? %>
+            Sua coleção está aberta para visualização pública via link único.
+          <% else %>
+            Ative o compartilhamento para gerar um link público da sua coleção.
+          <% end %>
+        </p>
+      </div>
+
+      <div class="d-flex align-items-center gap-3">
+        <% if current_user.sharing_enabled? %>
+          <div class="input-group" style="max-width: 350px;" data-controller="clipboard" data-clipboard-success-content-value="Copiado!">
+            <input type="text" class="form-control bg-light border-0 rounded-start-pill ps-4" readonly 
+                   value="<%= public_share_url(current_user.share_token) %>" 
+                   data-clipboard-target="source">
+            <button class="btn btn-primary rounded-end-pill px-4 d-flex align-items-center gap-2" type="button" data-action="clipboard#copy" data-clipboard-target="button">
+              <i class="bi bi-clipboard"></i> <span>Copiar</span>
+            </button>
+          </div>
+        <% end %>
+
+        <%= button_to toggle_sharing_cars_path, 
+                      method: :patch, 
+                      class: "btn #{current_user.sharing_enabled? ? 'btn-soft-danger' : 'btn-premium'} rounded-pill px-4 py-2 d-flex align-items-center gap-2" do %>
+          <% if current_user.sharing_enabled? %>
+            <i class="bi bi-x-circle"></i> <span>Desativar</span>
+          <% else %>
+            <i class="bi bi-check-circle"></i> <span>Ativar Link Público</span>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

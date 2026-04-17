@@ -1,0 +1,78 @@
+<%= render "devise/auth_styles" %>
+
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="auth-logo">SC</div>
+      <h1 class="auth-title">Criar conta</h1>
+      <p class="auth-subtitle">Junte-se ao Smart Collection</p>
+    </div>
+
+    <%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
+      <%= render "devise/shared/error_messages", resource: resource %>
+
+      <div class="form-group">
+        <%= f.label :name, "Nome completo" %>
+        <%= f.text_field :name, autofocus: true, autocomplete: "name",
+            placeholder: "Seu nome", class: "form-input",
+            id: "user_name" %>
+      </div>
+
+      <div class="form-group">
+        <%= f.label :email, "E-mail" %>
+        <%= f.email_field :email, autocomplete: "email",
+            placeholder: "seu@email.com", class: "form-input",
+            id: "user_email_signup" %>
+      </div>
+
+      <div class="form-group">
+        <%= f.label :password, "Senha" %>
+        <% if @minimum_password_length %>
+          <span class="form-hint">mínimo <%= @minimum_password_length %> caracteres</span>
+        <% end %>
+        <%= f.password_field :password, autocomplete: "new-password",
+            placeholder: "••••••••", class: "form-input",
+            id: "user_password_signup",
+            data: { action: "input->password-strength#evaluate" } %>
+        <div class="password-strength" id="password_strength_bar">
+          <div class="password-strength-bar" id="password_strength_fill"></div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <%= f.label :password_confirmation, "Confirmar senha" %>
+        <%= f.password_field :password_confirmation, autocomplete: "new-password",
+            placeholder: "••••••••", class: "form-input",
+            id: "user_password_confirmation" %>
+      </div>
+
+      <div class="form-actions">
+        <%= f.submit "Criar conta", class: "btn-primary", id: "sign_up_submit" %>
+      </div>
+    <% end %>
+
+    <div class="auth-links">
+      Já tem uma conta? <%= link_to "Entrar", new_session_path(resource_name) %>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    var input = document.getElementById('user_password_signup');
+    var fill  = document.getElementById('password_strength_fill');
+    if (!input || !fill) return;
+    input.addEventListener('input', function() {
+      var v = input.value;
+      fill.className = 'password-strength-bar';
+      if (v.length === 0) return;
+      if (v.length < 8) {
+        fill.classList.add('strength-weak');
+      } else if (v.length < 12 || !/[^a-zA-Z0-9]/.test(v)) {
+        fill.classList.add('strength-medium');
+      } else {
+        fill.classList.add('strength-strong');
+      }
+    });
+  })();
+</script>

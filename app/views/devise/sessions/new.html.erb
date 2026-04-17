@@ -1,0 +1,47 @@
+<%= render "devise/auth_styles" %>
+
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="auth-logo">SC</div>
+      <h1 class="auth-title">Entrar</h1>
+      <p class="auth-subtitle">Acesse sua conta</p>
+    </div>
+
+    <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
+      <div class="form-group">
+        <%= f.label :email, "E-mail" %>
+        <%= f.email_field :email, autofocus: true, autocomplete: "email",
+            placeholder: "seu@email.com", class: "form-input",
+            id: "user_email_login" %>
+      </div>
+
+      <div class="form-group">
+        <%= f.label :password, "Senha" %>
+        <%= f.password_field :password, autocomplete: "current-password",
+            placeholder: "••••••••", class: "form-input",
+            id: "user_password_login" %>
+      </div>
+
+      <% if devise_mapping.rememberable? %>
+        <div class="form-remember">
+          <%= f.check_box :remember_me, id: "user_remember_me" %>
+          <%= f.label :remember_me, "Lembrar de mim" %>
+        </div>
+      <% end %>
+
+      <div class="form-actions">
+        <%= f.submit "Entrar", class: "btn-primary", id: "sign_in_submit" %>
+      </div>
+    <% end %>
+
+    <div class="auth-links">
+      <% if devise_mapping.registerable? && controller_name != 'registrations' %>
+        Não tem conta? <%= link_to "Criar conta", new_registration_path(resource_name) %>
+      <% end %>
+      <% if devise_mapping.recoverable? && controller_name != 'passwords' && controller_name != 'registrations' %>
+        <br><%= link_to "Esqueceu sua senha?", new_password_path(resource_name) %>
+      <% end %>
+    </div>
+  </div>
+</div>

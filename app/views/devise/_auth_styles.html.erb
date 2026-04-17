@@ -1,0 +1,216 @@
+<style>
+  /* ===== Auth Shared Styles ===== */
+  .auth-container {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .auth-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.12), 0 2px 8px rgba(0,0,0,0.08);
+    padding: 2.75rem 2.25rem;
+    width: 100%;
+    max-width: 440px;
+  }
+
+  .auth-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .auth-logo {
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 1.4rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.1rem;
+    box-shadow: 0 4px 14px rgba(102, 126, 234, 0.4);
+  }
+
+  .auth-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin: 0 0 0.3rem;
+    letter-spacing: -0.3px;
+  }
+
+  .auth-subtitle {
+    color: #6b7280;
+    margin: 0;
+    font-size: 0.95rem;
+  }
+
+  .form-group {
+    margin-bottom: 1.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .form-group label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  .form-hint {
+    font-size: 0.78rem;
+    color: #9ca3af;
+  }
+
+  .form-input {
+    padding: 0.65rem 0.9rem;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.18s, box-shadow 0.18s;
+    background: #fafafa;
+    color: #1a1a2e;
+  }
+
+  .form-input:focus {
+    outline: none;
+    border-color: #667eea;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+  }
+
+  .form-input::placeholder {
+    color: #c4c9d4;
+  }
+
+  /* Password strength bar */
+  .password-strength {
+    margin-top: 4px;
+    height: 4px;
+    border-radius: 4px;
+    background: #e5e7eb;
+    overflow: hidden;
+    transition: all 0.3s;
+  }
+
+  .password-strength-bar {
+    height: 100%;
+    border-radius: 4px;
+    width: 0%;
+    transition: width 0.3s, background-color 0.3s;
+  }
+
+  .strength-weak   { width: 33%; background: #ef4444; }
+  .strength-medium { width: 66%; background: #f59e0b; }
+  .strength-strong { width: 100%; background: #10b981; }
+
+  .form-remember {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: #374151;
+    margin-bottom: 1rem;
+  }
+
+  .form-actions {
+    margin-top: 1.5rem;
+  }
+
+  .btn-primary {
+    width: 100%;
+    padding: 0.8rem;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: inherit;
+    letter-spacing: 0.2px;
+    transition: opacity 0.2s, transform 0.1s, box-shadow 0.2s;
+    box-shadow: 0 4px 14px rgba(102, 126, 234, 0.35);
+  }
+
+  .btn-primary:hover {
+    opacity: 0.92;
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.45);
+  }
+
+  .btn-primary:active {
+    transform: scale(0.99);
+  }
+
+  .auth-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 1.5rem 0;
+    color: #d1d5db;
+    font-size: 0.8rem;
+  }
+
+  .auth-divider::before,
+  .auth-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #e5e7eb;
+  }
+
+  .auth-links {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+
+  .auth-links a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.15s;
+  }
+
+  .auth-links a:hover {
+    color: #764ba2;
+    text-decoration: underline;
+  }
+
+  /* Flash / Error Messages */
+  #error_explanation {
+    background: #fef2f2;
+    border: 1.5px solid #fecaca;
+    border-radius: 10px;
+    padding: 0.85rem 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  #error_explanation h2 {
+    font-size: 0.875rem;
+    color: #dc2626;
+    margin: 0 0 0.5rem;
+    font-weight: 600;
+  }
+
+  #error_explanation ul {
+    margin: 0;
+    padding-left: 1.2rem;
+  }
+
+  #error_explanation li {
+    font-size: 0.875rem;
+    color: #dc2626;
+    margin-bottom: 2px;
+  }
+</style>

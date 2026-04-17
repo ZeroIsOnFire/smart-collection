@@ -31,3 +31,17 @@
 
 # Ignore master key for decrypting credentials and more.
 /config/master.key
+
+# Ignore local uploads (CarrierWave)
+/public/uploads/*
+!/public/uploads/.keep
+
+# Ignore Google Cloud Credential JSON keys
+/*.json
+!/package.json
+!/composer.json
+
+# Ignore additional log/debug artifacts
+/*.log
+/*.txt
+/spec/examples.txt

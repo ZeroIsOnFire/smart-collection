@@ -1,0 +1,37 @@
+require 'rails_helper'
+
+RSpec.describe AutodetectionService do
+  let(:user) { create(:user) }
+  let(:valid_params) do
+    { photo: Rack::Test::UploadedFile.new(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png') }
+  end
+
+  before do
+    ActiveJob::Base.queue_adapter = :test
+  end
+
+  describe '#create' do
+    it 'creates an autodetection for the user and enqueues the job' do
+      expect {
+        service = AutodetectionService.new(user)
+        autodetection = service.create(valid_params)
+        expect(autodetection).to be_persisted
+        expect(autodetection.status).to eq('pending')
+      }.to change(user.autodetections, :count).by(1)
+       .and enqueue_job(AutodetectJob)
+    end
+  end
+
+  describe '#retry' do
+    let(:autodetection) { create(:autodetection, :error, user: user) }
+
+    it 'resets the status and re-enqueues the job' do
+      expect {
+        AutodetectionService.new(user).retry(autodetection.id.to_s)
+      }.to enqueue_job(AutodetectJob).with(autodetection.id.to_s)
+      
+      expect(autodetection.reload.status).to eq('pending')
+      expect(autodetection.error_message).to be_nil
+    end
+  end
+end

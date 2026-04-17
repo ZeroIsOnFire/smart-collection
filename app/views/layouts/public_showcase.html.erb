@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Coleção de <%= display_name(@user) %> | Smart Collection</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+    
+    <style>
+      :root {
+        --public-primary: #4F46E5;
+        --public-primary-dark: #4338CA;
+        --public-bg: #F9FAFB;
+        --public-surface: #FFFFFF;
+        --public-text: #111827;
+        --public-text-muted: #6B7280;
+      }
+      body {
+        font-family: 'Outfit', 'Inter', sans-serif;
+        background-color: var(--public-bg);
+        color: var(--public-text);
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+      .navbar-glass {
+        background: rgba(255, 255, 255, 0.9) !important;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid rgba(0,0,0,0.05) !important;
+      }
+      .brand-text {
+        font-weight: 800;
+        letter-spacing: -0.05em;
+        font-size: 1.5rem;
+      }
+      .brand-icon {
+        color: var(--public-primary);
+        font-size: 1.75rem;
+        transition: transform 0.3s ease;
+      }
+      .navbar-brand:hover .brand-icon {
+        transform: rotate(15deg);
+      }
+      main {
+        flex: 1;
+      }
+      .footer-glass {
+        background: var(--public-surface);
+        border-top: 1px solid rgba(0,0,0,0.05);
+      }
+    </style>
+  </head>
+
+  <body>
+    <header class="navbar navbar-expand-lg sticky-top navbar-glass py-3">
+      <div class="container">
+        <%= link_to root_path, class: "navbar-brand d-flex align-items-center text-decoration-none" do %>
+          <i class="bi bi-intersect brand-icon me-2"></i>
+          <span class="brand-text">Smart<span style="color: var(--public-primary);">Collection</span></span>
+        <% end %>
+      </div>
+    </header>
+
+    <main>
+      <%= yield %>
+    </main>
+
+    <footer class="py-5 footer-glass mt-5">
+      <div class="container text-center">
+        <div class="d-flex align-items-center justify-content-center mb-3">
+          <i class="bi bi-intersect text-primary fs-3 me-2" style="color: var(--public-primary) !important;"></i>
+          <span class="brand-text fs-5">SmartCollection</span>
+        </div>
+        <p class="text-muted small mb-4" style="color: var(--public-text-muted) !important;">Organize, exiba e compartilhe seu acervo de forma elegante.</p>
+        <div>
+          <%= link_to "Criar minha coleção grátis", new_user_registration_path, class: "btn text-white fw-medium rounded-pill px-5 py-2 hover-lift shadow-sm", style: "background-color: var(--public-primary);" %>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

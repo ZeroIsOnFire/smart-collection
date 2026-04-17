@@ -1,11 +1,12 @@
 class ApplicationController < ActionController::Base
+  helper :all
   layout :set_layout
 
   def after_sign_in_path_for(resource)
     if resource.admin?
       admin_dashboard_path
     else
-      root_path
+      cars_path
     end
   end
 

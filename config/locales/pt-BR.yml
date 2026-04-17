@@ -107,6 +107,9 @@ pt-BR:
       item:
         one: "Item"
         other: "Itens"
+      car:
+        one: "Carro"
+        other: "Carros"
     attributes:
       user:
         email: "E-mail"
@@ -122,3 +125,57 @@ pt-BR:
         model: "Modelo"
         description: "Descrição"
         tags: "Tags"
+      car:
+        name: "Nome / Modelo"
+        brand: "Marca"
+        manufacturer: "Fabricante"
+        year: "Ano"
+        size: "Escala / Tamanho"
+        tags: "Tags"
+        observations: "Observações"
+        photo: "Foto"
+
+  # ── Mongoid ──────────────────────────────────────────
+  mongoid:
+    models:
+      car:
+        one: "Carro"
+        other: "Carros"
+    attributes:
+      car:
+        name: "Nome / Modelo"
+        brand: "Marca"
+        manufacturer: "Fabricante"
+        year: "Ano"
+        size: "Escala / Tamanho"
+        tags: "Tags"
+        observations: "Observações"
+        photo: "Foto"
+
+  # ── Erros de Validação ─────────────────────────────────
+  errors:
+    format: "%{attribute} %{message}"
+    messages:
+      blank: "não pode ficar em branco"
+      empty: "não pode ficar vazio"
+      taken: "já está em uso"
+      invalid: "é inválido"
+      too_long:
+        one: "é muito longo (máximo: 1 caractere)"
+        other: "é muito longo (máximo: %{count} caracteres)"
+      too_short:
+        one: "é muito curto (mínimo: 1 caractere)"
+        other: "é muito curto (mínimo: %{count} caracteres)"
+      wrong_length:
+        one: "possui o comprimento errado (deveria ter 1 caractere)"
+        other: "possui o comprimento errado (deveria ter %{count} caracteres)"
+      not_a_number: "não é um número"
+      not_an_integer: "deve ser um número inteiro"
+      greater_than: "deve ser maior que %{count}"
+      greater_than_or_equal_to: "deve ser maior ou igual a %{count}"
+      equal_to: "deve ser igual a %{count}"
+      less_than: "deve ser menor que %{count}"
+      less_than_or_equal_to: "deve ser menor ou igual a %{count}"
+      other_than: "deve ser diferente de %{count}"
+      odd: "deve ser ímpar"
+      even: "deve ser par"

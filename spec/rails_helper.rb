@@ -1,6 +1,7 @@
 require 'spec_helper'
 ENV['RAILS_ENV'] = 'test'
 require_relative '../config/environment'
+Dir[Rails.root.join('spec', 'support', '**', '*.rb')].sort.each { |f| require f }
 Rails.application.middleware.delete(ActionDispatch::HostAuthorization) rescue nil
 abort("The Rails environment is running in production mode!") if Rails.env.production?
 require 'rspec/rails'

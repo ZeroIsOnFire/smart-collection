@@ -31,11 +31,18 @@ gem "bootsnap", require: false
 
 gem "devise"
 gem "mongoid", "~> 9.0"
+gem "carrierwave", "~> 3.0"
+gem "carrierwave-mongoid"
 gem "responders"
 gem "propshaft"
 gem "importmap-rails"
 gem "turbo-rails"
 gem "stimulus-rails"
+gem "simple_form"
+gem "sidekiq"
+gem "redis"
+gem "google-cloud-vision"
+gem "mini_magick"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
@@ -46,6 +53,8 @@ group :development, :test do
   gem "rubocop", require: false
   gem "rubocop-rails", require: false
   gem "rubocop-rspec", require: false
+  gem "vcr"
+  gem "webmock"
 end
 
 group :development do

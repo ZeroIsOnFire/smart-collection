@@ -1,0 +1,128 @@
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+
+      <!-- Cabeçalho com ações -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <%= link_to cars_path, class: "btn btn-outline-secondary rounded-pill px-4 d-inline-flex align-items-center" do %>
+          <i class="bi bi-arrow-left me-2"></i> Minha Coleção
+        <% end %>
+        <div class="d-flex align-items-center gap-2">
+          <%= link_to 'Editar', edit_car_path(@car), class: 'btn btn-premium rounded-pill d-inline-flex align-items-center justify-content-center', style: 'min-width: 120px;' %>
+          <%= link_to 'Excluir', @car, data: { turbo_method: :delete, turbo_confirm: 'Tem certeza que deseja excluir este item?' }, class: 'btn btn-outline-danger rounded-pill d-inline-flex align-items-center justify-content-center', style: 'padding: 0.75rem 1.75rem; min-width: 120px;' %>
+        </div>
+      </div>
+
+      <!-- Card Principal -->
+      <div class="card shadow-sm border-0 rounded-4 overflow-hidden mb-4">
+
+        <!-- Foto clicável -->
+        <% if @car.photo? %>
+          <div style="height: 400px; overflow: hidden; cursor: zoom-in; position: relative;"
+               data-bs-toggle="modal" data-bs-target="#photoLightbox">
+            <%= image_tag @car.photo.url, style: "width: 100%; height: 100%; object-fit: cover; display: block;" %>
+            <div class="position-absolute bottom-0 end-0 m-3">
+              <span class="badge bg-dark bg-opacity-60 rounded-pill px-3 py-2 text-white">
+                <i class="bi bi-zoom-in me-1"></i> Ver foto completa
+              </span>
+            </div>
+          </div>
+
+          <!-- Modal Lightbox -->
+          <div class="modal fade" id="photoLightbox" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-centered">
+              <div class="modal-content bg-transparent border-0 shadow-none">
+                <div class="modal-body p-0 text-center position-relative d-inline-block w-auto mx-auto">
+                  <%= image_tag @car.photo.url, 
+                        class: "rounded-4 shadow-lg d-block", 
+                        style: "max-height: 85vh; max-width: 90vw; min-height: 320px; min-width: 320px; object-fit: contain; background: #111;" %>
+                  <button type="button" 
+                          class="btn btn-dark btn-sm rounded-circle shadow position-absolute"
+                          data-bs-dismiss="modal"
+                          style="top: -14px; right: -14px; width: 34px; height: 34px; padding: 0; opacity: 0.85; z-index: 10;">
+                    <i class="bi bi-x-lg small"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% else %>
+          <div class="bg-light d-flex align-items-center justify-content-center text-muted" style="height: 240px;">
+            <div class="text-center">
+              <i class="bi bi-camera display-4 mb-2 opacity-30"></i>
+              <p class="small mb-0">Sem foto cadastrada</p>
+            </div>
+          </div>
+        <% end %>
+
+        <div class="card-body p-4 p-md-5">
+          <!-- Nome e badges -->
+          <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
+            <div>
+              <h1 class="h2 fw-bold mb-1"><%= @car.name.presence || '—' %></h1>
+              <% if @car.brand.present? %>
+                <span class="badge bg-primary bg-opacity-10 text-primary fw-semibold fs-6 rounded-pill"><%= @car.brand %></span>
+              <% end %>
+            </div>
+            <% if @car.year.present? %>
+              <span class="badge bg-secondary rounded-pill fs-6 px-3 py-2"><i class="bi bi-calendar me-1"></i><%= @car.year %></span>
+            <% end %>
+          </div>
+
+          <hr class="my-4">
+
+          <!-- Detalhes em grid -->
+          <div class="row g-4 mb-4">
+            <div class="col-sm-6">
+              <div class="d-flex flex-column">
+                <small class="text-uppercase fw-semibold text-muted tracking-wide mb-1">Marca</small>
+                <span class="fs-6 fw-medium"><%= @car.brand.presence || '—' %></span>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="d-flex flex-column">
+                <small class="text-uppercase fw-semibold text-muted tracking-wide mb-1">Fabricante</small>
+                <span class="fs-6 fw-medium"><%= @car.manufacturer.presence || '—' %></span>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="d-flex flex-column">
+                <small class="text-uppercase fw-semibold text-muted tracking-wide mb-1">Escala / Tamanho</small>
+                <span class="fs-6 fw-medium"><%= @car.size.presence || '—' %></span>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="d-flex flex-column">
+                <small class="text-uppercase fw-semibold text-muted tracking-wide mb-1">Ano de Fabricação</small>
+                <span class="fs-6 fw-medium"><%= @car.year.presence || '—' %></span>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="d-flex flex-column">
+                <small class="text-uppercase fw-semibold text-muted tracking-wide mb-1">Cor</small>
+                <span class="fs-6 fw-medium d-flex align-items-center gap-2">
+                  <% if @car.color.present? %>
+                    <span class="d-inline-block rounded-circle shadow-sm" style="width:14px; height:14px; background-color:<%= Car::COLORS[@car.color] || '#ccc' %>; border: 1px solid #dee2e6;"></span>
+                  <% end %>
+                  <%= @car.color.presence || '—' %>
+                </span>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="d-flex flex-column">
+                <small class="text-uppercase fw-semibold text-muted tracking-wide mb-1">Observações</small>
+                <p class="mb-0 text-dark" style="line-height: 1.7;"><%= @car.observations.presence || '—' %></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Meta info -->
+          <div class="text-muted small">
+            <i class="bi bi-clock me-1"></i> Adicionado em <%= @car.created_at.strftime("%d/%m/%Y") %>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

@@ -1,0 +1,121 @@
+<div class="container-fluid py-4 px-lg-5">
+
+  <!-- Cabeçalho -->
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+      <h1 class="fw-bold mb-0 fs-3">Meus Carros</h1>
+      <p class="text-muted small mb-0">Sua coleção pessoal</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <%= render "autodetections/form_button", autodetection: Autodetection.new %>
+      <%= link_to new_car_path, class: 'btn btn-premium rounded-pill px-4 d-flex align-items-center gap-2' do %>
+        <i class="bi bi-plus-circle"></i> Novo Item
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Autodetections em andamento -->
+  <%= turbo_stream_from "autodetections_#{current_user.id.to_s}" %>
+  <div id="autodetections_list" class="mb-4">
+    <% if @autodetections.any? %>
+      <%= render partial: "autodetections/autodetection", collection: @autodetections %>
+    <% end %>
+  </div>
+
+  <div id="sharing_banner" class="mb-4">
+    <%= render partial: "cars/sharing_banner" %>
+  </div>
+
+  <!-- Campo de Busca Full Text -->
+  <div class="row mb-4">
+    <div class="col-12 col-lg-8 mx-auto">
+      <%= form_with url: cars_path, 
+                    method: :get, 
+                    class: "position-relative", 
+                    data: { 
+                      controller: "search-form",
+                      turbo_frame: "cars_grid"
+                    } do |f| %>
+        <div class="input-group input-group-lg premium-search-container shadow-sm border rounded-pill overflow-hidden bg-white">
+          <span class="input-group-text border-0 bg-transparent ps-4">
+            <i class="bi bi-search text-muted"></i>
+          </span>
+          <%= f.text_field :q, 
+                           value: params[:q], 
+                           placeholder: "Buscar por nome, marca, tags...", 
+                           class: "form-control border-0 bg-transparent py-3 shadow-none",
+                           autocomplete: "off",
+                           data: { 
+                             search_form_target: "input",
+                             action: "input->search-form#submit" 
+                           } %>
+          
+          <div class="d-none d-flex align-items-center me-2" data-search-form-target="spinner">
+            <div class="spinner-border spinner-border-sm text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+
+          <% if params[:q].present? %>
+            <%= link_to cars_path, class: "btn border-0 bg-transparent text-muted px-4 d-flex align-items-center", data: { turbo_stream: true } do %>
+              <i class="bi bi-x-circle"></i>
+            <% end %>
+          <% end %>
+          
+          <button type="submit" class="btn btn-premium px-4 rounded-pill m-1 d-none d-sm-block">
+            Buscar
+          </button>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- View Toggle Wrapper -->
+  <div data-controller="view-toggle">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div class="text-muted small">
+        <!-- Aqui poderia ir um contador de resultados -->
+      </div>
+      <div class="btn-group shadow-sm bg-white rounded-pill p-1 border">
+        <button type="button" class="btn btn-sm text-primary active rounded-pill px-3 fw-medium d-flex align-items-center gap-2" data-view-toggle-target="gridButton" data-action="click->view-toggle#setGrid">
+          <i class="bi bi-grid-fill"></i> Grade
+        </button>
+        <button type="button" class="btn btn-sm text-muted rounded-pill px-3 fw-medium d-flex align-items-center gap-2" data-view-toggle-target="listButton" data-action="click->view-toggle#setList">
+          <i class="bi bi-list-ul"></i> Lista
+        </button>
+      </div>
+    </div>
+
+    <!-- Grid de carros -->
+    <turbo-frame id="cars_grid">
+      <div id="cars_list_container" class="position-relative">
+        <% if @cars.any? || current_user.cars.any? %>
+          <div id="cars_grid_inner" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4 mt-2">
+            <%= render partial: "cars/car", collection: @cars %>
+          </div>
+
+          <!-- Sentinela para infinite scroll -->
+          <% if @has_more %>
+            <div id="cars_sentinel" class="row mt-4">
+              <%= render partial: "cars/sentinel", locals: { next_page: @page + 1 } %>
+            </div>
+          <% end %>
+
+        <% else %>
+          <!-- Estado vazio -->
+          <div class="text-center py-5 mt-4">
+            <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light mb-4" style="width: 80px; height: 80px;">
+              <i class="bi bi-collection fs-2 text-muted opacity-50"></i>
+            </div>
+            <h4 class="fw-bold mb-2">Nenhum item na coleção</h4>
+            <p class="text-muted mb-4">Adicione seu primeiro carro ou use a Autodetecção por foto.</p>
+            <%= link_to new_car_path, class: 'btn btn-premium rounded-pill px-5', data: { turbo: false } do %>
+              <i class="bi bi-plus-circle me-2"></i> Adicionar Primeiro Item
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </turbo-frame>
+  </div>
+
+</div>

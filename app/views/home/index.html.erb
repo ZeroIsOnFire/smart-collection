@@ -1,18 +1,149 @@
-<div class="placeholder-hero">
-  Smart Collection - Home Placeholder
-</div>
-
-<section style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
-  <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-    <h3>Feature A</h3>
-    <p>Sample description for feature A.</p>
-  </div>
-  <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-    <h3>Feature B</h3>
-    <p>Sample description for feature B.</p>
-  </div>
-  <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-    <h3>Feature C</h3>
-    <p>Sample description for feature C.</p>
+<section class="hero-section">
+  <%= image_tag "hero_car_collection_1775696111841.png", class: "hero-bg-image", alt: "Premium Car Collection Showcase" %>
+  
+  <div class="container hero-content">
+    <div class="row align-items-center min-vh-75">
+      <div class="col-lg-7 animate-fade-up">
+        <div class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill mb-4 border border-primary border-opacity-25">
+          <i class="bi bi-stars me-1"></i> Inteligência Artificial de Ponta
+        </div>
+        <h1 class="display-3 fw-bold tracking-tight mb-4">
+          Sua coleção elevada a um <span class="text-gradient">novo nível.</span>
+        </h1>
+        <p class="lead text-white text-opacity-75 mb-5 fs-4">
+          O Smart Collection utiliza IA avançada para reconhecer seus itens através de fotos, organizando sua paixão automaticamente e com precisão cirúrgica.
+        </p>
+        <div class="d-flex flex-wrap gap-3">
+          <% if user_signed_in? %>
+            <%= link_to cars_path, class: "btn btn-primary btn-lg rounded-pill px-5 py-3 fs-5 fw-semibold d-flex align-items-center" do %>
+              <i class="bi bi-person-circle me-2 fs-4"></i>
+              Olá, <%= current_user.email.split('@').first.capitalize %>! <i class="bi bi-arrow-right ms-2 mt-1"></i>
+            <% end %>
+            <%= link_to "#features", class: "btn btn-outline-light btn-lg rounded-pill px-5 py-3 fs-5" do %>
+              Ver Recursos
+            <% end %>
+          <% else %>
+            <%= link_to new_user_registration_path, class: "btn btn-primary btn-lg rounded-pill px-5 py-3 fs-5 fw-semibold" do %>
+              Começar Agora <i class="bi bi-arrow-right ms-2"></i>
+            <% end %>
+            <%= link_to "#features", class: "btn btn-outline-light btn-lg rounded-pill px-4 py-3 fs-5" do %>
+              Ver Recursos
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+      
+      <div class="col-lg-5 d-none d-lg-block animate-fade-up" style="animation-delay: 0.2s;">
+        <div class="glass-card p-4 text-center">
+          <div class="bg-primary bg-opacity-20 rounded-4 p-5 mb-4 border border-white border-opacity-10">
+             <i class="bi bi-upc-scan display-1 text-white opacity-50"></i>
+          </div>
+          <h4 class="fw-bold mb-2">Escaneamento Inteligente</h4>
+          <p class="text-white text-opacity-50 small mb-0">Identificação instantânea de modelos, marcas e fabricantes via Google Vision API.</p>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
+
+<section id="features" class="py-5 bg-white">
+  <div class="container py-5">
+    <div class="text-center mb-5 animate-fade-up">
+      <h2 class="display-5 fw-bold mb-3">Tudo o que você precisa</h2>
+      <p class="text-muted lead mx-auto" style="max-width: 700px;">
+        Ferramentas profissionais desenhadas para colecionadores exigentes que não abrem mão de organização e beleza.
+      </p>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+      <!-- Feature 1 -->
+      <div class="col-md-4 animate-fade-up" style="animation-delay: 0.1s;">
+        <div class="feature-card">
+          <div class="icon-box bg-indigo-light">
+            <i class="bi bi-robot"></i>
+          </div>
+          <h4 class="fw-bold mb-3">Indexação via IA</h4>
+          <p class="text-muted mb-0">
+            Chega de digitar. Tire uma foto da sua prateleira e deixe nossa IA identificar e catalogar cada item individualmente.
+          </p>
+        </div>
+      </div>
+
+      <!-- Feature 2 -->
+      <div class="col-md-4 animate-fade-up" style="animation-delay: 0.2s;">
+        <div class="feature-card">
+          <div class="icon-box bg-purple-light">
+            <i class="bi bi-grid-3x3-gap"></i>
+          </div>
+          <h4 class="fw-bold mb-3">Galeria Infinita</h4>
+          <p class="text-muted mb-0">
+            Visualize sua coleção em uma galeria premium com filtros inteligentes por marca, ano ou fabricante.
+          </p>
+        </div>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="col-md-4 animate-fade-up" style="animation-delay: 0.3s;">
+        <div class="feature-card">
+          <div class="icon-box bg-emerald-light">
+            <i class="bi bi-file-earmark-pdf"></i>
+          </div>
+          <h4 class="fw-bold mb-3">Exportação Master</h4>
+          <p class="text-muted mb-0">
+            Gere catálogos profissionais em PDF ou planilhas CSV com um clique. Pronto para compartilhar ou imprimir.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-5 bg-light border-top">
+  <div class="container py-5">
+    <div class="row align-items-center">
+      <div class="col-lg-6 mb-5 mb-lg-0">
+        <h2 class="display-6 fw-bold mb-4">Pronto para digitalizar sua paixão?</h2>
+        <p class="lead text-muted mb-5">
+          Junte-se a milhares de colecionadores e transforme sua paixão em um catálogo digital organizado e compartilhável.
+        </p>
+        <% unless user_signed_in? %>
+          <%= link_to "Criar Minha Conta Grátis", new_user_registration_path, class: "btn btn-primary btn-lg rounded-pill px-5 py-3 fw-bold" %>
+        <% else %>
+           <%= link_to "Acessar Meus Carros", cars_path, class: "btn btn-primary btn-lg rounded-pill px-5 py-3 fw-bold" %>
+        <% end %>
+      </div>
+      <div class="col-lg-6">
+        <div class="p-4 bg-white shadow-lg rounded-4 border">
+          <div class="d-flex align-items-center mb-3">
+             <div class="rounded-circle bg-success bg-opacity-10 p-2 me-3">
+               <i class="bi bi-check-lg text-success"></i>
+             </div>
+             <span class="fw-semibold">Google Vision API Integrada</span>
+          </div>
+          <div class="d-flex align-items-center mb-3">
+             <div class="rounded-circle bg-success bg-opacity-10 p-2 me-3">
+               <i class="bi bi-check-lg text-success"></i>
+             </div>
+             <span class="fw-semibold">Exportação Prawn PDF de alta fidelidade</span>
+          </div>
+          <div class="d-flex align-items-center">
+             <div class="rounded-circle bg-success bg-opacity-10 p-2 me-3">
+               <i class="bi bi-check-lg text-success"></i>
+             </div>
+             <span class="fw-semibold">Segurança e Privacidade de Dados</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="py-5 bg-white border-top">
+  <div class="container text-center">
+    <div class="navbar-brand d-flex align-items-center justify-content-center mb-4">
+      <i class="bi bi-intersect text-primary fs-3 me-2"></i>
+      <span class="fw-bold tracking-tight text-dark">Smart<span class="text-primary">Collection</span></span>
+    </div>
+    <p class="text-muted small">© <%= Time.now.year %> Smart Collection Catalog. Todos os direitos reservados.</p>
+  </div>
+</footer>

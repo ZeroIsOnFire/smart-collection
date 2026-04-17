@@ -1,0 +1,408 @@
+/*
+ * This is a manifest file that'll be compiled into application.css, which will include all the files
+ * listed below.
+ *
+ * Any CSS and SCSS file within this directory, lib/assets/stylesheets, or any plugin's
+ * vendor/assets/stylesheets directory can be referenced here using a relative path.
+ *
+ * You're free to add application-wide styles to this file and they'll appear at the bottom of the
+ * compiled file so the styles you add here take precedence over styles defined in any other CSS/SCSS
+ * files in this directory. Styles in this file should be added after the last require_* statement.
+ * It is generally better to create a new file per style scope.
+ *
+ */
+
+/* Import Bootstrap 5 from CDN for immediate availability and reliability */
+@import url('https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css');
+/* Import Google Fonts - Outfit for a modern, premium feel */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+/* Import Bootstrap Icons */
+@import url('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css');
+
+:root {
+  --premium-indigo: #4f46e5;
+  --premium-slate: #0f172a;
+  --premium-background: #f8fafc;
+  --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  --secondary-gradient: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.3);
+  --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05), 0 4px 12px -3px rgba(0, 0, 0, 0.02);
+}
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background-color: var(--premium-background);
+  color: var(--premium-slate);
+  min-height: 100vh;
+  letter-spacing: -0.01em;
+}
+
+.tracking-tight { letter-spacing: -0.025em; }
+
+/* Premium Navbar */
+.navbar {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--glass-border);
+  padding: 1.25rem 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  transition: all 0.3s ease;
+}
+
+.navbar .nav-link {
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+/* Landing Page Navbar Overrides */
+.landing-page .navbar {
+  border-bottom: none !important;
+  position: absolute;
+  width: 100%;
+  background: transparent !important;
+  box-shadow: none;
+}
+
+/* Premium Cards */
+.card.premium-card {
+  border: 1px solid var(--glass-border);
+  background: white;
+  box-shadow: var(--card-shadow);
+  transition: box-shadow 0.3s ease;
+}
+
+.card.premium-card:hover {
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1);
+}
+
+/* Form Styling */
+.form-control {
+  border: 1.5px solid #e2e8f0;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  background-color: #fff;
+}
+
+.form-control:focus {
+  border-color: var(--premium-indigo);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+  background-color: #fff;
+}
+
+/* Buttons */
+.btn-premium {
+  background: var(--primary-gradient);
+  border: none;
+  color: white;
+  font-weight: 600;
+  padding: 0.75rem 1.75rem;
+  border-radius: 0.75rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.btn-premium:hover {
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  color: white;
+  filter: brightness(1.15);
+}
+
+.btn-soft-secondary {
+  background-color: #f8fafc;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+.btn-soft-secondary:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+.btn-soft-danger {
+  background-color: #fef2f2;
+  color: #ef4444;
+  border: 1px solid #fee2e2;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+.btn-soft-danger:hover {
+  background-color: #fee2e2;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+.btn-soft-warning {
+  background-color: #fffbeb;
+  color: #d97706;
+  border: 1px solid #fef3c7;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+.btn-soft-warning:hover {
+  background-color: #fef3c7;
+  color: #b45309;
+  border-color: #fde68a;
+}
+
+/* Landing Page Sections */
+.hero-section {
+  position: relative;
+  padding: 180px 0 120px;
+  background-color: #0c0e14;
+  overflow: hidden;
+  color: white;
+}
+
+.hero-bg-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.5;
+  z-index: 1;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 2rem;
+  padding: 3rem;
+}
+
+/* Feature Cards */
+.feature-card {
+  padding: 2.5rem;
+  background: white;
+  border-radius: 1.5rem;
+  transition: all 0.3s ease;
+  height: 100%;
+  border: 1px solid #f1f5f9;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+}
+
+.icon-box {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  font-size: 1.75rem;
+}
+
+.bg-indigo-light { background-color: rgba(79, 70, 229, 0.1); color: var(--premium-indigo); }
+.bg-purple-light { background-color: rgba(124, 58, 237, 0.1); color: #7c3aed; }
+.bg-emerald-light { background-color: rgba(16, 185, 129, 0.1); color: #10b981; }
+
+/* Loading state for detected items */
+.is-loading {
+  position: relative;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.detected-item-loader {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.6);
+  z-index: 10;
+  border-radius: inherit;
+}
+
+.is-loading .detected-item-loader {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Premium Search Bar */
+.premium-search-container {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-color: #e2e8f0 !important;
+}
+
+.premium-search-container:focus-within {
+  border-color: var(--premium-indigo) !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  transform: translateY(-1px);
+}
+
+.premium-search-container .form-control:focus {
+  box-shadow: none !important;
+}
+
+/* Animations for Dynamic Updates */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+/* Showcase Styles */
+.public-showcase-hero {
+  background: var(--primary-gradient);
+  position: relative;
+  overflow: hidden;
+}
+
+.public-showcase-hero::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  background: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2v-4h4v-2h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2v-4h4v-2H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');
+  opacity: 1;
+}
+
+/* Toggle View Styles (Compact Table) */
+.view-list #cars_grid_inner {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  background: white;
+  box-shadow: var(--card-shadow);
+  /* overflow: hidden removed to allow dropdowns to pop out */
+}
+
+.view-list #cars_grid_inner > .col {
+  width: 100% !important;
+  flex: 0 0 100% !important;
+  max-width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  position: relative;
+  z-index: 10;
+}
+
+/* Fix z-index stacking when hovering or opening dropdowns */
+.view-list #cars_grid_inner > .col:hover,
+.view-list #cars_grid_inner > .col:focus-within {
+  z-index: 20;
+}
+
+.view-list .card {
+  flex-direction: row !important;
+  height: auto !important;
+  min-height: 0;
+  border: none !important;
+  border-radius: 0 !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  box-shadow: none !important;
+  transition: background-color 0.2s;
+  overflow: visible !important; /* Allow dropdown to escape the thin card row */
+}
+
+/* Ensure corners are visually contained without overflow: hidden on parent */
+.view-list .col:first-child .card {
+  border-top-left-radius: 1rem !important;
+  border-top-right-radius: 1rem !important;
+}
+
+.view-list .col:last-child .card {
+  border-bottom: none !important;
+  border-bottom-left-radius: 1rem !important;
+  border-bottom-right-radius: 1rem !important;
+}
+
+.view-list .card:hover {
+  background-color: #f8fafc !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.view-list .card > a {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  text-decoration: none;
+  align-items: center;
+}
+
+.view-list .car-photo-container {
+  width: 70px !important;
+  height: 50px !important;
+  min-height: 0;
+  margin: 10px 15px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.view-list .card-body {
+  display: flex;
+  flex-direction: row !important;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 70px 10px 0 !important; /* increased padding-right for dropdown */
+  flex: 1;
+  gap: 15px;
+}
+
+/* Fix action dropdown position on table row */
+.view-list .car-action-dropdown {
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  right: 15px !important;
+  bottom: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Remove default margin constraints for compact row */
+.view-list .card-title {
+  margin: 0 !important;
+  font-size: 1rem;
+  flex: 2;
+  white-space: nowrap;
+}
+
+.view-list .card-text {
+  margin: 0 !important;
+  flex: 1;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.view-list .card-body > .d-flex {
+  margin: 0 !important;
+  align-items: center;
+  gap: 10px;
+}
+
+@media (max-width: 768px) {
+  .view-list .card-text {
+    display: none; /* Hide brand on mobile table view to save space */
+  }
+}

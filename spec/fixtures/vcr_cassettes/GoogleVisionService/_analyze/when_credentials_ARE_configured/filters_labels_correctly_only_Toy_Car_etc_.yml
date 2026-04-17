@@ -1,0 +1,47 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://oauth2.googleapis.com/token
+    body:
+      encoding: ASCII-8BIT
+      string: grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJzbWFydGNvbGxlY3Rpb25AbG9mdHktb3V0Y29tZS00OTE5MjMtcDIuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJhdWQiOiJodHRwczovL29hdXRoMi5nb29nbGVhcGlzLmNvbS90b2tlbiIsImV4cCI6MTc3NDkxNzkyOCwiaWF0IjoxNzc0OTE3ODA4LCJzY29wZSI6Imh0dHBzOi8vd3d3Lmdvb2dsZWFwaXMuY29tL2F1dGgvY2xvdWQtcGxhdGZvcm0gaHR0cHM6Ly93d3cuZ29vZ2xlYXBpcy5jb20vYXV0aC9jbG91ZC12aXNpb24ifQ.JBUQsOKTEplWWvv_Yp4r_X4Yn4r6aRxq3IlUoZv7CotNMlIDbuWjeBSDyzLnseN1zTSz6OFDPmWsV7D_8FImMZBYIRI-RVW7kkyoIC-bBcKBTQpsuXBE-fkjoAokA9WMtKbXDd9dzoDPMdZpiXV4-yU3SRrYCnxvcdqSVXYD74tRLQUpMxGNUCOwamqkN65rsl9aeJ_5-EFsbwkF6fI4744EeXB3x3t5Ws_A42SBL1Os7hkIn-Fxfjx8iY7BYZkwsQP1iooOLiXdI53D_8IpdJVjzGCYolcUvDwxg3ob8JiJjTWspDFwiR38jsvjFMUD3fUJsfyVZx6OsqM5WA04zA
+    headers:
+      User-Agent:
+      - Faraday v2.14.1
+      Content-Type:
+      - application/x-www-form-urlencoded
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Vary:
+      - Origin
+      - Referer
+      - X-Origin
+      Date:
+      - Tue, 31 Mar 2026 00:44:29 GMT
+      Server:
+      - scaffolding on HTTPServer2
+      X-Xss-Protection:
+      - '0'
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Content-Type-Options:
+      - nosniff
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: ASCII-8BIT
+      string: '{"access_token":"ya29.c.c0AZ4bNpYr2MGexOFKpBRYngQ7HOqg4f--VeeekX8m0Wmnxh4YFVVgenfMO97sfRv-Zqpfjkb2hS3DuBDKepHM_NVmAsUKAAVkpkbtn7sbZNcTw5O3eqFbbw0VAejyHEp6KRgukwqC1q2RY753myp7ratDL6XrpZICRsrc2BFrCHLO3VTGrqdQfrY8sGjsi-piLJv6TsOLIyLYlJ4pupjwquctWOTMXMO0yplVZZp9SlsDxgtV35uDC-A7UNaq-WB7TZe7WiC96HqRruuF-h6oNGMZ_2ej_SNqdH2319-e-iYcHsxYBLv4lz7TMT0343WXeYm_9Hj24CxLUWCAmF2qHZy5JOR8xlF8KxhbyuJXw8Rj_ISVikdXniJouGsYN389CI494O-jx6jZJ88gv1a-tSWSf3YJOwO9Ym-UOgY6sZuOfhSsOJ2fhhnI17Zey4qJiionaIh6t6I8UxjacgUx9Bq_9zBk662iWFiM_r1FzVoafY4w24O3S14gda-a6n86akoZ36OJW3cye_BMQMUaWoJjJxrY3idUp5k13qQxR7cF4Ms9jWI9xoolJ7nr2e2oB1bwhwf-z7SSWf732SvpgnWy8rhRk810qpZV38fm0V8Z0WBkSZufuRWBYuUSydVhg3O4-Y5Jx9ffFw3MOvdy_rhS01pRWcJFF9q4miI-Vij-W0-V__QmfkOk5-sS3I85ostI30rUl2XR40FV7o1-h4lIsYarFBb0yYRux81Q1vo_byJy4dmvWjhh7Is50Iyf_OVBeMxVnWp_Ft8YU2ky3XX_9uyj2gjMOl-mnnR45OfmpRtyOjptqJfvkJZBwmM2iu6pbSkt7e51r3c11b2prIUsxaB7U7M6uIYyXRrfmrxlOifXvvMSuBRmYu_gj3BOu7_9Y3FQzQr2M3OpJYObg-ztO5Ons-fr2bfzvguiJ4iV8rimIe6VJ82vw51VrovkFSS_80kM10tWzJSYR6o-k8IvFV_tpdqp95ib82zfbIJZcM4-FvR-ifq","expires_in":3599,"token_type":"Bearer"}'
+  recorded_at: Tue, 31 Mar 2026 00:44:28 GMT
+recorded_with: VCR 6.4.0

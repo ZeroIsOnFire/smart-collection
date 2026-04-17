@@ -1,0 +1,216 @@
+<%= simple_form_for(car, html: { 
+  class: "needs-validation", 
+  novalidate: true, 
+  multipart: true,
+  data: { 
+    controller: "color-detector",
+    "color-detector-colors-value": Car::COLORS.to_json
+  }
+}) do |f| %>
+  <%= f.error_notification %>
+
+  <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+    <div class="card-body p-4 p-md-5">
+      
+      <!-- Foto Principal -->
+      <h5 class="fw-bold mb-4 text-dark pb-2 border-bottom">
+        <i class="bi bi-camera me-2 text-primary"></i> Foto Principal
+      </h5>
+
+      <div class="col-12 mb-5"
+           data-controller="photo-upload"
+           data-action="dragover->photo-upload#dragOver dragleave->photo-upload#dragLeave drop->photo-upload#drop">
+
+        <!-- Hidden input for remove_photo -->
+        <%= f.hidden_field :remove_photo, value: "", data: { "photo-upload-target": "removeField" } %>
+        <%= f.hidden_field :remote_photo_url %>
+
+        <!-- File input (hidden but accessible for programmatic .click()) -->
+        <%= f.file_field :photo,
+              accept: "image/png,image/gif,image/jpeg",
+              style: "position: absolute; width: 0; height: 0; opacity: 0; overflow: hidden;",
+              data: { "photo-upload-target": "input", "color-detector-target": "input", action: "change->photo-upload#fileSelected change->color-detector#detect" } %>
+
+        <!-- Existing photo data (only on edit) -->
+        <% if car.photo.present? %>
+          <span data-photo-upload-target="existingPhoto"
+                data-url="<%= car.photo.url %>"
+                class="d-none"></span>
+        <% elsif car.remote_photo_url.present? %>
+          <span data-photo-upload-target="remotePhoto"
+                data-url="<%= car.remote_photo_url %>"
+                class="d-none"></span>
+        <% end %>
+
+        <!-- Drop zone / Upload prompt -->
+        <div class="position-relative border rounded-4 p-5 text-center bg-light photo-dropzone"
+             style="border-style: dashed !important; border-width: 2px !important; border-color: #dee2e6 !important; cursor: pointer;"
+             data-photo-upload-target="dropzone"
+             data-action="click->photo-upload#openFilePicker">
+
+          <!-- Upload prompt (shown when no photo) -->
+          <div data-photo-upload-target="uploadPrompt">
+            <div class="d-inline-flex align-items-center justify-content-center bg-white shadow-sm rounded-circle mb-3"
+                 style="width: 64px; height: 64px;">
+              <i class="bi bi-cloud-upload text-primary fs-3"></i>
+            </div>
+            <h6 class="fw-bold text-dark mb-1">Clique ou arraste a imagem aqui</h6>
+            <p class="text-muted small mb-0">JPG, PNG ou GIF &mdash; máx. 5 MB</p>
+          </div>
+
+          <!-- Preview (hidden initially, shown after photo selected or existing) -->
+          <div data-photo-upload-target="preview" class="d-none">
+            <div class="position-relative d-inline-block">
+              <img data-photo-upload-target="previewImg"
+                   src=""
+                   alt="Preview"
+                   class="rounded-3 shadow-sm"
+                   style="max-height: 240px; max-width: 100%; object-fit: contain;">
+
+              <button type="button"
+                      class="btn btn-danger btn-sm rounded-circle position-absolute shadow"
+                      style="top: -10px; right: -10px; width: 32px; height: 32px; padding: 0; line-height: 1;"
+                      title="Remover foto"
+                      data-action="click->photo-upload#removePhoto">
+                <i class="bi bi-x-lg"></i>
+              </button>
+            </div>
+            <p class="text-muted small mt-3 mb-0">Clique ou arraste para substituir a foto</p>
+          </div>
+        </div>
+
+        <% if car.errors[:photo].any? %>
+          <div class="invalid-feedback d-block text-start mt-2">
+            <%= car.errors[:photo].to_sentence %>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Informações Básicas -->
+      <h5 class="fw-bold mb-4 text-dark pb-2 border-bottom">
+        <i class="bi bi-box-seam me-2 text-primary"></i> Informações Básicas
+      </h5>
+
+      <div class="row g-4 mb-4">
+        <div class="col-12">
+          <%= f.input :brand, 
+                      label: "Marca (Item)", 
+                      placeholder: "Ex: Hot Wheels, Matchbox, Maisto", 
+                      input_html: { class: "form-control-lg bg-light border-0" },
+                      label_html: { class: "text-secondary small text-uppercase tracking-wide" } %>
+        </div>
+        
+        <div class="col-12">
+          <%= f.input :manufacturer, 
+                      label: "Fabricante (Veículo)", 
+                      placeholder: "Ex: Porsche, Ferrari, Ford", 
+                      input_html: { class: "form-control-lg bg-light border-0" },
+                      label_html: { class: "text-secondary small text-uppercase tracking-wide" } %>
+        </div>
+
+        <div class="col-12">
+          <%= f.input :name, 
+                      label: "Nome / Modelo do Veículo", 
+                      placeholder: "Ex: 911 Carrera, Mustang GT, LaFerrari", 
+                      input_html: { class: "form-control-lg bg-light border-0" },
+                      label_html: { class: "text-secondary small text-uppercase tracking-wide" } %>
+        </div>
+      </div>
+
+      <!-- Especificações -->
+      <h5 class="fw-bold mb-4 text-dark pb-2 border-bottom">
+        <i class="bi bi-sliders me-2 text-primary"></i> Especificações
+      </h5>
+
+      <div class="row g-4 mb-5">
+        <div class="col-md-6">
+          <%= f.input :year, 
+                      label: "Ano de Fabricação", 
+                      placeholder: "Ex: 1998", 
+                      input_html: { class: "form-control-lg bg-light border-0" },
+                      label_html: { class: "text-secondary small text-uppercase tracking-wide" } %>
+        </div>
+        
+        <div class="col-md-6">
+          <%= f.input :size,
+                      as: :select,
+                      label: "Escala / Tamanho",
+                      collection: [
+                        "1:18", "1:24", "1:32", "1:43", "1:50",
+                        "1:64", "1:72", "1:76", "1:87", "1:160"
+                      ],
+                      include_blank: "Selecione a escala...",
+                      input_html: { class: "form-select form-select-lg bg-light border-0" },
+                      label_html: { class: "text-secondary small text-uppercase tracking-wide" } %>
+        </div>
+
+        <div class="col-md-12 mt-4">
+          <div class="input-group input-group-lg border-0 bg-light rounded-3 overflow-hidden">
+            <span class="input-group-text bg-light border-0 ps-3">
+              <div data-color-detector-target="preview" 
+                   class="rounded-circle shadow-sm" 
+                   style="width: 24px; height: 24px; transition: background-color 0.3s ease; border: 1px solid #dee2e6;">
+              </div>
+            </span>
+            <%= f.input :color,
+                        as: :select,
+                        label: false,
+                        collection: Car.color_options,
+                        include_blank: "Selecione a cor...",
+                        input_html: { 
+                          class: "form-select border-0 bg-light py-3",
+                          data: { 
+                            "color-detector-target": "select",
+                            action: "change->color-detector#updatePreview"
+                          }
+                        },
+                        wrapper: false %>
+          </div>
+          <small class="text-secondary small text-uppercase tracking-wide mt-2 d-block ms-1" style="font-size: 0.7rem;">Cor Principal</small>
+        </div>
+      </div>
+
+      <!-- Detalhes Adicionais -->
+      <h5 class="fw-bold mb-4 text-dark pb-2 border-bottom">
+        <i class="bi bi-card-text me-2 text-primary"></i> Detalhes Adicionais
+      </h5>
+
+      <div class="row g-4 mb-2">
+        <div class="col-12">
+          <%= f.input :observations, 
+                      as: :text,
+                      label: "Observações do Item", 
+                      placeholder: "Escreva detalhes sobre o estado de conservação...", 
+                      input_html: { class: "bg-light border-0", rows: 4 },
+                      label_html: { class: "text-secondary small text-uppercase tracking-wide" } %>
+        </div>
+      </div>
+
+    </div>
+    
+    <div class="card-footer bg-light border-0 p-4 p-md-5 d-flex justify-content-between align-items-center">
+      <%= link_to cars_path, class: "btn btn-link text-secondary text-decoration-none fw-semibold px-0" do %>
+        <i class="bi bi-arrow-left me-2"></i>Voltar
+      <% end %>
+      
+      <%= f.button :submit, car.persisted? ? "Salvar Alterações" : "Adicionar ao Acervo", class: "btn-primary btn-lg rounded-pill px-5 fw-bold shadow-sm" %>
+    </div>
+  </div>
+<% end %>
+
+<style>
+  .tracking-wide { letter-spacing: 0.05em; }
+  .form-control { transition: all 0.2s ease-in-out; }
+  .form-control:focus {
+    background-color: #fff !important;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1) !important;
+    border: 1px solid #dee2e6 !important;
+  }
+  .photo-dropzone {
+    transition: border-color 0.2s, background-color 0.2s;
+  }
+  .photo-dropzone.drag-over {
+    border-color: #0d6efd !important;
+    background-color: #e8f0fe !important;
+  }
+</style>

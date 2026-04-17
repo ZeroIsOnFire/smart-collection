@@ -1,7 +1,39 @@
 Rails.application.routes.draw do
-  devise_for :users
+  devise_for :users, controllers: { registrations: "registrations" }
   
+  # Removendo o redirecionamento automático para cars#index para que a landing page seja sempre a home
+  # authenticated :user do
+  #   root 'cars#index', as: :authenticated_root
+  # end
+
+  resources :cars do
+    collection do
+      patch :toggle_sharing
+    end
+  end
+
+  # Public sharing routes
+  get '/s/:share_token', to: 'public_collections#index', as: :public_share
+  get '/s/:share_token/car/:id', to: 'public_collections#show', as: :public_share_car
+
+  resources :autodetections, only: [:create, :show, :destroy] do
+    member do
+      patch :retry
+    end
+    resources :detected_items, only: [:create]
+  end
+
+  resources :detected_items, only: [:destroy] do
+    member do
+      patch :reject
+      patch :undo
+      patch :update_selection
+    end
+  end
+
   root "home#index"
+
+  mount ActionCable.server => '/cable'
 
   namespace :admin do
     get '/', to: 'dashboard#index', as: :dashboard

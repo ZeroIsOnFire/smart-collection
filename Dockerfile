@@ -17,7 +17,7 @@ FROM base as build
 
 # Install packages needed to build gems
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential git pkg-config libyaml-dev
+    apt-get install --no-install-recommends -y build-essential git pkg-config libyaml-dev imagemagick
 
 # Install application gems
 COPY Gemfile Gemfile.lock ./
@@ -37,7 +37,7 @@ FROM base
 
 # Install packages needed for deployment
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y curl && \
+    apt-get install --no-install-recommends -y curl git imagemagick && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Copy built artifacts: gems, application
@@ -46,7 +46,8 @@ COPY --from=build /rails /rails
 
 # Run and own only the runtime files as a non-root user for security
 RUN useradd rails --create-home --shell /bin/bash && \
-    chown -R rails:rails log tmp
+    mkdir -p public/uploads storage && \
+    chown -R rails:rails log tmp public/uploads storage
 USER rails:rails
 
 # Entrypoint prepares the database.
