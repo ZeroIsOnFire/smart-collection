@@ -55,6 +55,7 @@ group :development, :test do
   gem "rubocop-rspec", require: false
   gem "vcr"
   gem "webmock"
+  gem "bundler-audit", require: false
 end
 
 group :development do

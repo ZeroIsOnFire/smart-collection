@@ -42,7 +42,7 @@ services:
     volumes:
       - mongodb_data:/data/db
     ports:
-      - "27017:27017"
+      - "127.0.0.1:27017:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USERNAME:-scc_admin}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD:-scc_dev}
@@ -60,7 +60,7 @@ services:
     volumes:
       - redis_data:/data
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s

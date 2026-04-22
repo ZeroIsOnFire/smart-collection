@@ -50,7 +50,13 @@ class CarsController < ApplicationController
 
   # POST /cars
   def create
-    @detected_item = DetectedItem.find(params[:detected_item_id]) if params[:detected_item_id].present?
+    if params[:detected_item_id].present?
+      @detected_item = DetectedItem.find_by(id: params[:detected_item_id])
+      # Garante que o item detectado pertence ao usuário atual
+      if @detected_item.nil? || @detected_item.autodetection.user_id.to_s != current_user.id.to_s
+        return redirect_to cars_path, alert: "Item detectado inválido ou não autorizado."
+      end
+    end
     
     # Se vier de um item detectado, garante que a foto seja carregada do arquivo local
     # CarrierWave remote_photo_url falha para arquivos locais / uploads/

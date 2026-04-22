@@ -2,7 +2,12 @@ class ApplicationController < ActionController::Base
   helper :all
   layout :set_layout
 
+  protected
+  
   def after_sign_in_path_for(resource)
+    # Limpa qualquer localização armazenada (como a Home) para garantir o redirecionamento correto
+    stored_location_for(resource)
+    
     if resource.admin?
       admin_dashboard_path
     else

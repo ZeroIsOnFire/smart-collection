@@ -8,7 +8,7 @@
       <p class="auth-subtitle">Acesse sua conta</p>
     </div>
 
-    <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
+    <%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { data: { turbo: false } }) do |f| %>
       <div class="form-group">
         <%= f.label :email, "E-mail" %>
         <%= f.email_field :email, autofocus: true, autocomplete: "email",

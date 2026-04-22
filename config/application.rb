@@ -24,8 +24,8 @@ module SmartCollectionCatalog
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 7.1
 
-    if ENV['RAILS_ENV'] == 'test' || Rails.env.test?
-      config.hosts = [/.*/]
+    if Rails.env.test?
+      config.hosts = [/.*/]  # Permite qualquer Host header em CI (evita DNS rebinding errors)
       config.action_controller.allow_forgery_protection = false
     end
 

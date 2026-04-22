@@ -5,18 +5,7 @@ class DetectedItemsController < ApplicationController
 
   # POST /autodetections/:autodetection_id/detected_items
   def create
-    # Recebe coordenadas normalizadas (0.0 a 1.0)
-    x = params[:x].to_f
-    y = params[:y].to_f
-    w = params[:width].to_f
-    h = params[:height].to_f
-
-    normalized_vertices = [
-      { "x" => x, "y" => y },
-      { "x" => x + w, "y" => y },
-      { "x" => x + w, "y" => y + h },
-      { "x" => x, "y" => y + h }
-    ]
+    normalized_vertices = normalized_vertices_from_params
 
     # Recortar imagem
     cropped_file = ImageCropperService.crop(@autodetection.photo.path, normalized_vertices, padding: 0)
@@ -108,18 +97,7 @@ class DetectedItemsController < ApplicationController
 
   # PATCH /detected_items/:id/update_selection
   def update_selection
-    # Recebe coordenadas normalizadas (0.0 a 1.0)
-    x = params[:x].to_f
-    y = params[:y].to_f
-    w = params[:width].to_f
-    h = params[:height].to_f
-
-    normalized_vertices = [
-      { "x" => x, "y" => y },
-      { "x" => x + w, "y" => y },
-      { "x" => x + w, "y" => y + h },
-      { "x" => x, "y" => y + h }
-    ]
+    normalized_vertices = normalized_vertices_from_params
 
     # Recortar novamente sem padding extra
     cropped_file = ImageCropperService.crop(@detected_item.autodetection.photo.path, normalized_vertices, padding: 0)
@@ -155,15 +133,28 @@ class DetectedItemsController < ApplicationController
 
   def set_detected_item
     @detected_item = DetectedItem.find_by(id: params[:id])
-    
+
     if @detected_item.nil?
-      render json: { error: "Não encontrado" }, status: :not_found
-      return
+      render json: { error: "Não encontrado" }, status: :not_found and return
     end
 
     # Verifica se pertence ao usuário através da autodetection
-    if @detected_item.autodetection.user_id.to_s != current_user.id.to_s
-      render json: { error: "Não autorizado" }, status: :unauthorized
+    unless @detected_item.autodetection.user_id.to_s == current_user.id.to_s
+      render json: { error: "Não autorizado" }, status: :unauthorized and return
     end
+  end
+
+  # Monta os vértices normalizados (0.0 a 1.0) a partir dos params x, y, width, height
+  def normalized_vertices_from_params
+    x = params[:x].to_f
+    y = params[:y].to_f
+    w = params[:width].to_f
+    h = params[:height].to_f
+    [
+      { "x" => x,     "y" => y },
+      { "x" => x + w, "y" => y },
+      { "x" => x + w, "y" => y + h },
+      { "x" => x,     "y" => y + h }
+    ]
   end
 end

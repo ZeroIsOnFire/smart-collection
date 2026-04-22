@@ -1,4 +1,4 @@
-<div class="container-fluid py-4 px-lg-5">
+<div class="container-fluid py-4 app-container">
 
   <!-- Cabeçalho -->
   <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
@@ -72,7 +72,7 @@
 
   <!-- View Toggle Wrapper -->
   <div data-controller="view-toggle">
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-5">
       <div class="text-muted small">
         <!-- Aqui poderia ir um contador de resultados -->
       </div>
@@ -90,7 +90,7 @@
     <turbo-frame id="cars_grid">
       <div id="cars_list_container" class="position-relative">
         <% if @cars.any? || current_user.cars.any? %>
-          <div id="cars_grid_inner" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4 mt-2">
+          <div id="cars_grid_inner" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4 mt-2 grid-view">
             <%= render partial: "cars/car", collection: @cars %>
           </div>
 

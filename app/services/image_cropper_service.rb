@@ -1,11 +1,27 @@
 require "mini_magick"
+require "tempfile"
 
 class ImageCropperService
+  # Diretórios permitidos para leitura de imagens (proteção contra path traversal)
+  def self.allowed_paths
+    @allowed_paths ||= [
+      Rails.root.join("public", "uploads").to_s,
+      (Rails.root.join("spec", "fixtures").to_s if Rails.env.test?)
+    ].compact.freeze
+  end
+
   def self.crop(source_path, normalized_vertices, padding: 0.05)
     return nil if normalized_vertices.blank?
 
+    # Proteção contra path traversal: garante que o arquivo está dentro dos diretórios permitidos
+    resolved_path = File.expand_path(source_path.to_s)
+    unless allowed_paths.any? { |root| resolved_path.start_with?(root) }
+      Rails.logger.error "ImageCropperService: path não permitido: #{resolved_path}"
+      return nil
+    end
+
     begin
-      image = MiniMagick::Image.open(source_path)
+      image = MiniMagick::Image.open(resolved_path)
       width = image.width
       height = image.height
 
@@ -21,7 +37,7 @@ class ImageCropperService
       # Add small padding
       padding_w = w * padding
       padding_h = h * padding
-      
+
       left = [0, left - padding_w].max
       top = [0, top - padding_h].max
       w = [width - left, w + 2 * padding_w].min
@@ -29,12 +45,13 @@ class ImageCropperService
 
       # MiniMagick crop format: "widthxheight+x+y"
       image.crop "#{w.to_i}x#{h.to_i}+#{left.to_i}+#{top.to_i}"
-      
-      # We return a File object that CarrierWave can handle
-      output_path = Rails.root.join('tmp', "crop_#{SecureRandom.hex(8)}.jpg")
-      image.write output_path
-      
-      File.open(output_path)
+
+      # Usar Tempfile para que o Ruby/OS gerencie a remoção automaticamente
+      output = Tempfile.new(["crop_", ".jpg"], Rails.root.join("tmp"))
+      output.binmode
+      image.write(output.path)
+      output.rewind
+      output
     rescue => e
       Rails.logger.error "Image Cropper Error: #{e.message}"
       nil

@@ -28,6 +28,53 @@
   --glass-bg: rgba(255, 255, 255, 0.7);
   --glass-border: rgba(255, 255, 255, 0.3);
   --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05), 0 4px 12px -3px rgba(0, 0, 0, 0.02);
+  
+  /* Standardized Responsive Margins */
+  --app-px: 1.25rem;
+  --app-gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --app-px: 2rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  :root {
+    --app-px: 3rem;
+    --app-gap: 2rem;
+  }
+}
+
+@media (min-width: 1600px) {
+  :root {
+    --app-px: 4rem;
+  }
+}
+
+/* Generalized Container Alignment */
+.app-container {
+  padding-left: var(--app-px) !important;
+  padding-right: var(--app-px) !important;
+  width: 100%;
+}
+
+/* Public view should be slightly wider/closer to edge on high-res */
+.public-container {
+  --app-px: 1rem;
+}
+
+@media (min-width: 1200px) {
+  .public-container {
+    --app-px: 1.5rem;
+  }
+}
+
+@media (min-width: 1600px) {
+  .public-container {
+    --app-px: 2rem; /* Half the desktop padding of private view */
+  }
 }
 
 body {
@@ -46,7 +93,11 @@ body {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--glass-border);
-  padding: 1.25rem 2rem;
+  padding-top: 1.25rem;
+  padding-bottom: 1.25rem;
+  /* Removed horizontal padding from navbar to align internal container with content below */
+  padding-left: 0 !important;
+  padding-right: 0 !important;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
   position: sticky;
   top: 0;
@@ -284,6 +335,39 @@ body {
 }
 
 /* Toggle View Styles (Compact Table) */
+.view-grid #cars_grid_inner,
+#cars_grid_inner.grid-view {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
+  gap: var(--app-gap) !important;
+  padding: 0 !important; 
+}
+
+/* On medium screen ranges, ensure margins are consistent */
+@media (max-width: 991.98px) {
+  .view-grid #cars_grid_inner,
+  #cars_grid_inner.grid-view {
+    /* Padding is now handled by the parent .app-container */
+  }
+}
+
+/* Mobile override for grid view: 1fr */
+@media (max-width: 576px) {
+  .view-grid #cars_grid_inner,
+  #cars_grid_inner.grid-view {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Reset Bootstrap column paddings for CSS grid */
+.view-grid #cars_grid_inner > .col,
+#cars_grid_inner.grid-view > .col {
+  width: 100% !important;
+  max-width: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
 .view-list #cars_grid_inner {
   display: flex !important;
   flex-direction: column !important;
@@ -294,7 +378,6 @@ body {
   border-radius: 1rem;
   background: white;
   box-shadow: var(--card-shadow);
-  /* overflow: hidden removed to allow dropdowns to pop out */
 }
 
 .view-list #cars_grid_inner > .col {
@@ -365,9 +448,23 @@ body {
   flex-direction: row !important;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 70px 10px 0 !important; /* increased padding-right for dropdown */
+  padding: 10px 15px 10px 0 !important; /* Balanced with the 15px left margin of the photo */
   flex: 1;
   gap: 15px;
+}
+
+/* On private views, add extra padding ONLY if needed for the absolute positioned dropdown */
+/* We increased this from 45px to 65px to avoid overlap with the action button */
+.view-list:not(.is-public) .card-body {
+  padding-right: 65px !important;
+}
+
+/* On public showcase, allow the text to go closer to the edge for a wider look */
+/* We use multiple selectors to ensure it catches cases where is-public is on a parent or the grid itself */
+.is-public .view-list .card-body,
+.view-list.is-public .card-body,
+#cars_grid_inner.is-public .card-body {
+  padding-right: 15px !important;
 }
 
 /* Fix action dropdown position on table row */
@@ -378,6 +475,7 @@ body {
   bottom: auto !important;
   margin: 0 !important;
   padding: 0 !important;
+  z-index: 100 !important; /* Ensure it's above any other card-body content */
 }
 
 /* Remove default margin constraints for compact row */
