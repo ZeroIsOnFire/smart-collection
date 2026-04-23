@@ -21,9 +21,9 @@ class CollectionExport
   def broadcast_status_update
     Turbo::StreamsChannel.broadcast_replace_to(
       "user_#{user_id}_exports",
-      target: "export_status_container",
+      target: "export_#{format_type}_status_container",
       partial: "collection_exports/export_status",
-      locals: { export: self }
+      locals: { export: self, format_type: format_type }
     )
   end
 end

@@ -19,9 +19,12 @@
         </div>
       <% end %>
       
-      <!-- Export Status -->
+      <!-- Export Status CSV -->
       <%= turbo_stream_from "user_#{current_user.id}_exports" %>
-      <%= render partial: "collection_exports/export_status", locals: { export: current_user.collection_exports.where(format_type: 'csv').last } %>
+      <%= render partial: "collection_exports/export_status", locals: { export: current_user.collection_exports.where(format_type: 'csv').last, format_type: 'csv' } %>
+      
+      <!-- Export Status PDF -->
+      <%= render partial: "collection_exports/export_status", locals: { export: current_user.collection_exports.where(format_type: 'pdf').last, format_type: 'pdf' } %>
 
       <%= render "autodetections/form_button", autodetection: Autodetection.new %>
       <%= link_to new_car_path, class: 'btn btn-premium rounded-pill px-4 d-flex align-items-center gap-2' do %>

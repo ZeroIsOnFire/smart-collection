@@ -1,19 +1,19 @@
-<div id="export_status_container">
+<div id="export_<%= format_type %>_status_container">
   <% if export.nil? %>
-    <%= button_to collection_exports_path, method: :post, class: "btn btn-outline-secondary rounded-pill px-3 d-flex align-items-center gap-2", style: "height: 48px;", data: { turbo_stream: true } do %>
-      <i class="bi bi-filetype-csv"></i> Gerar CSV
+    <%= button_to collection_exports_path(format_type: format_type), method: :post, class: "btn btn-outline-secondary rounded-pill px-3 d-flex align-items-center gap-2", style: "height: 48px;", data: { turbo_stream: true } do %>
+      <i class="bi <%= format_type == 'csv' ? 'bi-filetype-csv' : 'bi-file-earmark-pdf' %>"></i> Gerar <%= format_type.upcase %>
     <% end %>
   <% elsif export.status == 'pending' || export.status == 'processing' %>
     <button class="btn btn-outline-secondary rounded-pill px-3 d-flex align-items-center gap-2" style="height: 48px;" disabled>
       <span class="spinner-border spinner-border-sm text-secondary" role="status" aria-hidden="true"></span>
-      Gerando CSV...
+      Gerando <%= format_type.upcase %>...
     </button>
   <% elsif export.status == 'completed' %>
     <div class="btn-group shadow-sm rounded-pill" style="height: 48px;">
       <%= link_to export.file.url, class: "btn btn-success rounded-start-pill px-3 d-flex align-items-center gap-2", style: "height: 48px;", target: "_blank", data: { turbo: false } do %>
-        <i class="bi bi-download"></i> Baixar CSV
+        <i class="bi bi-download"></i> Baixar <%= format_type.upcase %>
       <% end %>
-      <%= button_to collection_export_path(export), method: :delete, class: "btn btn-outline-success rounded-end-pill px-3 d-flex align-items-center border-start-0", style: "height: 48px;", data: { turbo_stream: true }, title: "Gerar Novamente" do %>
+      <%= button_to collection_exports_path(format_type: format_type), method: :post, class: "btn btn-outline-success rounded-end-pill px-3 d-flex align-items-center border-start-0", style: "height: 48px;", data: { turbo_stream: true }, title: "Gerar Novamente" do %>
         <i class="bi bi-arrow-clockwise"></i>
       <% end %>
     </div>
@@ -22,7 +22,7 @@
       <button class="btn btn-outline-danger rounded-start-pill px-3 d-flex align-items-center gap-2" style="height: 48px;" disabled title="<%= export.error_message %>">
         <i class="bi bi-exclamation-triangle"></i> Falhou
       </button>
-      <%= button_to collection_export_path(export), method: :delete, class: "btn btn-outline-danger rounded-end-pill px-3 d-flex align-items-center border-start-0", style: "height: 48px;", data: { turbo_stream: true }, title: "Tentar Novamente" do %>
+      <%= button_to collection_exports_path(format_type: format_type), method: :post, class: "btn btn-outline-danger rounded-end-pill px-3 d-flex align-items-center border-start-0", style: "height: 48px;", data: { turbo_stream: true }, title: "Tentar Novamente" do %>
         <i class="bi bi-arrow-clockwise"></i>
       <% end %>
     </div>
