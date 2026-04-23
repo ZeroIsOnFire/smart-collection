@@ -31,7 +31,7 @@ class CarsController < ApplicationController
     
     respond_to do |format|
       format.turbo_stream
-      format.html { redirect_to cars_path, notice: "Configuração de compartilhamento atualizada." }
+      format.html { redirect_to edit_user_registration_path, notice: "Configuração de compartilhamento atualizada." }
     end
   end
 

@@ -3,7 +3,9 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static targets = ["source", "button"]
   static values = {
-    successContent: String
+    successContent: String,
+    successClass: { type: String, default: "btn-success" },
+    defaultClass: { type: String, default: "btn-primary" }
   }
 
   connect() {
@@ -22,13 +24,13 @@ export default class extends Controller {
 
   showSuccess() {
     this.buttonTarget.innerHTML = this.successContentValue
-    this.buttonTarget.classList.remove("btn-primary")
-    this.buttonTarget.classList.add("btn-success")
+    this.buttonTarget.classList.remove(this.defaultClassValue)
+    this.buttonTarget.classList.add(this.successClassValue)
 
     setTimeout(() => {
       this.buttonTarget.innerHTML = this.originalContent
-      this.buttonTarget.classList.remove("btn-success")
-      this.buttonTarget.classList.add("btn-primary")
+      this.buttonTarget.classList.remove(this.successClassValue)
+      this.buttonTarget.classList.add(this.defaultClassValue)
     }, 2000)
   }
 }
