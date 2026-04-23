@@ -2,7 +2,19 @@
 
 ## Visão Geral
 
-Serviço web para registro e gerenciamento de coleções variadas. Permite cadastro de coleções e seus itens, compartilhamento, indexação automática via fotos (Google Vision API — credenciais fornecidas pelo usuário) e exportação em PDF/CSV.
+Serviço web premium para registro e gerenciamento de coleções variadas. Permite cadastro de coleções e seus itens, compartilhamento público seguro, indexação automática via fotos (Google Vision API — credenciais fornecidas pelo usuário), recorte interativo de imagens e exportação em PDF/CSV. O design é focado em alta fidelidade ("Premium Vibe"), utilizando Glassmorphism e layouts responsivos avançados (Grid/List views).
+
+---
+
+## 🛡️ Segurança em Primeiro Lugar
+
+A segurança e privacidade dos dados do usuário são a principal prioridade deste projeto. 
+
+- **Segregação Rigorosa de Dados**: Nenhum usuário pode ver, editar ou excluir itens de outro usuário. Toda query e ação de controller deve ser escopada via `current_user` (ex: `current_user.cars.find(params[:id])`).
+- **Autenticação**: O acesso é protegido via Devise. Ações sensíveis como alteração de senha e e-mail exigem confirmação da senha atual do usuário.
+- **Autorização de Compartilhamento**: Coleções são privadas por padrão. A funcionalidade de "Visão Pública" deve ser explicitamente ativada no Dashboard de Configurações, gerando um `share_token` único (UUID) impossível de ser adivinhado.
+- **Proteção de Credenciais**: As chaves da Google Vision API **devem ser fornecidas pelo próprio usuário**. O sistema não deve expor logs, parâmetros HTTP ou views que contenham chaves de API, senhas ou tokens sem ofuscação.
+- **Sanitização**: Todo input e parâmetro vindo de requests externas, formulários ou da Vision API deve ser higienizado contra XSS e injeções, utilizando o padrão Strong Parameters do Rails.
 
 ---
 
@@ -13,7 +25,8 @@ Serviço web para registro e gerenciamento de coleções variadas. Permite cadas
 | Backend        | Ruby on Rails 7.1+                  |
 | Banco de dados | MongoDB 7 (via Mongoid)             |
 | Frontend       | Hotwire (Turbo + Stimulus)          |
-| CSS            | Bootstrap 5                         |
+| CSS            | Bootstrap 5 + Premium Custom CSS    |
+| UI / UX        | Cropper.js, Fonte Outfit, Ícones BI |
 | Testes         | RSpec, FactoryBot, Shoulda, VCR     |
 | Storage        | ActiveStorage                       |
 | Background     | Solid Queue                         |
@@ -25,11 +38,13 @@ Serviço web para registro e gerenciamento de coleções variadas. Permite cadas
 
 ---
 
-## Arquitetura
+## Arquitetura e Design System
 
 - **Padrão MVC** com camada extra de **Services** (`app/services/`).
+- **Premium Design System**: A aplicação exige um visual impecável. Evite cores genéricas; utilize nossa paleta premium (`--premium-indigo`, `--premium-slate`), *glassmorphism*, modais polidos e transições suaves (`transition: all 0.3s ease`). 
+- **Componentes Modernos**: O sistema utiliza *infinite scroll*, visualização alternável (Grade/Lista compacta), recorte manual interativo de imagens na autodetecção e cópia de links para área de transferência via Stimulus.
 - Lógica de negócio complexa ou reutilizável **deve** residir em services, nunca em controllers ou models.
-- Controllers devem ser finos: recebem a requisição, delegam ao service e respondem.
+- Controllers devem ser finos: recebem a requisição, delegam ao service e respondem em formatos HTML ou Turbo Stream.
 - Models contêm apenas validações, associações e scopes.
 
 ### Estrutura de Diretórios Relevante
@@ -38,11 +53,11 @@ Serviço web para registro e gerenciamento de coleções variadas. Permite cadas
 app/
 ├── controllers/
 ├── models/
-├── services/        # Camada de serviços
-├── views/
-├── javascript/      # Stimulus controllers
+├── services/        # Camada de serviços de negócio e API
+├── views/           # UI com Turbo Frames e Streams
+├── javascript/      # Stimulus controllers (ex: clipboard, view-toggle)
 ├── assets/
-│   └── stylesheets/
+│   └── stylesheets/ # index.css / application.css (Variáveis Premium)
 spec/
 ├── controllers/
 ├── models/
@@ -67,16 +82,10 @@ spec/
 - Toda configuração de ambiente está centralizada no `docker-compose.yml`.
 - Variáveis de ambiente via arquivo `.env` (template em `.env.example`).
 
-### Segurança
-- Autenticação via Devise.
-- Nunca expor secrets ou API keys no código — usar variáveis de ambiente.
-- Sanitizar inputs do usuário.
-- Validar permissões de acesso (autorização) em cada action.
-
-### Google Vision API
+### Autodetecção e Visão
 - As credenciais da Vision API **devem ser fornecidas pelo próprio usuário** via variáveis de ambiente (`GOOGLE_CLOUD_PROJECT_ID`, `GOOGLE_CLOUD_CREDENTIALS_PATH`).
-- A aplicação **não** possui chave própria da API — o usuário é responsável por criar e configurar seu projeto no Google Cloud.
-- A funcionalidade de visão deve degradar graciosamente quando as credenciais não estiverem configuradas.
+- A aplicação **não** possui chave própria da API.
+- O fluxo conta com *fallback* manual caso o recorte falhe ou seja impreciso, e a interface deve atualizar via WebSockets/Turbo Streams em tempo real.
 
 ### Dependências
 - **Não adicionar gems ou bibliotecas novas sem autorização explícita do usuário.**
@@ -152,6 +161,7 @@ refactor(items): extrair lógica de tags para TagService
 4. Descrição do PR deve conter: o que foi feito, por que, e como testar.
 
 ### Checklist de Review
+- [ ] Segurança primeiro: Segregação de dados garantida (`current_user`)?
 - [ ] Testes foram escritos **antes** da implementação (TDD)?
 - [ ] Cobertura adequada (models, services, controllers)?
 - [ ] Código segue os padrões de arquitetura (MVC + Services)?
@@ -161,23 +171,23 @@ refactor(items): extrair lógica de tags para TagService
 
 ---
 
-## Etapas de Desenvolvimento (Ordem)
+## Etapas de Desenvolvimento (Ordem Atualizada)
 
-1. Login e Autenticação
-2. Cadastro de Usuários
-3. Cadastro de Coleções
-4. Cadastro de Itens de Coleção
-5. Exportação de Coleção para PDF (Prawn)
-6. Exportação de Coleção para CSV
-7. Captura/Indexação de Itens via Google Vision API (credenciais do usuário)
-8. Link público / Exportação HTML de coleções (para auto-hospedagem)
-9. **TODO**: Avaliar modelos de monetização (ex: cobrar pelo Vision API integrado na versão web, versão self-hosted gratuita com API própria do usuário, planos pagos para remover necessidade de fornecer chave própria)
+1. [x] Login e Autenticação
+2. [x] Cadastro de Usuários e Configurações de Perfil Seguras
+3. [x] Cadastro e Gestão de Coleções (Premium Grid/List)
+4. [x] Captura/Indexação via Google Vision API e Recorte Interativo
+5. [x] Link público e Visão Showcase Privada (Share Token Segregado)
+6. [ ] Exportação de Coleção para PDF (Prawn)
+7. [ ] Exportação de Coleção para CSV
+8. [ ] Pesquisa Global / Full Text Search Integrada (Múltiplas Coleções)
+9. **TODO**: Avaliar modelos de monetização e deploy da versão cloud/self-hosted.
 
 ---
 
 ## Convenções para Agentes
 
-- Ao criar novos arquivos, siga estritamente a estrutura de diretórios acima.
+- **PRIORIDADE MÁXIMA**: Segurança e Segregação de Dados (`current_user`).
+- Ao criar ou editar views, garanta a adequação ao padrão Premium Design (usando CSS e ícones existentes).
 - Sempre execute `bundle exec rspec` antes de considerar uma tarefa concluída.
-- Mantenha o `README.md` atualizado com qualquer mudança significativa de setup.
 - Commits devem ser atômicos e com mensagens claras em português.
