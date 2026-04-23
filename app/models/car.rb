@@ -6,7 +6,6 @@ class Car
   field :name, type: String
   field :brand, type: String
   field :manufacturer, type: String
-  field :tags, type: Array, default: []
   field :observations, type: String
   field :size, type: String
   field :year, type: Integer
@@ -49,7 +48,6 @@ class Car
     name: "text",
     brand: "text",
     manufacturer: "text",
-    tags: "text",
     observations: "text",
     size: "text"
   }, {

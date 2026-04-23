@@ -20,6 +20,7 @@
       <% end %>
       
       <!-- Export Status -->
+      <%= turbo_stream_from "user_#{current_user.id}_exports" %>
       <%= render partial: "collection_exports/export_status", locals: { export: current_user.collection_exports.where(format_type: 'csv').last } %>
 
       <%= render "autodetections/form_button", autodetection: Autodetection.new %>
@@ -55,7 +56,7 @@
           </span>
           <%= f.text_field :q, 
                            value: params[:q], 
-                           placeholder: "Buscar por nome, marca, tags...", 
+                           placeholder: "Buscar por nome, marca...", 
                            class: "form-control border-0 bg-transparent py-3 shadow-none",
                            autocomplete: "off",
                            data: { 

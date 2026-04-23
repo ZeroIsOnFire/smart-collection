@@ -45,8 +45,7 @@ class CarService
         { brand: regex },
         { manufacturer: regex },
         { observations: regex },
-        { size: regex },
-        { tags: regex }
+        { size: regex }
       ]}
     end
 

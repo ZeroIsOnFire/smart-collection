@@ -7,7 +7,7 @@ class ExportCsvService
 
   def generate
     CSV.generate(headers: true) do |csv|
-      csv << ['Nome', 'Marca', 'Fabricante', 'Escala', 'Ano', 'Cor', 'Observações', 'Tags', 'Data de Adição']
+      csv << ['Nome', 'Marca', 'Fabricante', 'Escala', 'Ano', 'Cor', 'Observações', 'Data de Adição']
 
       @cars.each do |car|
         csv << [
@@ -18,8 +18,7 @@ class ExportCsvService
           car.year,
           car.color,
           car.observations,
-          car.tags.join(', '),
-          car.created_at.strftime('%d/%m/%Y %H:%M')
+          car.created_at.strftime('%Y-%m-%d %H:%M')
         ]
       end
     end

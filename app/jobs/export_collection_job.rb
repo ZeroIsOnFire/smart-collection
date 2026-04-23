@@ -8,7 +8,7 @@ class ExportCollectionJob < ApplicationJob
     export.update(status: 'processing')
 
     begin
-      csv_data = ExportCsvService.new(export.user.cars.order(created_at: :desc)).generate
+      csv_data = ExportCsvService.new(export.user.cars.order(created_at: :asc)).generate
       
       temp_file = Tempfile.new(["export_#{export.id}", ".csv"])
       # Escrevendo com encoding que funciona bem no excel também:
