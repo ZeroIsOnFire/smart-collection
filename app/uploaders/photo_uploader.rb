@@ -1,12 +1,12 @@
 class PhotoUploader < CarrierWave::Uploader::Base
-  # Include RMagick, MiniMagick, or Vips support:
-  # include CarrierWave::RMagick
-  # include CarrierWave::MiniMagick
-  # include CarrierWave::Vips
+  include CarrierWave::MiniMagick
 
   # Choose what kind of storage to use for this uploader:
   storage :file
   # storage :fog
+
+  # Converter para JPG para compatibilidade com o PDF (incluindo JFIF)
+  process convert: 'jpg'
 
   # Override the directory where uploaded files will be stored.
   # This is a sensible default for uploaders that are meant to be mounted:
@@ -38,12 +38,10 @@ class PhotoUploader < CarrierWave::Uploader::Base
   # Add an allowlist of extensions which are allowed to be uploaded.
   # For images you might use something like this:
   def extension_allowlist
-    %w(jpg jpeg gif png webp jfif)
+    %w(jpg jpeg gif png webp jfif heic)
   end
 
-  # Override the filename of the uploaded files:
-  # Avoid using model.id or version_name here, see uploader/store.rb for details.
-  # def filename
-  #   "something.jpg"
-  # end
+  def filename
+    super.chomp(File.extname(super)) + '.jpg' if original_filename.present?
+  end
 end

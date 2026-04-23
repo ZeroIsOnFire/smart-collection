@@ -20,7 +20,7 @@
       <% end %>
       
       <!-- Export Status CSV -->
-      <%= turbo_stream_from "user_#{current_user.id}_exports" %>
+      <%= turbo_stream_from "user_#{current_user.id.to_s}_exports" %>
       <%= render partial: "collection_exports/export_status", locals: { export: current_user.collection_exports.where(format_type: 'csv').last, format_type: 'csv' } %>
       
       <!-- Export Status PDF -->

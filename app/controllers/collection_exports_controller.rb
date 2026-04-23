@@ -36,4 +36,11 @@ class CollectionExportsController < ApplicationController
       format.html { redirect_to cars_path, notice: 'Exportação removida.' }
     end
   end
+
+  def status
+    format_type = params[:format_type] || 'csv'
+    @export = current_user.collection_exports.where(format_type: format_type).last
+    
+    render partial: "collection_exports/export_status", locals: { export: @export, format_type: format_type }
+  end
 end

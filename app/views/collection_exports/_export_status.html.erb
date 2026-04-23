@@ -1,4 +1,7 @@
-<div id="export_<%= format_type %>_status_container">
+<div id="export_<%= format_type %>_status_container" 
+     data-controller="export-refresh" 
+     data-export-refresh-format-value="<%= format_type %>"
+     data-export-refresh-status-value="<%= export&.status %>">
   <% if export.nil? %>
     <%= button_to collection_exports_path(format_type: format_type), method: :post, class: "btn btn-outline-secondary rounded-pill px-3 d-flex align-items-center gap-2", style: "height: 48px;", data: { turbo_stream: true } do %>
       <i class="bi <%= format_type == 'csv' ? 'bi-filetype-csv' : 'bi-file-earmark-pdf' %>"></i> Gerar <%= format_type.upcase %>
