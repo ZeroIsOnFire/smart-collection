@@ -178,8 +178,8 @@ refactor(items): extrair lógica de tags para TagService
 3. [x] Cadastro e Gestão de Coleções (Premium Grid/List)
 4. [x] Captura/Indexação via Google Vision API e Recorte Interativo
 5. [x] Link público e Visão Showcase Privada (Share Token Segregado)
-6. [ ] Exportação de Coleção para PDF (Prawn)
-7. [ ] Exportação de Coleção para CSV
+6. [x] Exportação de Coleção para PDF (Prawn)
+7. [x] Exportação de Coleção para CSV
 8. [ ] Pesquisa Global / Full Text Search Integrada (Múltiplas Coleções)
 9. **TODO**: Avaliar modelos de monetização e deploy da versão cloud/self-hosted.
 
