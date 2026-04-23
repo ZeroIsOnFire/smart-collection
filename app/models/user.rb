@@ -39,6 +39,7 @@ class User
 
   has_many :cars, class_name: "Car", dependent: :destroy
   has_many :autodetections, dependent: :destroy
+  has_many :collection_exports, dependent: :destroy
 
   index({ email: 1 }, { unique: true, background: true })
   index({ reset_password_token: 1 }, { unique: true, sparse: true, background: true })

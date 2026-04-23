@@ -31,6 +31,8 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :collection_exports, only: [:create, :destroy]
+
   root "home#index"
 
   mount ActionCable.server => '/cable'

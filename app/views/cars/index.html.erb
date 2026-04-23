@@ -18,6 +18,10 @@
           </button>
         </div>
       <% end %>
+      
+      <!-- Export Status -->
+      <%= render partial: "collection_exports/export_status", locals: { export: current_user.collection_exports.where(format_type: 'csv').last } %>
+
       <%= render "autodetections/form_button", autodetection: Autodetection.new %>
       <%= link_to new_car_path, class: 'btn btn-premium rounded-pill px-4 d-flex align-items-center gap-2' do %>
         <i class="bi bi-plus-circle"></i> Novo Item
