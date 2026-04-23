@@ -1,11 +1,6 @@
 class HomeController < ApplicationController
   def index
-    if user_signed_in?
-      if current_user.admin?
-        redirect_to admin_dashboard_path and return
-      else
-        redirect_to cars_path and return
-      end
-    end
+    # A landing page deve ser acessível para todos, mesmo logados.
+    # O redirecionamento após login já é tratado no ApplicationController.
   end
 end
