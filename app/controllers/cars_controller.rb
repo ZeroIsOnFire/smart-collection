@@ -80,26 +80,30 @@ class CarsController < ApplicationController
         )
         @detected_item.autodetection.check_completion!
       end
-
+      
       respond_to do |format|
         format.html { redirect_to car_url(@car), notice: "Carro criado com sucesso." }
-        format.turbo_stream do
-          render turbo_stream: turbo_stream.replace(
-            "detected_item_#{@detected_item.id}", 
-            partial: "detected_items/detected_item", 
-            locals: { detected_item: @detected_item }
-          )
+        if @detected_item
+          format.turbo_stream do
+            render turbo_stream: turbo_stream.replace(
+              "detected_item_#{@detected_item.id}", 
+              partial: "detected_items/detected_item", 
+              locals: { detected_item: @detected_item }
+            )
+          end
         end
       end
     else
       respond_to do |format|
         format.html { render :new, status: :unprocessable_entity }
-        format.turbo_stream do
-          render turbo_stream: turbo_stream.replace(
-            "detected_item_#{@detected_item.id}", 
-            partial: "detected_items/detected_item", 
-            locals: { detected_item: @detected_item }
-          )
+        if @detected_item
+          format.turbo_stream do
+            render turbo_stream: turbo_stream.replace(
+              "detected_item_#{@detected_item.id}", 
+              partial: "detected_items/detected_item", 
+              locals: { detected_item: @detected_item }
+            )
+          end
         end
       end
     end

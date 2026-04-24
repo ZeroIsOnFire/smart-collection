@@ -12,32 +12,35 @@ class ExportPdfService
     pdf_content = Prawn::Document.new(page_size: 'A4', margin: [40, 30, 40, 30]) do |pdf|
       # --- Header Premium ---
       pdf.fill_color "1E293B" # Slate escuro
-      pdf.fill_rectangle [pdf.bounds.left, pdf.bounds.top], pdf.bounds.width, 100
+      pdf.fill_rectangle [pdf.bounds.left, pdf.bounds.top], pdf.bounds.width, 80
       
       pdf.fill_color "FFFFFF"
       pdf.font "Helvetica"
       
-      pdf.move_down 30
-      safe_title = "CATÁLOGO DE COLEÇÃO".encode("Windows-1252", invalid: :replace, undef: :replace, replace: "") rescue "CATALOGO DE COLECAO"
-      pdf.text safe_title, size: 10, style: :bold, align: :center, character_spacing: 2
+      pdf.move_down 20
+      raw_title = I18n.t('export_pdf.title')
+      safe_title = raw_title.encode("Windows-1252", invalid: :replace, undef: :replace, replace: "") rescue "CATALOGO DE COLECAO"
+      pdf.text safe_title, size: 8, style: :bold, align: :center, character_spacing: 2
       
-      pdf.move_down 5
+      pdf.move_down 3
       # Tentar converter nome do usuário para Windows-1252 para evitar crash no Prawn
-      safe_user = "#{@user.name.presence || 'Usuário'}".encode("Windows-1252", invalid: :replace, undef: :replace, replace: "") rescue "USUARIO"
-      pdf.text safe_user.upcase, size: 24, style: :bold, align: :center
+      user_name = @user.name.presence || I18n.t('export_pdf.user_placeholder')
+      safe_user = user_name.encode("Windows-1252", invalid: :replace, undef: :replace, replace: "") rescue "USUARIO"
+      pdf.text safe_user.upcase, size: 20, style: :bold, align: :center
       
-      pdf.move_down 5
+      pdf.move_down 3
       pdf.fill_color "94A3B8"
-      pdf.text "Gerado em: #{Time.current.strftime('%d/%m/%Y %H:%M')}", size: 9, align: :center
-      pdf.text "Total de itens: #{@cars.count}", size: 9, align: :center
+      meta_info = I18n.t('export_pdf.meta_info', date: Time.current.strftime('%d/%m/%Y %H:%M'), count: @cars.count)
+      pdf.text meta_info, size: 8, align: :center
       
-      pdf.move_down 60
+      pdf.move_down 40
 
       # --- Grid Settings ---
-      columns = 3
-      gutter = 20
+      columns = 4
+      gutter = 12
       col_width = (pdf.bounds.width - (gutter * (columns - 1))) / columns
-      card_height = 210
+      card_height = 185
+      img_height = 95
       
       y_start = pdf.cursor
       
@@ -66,7 +69,6 @@ class ExportPdfService
           pdf.stroke_rounded_rectangle [0, pdf.bounds.top], col_width, card_height, 10
           
           # --- Image Area ---
-          img_height = 115
           pdf.bounding_box([0, pdf.bounds.top], width: col_width, height: img_height) do
             # Clip image to rounded corners top
             pdf.fill_color "F8FAFC"
@@ -94,24 +96,24 @@ class ExportPdfService
               rescue StandardError => e
                 pdf.move_down (img_height / 2) - 5
                 pdf.fill_color "94A3B8"
-                pdf.text "Sem Imagem", align: :center, size: 8
+                pdf.text I18n.t('export_pdf.no_image'), align: :center, size: 8
               end
             else
               pdf.move_down (img_height / 2) - 5
               pdf.fill_color "94A3B8"
-              pdf.text "Sem Foto", align: :center, size: 8
+              pdf.text I18n.t('export_pdf.no_photo'), align: :center, size: 8
             end
           end
           
           # --- Text Area ---
-          text_box_y = pdf.bounds.top - img_height - 10
-          pdf.bounding_box([8, text_box_y], width: col_width - 16, height: card_height - img_height - 10) do
+          text_box_y = pdf.bounds.top - img_height - 8
+          pdf.bounding_box([6, text_box_y], width: col_width - 12, height: card_height - img_height - 8) do
             # Name
             pdf.fill_color "0F172A"
             safe_name = car.name.encode("Windows-1252", invalid: :replace, undef: :replace, replace: "") rescue car.name
-            pdf.text safe_name, size: 9, style: :bold, align: :center, overflow: :truncate
+            pdf.text safe_name, size: 8.5, style: :bold, align: :center, overflow: :truncate
             
-            pdf.move_down 4
+            pdf.move_down 3
             
             # Details
             details = []
@@ -152,7 +154,8 @@ class ExportPdfService
             # Observations
             if car.observations.present?
               pdf.move_down 2 # Pequeno ajuste
-              safe_obs = car.observations.encode("Windows-1252", invalid: :replace, undef: :replace, replace: "") rescue car.observations
+              clean_obs = car.observations.to_s.squish
+              safe_obs = clean_obs.encode("Windows-1252", invalid: :replace, undef: :replace, replace: "") rescue clean_obs
               pdf.fill_color "94A3B8"
               
               # Aumentamos a altura disponível para aproveitar o espaço do card
@@ -173,6 +176,31 @@ class ExportPdfService
           y_start -= (card_height + gutter)
         end
       end
+
+      # --- Footer com Logo e numeração ---
+      pdf.repeat(:all) do
+        pdf.stroke_color "E2E8F0"
+        pdf.line_width = 0.5
+        pdf.stroke_horizontal_line pdf.bounds.left, pdf.bounds.right, at: -5
+        
+        # Logo no Rodapé (Esquerda)
+        pdf.fill_color "3B82F6"
+        pdf.fill_circle [pdf.bounds.left + 10, -20.5], 4
+        pdf.fill_color "1D4ED8"
+        pdf.fill_circle [pdf.bounds.left + 15, -24.5], 4
+        
+        pdf.fill_color "94A3B8"
+        pdf.draw_text "Smart", at: [pdf.bounds.left + 25, -25], size: 8, style: :bold
+        pdf.fill_color "3B82F6"
+        pdf.draw_text "Collection", at: [pdf.bounds.left + 48, -25], size: 8, style: :bold
+      end
+
+      page_string = I18n.t('export_pdf.page_info', page: '<page>', total: '<total>')
+      pdf.number_pages page_string, 
+                       at: [pdf.bounds.left, -18.5], 
+                       size: 8, 
+                       color: "94A3B8",
+                       align: :right
     end.render
     
     @temp_files.each { |f| f.close; f.unlink } rescue nil

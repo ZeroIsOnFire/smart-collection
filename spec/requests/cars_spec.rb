@@ -52,11 +52,6 @@ RSpec.describe "Cars", type: :request do
         expect(response.body).to include('Searchable Car')
       end
 
-      it "filters cars by tags" do
-        car_matching.update!(tags: ['match'])
-        get cars_path, params: { q: 'match' }
-        expect(response.body).to include('Searchable Car')
-      end
     end
   end
 

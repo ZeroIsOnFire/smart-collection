@@ -178,4 +178,11 @@ pt-BR:
       less_than_or_equal_to: "deve ser menor ou igual a %{count}"
       other_than: "deve ser diferente de %{count}"
       odd: "deve ser ímpar"
-      even: "deve ser par"
+  # ── Exportação PDF ─────────────────────────────────────
+  export_pdf:
+    title: "CATÁLOGO DE COLEÇÃO"
+    user_placeholder: "Usuário"
+    meta_info: "Gerado em: %{date} | Total: %{count} itens"
+    no_image: "Sem Imagem"
+    no_photo: "Sem Foto"
+    page_info: "Página %{page} de %{total}"

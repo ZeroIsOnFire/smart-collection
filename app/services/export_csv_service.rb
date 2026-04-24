@@ -17,7 +17,7 @@ class ExportCsvService
           car.size,
           car.year,
           car.color,
-          car.observations,
+          car.observations.to_s.squish,
           car.created_at.strftime('%Y-%m-%d %H:%M')
         ]
       end
