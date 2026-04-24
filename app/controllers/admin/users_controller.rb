@@ -15,7 +15,9 @@ module Admin
                  User.all
                end
       
-      @users = @users.desc(:created_at).page(params[:page]).per(20)
+      @page = (params[:page] || 1).to_i
+      @per_page = 20
+      @users = @users.desc(:created_at).skip((@page - 1) * @per_page).limit(@per_page)
     end
 
     # GET /admin/users/1
