@@ -1,3 +1,5 @@
+name: smart-collection
+
 services:
   web:
     build: .

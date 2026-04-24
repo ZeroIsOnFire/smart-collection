@@ -85,7 +85,7 @@ RSpec.describe 'Authentications', type: :request do
       sign_in admin
       get admin_dashboard_path
       expect(response).to have_http_status(:success)
-      expect(response.body).to include('Admin Dashboard')
+      expect(response.body).to include('Dashboard Administrativo')
     end
   end
 end

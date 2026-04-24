@@ -22,7 +22,7 @@ O **Smart Collection Catalog** é um serviço web premium para registro e gerenc
 1. **Clone o repositório**:
    ```bash
    git clone <repo-url>
-   cd agent-test
+   cd smart-collection
    ```
 
 2. **Configuração de Ambiente**:
