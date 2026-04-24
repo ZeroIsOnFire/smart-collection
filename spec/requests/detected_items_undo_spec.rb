@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
-RSpec.describe "DetectedItems Undo", type: :request do
-  before(:each) do
+RSpec.describe 'DetectedItems Undo', type: :request do
+  before do
     @user = create(:user)
     @autodetection = create(:autodetection, user: @user)
     @car = create(:car, user: @user)
@@ -9,28 +11,28 @@ RSpec.describe "DetectedItems Undo", type: :request do
     sign_in @user
   end
 
-  describe "PATCH /undo" do
-    it "removes the associated car and sets item to pending" do
+  describe 'PATCH /undo' do
+    it 'removes the associated car and sets item to pending' do
       @autodetection.update(status: 'completed')
-      
-      expect {
+
+      expect do
         patch undo_detected_item_path(@detected_item)
-      }.to change(Car, :count).by(-1)
+      end.to change(Car, :count).by(-1)
 
       @detected_item.reload
       expect(@detected_item.status).to eq('pending')
       expect(@detected_item.car_id).to be_nil
-      
+
       @autodetection.reload
       expect(@autodetection.status).to eq('to_verify')
     end
 
-    it "handles cases where the car is already deleted (no crash)" do
+    it 'handles cases where the car is already deleted (no crash)' do
       @car.destroy
-      
-      expect {
+
+      expect do
         patch undo_detected_item_path(@detected_item)
-      }.not_to change(Car, :count)
+      end.not_to change(Car, :count)
 
       @detected_item.reload
       expect(@detected_item.status).to eq('pending')

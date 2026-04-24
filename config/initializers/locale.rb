@@ -17,13 +17,13 @@
 #   end
 
 # Carregar todos os arquivos de locale recursivamente
-I18n.load_path += Dir[Rails.root.join("config", "locales", "**", "*.{rb,yml}")]
+I18n.load_path += Rails.root.glob('config/locales/**/*.{rb,yml}')
 
 # Locales disponíveis
-I18n.available_locales = [:"pt-BR", :en]
+I18n.available_locales = %i[pt-BR en]
 
 # Locale padrão
-I18n.default_locale = :"pt-BR"
+I18n.default_locale = :'pt-BR'
 
 # Fallbacks: se uma tradução não existir em pt-BR, usa en
-Rails.application.config.i18n.fallbacks = [:"pt-BR", :en]
+Rails.application.config.i18n.fallbacks = %i[pt-BR en]

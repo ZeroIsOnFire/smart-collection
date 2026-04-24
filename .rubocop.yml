@@ -1,11 +1,64 @@
-require:
+plugins:
   - rubocop-rails
   - rubocop-rspec
 
 AllCops:
   NewCops: enable
+  SuggestExtensions: false
   Exclude:
     - 'vendor/**/*'
     - 'db/schema.rb'
     - 'bin/**/*'
     - 'node_modules/**/*'
+    - 'tmp/**/*'
+
+Style/Documentation:
+  Enabled: false
+
+Rails/I18nLocaleTexts:
+  Enabled: false
+
+Metrics/AbcSize:
+  Enabled: false
+
+Metrics/BlockLength:
+  Enabled: false
+
+Metrics/ClassLength:
+  Enabled: false
+
+Metrics/CyclomaticComplexity:
+  Enabled: false
+
+Metrics/MethodLength:
+  Enabled: false
+
+Metrics/PerceivedComplexity:
+  Enabled: false
+
+RSpec/ExampleLength:
+  Enabled: false
+
+RSpec/IndexedLet:
+  Enabled: false
+
+RSpec/InstanceVariable:
+  Enabled: false
+
+RSpec/LetSetup:
+  Enabled: false
+
+RSpec/MessageSpies:
+  Enabled: false
+
+RSpec/MultipleExpectations:
+  Enabled: false
+
+RSpec/MultipleMemoizedHelpers:
+  Enabled: false
+
+RSpec/StubbedMock:
+  Enabled: false
+
+RSpec/VerifiedDoubles:
+  Enabled: false

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class HomeController < ApplicationController
   def index
     # A landing page deve ser acessível para todos, mesmo logados.

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe ImageCropperService do
@@ -14,27 +16,27 @@ RSpec.describe ImageCropperService do
   describe '.crop' do
     it 'crops the image and returns a Tempfile object' do
       # We test that it produces a file and uses the provided vertices
-      result = ImageCropperService.crop(photo_path, vertices)
-      
+      result = described_class.crop(photo_path, vertices)
+
       expect(result).to be_a(Tempfile)
-      expect(File.exist?(result.path)).to be_truthy
+      expect(File).to exist(result.path)
       expect(result.path).to include('crop_')
-      
+
       # Clean up after test
       result.close
-      File.delete(result.path) if File.exist?(result.path)
+      FileUtils.rm_f(result.path)
     end
 
     it 'handles nil or empty vertices gracefully' do
-      expect(ImageCropperService.crop(photo_path, nil)).to be_nil
-      expect(ImageCropperService.crop(photo_path, [])).to be_nil
+      expect(described_class.crop(photo_path, nil)).to be_nil
+      expect(described_class.crop(photo_path, [])).to be_nil
     end
 
     it 'handles error during cropping gracefully' do
       # Pre-resolve path to match against expectation
       resolved = File.expand_path(photo_path)
-      expect(MiniMagick::Image).to receive(:open).with(resolved).and_raise("MiniMagick error")
-      result = ImageCropperService.crop(photo_path, vertices)
+      expect(MiniMagick::Image).to receive(:open).with(resolved).and_raise('MiniMagick error')
+      result = described_class.crop(photo_path, vertices)
       expect(result).to be_nil
     end
   end

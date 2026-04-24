@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CroppedPhotoUploader < CarrierWave::Uploader::Base
   storage :file
 
@@ -6,6 +8,6 @@ class CroppedPhotoUploader < CarrierWave::Uploader::Base
   end
 
   def extension_allowlist
-    %w(jpg jpeg gif png webp jfif)
+    %w[jpg jpeg gif png webp jfif]
   end
 end

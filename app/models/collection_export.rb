@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CollectionExport
   include Mongoid::Document
   include Mongoid::Timestamps
@@ -21,18 +23,18 @@ class CollectionExport
 
   def broadcast_status_update
     Turbo::StreamsChannel.broadcast_replace_to(
-      "user_#{user_id.to_s}_exports",
+      "user_#{user_id}_exports",
       target: "export_#{format_type}_status_container",
-      partial: "collection_exports/export_status",
+      partial: 'collection_exports/export_status',
       locals: { export: self, format_type: format_type }
     )
   end
 
   def broadcast_removal
     Turbo::StreamsChannel.broadcast_replace_to(
-      "user_#{user_id.to_s}_exports",
+      "user_#{user_id}_exports",
       target: "export_#{format_type}_status_container",
-      partial: "collection_exports/export_status",
+      partial: 'collection_exports/export_status',
       locals: { export: nil, format_type: format_type }
     )
   end

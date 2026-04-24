@@ -1,0 +1,86 @@
+<div class="mb-5">
+  <h2 class="fw-bold mb-1 text-dark">Manutenção do Sistema</h2>
+  <p class="text-muted mb-0">Monitore a saúde do sistema e gerencie arquivos temporários.</p>
+</div>
+
+<div class="row g-4 mb-4">
+  <!-- Status de Armazenamento -->
+  <div class="col-md-6 col-lg-4">
+    <div class="card premium-card border-0 rounded-4 p-4 h-100">
+      <div class="d-flex align-items-center gap-3 mb-4">
+        <div class="icon-box bg-indigo-light mb-0 rounded-3" style="width: 54px; height: 54px;">
+          <i class="bi bi-hdd fs-3"></i>
+        </div>
+        <div>
+          <div class="text-secondary small fw-bold text-uppercase tracking-wider">Armazenamento</div>
+          <div class="fs-4 fw-bold text-dark"><%= @uploads_size %></div>
+        </div>
+      </div>
+      <p class="small text-muted mb-0">Total ocupado pela pasta <code>public/uploads</code>.</p>
+    </div>
+  </div>
+
+  <!-- Itens para Limpeza -->
+  <div class="col-md-6 col-lg-4">
+    <div class="card premium-card border-0 rounded-4 p-4 h-100">
+      <div class="d-flex align-items-center gap-3 mb-4">
+        <div class="icon-box bg-warning-light mb-0 rounded-3" style="width: 54px; height: 54px; background-color: rgba(255, 193, 7, 0.1); color: #ffc107;">
+          <i class="bi bi-trash fs-3"></i>
+        </div>
+        <div>
+          <div class="text-secondary small fw-bold text-uppercase tracking-wider">Itens Expirados</div>
+          <div class="fs-4 fw-bold text-dark"><%= @old_records_count %></div>
+        </div>
+      </div>
+      <div class="d-grid mt-auto">
+        <%= button_to admin_maintenance_cleanup_path, 
+                      method: :post, 
+                      class: "btn btn-outline-warning rounded-pill py-2 fw-bold d-flex align-items-center justify-content-center gap-2",
+                      disabled: @old_records_count == 0,
+                      data: { turbo_confirm: "Isso removerá permanentemente os registros e fotos de autodetecções concluídas há mais de 24 horas. Deseja continuar?" } do %>
+          <i class="bi bi-stars"></i> Limpar Agora
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status Geral -->
+  <div class="col-md-12 col-lg-4">
+    <div class="card premium-card border-0 rounded-4 p-4 h-100">
+      <h6 class="fw-bold mb-3">Status por Tipo (Autodetecção)</h6>
+      <div class="d-flex flex-column gap-2">
+        <% @autodetections_by_status.each do |stat| %>
+          <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded-3">
+            <span class="small fw-medium text-capitalize"><%= stat[:_id] %></span>
+            <span class="badge bg-white text-dark border shadow-sm rounded-pill"><%= stat[:count] %></span>
+          </div>
+        <% end %>
+        <% if @autodetections_by_status.empty? %>
+          <div class="text-center py-3 text-muted small italic">Nenhum dado disponível</div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-lg-12">
+    <div class="card premium-card border-0 rounded-4 overflow-hidden">
+      <div class="card-header bg-white border-bottom p-4">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="mb-0 fw-bold">Processos de Fundo (Background Jobs)</h5>
+          <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3">Ativo</span>
+        </div>
+      </div>
+      <div class="card-body p-4">
+        <div class="alert alert-info border-0 rounded-4 d-flex align-items-center gap-3 mb-0">
+          <i class="bi bi-info-circle-fill fs-3 text-primary"></i>
+          <div>
+            <div class="fw-bold">Sistema de Fila: Solid Queue</div>
+            <div class="small">O sistema processa autodetecções e exportações em segundo plano para manter a interface rápida.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 require 'securerandom'
 
 Devise.setup do |config|
-  config.secret_key = SecureRandom.hex(64) if Rails.env.development? || Rails.env.test?
+  config.secret_key = SecureRandom.hex(64) if Rails.env.local?
   config.mailer_sender = 'please-change-me-at-config-initializers-devise@example.com'
   require 'devise/orm/mongoid'
   config.case_insensitive_keys = [:email]
@@ -16,5 +18,5 @@ Devise.setup do |config|
   config.sign_out_via = :delete
   config.responder.error_status = :unprocessable_entity
   config.responder.redirect_status = :see_other
-  config.navigational_formats = [:html, :json, :turbo_stream]
+  config.navigational_formats = %i[html json turbo_stream]
 end

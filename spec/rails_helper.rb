@@ -1,9 +1,15 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 ENV['RAILS_ENV'] = 'test'
 require_relative '../config/environment'
-Dir[Rails.root.join('spec', 'support', '**', '*.rb')].sort.each { |f| require f }
-Rails.application.middleware.delete(ActionDispatch::HostAuthorization) rescue nil
-abort("The Rails environment is running in production mode!") if Rails.env.production?
+Rails.root.glob('spec/support/**/*.rb').each { |f| require f }
+begin
+  Rails.application.middleware.delete(ActionDispatch::HostAuthorization)
+rescue StandardError
+  nil
+end
+abort('The Rails environment is running in production mode!') if Rails.env.production?
 require 'rspec/rails'
 
 begin
@@ -25,7 +31,7 @@ RSpec.configure do |config|
   config.include FactoryBot::Syntax::Methods
   config.include Devise::Test::IntegrationHelpers, type: :request
 
-  config.before(:each) do
+  config.before do
     Mongoid.purge!
   end
 end

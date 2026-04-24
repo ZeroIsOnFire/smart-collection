@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Car
   include Mongoid::Document
   include Mongoid::Timestamps
@@ -30,8 +32,8 @@ class Car
   }.freeze
 
   SCALES = [
-    '1:12', '1:18', '1:24', '1:32', '1:36', '1:43', '1:48', 
-    '1:50', '1:55', '1:60', '1:64', '1:72', '1:76', '1:87', 
+    '1:12', '1:18', '1:24', '1:32', '1:36', '1:43', '1:48',
+    '1:50', '1:55', '1:60', '1:64', '1:72', '1:76', '1:87',
     '1:100', '1:120', '1:144', '1:160', 'Outra'
   ].freeze
 
@@ -44,21 +46,21 @@ class Car
   end
 
   mount_uploader :photo, PhotoUploader
-  
+
   index({
-    name: "text",
-    brand: "text",
-    manufacturer: "text",
-    observations: "text",
-    size: "text"
-  }, {
-    weights: {
-      name: 10,
-      brand: 5,
-      manufacturer: 2
-    },
-    name: "CarTextIndex"
-  })
+          name: 'text',
+          brand: 'text',
+          manufacturer: 'text',
+          observations: 'text',
+          size: 'text'
+        }, {
+          weights: {
+            name: 10,
+            brand: 5,
+            manufacturer: 2
+          },
+          name: 'CarTextIndex'
+        })
 
   belongs_to :user
 

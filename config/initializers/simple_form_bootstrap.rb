@@ -3,7 +3,7 @@
 SimpleForm.setup do |config|
   config.button_class = 'btn'
   config.boolean_label_class = 'form-check-label'
-  config.label_text = lambda { |label, required, explicit_label| "#{label} #{required}" }
+  config.label_text = ->(label, required, _explicit_label) { "#{label} #{required}" }
   config.boolean_style = :inline
   config.item_wrapper_tag = :div
   config.include_default_input_wrapper_class = false
@@ -40,7 +40,8 @@ SimpleForm.setup do |config|
   end
 
   # vertical input for radio buttons and check boxes
-  config.wrappers :vertical_collection, item_wrapper_class: 'form-check', item_label_class: 'form-check-label', tag: 'fieldset', class: 'mb-3' do |b|
+  config.wrappers :vertical_collection, item_wrapper_class: 'form-check', item_label_class: 'form-check-label',
+                                        tag: 'fieldset', class: 'mb-3' do |b|
     b.use :html5
     b.optional :readonly
     b.wrapper :legend_tag, tag: 'legend', class: 'col-form-label pt-0 fw-bold' do |ba|
@@ -68,10 +69,10 @@ SimpleForm.setup do |config|
 
   config.default_wrapper = :vertical_form
   config.wrapper_mappings = {
-    boolean:       :vertical_boolean,
-    check_boxes:   :vertical_collection,
-    file:          :vertical_form,
+    boolean: :vertical_boolean,
+    check_boxes: :vertical_collection,
+    file: :vertical_form,
     radio_buttons: :vertical_collection,
-    select:        :vertical_form
+    select: :vertical_form
   }
 end

@@ -1,8 +1,11 @@
 # frozen_string_literal: true
-puts "DEBUG: Simple Form Initializer Loaded"
+
+Rails.logger.debug 'DEBUG: Simple Form Initializer Loaded'
 SimpleForm.setup do |config|
   config.wrappers :default, class: :input,
-    hint_class: :field_with_hint, error_class: :field_with_errors, valid_class: :field_without_errors do |b|
+                            hint_class: :field_with_hint,
+                            error_class: :field_with_errors,
+                            valid_class: :field_without_errors do |b|
     b.use :html5
     b.use :placeholder
     b.optional :maxlength

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class DetectedItem
   include Mongoid::Document
   include Mongoid::Timestamps
@@ -14,7 +16,7 @@ class DetectedItem
   mount_uploader :cropped_photo, CroppedPhotoUploader
 
   belongs_to :autodetection
-  
+
   STATUSES = %w[pending saved rejected].freeze
   validates :status, inclusion: { in: STATUSES }
   validates :label, presence: true
@@ -29,7 +31,7 @@ class DetectedItem
     Turbo::StreamsChannel.broadcast_append_to(
       "autodetection_#{autodetection_id}_items",
       target: "detected_items_list_#{autodetection_id}",
-      partial: "detected_items/detected_item",
+      partial: 'detected_items/detected_item',
       locals: { detected_item: self }
     )
   end

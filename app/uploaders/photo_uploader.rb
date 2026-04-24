@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class PhotoUploader < CarrierWave::Uploader::Base
   include CarrierWave::MiniMagick
 
@@ -11,7 +13,7 @@ class PhotoUploader < CarrierWave::Uploader::Base
   # Override the directory where uploaded files will be stored.
   # This is a sensible default for uploaders that are meant to be mounted:
   def store_dir
-    id = model.id.to_s.presence || "new"
+    id = model.id.to_s.presence || 'new'
     "uploads/#{model.class.to_s.underscore}/#{mounted_as}/#{id}"
   end
 
@@ -38,10 +40,10 @@ class PhotoUploader < CarrierWave::Uploader::Base
   # Add an allowlist of extensions which are allowed to be uploaded.
   # For images you might use something like this:
   def extension_allowlist
-    %w(jpg jpeg gif png webp jfif heic)
+    %w[jpg jpeg gif png webp jfif heic]
   end
 
   def filename
-    super.chomp(File.extname(super)) + '.jpg' if original_filename.present?
+    "#{super.chomp(File.extname(super))}.jpg" if original_filename.present?
   end
 end

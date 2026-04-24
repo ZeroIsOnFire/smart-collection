@@ -41,9 +41,9 @@
               <% end %>
             </li>
             <li class="nav-item">
-              <a href="#" class="nav-link text-white opacity-50 cursor-not-allowed" title="Em breve">
-                <i class="bi bi-gear me-2"></i> Configurações
-              </a>
+              <%= link_to admin_maintenance_path, class: "nav-link text-white #{'active' if controller_name == 'maintenance'}" do %>
+                <i class="bi bi-tools me-2"></i> Manutenção
+              <% end %>
             </li>
           </ul>
         </nav>

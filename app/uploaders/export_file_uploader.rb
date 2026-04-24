@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ExportFileUploader < CarrierWave::Uploader::Base
   storage :file
 
@@ -6,6 +8,6 @@ class ExportFileUploader < CarrierWave::Uploader::Base
   end
 
   def extension_allowlist
-    %w(csv pdf)
+    %w[csv pdf]
   end
 end

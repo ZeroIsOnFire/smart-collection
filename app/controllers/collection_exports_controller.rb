@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CollectionExportsController < ApplicationController
   before_action :authenticate_user!
 
@@ -7,12 +9,12 @@ class CollectionExportsController < ApplicationController
 
     @export = current_user.collection_exports.create!(status: 'pending', format_type: format_type)
     ExportCollectionJob.perform_later(@export.id.to_s)
-    
+
     respond_to do |format|
       format.turbo_stream do
         render turbo_stream: turbo_stream.replace(
           "export_#{format_type}_status_container",
-          partial: "collection_exports/export_status",
+          partial: 'collection_exports/export_status',
           locals: { export: @export, format_type: format_type }
         )
       end
@@ -24,12 +26,12 @@ class CollectionExportsController < ApplicationController
     @export = current_user.collection_exports.find(params[:id])
     format_type = @export.format_type
     @export.destroy
-    
+
     respond_to do |format|
       format.turbo_stream do
         render turbo_stream: turbo_stream.replace(
           "export_#{format_type}_status_container",
-          partial: "collection_exports/export_status",
+          partial: 'collection_exports/export_status',
           locals: { export: nil, format_type: format_type }
         )
       end
@@ -40,7 +42,7 @@ class CollectionExportsController < ApplicationController
   def status
     format_type = params[:format_type] || 'csv'
     @export = current_user.collection_exports.where(format_type: format_type).last
-    
-    render partial: "collection_exports/export_status", locals: { export: @export, format_type: format_type }
+
+    render partial: 'collection_exports/export_status', locals: { export: @export, format_type: format_type }
   end
 end

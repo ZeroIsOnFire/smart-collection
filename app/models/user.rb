@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class User
   include Mongoid::Document
   include Mongoid::Timestamps
@@ -7,8 +9,8 @@ class User
          :recoverable, :rememberable, :validatable
 
   ## Database authenticatable
-  field :email,              type: String, default: ""
-  field :encrypted_password, type: String, default: ""
+  field :email,              type: String, default: ''
+  field :encrypted_password, type: String, default: ''
 
   ## Recoverable
   field :reset_password_token,   type: String
@@ -18,7 +20,7 @@ class User
   field :remember_created_at, type: Time
 
   ## Profile
-  field :name, type: String, default: ""
+  field :name, type: String, default: ''
   field :share_token, type: String
   field :sharing_enabled, type: Boolean, default: false
 
@@ -37,7 +39,7 @@ class User
     self.share_token ||= SecureRandom.uuid
   end
 
-  has_many :cars, class_name: "Car", dependent: :destroy
+  has_many :cars, class_name: 'Car', dependent: :destroy
   has_many :autodetections, dependent: :destroy
   has_many :collection_exports, dependent: :destroy
 

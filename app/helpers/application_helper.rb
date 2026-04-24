@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ApplicationHelper
   def user_initials(user)
     if user.name.present?
@@ -15,6 +17,7 @@ module ApplicationHelper
 
   def display_name(user)
     return user.email if user.name.blank?
+
     user.name.gsub(/\s+[a-f0-9]{24}$/i, '')
   end
 end

@@ -1,17 +1,19 @@
-require_relative "boot"
+# frozen_string_literal: true
 
-require "rails"
+require_relative 'boot'
+
+require 'rails'
 # Pick the frameworks you want:
-require "active_model/railtie"
-require "active_job/railtie"
+require 'active_model/railtie'
+require 'active_job/railtie'
 # require "active_record/railtie"
 # require "active_storage/engine"
-require "action_controller/railtie"
-require "action_mailer/railtie"
+require 'action_controller/railtie'
+require 'action_mailer/railtie'
 # require "action_mailbox/engine"
 # require "action_text/engine"
-require "action_view/railtie"
-require "action_cable/engine"
+require 'action_view/railtie'
+require 'action_cable/engine'
 # require "mongoid/railtie"
 # require "rails/test_unit/railtie"
 
@@ -25,14 +27,14 @@ module SmartCollectionCatalog
     config.load_defaults 7.1
 
     if Rails.env.test?
-      config.hosts = [/.*/]  # Permite qualquer Host header em CI (evita DNS rebinding errors)
+      config.hosts = [/.*/] # Permite qualquer Host header em CI (evita DNS rebinding errors)
       config.action_controller.allow_forgery_protection = false
     end
 
     # Please, add to the `ignore` list any other `lib` subdirectories that do
     # not contain `.rb` files, or that should not be reloaded or eager loaded.
     # Common ones are `templates`, `generators`, or `middleware`, for example.
-    config.autoload_lib(ignore: %w(assets tasks))
+    config.autoload_lib(ignore: %w[assets tasks])
 
     # Configuration for the application, engines, and railties goes here.
     #
@@ -54,13 +56,13 @@ module SmartCollectionCatalog
 
     config.generators do |g|
       g.test_framework :rspec,
-        fixtures: true,
-        view_specs: false,
-        helper_specs: false,
-        routing_specs: false,
-        controller_specs: false,
-        request_specs: true
-      g.fixture_replacement :factory_bot, dir: "spec/factories"
+                       fixtures: true,
+                       view_specs: false,
+                       helper_specs: false,
+                       routing_specs: false,
+                       controller_specs: false,
+                       request_specs: true
+      g.fixture_replacement :factory_bot, dir: 'spec/factories'
     end
 
     config.active_job.queue_adapter = :sidekiq

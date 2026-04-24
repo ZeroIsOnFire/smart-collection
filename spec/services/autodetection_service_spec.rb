@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe AutodetectionService do
@@ -12,13 +14,13 @@ RSpec.describe AutodetectionService do
 
   describe '#create' do
     it 'creates an autodetection for the user and enqueues the job' do
-      expect {
-        service = AutodetectionService.new(user)
+      expect do
+        service = described_class.new(user)
         autodetection = service.create(valid_params)
         expect(autodetection).to be_persisted
         expect(autodetection.status).to eq('pending')
-      }.to change(user.autodetections, :count).by(1)
-       .and enqueue_job(AutodetectJob)
+      end.to change(user.autodetections, :count).by(1)
+                                                .and enqueue_job(AutodetectJob)
     end
   end
 
@@ -26,10 +28,10 @@ RSpec.describe AutodetectionService do
     let(:autodetection) { create(:autodetection, :error, user: user) }
 
     it 'resets the status and re-enqueues the job' do
-      expect {
-        AutodetectionService.new(user).retry(autodetection.id.to_s)
-      }.to enqueue_job(AutodetectJob).with(autodetection.id.to_s)
-      
+      expect do
+        described_class.new(user).retry(autodetection.id.to_s)
+      end.to enqueue_job(AutodetectJob).with(autodetection.id.to_s)
+
       expect(autodetection.reload.status).to eq('pending')
       expect(autodetection.error_message).to be_nil
     end

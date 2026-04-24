@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CarService
   attr_reader :user
 
@@ -27,7 +29,7 @@ class CarService
     query = params[:q]
 
     scope = query.present? ? search(query) : user.cars.all
-    
+
     # Ordenação por data de criação decrescente e paginação manual
     scope.desc(:created_at).skip((page - 1) * per_page).limit(per_page)
   end
@@ -35,7 +37,7 @@ class CarService
   def search(query)
     # Dividimos a busca em palavras para permitir termos fora de ordem (ex: 'azul match' encontra 'Matchbox Azul')
     # Cada palavra deve ser encontrada em pelo menos um dos campos ($and de vários $or)
-    words = query.to_s.split(/\s+/).reject(&:blank?)
+    words = query.to_s.split(/\s+/).compact_blank
     return user.cars if words.empty?
 
     query_conditions = words.map do |word|
@@ -47,7 +49,7 @@ class CarService
         { observations: regex },
         { size: regex },
         { tags: regex }
-      ]}
+      ] }
     end
 
     user.cars.where('$and' => query_conditions)

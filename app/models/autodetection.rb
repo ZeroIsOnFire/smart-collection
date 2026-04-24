@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Autodetection
   include Mongoid::Document
   include Mongoid::Timestamps
@@ -23,9 +25,9 @@ class Autodetection
     return if %w[error completed].include?(status)
 
     # Se todos os itens estão 'saved' ou 'rejected', conclui a tarefa
-    if detected_items.any? && detected_items.all? { |item| %w[saved rejected].include?(item.status) }
-      update(status: 'completed')
-    end
+    return unless detected_items.any? && detected_items.all? { |item| %w[saved rejected].include?(item.status) }
+
+    update(status: 'completed')
   end
 
   def self.cleanup_old_records(older_than: 24.hours.ago)
@@ -42,9 +44,9 @@ class Autodetection
 
   def broadcast_new_autodetection
     Turbo::StreamsChannel.broadcast_prepend_to(
-      "autodetections_#{user_id.to_s}",
-      target: "autodetections_list",
-      partial: "autodetections/autodetection",
+      "autodetections_#{user_id}",
+      target: 'autodetections_list',
+      partial: 'autodetections/autodetection',
       locals: { autodetection: self }
     )
   end
@@ -52,17 +54,16 @@ class Autodetection
   def broadcast_update_autodetection
     if status == 'completed'
       Turbo::StreamsChannel.broadcast_remove_to(
-        "autodetections_#{user_id.to_s}",
-        target: "autodetection_#{id.to_s}"
+        "autodetections_#{user_id}",
+        target: "autodetection_#{id}"
       )
     else
       Turbo::StreamsChannel.broadcast_replace_to(
-        "autodetections_#{user_id.to_s}",
-        target: "autodetection_#{id.to_s}",
-        partial: "autodetections/autodetection",
+        "autodetections_#{user_id}",
+        target: "autodetection_#{id}",
+        partial: 'autodetections/autodetection',
         locals: { autodetection: self }
       )
     end
   end
-
 end

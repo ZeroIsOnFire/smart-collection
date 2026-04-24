@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 Rails.application.routes.draw do
-  devise_for :users, controllers: { registrations: "registrations" }
-  
+  devise_for :users, controllers: { registrations: 'registrations' }
+
   # Removendo o redirecionamento automático para cars#index para que a landing page seja sempre a home
   # authenticated :user do
   #   root 'cars#index', as: :authenticated_root
@@ -16,7 +18,7 @@ Rails.application.routes.draw do
   get '/s/:share_token', to: 'public_collections#index', as: :public_share
   get '/s/:share_token/car/:id', to: 'public_collections#show', as: :public_share_car
 
-  resources :autodetections, only: [:create, :show, :destroy] do
+  resources :autodetections, only: %i[create show destroy] do
     member do
       patch :retry
     end
@@ -31,22 +33,24 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :collection_exports, only: [:create, :destroy] do
+  resources :collection_exports, only: %i[create destroy] do
     get :status, on: :collection
   end
 
-  root "home#index"
+  root 'home#index'
 
   mount ActionCable.server => '/cable'
 
   namespace :admin do
     get '/', to: 'dashboard#index', as: :dashboard
     resources :users
+    get 'maintenance', to: 'maintenance#index'
+    post 'maintenance/cleanup', to: 'maintenance#cleanup'
   end
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.
-  get "up" => "rails/health#show", as: :rails_health_check
+  get 'up' => 'rails/health#show', as: :rails_health_check
 
   # Defines the root path route ("/")
   # root "posts#index"

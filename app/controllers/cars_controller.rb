@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 class CarsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_car, only: %i[ show edit update destroy ]
+  before_action :set_car, only: %i[show edit update destroy]
 
   PER_PAGE = 20
 
@@ -9,7 +11,7 @@ class CarsController < ApplicationController
     @autodetections = current_user.autodetections.where(:status.ne => 'completed').order(created_at: :desc)
     @page = (params[:page] || 1).to_i
     @cars = car_service.all(params.merge(per_page: PER_PAGE))
-    
+
     # Check if there are more results (for infinite scroll)
     # We count based on filtered results if search is present
     total_count = if params[:q].present?
@@ -28,16 +30,15 @@ class CarsController < ApplicationController
   # PATCH /cars/toggle_sharing
   def toggle_sharing
     current_user.update(sharing_enabled: !current_user.sharing_enabled)
-    
+
     respond_to do |format|
       format.turbo_stream
-      format.html { redirect_to edit_user_registration_path, notice: "Configuração de compartilhamento atualizada." }
+      format.html { redirect_to edit_user_registration_path, notice: 'Configuração de compartilhamento atualizada.' }
     end
   end
 
   # GET /cars/1
-  def show
-  end
+  def show; end
 
   # GET /cars/new
   def new
@@ -45,8 +46,7 @@ class CarsController < ApplicationController
   end
 
   # GET /cars/1/edit
-  def edit
-  end
+  def edit; end
 
   # POST /cars
   def create
@@ -54,10 +54,10 @@ class CarsController < ApplicationController
       @detected_item = DetectedItem.find_by(id: params[:detected_item_id])
       # Garante que o item detectado pertence ao usuário atual
       if @detected_item.nil? || @detected_item.autodetection.user_id.to_s != current_user.id.to_s
-        return redirect_to cars_path, alert: "Item detectado inválido ou não autorizado."
+        return redirect_to cars_path, alert: 'Item detectado inválido ou não autorizado.'
       end
     end
-    
+
     # Se vier de um item detectado, garante que a foto seja carregada do arquivo local
     # CarrierWave remote_photo_url falha para arquivos locais / uploads/
     params_to_save = car_params
@@ -71,7 +71,7 @@ class CarsController < ApplicationController
     if @car.persisted?
       if @detected_item
         @detected_item.update(
-          status: 'saved', 
+          status: 'saved',
           car_id: @car.id,
           color: @car.color,
           year: @car.year,
@@ -80,14 +80,14 @@ class CarsController < ApplicationController
         )
         @detected_item.autodetection.check_completion!
       end
-      
+
       respond_to do |format|
-        format.html { redirect_to car_url(@car), notice: "Carro criado com sucesso." }
+        format.html { redirect_to car_url(@car), notice: 'Carro criado com sucesso.' }
         if @detected_item
           format.turbo_stream do
             render turbo_stream: turbo_stream.replace(
-              "detected_item_#{@detected_item.id}", 
-              partial: "detected_items/detected_item", 
+              "detected_item_#{@detected_item.id}",
+              partial: 'detected_items/detected_item',
               locals: { detected_item: @detected_item }
             )
           end
@@ -95,12 +95,12 @@ class CarsController < ApplicationController
       end
     else
       respond_to do |format|
-        format.html { render :new, status: :unprocessable_entity }
+        format.html { render :new, status: :unprocessable_content }
         if @detected_item
           format.turbo_stream do
             render turbo_stream: turbo_stream.replace(
-              "detected_item_#{@detected_item.id}", 
-              partial: "detected_items/detected_item", 
+              "detected_item_#{@detected_item.id}",
+              partial: 'detected_items/detected_item',
               locals: { detected_item: @detected_item }
             )
           end
@@ -112,18 +112,18 @@ class CarsController < ApplicationController
   # PATCH/PUT /cars/1
   def update
     @car = car_service.update(@car.id, car_params)
-    
+
     if @car.errors.empty?
-      redirect_to car_url(@car), notice: "Carro atualizado com sucesso."
+      redirect_to car_url(@car), notice: 'Carro atualizado com sucesso.'
     else
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 
   # DELETE /cars/1
   def destroy
     car_service.destroy(@car.id)
-    redirect_to cars_url, notice: "Carro deletado com sucesso."
+    redirect_to cars_url, notice: 'Carro deletado com sucesso.'
   end
 
   private
@@ -138,6 +138,7 @@ class CarsController < ApplicationController
   end
 
   def car_params
-    params.require(:car).permit(:name, :brand, :manufacturer, :observations, :size, :year, :photo, :remove_photo, :remote_photo_url, :color)
+    params.require(:car).permit(:name, :brand, :manufacturer, :observations, :size, :year, :photo, :remove_photo,
+                                :remote_photo_url, :color)
   end
 end

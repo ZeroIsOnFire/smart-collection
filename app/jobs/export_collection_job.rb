@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ExportCollectionJob < ApplicationJob
   queue_as :default
 
@@ -10,19 +12,17 @@ class ExportCollectionJob < ApplicationJob
     begin
       if export.format_type == 'csv'
         data = ExportCsvService.new(export.user.cars.order(created_at: :asc)).generate
-        
-        temp_file = Tempfile.new(["export_#{export.id}", ".csv"])
+
+        temp_file = Tempfile.new(["export_#{export.id}", '.csv'])
         temp_file.write("\xEF\xBB\xBF") # BOM para UTF-8 no Excel
-        temp_file.write(data)
-        temp_file.rewind
       else
         data = ExportPdfService.new(export.user, export.user.cars.order(created_at: :asc)).generate
-        
-        temp_file = Tempfile.new(["export_#{export.id}", ".pdf"])
+
+        temp_file = Tempfile.new(["export_#{export.id}", '.pdf'])
         temp_file.binmode
-        temp_file.write(data)
-        temp_file.rewind
       end
+      temp_file.write(data)
+      temp_file.rewind
 
       export.file = temp_file
       export.status = 'completed'

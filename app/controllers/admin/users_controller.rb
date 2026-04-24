@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Admin
   class UsersController < DashboardController
     before_action :set_user, only: %i[show edit update destroy]
@@ -14,7 +16,7 @@ module Admin
                else
                  User.all
                end
-      
+
       @page = (params[:page] || 1).to_i
       @per_page = 20
       @users = @users.desc(:created_at).skip((@page - 1) * @per_page).limit(@per_page)
@@ -29,25 +31,24 @@ module Admin
     end
 
     # GET /admin/users/1/edit
-    def edit
-    end
+    def edit; end
 
     # PATCH/PUT /admin/users/1
     def update
       if @user.update(user_params)
-        redirect_to admin_user_path(@user), notice: "Usuário atualizado com sucesso."
+        redirect_to admin_user_path(@user), notice: 'Usuário atualizado com sucesso.'
       else
-        render :edit, status: :unprocessable_entity
+        render :edit, status: :unprocessable_content
       end
     end
 
     # DELETE /admin/users/1
     def destroy
       if @user == current_user
-        redirect_to admin_users_path, alert: "Você não pode deletar seu próprio usuário."
+        redirect_to admin_users_path, alert: 'Você não pode deletar seu próprio usuário.'
       else
         @user.destroy
-        redirect_to admin_users_path, notice: "Usuário removido com sucesso."
+        redirect_to admin_users_path, notice: 'Usuário removido com sucesso.'
       end
     end
 

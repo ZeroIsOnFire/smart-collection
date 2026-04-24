@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe 'Authentications', type: :request do
@@ -24,7 +26,12 @@ RSpec.describe 'Authentications', type: :request do
       it 'creates a new user with name and redirects' do
         expect do
           post user_registration_path, params: {
-            user: { name: 'Novo Usuário', email: 'newuser@example.com', password: 'password123', password_confirmation: 'password123' }
+            user: {
+              name: 'Novo Usuário',
+              email: 'newuser@example.com',
+              password: 'password123',
+              password_confirmation: 'password123'
+            }
           }
         end.to change(User, :count).by(1)
         expect(response).to redirect_to(cars_path)
