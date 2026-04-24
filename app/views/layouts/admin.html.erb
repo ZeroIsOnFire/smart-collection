@@ -31,14 +31,14 @@
         <nav class="flex-grow-1 px-3">
           <ul class="nav nav-pills flex-column gap-2">
             <li class="nav-item">
-              <%= link_to admin_dashboard_path, class: "nav-link text-white #{'active' if current_page?(admin_dashboard_path)}" do %>
+              <%= link_to admin_dashboard_path, class: "nav-link text-white #{'active' if controller_name == 'dashboard'}" do %>
                 <i class="bi bi-speedometer2 me-2"></i> Dashboard
               <% end %>
             </li>
             <li class="nav-item">
-              <a href="#" class="nav-link text-white opacity-50 cursor-not-allowed" title="Em breve">
+              <%= link_to admin_users_path, class: "nav-link text-white #{'active' if controller_name == 'users'}" do %>
                 <i class="bi bi-people me-2"></i> Usuários
-              </a>
+              <% end %>
             </li>
             <li class="nav-item">
               <a href="#" class="nav-link text-white opacity-50 cursor-not-allowed" title="Em breve">

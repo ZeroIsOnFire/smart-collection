@@ -1,0 +1,106 @@
+<div class="d-flex justify-content-between align-items-center mb-5">
+  <div>
+    <h2 class="fw-bold mb-1 text-dark">Gestão de Usuários</h2>
+    <p class="text-muted mb-0">Visualize e gerencie todos os usuários do sistema.</p>
+  </div>
+</div>
+
+<div class="card premium-card border-0 rounded-4 overflow-hidden mb-4">
+  <div class="card-header bg-white border-bottom p-4">
+    <div class="row g-3 align-items-center">
+      <div class="col-md-6">
+        <%= form_with url: admin_users_path, method: :get, class: "d-flex gap-2" do |f| %>
+          <div class="input-group">
+            <span class="input-group-text bg-light border-end-0 rounded-start-pill ps-3">
+              <i class="bi bi-search text-muted"></i>
+            </span>
+            <%= f.text_field :q, 
+                  value: params[:q], 
+                  placeholder: "Buscar por nome ou e-mail...", 
+                  class: "form-control bg-light border-start-0 rounded-end-pill py-2" %>
+          </div>
+          <%= f.submit "Buscar", class: "btn btn-primary rounded-pill px-4" %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="bg-light">
+        <tr>
+          <th class="ps-4 py-3 text-secondary small text-uppercase fw-bold">Usuário</th>
+          <th class="py-3 text-secondary small text-uppercase fw-bold text-center">Status</th>
+          <th class="py-3 text-secondary small text-uppercase fw-bold text-center">Acervo</th>
+          <th class="py-3 text-secondary small text-uppercase fw-bold text-center">Cadastrado em</th>
+          <th class="pe-4 py-3 text-end text-secondary small text-uppercase fw-bold">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @users.each do |user| %>
+          <tr>
+            <td class="ps-4">
+              <div class="d-flex align-items-center gap-3">
+                <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-sm" 
+                     style="width: 40px; height: 40px; background-color: <%= user_avatar_color(user) %>">
+                  <%= user_initials(user) %>
+                </div>
+                <div>
+                  <div class="fw-bold text-dark"><%= display_name(user) %></div>
+                  <div class="text-muted small"><%= user.email %></div>
+                </div>
+              </div>
+            </td>
+            <td class="text-center">
+              <% if user.admin? %>
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3">Admin</span>
+              <% else %>
+                <span class="badge bg-light text-secondary border rounded-pill px-3">Membro</span>
+              <% end %>
+            </td>
+            <td class="text-center">
+              <span class="fw-semibold"><%= user.cars.count %></span>
+              <span class="text-muted small ms-1">itens</span>
+            </td>
+            <td class="text-center text-muted small">
+              <%= user.created_at.strftime("%d/%m/%Y") %>
+            </td>
+            <td class="pe-4 text-end">
+              <div class="dropdown">
+                <button class="btn btn-link text-muted p-0 shadow-none" data-bs-toggle="dropdown">
+                  <i class="bi bi-three-dots-vertical fs-5"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-3">
+                  <li>
+                    <%= link_to admin_user_path(user), class: "dropdown-item d-flex align-items-center py-2" do %>
+                      <i class="bi bi-eye me-2 text-primary"></i> Detalhes
+                    <% end %>
+                  </li>
+                  <li>
+                    <%= link_to edit_admin_user_path(user), class: "dropdown-item d-flex align-items-center py-2" do %>
+                      <i class="bi bi-pencil me-2 text-secondary"></i> Editar
+                    <% end %>
+                  </li>
+                  <% if user != current_user %>
+                    <li><hr class="dropdown-divider opacity-50"></li>
+                    <li>
+                      <%= button_to admin_user_path(user), method: :delete, class: "dropdown-item d-flex align-items-center py-2 text-danger", data: { turbo_confirm: "Tem certeza que deseja remover este usuário permanentemente? Todos os seus carros e coleções serão deletados." } do %>
+                        <i class="bi bi-trash3 me-2"></i> Excluir
+                      <% end %>
+                    </li>
+                  <% end %>
+                </ul>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  
+  <% if @users.respond_to?(:total_pages) %>
+    <div class="card-footer bg-white border-top p-4 d-flex justify-content-center">
+      <%# Aqui entraria a paginação do Kaminari/WillPaginate se estivessem instaladas %>
+    </div>
+  <% end %>
+</div>
