@@ -28,6 +28,12 @@ class Autodetection
     end
   end
 
+  def self.cleanup_old_records(older_than: 24.hours.ago)
+    # Deleta autodetecções concluídas ou com erro há mais de X tempo
+    # destroy_all é necessário para disparar os callbacks do CarrierWave e deletar os arquivos
+    where(:status.in => %w[completed error], :updated_at.lt => older_than).destroy_all
+  end
+
   # Callbacks de broadcast em tempo real
   after_create :broadcast_new_autodetection
   after_update :broadcast_update_autodetection
