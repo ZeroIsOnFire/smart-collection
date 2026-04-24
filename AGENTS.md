@@ -180,7 +180,7 @@ refactor(items): extrair lógica de tags para TagService
 5. [x] Link público e Visão Showcase Privada (Share Token Segregado)
 6. [x] Exportação de Coleção para PDF (Prawn)
 7. [x] Exportação de Coleção para CSV
-8. [ ] Pesquisa Global / Full Text Search Integrada (Múltiplas Coleções)
+8. [x] Pesquisa Global / Full Text Search Integrada (Múltiplas Coleções)
 9. **TODO**: Avaliar modelos de monetização e deploy da versão cloud/self-hosted.
 
 ---

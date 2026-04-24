@@ -10,6 +10,7 @@ class Car
   field :size, type: String
   field :year, type: Integer
   field :color, type: String
+  field :tags, type: Array, default: []
 
   COLORS = {
     'Branco' => '#FFFFFF',

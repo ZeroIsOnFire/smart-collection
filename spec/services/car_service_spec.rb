@@ -32,7 +32,7 @@ RSpec.describe CarService do
     it 'attaches the photo to the car' do
       car = CarService.new(user).create(valid_params)
       expect(car.photo).to be_present
-      expect(car.photo.url).to include('test_image.png')
+      expect(car.photo.url).to include('test_image.jpg')
     end
   end
 
