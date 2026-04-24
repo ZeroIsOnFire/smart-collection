@@ -4,6 +4,12 @@ module Admin
     before_action :authenticate_admin!
 
     def index
+      @stats = {
+        users_count: User.count,
+        cars_count: Car.count,
+        autodetections_count: Autodetection.count,
+        pending_autodetections: Autodetection.where(:status.in => ['pending', 'processing']).count
+      }
     end
 
     private
