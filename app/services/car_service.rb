@@ -31,7 +31,7 @@ class CarService
     scope = query.present? ? search(query) : user.cars.all
 
     # Ordenação por data de criação decrescente e paginação manual
-    scope.desc(:created_at).skip((page - 1) * per_page).limit(per_page)
+    scope.desc(:created_at).page(page).per(per_page)
   end
 
   def search(query)

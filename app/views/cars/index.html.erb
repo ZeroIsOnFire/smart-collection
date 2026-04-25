@@ -114,7 +114,7 @@
           <!-- Sentinela para infinite scroll -->
           <% if @has_more %>
             <div id="cars_sentinel" class="row mt-4">
-              <%= render partial: "cars/sentinel", locals: { next_page: @page + 1 } %>
+              <%= render partial: "cars/sentinel", locals: { next_page: @cars.next_page } %>
             </div>
           <% end %>
 

@@ -104,7 +104,7 @@
 
           <!-- Sentinela de infinite scroll para o share -->
           <% if @has_more %>
-            <%= render partial: "cars/sentinel", locals: { next_page: @page + 1, url: public_share_path(@user.share_token, page: @page + 1, q: params[:q], format: :turbo_stream) } %>
+            <%= render partial: "cars/sentinel", locals: { next_page: @cars.next_page, url: public_share_path(@user.share_token, page: @cars.next_page, q: params[:q], format: :turbo_stream) } %>
           <% end %>
         <% else %>
           <div class="text-center py-5 mt-4">

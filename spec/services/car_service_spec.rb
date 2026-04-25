@@ -112,4 +112,19 @@ RSpec.describe CarService do
       expect(results).to include(car1)
     end
   end
+
+  describe '#all' do
+    before do
+      create_list(:car, 21, user: user)
+    end
+
+    it 'returns a paginatable collection' do
+      results = described_class.new(user).all(page: 2, per_page: 20)
+
+      expect(results.current_page).to eq(2)
+      expect(results.total_pages).to eq(2)
+      expect(results.next_page).to be_nil
+      expect(results.to_a.size).to eq(1)
+    end
+  end
 end

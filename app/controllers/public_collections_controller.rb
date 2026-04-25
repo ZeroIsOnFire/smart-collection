@@ -8,12 +8,9 @@ class PublicCollectionsController < ApplicationController
 
     if @user
       @cars = CarService.new(@user).all(index_params)
-      @page = (index_params[:page] || 1).to_i
-
-      scope = params[:q].present? ? CarService.new(@user).search(params[:q]) : @user.cars
-      @total_count = scope.count
-
-      @has_more = @total_count > @page * 20
+      @page = @cars.current_page
+      @total_count = @cars.total_count
+      @has_more = @cars.next_page.present?
 
       respond_to do |format|
         format.html

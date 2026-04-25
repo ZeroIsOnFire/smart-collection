@@ -28,6 +28,21 @@ RSpec.describe 'Cars', type: :request do
       expect(response).to be_successful
     end
 
+    it 'paginates the cars collection' do
+      create_list(:car, 21, user: user)
+
+      get cars_path
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include('/cars.turbo_stream?page=2')
+
+      get cars_path, params: { page: 2 }, as: :turbo_stream
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).not_to include('turbo-stream action="replace" target="cars_sentinel"')
+      expect(response.body).to include('turbo-stream action="remove" target="cars_sentinel"')
+    end
+
     context 'with search parameter' do
       before do
         Car.create_indexes

@@ -3,7 +3,7 @@
   <%= turbo_stream.append("cars_grid_inner", partial: "cars/car", collection: @cars) %>
   
   <% if @has_more %>
-    <%= turbo_stream.replace("cars_sentinel", partial: "cars/sentinel", locals: { next_page: @page + 1 }) %>
+    <%= turbo_stream.replace("cars_sentinel", partial: "cars/sentinel", locals: { next_page: @cars.next_page }) %>
   <% else %>
     <%= turbo_stream.remove("cars_sentinel") %>
   <% end %>
@@ -18,7 +18,7 @@
 
       <% if @has_more %>
         <div id="cars_sentinel" class="row mt-4">
-          <%= render partial: "cars/sentinel", locals: { next_page: @page + 1 } %>
+          <%= render partial: "cars/sentinel", locals: { next_page: @cars.next_page } %>
         </div>
       <% end %>
     <% else %>

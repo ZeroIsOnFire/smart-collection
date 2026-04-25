@@ -213,6 +213,13 @@ GEM
     json (2.19.3)
     jwt (3.1.2)
       base64
+    kaminari-actionview (1.2.2)
+      actionview
+      kaminari-core (= 1.2.2)
+    kaminari-core (1.2.2)
+    kaminari-mongoid (1.0.2)
+      kaminari-core (~> 1.0)
+      mongoid
     language_server-protocol (3.17.0.5)
     lint_roller (1.1.0)
     logger (1.7.0)
@@ -443,6 +450,8 @@ DEPENDENCIES
   factory_bot_rails
   google-cloud-vision
   importmap-rails
+  kaminari-actionview
+  kaminari-mongoid
   mini_magick
   mongoid (~> 9.0)
   prawn

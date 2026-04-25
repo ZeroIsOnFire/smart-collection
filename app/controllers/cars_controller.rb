@@ -9,17 +9,9 @@ class CarsController < ApplicationController
   # GET /cars
   def index
     @autodetections = current_user.autodetections.where(:status.ne => 'completed').order(created_at: :desc)
-    @page = (params[:page] || 1).to_i
     @cars = car_service.all(params.merge(per_page: PER_PAGE))
-
-    # Check if there are more results (for infinite scroll)
-    # We count based on filtered results if search is present
-    total_count = if params[:q].present?
-                    car_service.search(params[:q]).count
-                  else
-                    current_user.cars.count
-                  end
-    @has_more = total_count > @page * PER_PAGE
+    @page = @cars.current_page
+    @has_more = @cars.next_page.present?
 
     respond_to do |format|
       format.html

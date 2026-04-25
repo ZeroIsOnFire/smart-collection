@@ -14,6 +14,21 @@ RSpec.describe 'Public Collections', type: :request do
       expect(response.body).to include('Public Car')
     end
 
+    it 'paginates the public collection' do
+      create_list(:car, 20, user: user)
+
+      get public_share_path(user.share_token)
+
+      expect(response).to have_http_status(:success)
+      expect(response.body.scan('id="cars_sentinel"').size).to eq(1)
+
+      get public_share_path(user.share_token), params: { page: 2 }, as: :turbo_stream
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).not_to include('turbo-stream action="replace" target="cars_sentinel"')
+      expect(response.body).to include('turbo-stream action="remove" target="cars_sentinel"')
+    end
+
     it 'returns 404 if sharing is disabled' do
       user.update(sharing_enabled: false)
       get public_share_path(user.share_token)
