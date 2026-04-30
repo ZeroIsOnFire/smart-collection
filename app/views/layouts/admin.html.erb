@@ -15,6 +15,11 @@
     
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
+    <link rel="icon" type="image/png" href="/logo/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/logo/favicon.svg" />
+    <link rel="shortcut icon" href="/logo/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/logo/apple-touch-icon.png" />
+    <link rel="manifest" href="/logo/site.webmanifest" />
   </head>
 
   <body class="admin-body">
@@ -25,8 +30,8 @@
       <aside class="admin-sidebar bg-dark text-white d-flex flex-column">
         <div class="p-4 border-bottom border-secondary mb-3">
           <%= link_to admin_dashboard_path, class: "text-white text-decoration-none d-flex align-items-center gap-2" do %>
-            <i class="bi bi-intersect fs-3 text-primary"></i>
-            <span class="fw-bold fs-5 tracking-tight">SCC <span class="text-primary small">Admin</span></span>
+            <%= image_tag "/logo/logo.png", alt: "SCC Admin", height: 32, class: "brightness-0 invert" %>
+            <span class="fw-bold fs-5 tracking-tight">Admin</span>
           <% end %>
         </div>
 

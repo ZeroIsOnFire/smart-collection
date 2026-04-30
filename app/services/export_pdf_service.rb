@@ -213,15 +213,22 @@ class ExportPdfService
         pdf.stroke_horizontal_line pdf.bounds.left, pdf.bounds.right, at: -5
 
         # Logo no Rodapé (Esquerda)
-        pdf.fill_color '3B82F6'
-        pdf.fill_circle [pdf.bounds.left + 10, -20.5], 4
-        pdf.fill_color '1D4ED8'
-        pdf.fill_circle [pdf.bounds.left + 15, -24.5], 4
+        logo_path = Rails.root.join('public', 'logo', 'logo.png')
+        if File.exist?(logo_path)
+          pdf.image logo_path, at: [pdf.bounds.left, -17], height: 12
+          pdf.fill_color '94A3B8'
+          pdf.draw_text 'SmartCollection', at: [pdf.bounds.left + 20, -26], size: 8, style: :bold
+        else
+          pdf.fill_color '3B82F6'
+          pdf.fill_circle [pdf.bounds.left + 10, -20.5], 4
+          pdf.fill_color '1D4ED8'
+          pdf.fill_circle [pdf.bounds.left + 15, -24.5], 4
 
-        pdf.fill_color '94A3B8'
-        pdf.draw_text 'Smart', at: [pdf.bounds.left + 25, -25], size: 8, style: :bold
-        pdf.fill_color '3B82F6'
-        pdf.draw_text 'Collection', at: [pdf.bounds.left + 48, -25], size: 8, style: :bold
+          pdf.fill_color '94A3B8'
+          pdf.draw_text 'Smart', at: [pdf.bounds.left + 25, -25], size: 8, style: :bold
+          pdf.fill_color '3B82F6'
+          pdf.draw_text 'Collection', at: [pdf.bounds.left + 48, -25], size: 8, style: :bold
+        end
       end
 
       page_string = I18n.t('export_pdf.page_info', page: '<page>', total: '<total>')
