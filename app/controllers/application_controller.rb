@@ -26,7 +26,7 @@ class ApplicationController < ActionController::Base
   private
 
   def set_layout
-    if current_user&.admin?
+    if self.class.name.start_with?('Admin::')
       'admin'
     else
       'application'
