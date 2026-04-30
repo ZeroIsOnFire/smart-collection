@@ -15,8 +15,10 @@ class AutodetectionsController < ApplicationController
       # Pode retornar sucesso no Turbo pra não recarregar a página
       respond_to do |format|
         format.turbo_stream do
-          render turbo_stream: turbo_stream.prepend('autodetections_list', partial: 'autodetections/autodetection', locals: { autodetection: @autodetection }) +
-                               turbo_stream.append('flash_toasts', partial: 'shared/toast', locals: { type: :notice, message: 'Autodetect iniciado com sucesso!' })
+          render turbo_stream: turbo_stream.prepend('autodetections_list', partial: 'autodetections/autodetection',
+                                                                           locals: { autodetection: @autodetection }) +
+                               turbo_stream.append('flash_toasts', partial: 'shared/toast',
+                                                                   locals: { type: :notice, message: 'Autodetect iniciado com sucesso!' })
         end
         format.html { redirect_to root_path, notice: 'Autodetect iniciado!' }
       end
@@ -53,7 +55,8 @@ class AutodetectionsController < ApplicationController
           redirect_to cars_path, status: :see_other, notice: 'Autodetecção removida/cancelada com sucesso.'
         else
           render turbo_stream: turbo_stream.remove(autodetection_dom_id) +
-                               turbo_stream.append('flash_toasts', partial: 'shared/toast', locals: { type: :notice, message: 'Autodetecção excluída com sucesso.' })
+                               turbo_stream.append('flash_toasts', partial: 'shared/toast',
+                                                                   locals: { type: :notice, message: 'Autodetecção excluída com sucesso.' })
         end
       end
       format.html { redirect_to cars_path, notice: 'Autodetecção removida/cancelada com sucesso.' }

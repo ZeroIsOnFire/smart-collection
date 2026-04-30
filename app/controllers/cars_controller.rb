@@ -49,9 +49,7 @@ class CarsController < ApplicationController
     if params[:detected_item_id].present?
       @detected_item = DetectedItem.find_by(id: params[:detected_item_id])
       # Garante que o item detectado pertence ao usuário atual
-      if @detected_item.nil? || @detected_item.autodetection.user_id.to_s != current_user.id.to_s
-        return redirect_to cars_path, alert: 'Item detectado inválido ou não autorizado.'
-      end
+      return redirect_to cars_path, alert: 'Item detectado inválido ou não autorizado.' if @detected_item.nil? || @detected_item.autodetection.user_id.to_s != current_user.id.to_s
     end
 
     # Se vier de um item detectado, garante que a foto seja carregada do arquivo local
@@ -80,28 +78,12 @@ class CarsController < ApplicationController
 
       respond_to do |format|
         format.html { redirect_to car_url(@car), notice: 'Carro criado com sucesso.' }
-        if @detected_item
-          format.turbo_stream do
-            render turbo_stream: turbo_stream.replace(
-              "detected_item_#{@detected_item.id}",
-              partial: 'detected_items/detected_item',
-              locals: { detected_item: @detected_item }
-            )
-          end
-        end
+        render_detected_item_replacement(format)
       end
     else
       respond_to do |format|
         format.html { render :new, status: :unprocessable_content }
-        if @detected_item
-          format.turbo_stream do
-            render turbo_stream: turbo_stream.replace(
-              "detected_item_#{@detected_item.id}",
-              partial: 'detected_items/detected_item',
-              locals: { detected_item: @detected_item }
-            )
-          end
-        end
+        render_detected_item_replacement(format)
       end
     end
   end
@@ -124,6 +106,18 @@ class CarsController < ApplicationController
   end
 
   private
+
+  def render_detected_item_replacement(format)
+    return unless @detected_item
+
+    format.turbo_stream do
+      render turbo_stream: turbo_stream.replace(
+        "detected_item_#{@detected_item.id}",
+        partial: 'detected_items/detected_item',
+        locals: { detected_item: @detected_item }
+      )
+    end
+  end
 
   def set_car
     @car = Car.find(params[:id])

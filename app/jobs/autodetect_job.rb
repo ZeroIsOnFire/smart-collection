@@ -14,9 +14,7 @@ class AutodetectJob < ApplicationJob
       # 1. Analisar a imagem com Google Vision
       detected_items_data = GoogleVisionService.analyze(autodetection.photo.path)
 
-      if detected_items_data.empty?
-        Rails.logger.info "AutodetectJob: Blue items found for autodetection #{autodetection_id}"
-      end
+      Rails.logger.info "AutodetectJob: Blue items found for autodetection #{autodetection_id}" if detected_items_data.empty?
 
       # 2. Processar cada item detectado
       detected_items_data.each do |data|

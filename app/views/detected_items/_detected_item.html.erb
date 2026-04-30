@@ -1,15 +1,15 @@
-<turbo-frame id="detected_item_<%= detected_item.id %>" 
+<turbo-frame id="detected_item_<%= detected_item.id %>"
      class="col-12 mb-4 d-block"
      data-controller="detected-item">
-  <% 
+  <%
     is_saved = detected_item.status == 'saved'
     is_rejected = detected_item.status == 'rejected'
     is_processed = is_saved || is_rejected
   %>
-  
+
   <div class="card shadow rounded-4 border-0 overflow-hidden position-relative
               <%= 'bg-light opacity-75' if is_processed %>">
-    
+
     <!-- Loading Overlay -->
     <div class="detected-item-loader">
       <div class="spinner-border text-primary" role="status">
@@ -18,12 +18,12 @@
     </div>
     <div class="card-body p-0">
       <div class="row g-0 align-items-center">
-        
+
         <!-- Lado Esquerdo: Foto (25%) -->
         <div class="col-md-3 bg-light border-end">
           <% if detected_item.cropped_photo? %>
-            <%= image_tag detected_item.cropped_photo.url, 
-                          class: "img-fluid w-100 object-fit-cover", 
+            <%= image_tag detected_item.cropped_photo.url,
+                          class: "img-fluid w-100 object-fit-cover",
                           style: "height: 200px;" %>
           <% else %>
             <div class="d-flex align-items-center justify-content-center bg-white" style="height: 200px;">
@@ -54,9 +54,9 @@
 
               <div class="col-md-6">
                 <div class="form-floating">
-                  <%= f.text_field :brand, 
-                        class: "form-control border-0 bg-light", 
-                        id: "brand_#{detected_item.id}", 
+                  <%= f.text_field :brand,
+                        class: "form-control border-0 bg-light",
+                        id: "brand_#{detected_item.id}",
                         placeholder: "Hot Wheels" %>
                   <label for="brand_<%= detected_item.id %>">Marca (opcional)</label>
                 </div>
@@ -64,9 +64,9 @@
 
               <div class="col-md-6">
                 <div class="form-floating">
-                  <%= f.text_field :manufacturer, 
-                        class: "form-control border-0 bg-light", 
-                        id: "manufacturer_#{detected_item.id}", 
+                  <%= f.text_field :manufacturer,
+                        class: "form-control border-0 bg-light",
+                        id: "manufacturer_#{detected_item.id}",
                         placeholder: "Porsche" %>
                   <label for="manufacturer_<%= detected_item.id %>">Fabricante (opcional)</label>
                 </div>
@@ -74,10 +74,10 @@
 
               <div class="col-12 mb-2">
                 <div class="form-floating">
-                  <%= f.text_field :name, 
+                  <%= f.text_field :name,
                         value: detected_item.label,
-                        class: "form-control border-0 bg-light fw-bold", 
-                        id: "name_#{detected_item.id}", 
+                        class: "form-control border-0 bg-light fw-bold",
+                        id: "name_#{detected_item.id}",
                         placeholder: "911 Carrera",
                         required: true %>
                   <label for="name_<%= detected_item.id %>">Nome / Modelo (Obrigatório)</label>
@@ -86,7 +86,7 @@
 
               <div class="col-md-4">
                 <div class="form-floating">
-                  <%= f.select :color, 
+                  <%= f.select :color,
                         Car.color_options,
                         { selected: detected_item.color, prompt: "Selecione..." },
                         { class: "form-select border-0 bg-light", id: "color_#{detected_item.id}" } %>
@@ -96,10 +96,10 @@
 
               <div class="col-md-4">
                 <div class="form-floating">
-                  <%= f.number_field :year, 
+                  <%= f.number_field :year,
                         value: detected_item.year,
-                        class: "form-control border-0 bg-light", 
-                        id: "year_#{detected_item.id}", 
+                        class: "form-control border-0 bg-light",
+                        id: "year_#{detected_item.id}",
                         placeholder: "2024" %>
                   <label for="year_<%= detected_item.id %>">Ano</label>
                 </div>
@@ -107,7 +107,7 @@
 
               <div class="col-md-4">
                 <div class="form-floating">
-                  <%= f.select :size, 
+                  <%= f.select :size,
                         Car.scale_options,
                         { selected: (detected_item.size || '1:64'), prompt: "Escala..." },
                         { class: "form-select border-0 bg-light", id: "size_#{detected_item.id}" } %>
@@ -125,32 +125,32 @@
                <i class="bi <%= is_saved ? 'bi-patch-check' : 'bi-trash3' %> display-1"></i>
                <div class="fw-bold"><%= is_saved ? 'SALVO' : 'REJEITADO' %></div>
              </div>
-             
-             <%= button_to undo_detected_item_path(detected_item), 
-                           method: :patch, 
+
+             <%= button_to undo_detected_item_path(detected_item),
+                           method: :patch,
                            class: "btn btn-sm btn-outline-secondary rounded-pill px-4" do %>
                <i class="bi bi-arrow-counterclockwise me-1"></i> Desfazer
              <% end %>
           <% else %>
             <div class="d-flex flex-column gap-2 mb-3">
-              <button type="submit" 
-                      form="form_detected_item_<%= detected_item.id %>" 
+              <button type="submit"
+                      form="form_detected_item_<%= detected_item.id %>"
                       class="btn btn-premium rounded-pill shadow-sm py-2">
                 <i class="bi bi-plus-circle-fill me-1"></i> Adicionar ao Catálogo
               </button>
-              
+
               <div class="d-flex gap-2">
-                <%= button_to reject_detected_item_path(detected_item), 
-                              method: :patch, 
+                <%= button_to reject_detected_item_path(detected_item),
+                              method: :patch,
                               form_class: "w-100",
                               class: "btn btn-outline-warning w-100 rounded-pill shadow-sm py-2 px-0",
                               title: "Ignorar item e não salvar" do %>
                   <i class="bi bi-eye-slash-fill me-1"></i> Ignorar
                 <% end %>
 
-                <button type="button" 
+                <button type="button"
                         class="btn btn-outline-secondary w-100 rounded-pill shadow-sm py-2 px-0"
-                        data-bs-toggle="modal" 
+                        data-bs-toggle="modal"
                         data-bs-target="#adjustModal_<%= detected_item.id %>"
                         title="Recortar imagem novamente">
                   <i class="bi bi-crop me-1"></i> Ajustar
@@ -187,19 +187,19 @@
                   </div>
                   <div class="modal-body p-4">
                     <p class="text-muted small mb-4">Arraste e redimensione o quadro para enquadrar melhor o carro na foto original.</p>
-                    
-                    <div class="bg-light rounded-3 overflow-hidden position-relative" 
+
+                    <div class="bg-light rounded-3 overflow-hidden position-relative"
                          style="max-height: 60vh;">
-                      
-                      <img src="<%= detected_item.autodetection.photo.url %>" 
-                           class="img-fluid d-block mx-auto" 
+
+                      <img src="<%= detected_item.autodetection.photo.url %>"
+                           class="img-fluid d-block mx-auto"
                            data-selection-adjustment-target="image">
                     </div>
                   </div>
 
                   <div class="modal-footer border-0 p-4 pt-0">
                     <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" 
+                    <button type="button"
                             class="btn btn-premium rounded-pill px-4"
                             data-action="click->selection-adjustment#save">
                       Confirmar Ajuste

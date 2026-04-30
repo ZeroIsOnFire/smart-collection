@@ -13,15 +13,15 @@
     <div class="card premium-card border-0 rounded-4 p-5">
       <%= simple_form_for([:admin, @user]) do |f| %>
         <div class="mb-4">
-          <%= f.input :name, 
-                label: "Nome Completo", 
+          <%= f.input :name,
+                label: "Nome Completo",
                 input_html: { class: "form-control-lg rounded-3" },
                 placeholder: "Ex: João Silva" %>
         </div>
 
         <div class="mb-4">
-          <%= f.input :email, 
-                label: "E-mail", 
+          <%= f.input :email,
+                label: "E-mail",
                 input_html: { class: "form-control-lg rounded-3" },
                 placeholder: "email@exemplo.com" %>
         </div>

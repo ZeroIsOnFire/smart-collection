@@ -1,7 +1,7 @@
 <div data-controller="autodetection-upload">
-  <button type="button" 
-          class="btn btn-premium rounded-pill px-4 d-flex align-items-center gap-2" 
-          data-bs-toggle="modal" 
+  <button type="button"
+          class="btn btn-premium rounded-pill px-4 d-flex align-items-center gap-2"
+          data-bs-toggle="modal"
           data-bs-target="#autodetectModal">
     <i class="bi bi-magic"></i> <span>Autodetectar Minis</span>
   </button>
@@ -14,26 +14,26 @@
           <h5 class="modal-title fw-bold" id="autodetectModalLabel">Autodetectar Minis</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" data-action="click->autodetection-upload#stopCamera"></button>
         </div>
-        
+
         <div class="modal-body p-4">
-          <%= form_with model: autodetection, url: autodetections_path, 
-                data: { 
+          <%= form_with model: autodetection, url: autodetections_path,
+                data: {
                   autodetection_upload_target: "form",
                   action: "turbo:submit-start->autodetection-upload#onStart turbo:submit-end->autodetection-upload#onComplete"
-                }, 
+                },
                 multipart: true do |f| %>
-                
-            <%= f.file_field :photo, 
-                  class: "d-none", 
-                  data: { 
+
+            <%= f.file_field :photo,
+                  class: "d-none",
+                  data: {
                     autodetection_upload_target: "input",
-                    action: "change->autodetection-upload#fileSelected" 
+                    action: "change->autodetection-upload#fileSelected"
                   },
                   accept: "image/*" %>
 
             <!-- Interface de Upload / Dropzone -->
             <div data-autodetection-upload-target="uploadInterface">
-              <div class="dropzone-area mb-4" 
+              <div class="dropzone-area mb-4"
                    data-autodetection-upload-target="dropzone"
                    data-action="dragover->autodetection-upload#dragOver dragleave->autodetection-upload#dragLeave drop->autodetection-upload#drop click->autodetection-upload#selectFile">
                 <i class="bi bi-cloud-arrow-up display-4 text-primary mb-3"></i>
@@ -76,7 +76,7 @@
                 <div class="mb-3">
                   <img data-autodetection-upload-target="preview" class="img-fluid rounded shadow-sm border" style="max-height: 350px;">
                 </div>
-                
+
                 <div class="row g-2">
                   <div class="col-6">
                     <button type="button" class="btn btn-soft-secondary rounded-pill w-100 py-2 d-flex align-items-center justify-content-center gap-2" data-action="click->autodetection-upload#reset">

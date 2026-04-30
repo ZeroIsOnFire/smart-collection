@@ -54,20 +54,20 @@
 
         <!-- Marca + Fabricante -->
         <div class="d-flex flex-wrap gap-1 mt-1 mb-2">
-          <% if car.brand.present? %>
+          <% if car.brand? %>
             <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary small fw-normal"><%= car.brand %></span>
           <% end %>
-          <% if car.manufacturer.present? %>
+          <% if car.manufacturer? %>
             <span class="badge rounded-pill bg-secondary bg-opacity-10 text-secondary small fw-normal"><%= car.manufacturer %></span>
           <% end %>
         </div>
 
         <!-- Ano + Escala + Cor -->
-        <% if car.year.present? || car.size.present? || car.color.present? %>
+        <% if car.year? || car.size? || car.color? %>
           <div class="text-muted small d-flex gap-3">
-            <% if car.year.present? %><span><i class="bi bi-calendar me-1"></i><%= car.year %></span><% end %>
-            <% if car.size.present? %><span><i class="bi bi-arrows-fullscreen me-1"></i><%= car.size %></span><% end %>
-            <% if car.color.present? %>
+            <% if car.year? %><span><i class="bi bi-calendar me-1"></i><%= car.year %></span><% end %>
+            <% if car.size? %><span><i class="bi bi-arrows-fullscreen me-1"></i><%= car.size %></span><% end %>
+            <% if car.color? %>
               <span class="d-flex align-items-center gap-1">
                 <span class="d-inline-block rounded-circle shadow-sm" style="width:10px; height:10px; background-color:<%= Car::COLORS[car.color] || '#ccc' %>; border: 1px solid #dee2e6;"></span>
                 <%= car.color %>

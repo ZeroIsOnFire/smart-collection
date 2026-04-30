@@ -1,7 +1,7 @@
 <% if @page > 1 %>
   <%# Infinite scroll: append new items to the inner grid %>
   <%= turbo_stream.append("cars_grid_inner", partial: "cars/car", collection: @cars) %>
-  
+
   <% if @has_more %>
     <%= turbo_stream.replace("cars_sentinel", partial: "cars/sentinel", locals: { next_page: @cars.next_page }) %>
   <% else %>

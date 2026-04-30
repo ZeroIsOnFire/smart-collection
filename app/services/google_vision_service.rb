@@ -45,9 +45,7 @@ class GoogleVisionService
 
   def self.simulation_mode?
     enabled = ENV['VISION_SIMULATION_MODE'] == 'true'
-    if enabled && Rails.env.production?
-      Rails.logger.error '[SEGURANÇA] VISION_SIMULATION_MODE está habilitado em produção! Desabilite imediatamente.'
-    end
+    Rails.logger.error '[SEGURANÇA] VISION_SIMULATION_MODE está habilitado em produção! Desabilite imediatamente.' if enabled && Rails.env.production?
     enabled
   end
 

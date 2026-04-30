@@ -8,7 +8,7 @@
     </div>
     <div class="d-flex gap-2 flex-wrap">
       <% if current_user.sharing_enabled? %>
-        <div data-controller="clipboard" 
+        <div data-controller="clipboard"
              data-clipboard-success-content-value="<i class='bi bi-check2 fs-5'></i>"
              data-clipboard-default-class-value="btn-outline-primary"
              data-clipboard-success-class-value="btn-primary">
@@ -18,11 +18,11 @@
           </button>
         </div>
       <% end %>
-      
+
       <!-- Export Status CSV -->
       <%= turbo_stream_from "user_#{current_user.id.to_s}_exports" %>
       <%= render partial: "collection_exports/export_status", locals: { export: current_user.collection_exports.where(format_type: 'csv').last, format_type: 'csv' } %>
-      
+
       <!-- Export Status PDF -->
       <%= render partial: "collection_exports/export_status", locals: { export: current_user.collection_exports.where(format_type: 'pdf').last, format_type: 'pdf' } %>
 
@@ -46,10 +46,10 @@
   <!-- Campo de Busca Full Text -->
   <div class="row mb-4">
     <div class="col-12 col-lg-8 mx-auto">
-      <%= form_with url: cars_path, 
-                    method: :get, 
-                    class: "position-relative", 
-                    data: { 
+      <%= form_with url: cars_path,
+                    method: :get,
+                    class: "position-relative",
+                    data: {
                       controller: "search-form",
                       turbo_frame: "cars_grid"
                     } do |f| %>
@@ -57,16 +57,16 @@
           <span class="input-group-text border-0 bg-transparent ps-4">
             <i class="bi bi-search text-muted"></i>
           </span>
-          <%= f.text_field :q, 
-                           value: params[:q], 
-                           placeholder: "Buscar por nome, marca...", 
+          <%= f.text_field :q,
+                           value: params[:q],
+                           placeholder: "Buscar por nome, marca...",
                            class: "form-control border-0 bg-transparent py-3 shadow-none",
                            autocomplete: "off",
-                           data: { 
+                           data: {
                              search_form_target: "input",
-                             action: "input->search-form#submit" 
+                             action: "input->search-form#submit"
                            } %>
-          
+
           <div class="d-none d-flex align-items-center me-2" data-search-form-target="spinner">
             <div class="spinner-border spinner-border-sm text-primary" role="status">
               <span class="visually-hidden">Loading...</span>
@@ -78,7 +78,7 @@
               <i class="bi bi-x-circle"></i>
             <% end %>
           <% end %>
-          
+
           <button type="submit" class="btn btn-premium px-4 rounded-pill m-1 d-none d-sm-block">
             Buscar
           </button>

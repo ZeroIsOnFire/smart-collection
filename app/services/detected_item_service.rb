@@ -3,7 +3,7 @@
 class DetectedItemService
   def undo(detected_item, current_user)
     # 1. Se o item estava salvo, busca e remove o carro proporcionalmente
-    if detected_item.status == 'saved' && detected_item.car_id.present?
+    if detected_item.status == 'saved' && detected_item.car_id?
       # Usa where.first para evitar a exceção DocumentNotFound se o carro já tiver sido removido
       car = Car.where(id: detected_item.car_id, user_id: current_user.id).first
       car&.destroy

@@ -1,11 +1,11 @@
-<% 
+<%
   bg_class = case type.to_s
              when 'notice', 'success' then 'bg-success'
              when 'alert', 'error' then 'bg-danger'
              else 'bg-primary'
              end
 %>
-<div class="toast align-items-center text-white <%= bg_class %> border-0 mb-2 shadow-lg" 
+<div class="toast align-items-center text-white <%= bg_class %> border-0 mb-2 shadow-lg"
      role="alert" aria-live="assertive" aria-atomic="true"
      data-controller="toast">
   <div class="d-flex">

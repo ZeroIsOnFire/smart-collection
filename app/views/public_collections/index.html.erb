@@ -49,10 +49,10 @@
   <!-- Campo de Busca embutido para visitantes -->
   <div class="row mb-5 search-wrapper">
     <div class="col-12 col-lg-8 mx-auto">
-      <%= form_with url: public_share_path(@user.share_token), 
-                    method: :get, 
-                    class: "position-relative", 
-                    data: { 
+      <%= form_with url: public_share_path(@user.share_token),
+                    method: :get,
+                    class: "position-relative",
+                    data: {
                       controller: "search-form",
                       turbo_frame: "cars_grid"
                     } do |f| %>
@@ -60,17 +60,17 @@
           <span class="input-group-text border-0 bg-transparent ps-4 pe-2">
             <i class="bi bi-search text-muted fs-5"></i>
           </span>
-          <%= f.text_field :q, 
+          <%= f.text_field :q,
                            value: params[:q],
-                           placeholder: "Buscar na coleção de #{display_name(@user)}...", 
+                           placeholder: "Buscar na coleção de #{display_name(@user)}...",
                            class: "form-control border-0 py-4 fs-5 shadow-none bg-transparent fw-light",
                            autocomplete: "off",
-                           data: { 
+                           data: {
                              search_form_target: "input",
-                             action: "input->search-form#submit" 
+                             action: "input->search-form#submit"
                            } %>
-          
-          <div class="spinner-border spinner-border-sm text-primary position-absolute end-0 top-50 translate-middle-y me-4 d-none" 
+
+          <div class="spinner-border spinner-border-sm text-primary position-absolute end-0 top-50 translate-middle-y me-4 d-none"
                role="status"
                data-search-form_target="spinner">
             <span class="visually-hidden">Carregando...</span>

@@ -56,17 +56,17 @@
           <div class="mb-4">
             <h1 class="display-5 fw-bold mb-3 tracking-tight text-dark"><%= @car.name %></h1>
             <div class="d-flex flex-wrap gap-2">
-              <% if @car.brand.present? %>
+              <% if @car.brand? %>
                 <span class="badge rounded-pill px-3 py-2 fw-medium fs-6" style="background-color: var(--public-primary); color: white;"><%= @car.brand %></span>
               <% end %>
-              <% if @car.manufacturer.present? %>
+              <% if @car.manufacturer? %>
                 <span class="badge rounded-pill bg-light text-dark border px-3 py-2 fw-medium fs-6"><%= @car.manufacturer %></span>
               <% end %>
             </div>
           </div>
 
           <div class="row g-4 mb-4">
-            <% if @car.year.present? %>
+            <% if @car.year? %>
               <div class="col-6">
                 <div class="p-3 bg-light bg-opacity-50 rounded-4 border border-light">
                   <div class="text-muted small mb-1 fw-medium text-uppercase tracking-wider" style="font-size: 0.75rem;">Ano</div>
@@ -74,7 +74,7 @@
                 </div>
               </div>
             <% end %>
-            <% if @car.size.present? %>
+            <% if @car.size? %>
               <div class="col-6">
                 <div class="p-3 bg-light bg-opacity-50 rounded-4 border border-light">
                   <div class="text-muted small mb-1 fw-medium text-uppercase tracking-wider" style="font-size: 0.75rem;">Escala</div>
@@ -86,7 +86,7 @@
 
 
 
-          <% if @car.observations.present? %>
+          <% if @car.observations? %>
             <div class="mb-4 flex-grow-1">
               <div class="text-muted small mb-2 fw-medium text-uppercase tracking-wider" style="font-size: 0.75rem;">Observações / História</div>
               <div class="text-dark bg-light bg-opacity-50 p-4 rounded-4 border border-light shadow-sm" style="line-height: 1.7;">
@@ -94,7 +94,7 @@
               </div>
             </div>
           <% end %>
-          
+
           <div class="mt-auto pt-4 border-top">
             <div class="d-flex align-items-center justify-content-between text-muted small">
               <div class="d-flex align-items-center gap-2">
@@ -118,10 +118,10 @@
     <div class="modal-dialog modal-xl modal-dialog-centered">
       <div class="modal-content bg-transparent border-0 shadow-none">
         <div class="modal-body p-0 text-center position-relative d-inline-block w-auto mx-auto">
-          <%= image_tag @car.photo.url, 
-                class: "rounded-4 shadow-lg d-block", 
+          <%= image_tag @car.photo.url,
+                class: "rounded-4 shadow-lg d-block",
                 style: "max-height: 85vh; max-width: 90vw; min-height: 320px; min-width: 320px; object-fit: contain; background: #111;" %>
-          <button type="button" 
+          <button type="button"
                   class="btn btn-dark btn-sm rounded-circle shadow position-absolute"
                   data-bs-dismiss="modal"
                   style="top: -14px; right: -14px; width: 34px; height: 34px; padding: 0; opacity: 0.85; z-index: 10;">

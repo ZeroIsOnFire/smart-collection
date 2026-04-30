@@ -133,9 +133,9 @@ class ExportPdfService
 
             # Details
             details = []
-            details << car.brand if car.brand.present?
-            details << car.year.to_s if car.year.present?
-            details << car.size if car.size.present?
+            details << car.brand if car.brand?
+            details << car.year.to_s if car.year?
+            details << car.size if car.size?
 
             safe_details = begin
               details.join(' • ').encode('Windows-1252', invalid: :replace, undef: :replace,
@@ -147,7 +147,7 @@ class ExportPdfService
             pdf.text safe_details, size: 7, align: :center, overflow: :truncate
 
             # Color
-            if car.color.present?
+            if car.color?
               pdf.move_down 5
               color_hex = Car::COLORS[car.color] || '#CCCCCC'
               prawn_color = color_hex.delete('#')
@@ -178,7 +178,7 @@ class ExportPdfService
             end
 
             # Observations
-            if car.observations.present?
+            if car.observations?
               pdf.move_down 2 # Pequeno ajuste
               clean_obs = car.observations.to_s.squish
               safe_obs = begin

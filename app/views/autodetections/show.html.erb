@@ -1,7 +1,7 @@
 <div class="container-fluid py-5">
   <div class="row">
     <div class="col-12 px-lg-5">
-      
+
       <div class="d-flex justify-content-between align-items-center mb-5">
         <div>
           <h2 class="fw-bold mb-1 text-dark">Verificação de Autodetecção</h2>
@@ -29,10 +29,10 @@
              </div>
              <div class="position-relative bg-light">
                <%= image_tag @autodetection.photo.url, class: "img-fluid mx-auto d-block", style: "max-height: 500px; object-fit: contain;" if @autodetection.photo? %>
-               
-               <button type="button" 
+
+               <button type="button"
                        class="btn btn-premium rounded-pill px-4 shadow position-absolute bottom-0 end-0 m-3"
-                       data-bs-toggle="modal" 
+                       data-bs-toggle="modal"
                        data-bs-target="#manualAddModal">
                  <i class="bi bi-camera me-2"></i> Adicionar Manualmente
                </button>
@@ -58,7 +58,7 @@
           </div>
         </div>
       </div>
-      
+
     </div>
   </div>
 </div>
@@ -75,22 +75,22 @@
       </div>
       <div class="modal-body p-4">
         <p class="text-muted small mb-4">
-          Selecione o carro na foto original abaixo clicando e arrastando. 
+          Selecione o carro na foto original abaixo clicando e arrastando.
           Ao clicar em adicionar, o item aparecerá na lista e você poderá selecionar outro item sem fechar esta tela.
         </p>
-        
-        <div class="bg-light rounded-3 overflow-hidden position-relative" 
+
+        <div class="bg-light rounded-3 overflow-hidden position-relative"
              style="max-height: 60vh;">
-          
-          <img src="<%= @autodetection.photo.url %>" 
-               class="img-fluid d-block mx-auto" 
+
+          <img src="<%= @autodetection.photo.url %>"
+               class="img-fluid d-block mx-auto"
                data-manual-selection-target="image">
         </div>
       </div>
 
       <div class="modal-footer border-0 p-4 pt-0">
         <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Fechar</button>
-        <button type="button" 
+        <button type="button"
                 class="btn btn-premium rounded-pill px-4"
                 data-action="click->manual-selection#save">
           <i class="bi bi-plus-circle me-1"></i> Adicionar Item selecionado

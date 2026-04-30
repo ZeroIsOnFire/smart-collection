@@ -62,3 +62,9 @@ RSpec/StubbedMock:
 
 RSpec/VerifiedDoubles:
   Enabled: false
+
+RSpec/ContextWording:
+  Enabled: false
+
+Layout/LineLength:
+  Enabled: false

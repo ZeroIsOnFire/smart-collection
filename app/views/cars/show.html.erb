@@ -33,10 +33,10 @@
             <div class="modal-dialog modal-xl modal-dialog-centered">
               <div class="modal-content bg-transparent border-0 shadow-none">
                 <div class="modal-body p-0 text-center position-relative d-inline-block w-auto mx-auto">
-                  <%= image_tag @car.photo.url, 
-                        class: "rounded-4 shadow-lg d-block", 
+                  <%= image_tag @car.photo.url,
+                        class: "rounded-4 shadow-lg d-block",
                         style: "max-height: 85vh; max-width: 90vw; min-height: 320px; min-width: 320px; object-fit: contain; background: #111;" %>
-                  <button type="button" 
+                  <button type="button"
                           class="btn btn-dark btn-sm rounded-circle shadow position-absolute"
                           data-bs-dismiss="modal"
                           style="top: -14px; right: -14px; width: 34px; height: 34px; padding: 0; opacity: 0.85; z-index: 10;">
@@ -60,11 +60,11 @@
           <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
             <div>
               <h1 class="h2 fw-bold mb-1"><%= @car.name.presence || '—' %></h1>
-              <% if @car.brand.present? %>
+              <% if @car.brand? %>
                 <span class="badge bg-primary bg-opacity-10 text-primary fw-semibold fs-6 rounded-pill"><%= @car.brand %></span>
               <% end %>
             </div>
-            <% if @car.year.present? %>
+            <% if @car.year? %>
               <span class="badge bg-secondary rounded-pill fs-6 px-3 py-2"><i class="bi bi-calendar me-1"></i><%= @car.year %></span>
             <% end %>
           </div>
@@ -101,7 +101,7 @@
               <div class="d-flex flex-column">
                 <small class="text-uppercase fw-semibold text-muted tracking-wide mb-1">Cor</small>
                 <span class="fs-6 fw-medium d-flex align-items-center gap-2">
-                  <% if @car.color.present? %>
+                  <% if @car.color? %>
                     <span class="d-inline-block rounded-circle shadow-sm" style="width:14px; height:14px; background-color:<%= Car::COLORS[@car.color] || '#ccc' %>; border: 1px solid #dee2e6;"></span>
                   <% end %>
                   <%= @car.color.presence || '—' %>

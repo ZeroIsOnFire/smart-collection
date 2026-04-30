@@ -34,8 +34,8 @@
         </div>
       </div>
       <div class="d-grid mt-auto">
-        <%= button_to admin_maintenance_cleanup_path, 
-                      method: :post, 
+        <%= button_to admin_maintenance_cleanup_path,
+                      method: :post,
                       class: "btn btn-outline-warning rounded-pill py-2 fw-bold d-flex align-items-center justify-content-center gap-2",
                       disabled: @old_records_count == 0,
                       data: { turbo_frame: "_top", turbo_confirm: "Isso removerá permanentemente os registros e fotos de autodetecções concluídas há mais de 24 horas. Deseja continuar?" } do %>

@@ -69,32 +69,14 @@ class DetectedItemsController < ApplicationController
     @detected_item.update(status: 'rejected')
     @detected_item.autodetection.check_completion!
 
-    respond_to do |format|
-      format.html { redirect_back_or_to(root_path) }
-      format.turbo_stream do
-        render turbo_stream: turbo_stream.replace(
-          "detected_item_#{@detected_item.id}",
-          partial: 'detected_items/detected_item',
-          locals: { detected_item: @detected_item }
-        )
-      end
-    end
+    respond_with_replaced_item
   end
 
   # PATCH /detected_items/:id/undo
   def undo
     DetectedItemService.new.undo(@detected_item, current_user)
 
-    respond_to do |format|
-      format.html { redirect_back_or_to(root_path) }
-      format.turbo_stream do
-        render turbo_stream: turbo_stream.replace(
-          "detected_item_#{@detected_item.id}",
-          partial: 'detected_items/detected_item',
-          locals: { detected_item: @detected_item }
-        )
-      end
-    end
+    respond_with_replaced_item
   end
 
   # PATCH /detected_items/:id/update_selection
@@ -128,6 +110,19 @@ class DetectedItemsController < ApplicationController
   end
 
   private
+
+  def respond_with_replaced_item
+    respond_to do |format|
+      format.html { redirect_back_or_to(root_path) }
+      format.turbo_stream do
+        render turbo_stream: turbo_stream.replace(
+          "detected_item_#{@detected_item.id}",
+          partial: 'detected_items/detected_item',
+          locals: { detected_item: @detected_item }
+        )
+      end
+    end
+  end
 
   def set_autodetection
     @autodetection = current_user.autodetections.find(params[:autodetection_id])

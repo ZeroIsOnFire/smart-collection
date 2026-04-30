@@ -1,8 +1,8 @@
-<%= simple_form_for(car, html: { 
-  class: "needs-validation", 
-  novalidate: true, 
+<%= simple_form_for(car, html: {
+  class: "needs-validation",
+  novalidate: true,
   multipart: true,
-  data: { 
+  data: {
     controller: "color-detector",
     "color-detector-colors-value": Car::COLORS.to_json
   }
@@ -11,7 +11,7 @@
 
   <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
     <div class="card-body p-4 p-md-5">
-      
+
       <!-- Foto Principal -->
       <h5 class="fw-bold mb-4 text-dark pb-2 border-bottom">
         <i class="bi bi-camera me-2 text-primary"></i> Foto Principal
@@ -32,7 +32,7 @@
               data: { "photo-upload-target": "input", "color-detector-target": "input", action: "change->photo-upload#fileSelected change->color-detector#detect" } %>
 
         <!-- Existing photo data (only on edit) -->
-        <% if car.photo.present? %>
+        <% if car.photo? %>
           <span data-photo-upload-target="existingPhoto"
                 data-url="<%= car.photo.url %>"
                 class="d-none"></span>
@@ -93,25 +93,25 @@
 
       <div class="row g-4 mb-4">
         <div class="col-12">
-          <%= f.input :brand, 
-                      label: "Marca (Item)", 
-                      placeholder: "Ex: Hot Wheels, Matchbox, Maisto", 
-                      input_html: { class: "form-control-lg bg-light border-0" },
-                      label_html: { class: "text-secondary small text-uppercase tracking-wide" } %>
-        </div>
-        
-        <div class="col-12">
-          <%= f.input :manufacturer, 
-                      label: "Fabricante (Veículo)", 
-                      placeholder: "Ex: Porsche, Ferrari, Ford", 
+          <%= f.input :brand,
+                      label: "Marca (Item)",
+                      placeholder: "Ex: Hot Wheels, Matchbox, Maisto",
                       input_html: { class: "form-control-lg bg-light border-0" },
                       label_html: { class: "text-secondary small text-uppercase tracking-wide" } %>
         </div>
 
         <div class="col-12">
-          <%= f.input :name, 
-                      label: "Nome / Modelo do Veículo", 
-                      placeholder: "Ex: 911 Carrera, Mustang GT, LaFerrari", 
+          <%= f.input :manufacturer,
+                      label: "Fabricante (Veículo)",
+                      placeholder: "Ex: Porsche, Ferrari, Ford",
+                      input_html: { class: "form-control-lg bg-light border-0" },
+                      label_html: { class: "text-secondary small text-uppercase tracking-wide" } %>
+        </div>
+
+        <div class="col-12">
+          <%= f.input :name,
+                      label: "Nome / Modelo do Veículo",
+                      placeholder: "Ex: 911 Carrera, Mustang GT, LaFerrari",
                       input_html: { class: "form-control-lg bg-light border-0" },
                       label_html: { class: "text-secondary small text-uppercase tracking-wide" } %>
         </div>
@@ -124,13 +124,13 @@
 
       <div class="row g-4 mb-5">
         <div class="col-md-6">
-          <%= f.input :year, 
-                      label: "Ano de Fabricação", 
-                      placeholder: "Ex: 1998", 
+          <%= f.input :year,
+                      label: "Ano de Fabricação",
+                      placeholder: "Ex: 1998",
                       input_html: { class: "form-control-lg bg-light border-0" },
                       label_html: { class: "text-secondary small text-uppercase tracking-wide" } %>
         </div>
-        
+
         <div class="col-md-6">
           <%= f.input :size,
                       as: :select,
@@ -144,8 +144,8 @@
         <div class="col-md-12 mt-4">
           <div class="input-group input-group-lg border-0 bg-light rounded-3 overflow-hidden">
             <span class="input-group-text bg-light border-0 ps-3">
-              <div data-color-detector-target="preview" 
-                   class="rounded-circle shadow-sm" 
+              <div data-color-detector-target="preview"
+                   class="rounded-circle shadow-sm"
                    style="width: 24px; height: 24px; transition: background-color 0.3s ease; border: 1px solid #dee2e6;">
               </div>
             </span>
@@ -154,9 +154,9 @@
                         label: false,
                         collection: Car.color_options,
                         include_blank: "Selecione a cor...",
-                        input_html: { 
+                        input_html: {
                           class: "form-select border-0 bg-light py-3",
-                          data: { 
+                          data: {
                             "color-detector-target": "select",
                             action: "change->color-detector#updatePreview"
                           }
@@ -174,22 +174,22 @@
 
       <div class="row g-4 mb-2">
         <div class="col-12">
-          <%= f.input :observations, 
+          <%= f.input :observations,
                       as: :text,
-                      label: "Observações do Item", 
-                      placeholder: "Escreva detalhes sobre o estado de conservação...", 
+                      label: "Observações do Item",
+                      placeholder: "Escreva detalhes sobre o estado de conservação...",
                       input_html: { class: "bg-light border-0", rows: 4 },
                       label_html: { class: "text-secondary small text-uppercase tracking-wide" } %>
         </div>
       </div>
 
     </div>
-    
+
     <div class="card-footer bg-light border-0 p-4 p-md-5 d-flex justify-content-between align-items-center">
       <%= link_to cars_path, class: "btn btn-link text-secondary text-decoration-none fw-semibold px-0" do %>
         <i class="bi bi-arrow-left me-2"></i>Voltar
       <% end %>
-      
+
       <%= f.button :submit, car.persisted? ? "Salvar Alterações" : "Adicionar ao Acervo", class: "btn-primary btn-lg rounded-pill px-5 fw-bold shadow-sm" %>
     </div>
   </div>

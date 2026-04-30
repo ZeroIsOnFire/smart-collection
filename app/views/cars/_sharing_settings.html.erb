@@ -2,8 +2,8 @@
   <div class="mb-4">
     <label class="form-label fw-medium small">Seu link público</label>
     <div class="input-group" data-controller="clipboard" data-clipboard-success-content-value="Copiado!">
-      <input type="text" class="form-control bg-light border-0 rounded-start-pill ps-3 small" readonly 
-             value="<%= public_share_url(current_user.share_token) %>" 
+      <input type="text" class="form-control bg-light border-0 rounded-start-pill ps-3 small" readonly
+             value="<%= public_share_url(current_user.share_token) %>"
              data-clipboard-target="source">
       <button class="btn btn-primary rounded-end-pill px-3 d-flex align-items-center gap-2" type="button" data-action="clipboard#copy" data-clipboard-target="button">
         <i class="bi bi-clipboard"></i>
@@ -12,8 +12,8 @@
   </div>
 <% end %>
 
-<%= button_to toggle_sharing_cars_path, 
-              method: :patch, 
+<%= button_to toggle_sharing_cars_path,
+              method: :patch,
               form: { class: "d-block" },
               class: "btn #{current_user.sharing_enabled? ? 'btn-light text-danger' : 'btn-premium'} rounded-pill w-100 py-2 d-flex align-items-center justify-content-center gap-2" do %>
   <% if current_user.sharing_enabled? %>

@@ -2,7 +2,7 @@
 
 module ApplicationHelper
   def user_initials(user)
-    if user.name.present?
+    if user.name?
       user.name.split.map(&:first).join.upcase[0..1]
     else
       user.email.split('@').first[0..1].upcase
@@ -16,7 +16,7 @@ module ApplicationHelper
   end
 
   def display_name(user)
-    return user.email if user.name.blank?
+    return user.email unless user.name?
 
     user.name.gsub(/\s+[a-f0-9]{24}$/i, '')
   end

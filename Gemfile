@@ -55,6 +55,8 @@ group :development, :test do
   gem 'capybara'
   gem 'debug', platforms: %i[mri windows]
   gem 'factory_bot_rails'
+  gem 'flay', require: false
+  gem 'rails_best_practices', require: false
   gem 'rspec-rails'
   gem 'rubocop', require: false
   gem 'rubocop-rails', require: false

@@ -18,7 +18,7 @@ RSpec.describe 'Admin::Maintenance', type: :request do
         expect(response.body).to include('Armazenamento')
         expect(response.body).to include('Itens Expirados')
         expect(response.body).to include('Processos de Fundo')
-        expect(response.body).to include('Solid Queue')
+        expect(response.body).to include('Sidekiq')
       end
 
       it 'exibe a contagem correta de registros expirados' do

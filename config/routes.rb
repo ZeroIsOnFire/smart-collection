@@ -43,7 +43,7 @@ Rails.application.routes.draw do
 
   namespace :admin do
     get '/', to: 'dashboard#index', as: :dashboard
-    resources :users
+    resources :users, except: %i[new create]
     get 'maintenance', to: 'maintenance#index'
     post 'maintenance/cleanup', to: 'maintenance#cleanup'
   end

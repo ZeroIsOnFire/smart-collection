@@ -17,8 +17,8 @@ RSpec.describe 'Admin::Dashboard', type: :request do
         expect(response.body).to include('Dashboard Administrativo')
         expect(response.body).to include('Total de Usuários')
         expect(response.body).to include('Carros no Acervo')
-        expect(response.body).to include('Autodeteções')
-        expect(response.body).to include('Em Processamento')
+        expect(response.body).to include('Itens via IA')
+        expect(response.body).to include('Fila de IA')
       end
 
       it 'exibe os links de recursos rápidos funcionais' do
