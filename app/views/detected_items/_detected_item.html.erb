@@ -23,6 +23,7 @@
         <div class="col-md-3 bg-light border-end">
           <% if detected_item.cropped_photo? %>
             <%= image_tag detected_item.cropped_photo.url,
+                          loading: "lazy",
                           class: "img-fluid w-100 object-fit-cover",
                           style: "height: 200px;" %>
           <% else %>

@@ -1,81 +1,83 @@
 <div id="car_<%= car.id %>" class="col animate-fade-in">
-  <div class="card h-100 shadow-sm border-0 position-relative rounded-4 overflow-hidden" style="transition: transform 0.2s ease, box-shadow 0.2s ease;">
-    <% unless local_assigns[:public] %>
-      <!-- Menu Dropdown (Hiden on public views) -->
-      <div class="position-absolute top-0 end-0 p-2 z-3 car-action-dropdown">
-        <div class="dropdown">
-          <button class="btn btn-sm bg-white bg-opacity-90 rounded-circle shadow-sm border-0"
-                  type="button" data-bs-toggle="dropdown" aria-expanded="false"
-                  style="width: 32px; height: 32px; padding: 0;">
-            <i class="bi bi-three-dots-vertical small"></i>
-          </button>
-          <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3">
-            <li>
-              <%= link_to car_path(car), class: 'dropdown-item d-flex align-items-center gap-2 py-2', data: { turbo_frame: "_top" } do %>
-                <i class="bi bi-eye text-muted"></i> Ver Detalhes
-              <% end %>
-            </li>
-            <li>
-              <%= link_to edit_car_path(car), class: 'dropdown-item d-flex align-items-center gap-2 py-2', data: { turbo_frame: "_top" } do %>
-                <i class="bi bi-pencil text-muted"></i> Editar
-              <% end %>
-            </li>
-            <li><hr class="dropdown-divider"></li>
-            <li>
-              <%= button_to car_path(car), method: :delete, form: { data: { turbo_confirm: 'Tem certeza que deseja deletar este item?' } }, class: 'dropdown-item text-danger d-flex align-items-center gap-2 py-2' do %>
-                <i class="bi bi-trash3"></i> Deletar
-              <% end %>
-            </li>
-          </ul>
-        </div>
-      </div>
-    <% end %>
-
-    <%# Detalhe: se for público, usamos o path do share, senão o path normal %>
-    <% target_path = local_assigns[:public] ? public_share_car_path(share_token: @user.share_token, id: car.id) : car_path(car) %>
-    <%= link_to target_path, class: "text-decoration-none", data: { turbo_frame: "_top" } do %>
-      <!-- Foto -->
-      <% if car.photo? %>
-        <div class="car-photo-container" style="height: 180px; overflow: hidden;">
-          <%= image_tag car.photo.url, style: "width: 100%; height: 100%; object-fit: cover; display: block;" %>
-        </div>
-      <% else %>
-        <div class="car-photo-container bg-light d-flex align-items-center justify-content-center text-muted" style="height: 180px;">
-          <div class="text-center">
-            <i class="bi bi-camera fs-3 opacity-30 d-block mb-1"></i>
-            <small class="opacity-50">Sem foto</small>
+  <% cache [car, local_assigns[:public]] do %>
+    <div class="card h-100 shadow-sm border-0 position-relative rounded-4 overflow-hidden" style="transition: transform 0.2s ease, box-shadow 0.2s ease;">
+      <% unless local_assigns[:public] %>
+        <!-- Menu Dropdown (Hiden on public views) -->
+        <div class="position-absolute top-0 end-0 p-2 z-3 car-action-dropdown">
+          <div class="dropdown">
+            <button class="btn btn-sm bg-white bg-opacity-90 rounded-circle shadow-sm border-0"
+                    type="button" data-bs-toggle="dropdown" aria-expanded="false"
+                    style="width: 32px; height: 32px; padding: 0;">
+              <i class="bi bi-three-dots-vertical small"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3">
+              <li>
+                <%= link_to car_path(car), class: 'dropdown-item d-flex align-items-center gap-2 py-2', data: { turbo_frame: "_top" } do %>
+                  <i class="bi bi-eye text-muted"></i> Ver Detalhes
+                <% end %>
+              </li>
+              <li>
+                <%= link_to edit_car_path(car), class: 'dropdown-item d-flex align-items-center gap-2 py-2', data: { turbo_frame: "_top" } do %>
+                  <i class="bi bi-pencil text-muted"></i> Editar
+                <% end %>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <%= button_to car_path(car), method: :delete, form: { data: { turbo_confirm: 'Tem certeza que deseja deletar este item?' } }, class: 'dropdown-item text-danger d-flex align-items-center gap-2 py-2' do %>
+                  <i class="bi bi-trash3"></i> Deletar
+                <% end %>
+              </li>
+            </ul>
           </div>
         </div>
       <% end %>
 
-      <!-- Corpo do Card -->
-      <div class="card-body px-3 pb-3 pt-2">
-        <h5 class="card-title mb-0 fw-bold text-dark text-truncate fs-6"><%= car.name.presence || '—' %></h5>
-
-        <!-- Marca + Fabricante -->
-        <div class="d-flex flex-wrap gap-1 mt-1 mb-2">
-          <% if car.brand? %>
-            <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary small fw-normal"><%= car.brand %></span>
-          <% end %>
-          <% if car.manufacturer? %>
-            <span class="badge rounded-pill bg-secondary bg-opacity-10 text-secondary small fw-normal"><%= car.manufacturer %></span>
-          <% end %>
-        </div>
-
-        <!-- Ano + Escala + Cor -->
-        <% if car.year? || car.size? || car.color? %>
-          <div class="text-muted small d-flex gap-3">
-            <% if car.year? %><span><i class="bi bi-calendar me-1"></i><%= car.year %></span><% end %>
-            <% if car.size? %><span><i class="bi bi-arrows-fullscreen me-1"></i><%= car.size %></span><% end %>
-            <% if car.color? %>
-              <span class="d-flex align-items-center gap-1">
-                <span class="d-inline-block rounded-circle shadow-sm" style="width:10px; height:10px; background-color:<%= Car::COLORS[car.color] || '#ccc' %>; border: 1px solid #dee2e6;"></span>
-                <%= car.color %>
-              </span>
-            <% end %>
+      <%# Detalhe: se for público, usamos o path do share, senão o path normal %>
+      <% target_path = local_assigns[:public] ? public_share_car_path(share_token: @user.share_token, id: car.id) : car_path(car) %>
+      <%= link_to target_path, class: "text-decoration-none", data: { turbo_frame: "_top" } do %>
+        <!-- Foto -->
+        <% if car.photo? %>
+          <div class="car-photo-container" style="height: 180px; overflow: hidden;">
+            <%= image_tag car.photo.url, loading: "lazy", style: "width: 100%; height: 100%; object-fit: cover; display: block;" %>
+          </div>
+        <% else %>
+          <div class="car-photo-container bg-light d-flex align-items-center justify-content-center text-muted" style="height: 180px;">
+            <div class="text-center">
+              <i class="bi bi-camera fs-3 opacity-30 d-block mb-1"></i>
+              <small class="opacity-50">Sem foto</small>
+            </div>
           </div>
         <% end %>
-      </div>
-    <% end %>
-  </div>
+
+        <!-- Corpo do Card -->
+        <div class="card-body px-3 pb-3 pt-2">
+          <h5 class="card-title mb-0 fw-bold text-dark text-truncate fs-6"><%= car.name.presence || '—' %></h5>
+
+          <!-- Marca + Fabricante -->
+          <div class="d-flex flex-wrap gap-1 mt-1 mb-2">
+            <% if car.brand? %>
+              <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary small fw-normal"><%= car.brand %></span>
+            <% end %>
+            <% if car.manufacturer? %>
+              <span class="badge rounded-pill bg-secondary bg-opacity-10 text-secondary small fw-normal"><%= car.manufacturer %></span>
+            <% end %>
+          </div>
+
+          <!-- Ano + Escala + Cor -->
+          <% if car.year? || car.size? || car.color? %>
+            <div class="text-muted small d-flex gap-3">
+              <% if car.year? %><span><i class="bi bi-calendar me-1"></i><%= car.year %></span><% end %>
+              <% if car.size? %><span><i class="bi bi-arrows-fullscreen me-1"></i><%= car.size %></span><% end %>
+              <% if car.color? %>
+                <span class="d-flex align-items-center gap-1">
+                  <span class="d-inline-block rounded-circle shadow-sm" style="width:10px; height:10px; background-color:<%= Car::COLORS[car.color] || '#ccc' %>; border: 1px solid #dee2e6;"></span>
+                  <%= car.color %>
+                </span>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
 </div>

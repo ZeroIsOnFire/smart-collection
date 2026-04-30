@@ -53,15 +53,21 @@ class Car
           brand: 'text',
           manufacturer: 'text',
           observations: 'text',
-          size: 'text'
+          size: 'text',
+          tags: 'text'
         }, {
           weights: {
             name: 10,
             brand: 5,
-            manufacturer: 2
+            manufacturer: 2,
+            observations: 1,
+            size: 1,
+            tags: 1
           },
           name: 'CarTextIndex'
         })
+  index({ user_id: 1, created_at: -1 })
+  index({ user_id: 1, name: 1 })
 
   belongs_to :user
 
