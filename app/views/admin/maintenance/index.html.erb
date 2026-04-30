@@ -3,6 +3,7 @@
   <p class="text-muted mb-0">Monitore a saúde do sistema e gerencie arquivos temporários.</p>
 </div>
 
+<%= turbo_frame_tag "maintenance_stats", data: { controller: "poll", poll_interval_value: 5000 } do %>
 <div class="row g-4 mb-4">
   <!-- Status de Armazenamento -->
   <div class="col-md-6 col-lg-4">
@@ -37,7 +38,7 @@
                       method: :post, 
                       class: "btn btn-outline-warning rounded-pill py-2 fw-bold d-flex align-items-center justify-content-center gap-2",
                       disabled: @old_records_count == 0,
-                      data: { turbo_confirm: "Isso removerá permanentemente os registros e fotos de autodetecções concluídas há mais de 24 horas. Deseja continuar?" } do %>
+                      data: { turbo_frame: "_top", turbo_confirm: "Isso removerá permanentemente os registros e fotos de autodetecções concluídas há mais de 24 horas. Deseja continuar?" } do %>
           <i class="bi bi-stars"></i> Limpar Agora
         <% end %>
       </div>
@@ -73,14 +74,42 @@
         </div>
       </div>
       <div class="card-body p-4">
-        <div class="alert alert-info border-0 rounded-4 d-flex align-items-center gap-3 mb-0">
-          <i class="bi bi-info-circle-fill fs-3 text-primary"></i>
+        <div class="alert alert-primary border-0 rounded-4 d-flex align-items-center gap-3 mb-4">
+          <i class="bi bi-cpu-fill fs-3"></i>
           <div>
-            <div class="fw-bold">Sistema de Fila: Solid Queue</div>
-            <div class="small">O sistema processa autodetecções e exportações em segundo plano para manter a interface rápida.</div>
+            <div class="fw-bold">Motor de Processamento: Sidekiq</div>
+            <div class="small">Sistema assíncrono que processa IA (Autodetecção) e gera Exportações sem travar o usuário. Esta seção atualiza automaticamente a cada 5 segundos.</div>
+          </div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-6 col-md-3">
+            <div class="p-3 bg-light rounded-3 text-center border">
+              <div class="text-secondary small fw-bold text-uppercase mb-1">Processados</div>
+              <div class="fs-4 fw-bold text-dark"><%= number_with_delimiter(@sidekiq_stats.processed) %></div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="p-3 bg-light rounded-3 text-center border">
+              <div class="text-secondary small fw-bold text-uppercase mb-1">Na Fila (Aguardando)</div>
+              <div class="fs-4 fw-bold text-dark"><%= number_with_delimiter(@sidekiq_stats.enqueued) %></div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="p-3 bg-light rounded-3 text-center border">
+              <div class="text-secondary small fw-bold text-uppercase mb-1">Workers Ativos</div>
+              <div class="fs-4 fw-bold text-success"><%= @sidekiq_workers %></div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="p-3 bg-danger-subtle rounded-3 text-center border border-danger-subtle">
+              <div class="text-danger small fw-bold text-uppercase mb-1">Falhas (Histórico)</div>
+              <div class="fs-4 fw-bold text-danger"><%= number_with_delimiter(@sidekiq_stats.failed) %></div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
 </div>
+<% end %>

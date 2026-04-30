@@ -6,12 +6,19 @@ module Admin
     before_action :authenticate_admin!
 
     def index
+      cars_count = Car.count
+      ai_cars_count = Car.where(detected_via_ai: true).count
+
       @stats = {
         users_count: User.count,
-        cars_count: Car.count,
-        autodetections_count: Autodetection.count,
-        pending_autodetections: Autodetection.where(:status.in => %w[pending processing]).count
+        cars_count: cars_count,
+        ai_cars_count: ai_cars_count,
+        ai_cars_percentage: cars_count.zero? ? 0 : (ai_cars_count.to_f / cars_count * 100).round,
+        pending_autodetections: Autodetection.where(:status.in => %w[pending processing to_verify]).count,
+        collections_shared: User.where(sharing_enabled: true).count
       }
+
+      @recent_users = User.desc(:created_at).limit(5).to_a
     end
 
     private

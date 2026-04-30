@@ -14,7 +14,7 @@
             <i class="bi bi-arrow-left me-2"></i> Voltar
           <% end %>
 
-          <%= button_to autodetection_path(@autodetection), method: :delete, class: "btn btn-outline-danger rounded-pill px-4 shadow-sm", form: { data: { turbo_frame: "_top", turbo_confirm: "Cancelar e excluir todas as imagens extraídas permanentemente?" } } do %>
+          <%= button_to autodetection_path(@autodetection), method: :delete, params: { redirect_to_cars: true }, class: "btn btn-outline-danger rounded-pill px-4 shadow-sm", form: { data: { turbo_confirm: "Cancelar e excluir todas as imagens extraídas permanentemente?" } } do %>
             <i class="bi bi-x-lg me-1"></i> Descartar e Sair
           <% end %>
         </div>

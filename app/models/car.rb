@@ -13,6 +13,7 @@ class Car
   field :year, type: Integer
   field :color, type: String
   field :tags, type: Array, default: []
+  field :detected_via_ai, type: Boolean, default: false
 
   COLORS = {
     'Branco' => '#FFFFFF',

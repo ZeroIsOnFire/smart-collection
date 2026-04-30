@@ -34,11 +34,7 @@
 
         <div class="collapse navbar-collapse" id="mainNavbar">
           <ul class="navbar-nav me-auto">
-            <% if user_signed_in? %>
-              <li class="nav-item">
-                <%= link_to "Meus Carros", cars_path, class: "nav-link fw-medium" %>
-              </li>
-            <% end %>
+            <!-- Espaço reservado para links futuros, se necessário -->
           </ul>
           
           <div class="d-flex align-items-center gap-3">
@@ -58,13 +54,11 @@
                     </div>
                     <div class="text-muted extra-small"><%= current_user.email %></div>
                   </li>
-                  <% unless current_page?(cars_path) %>
-                    <li>
-                      <%= link_to cars_path, class: "dropdown-item d-flex align-items-center py-2" do %>
-                        <i class="bi bi-grid-1x2 me-2 text-primary"></i> Acessar Meus Carros
-                      <% end %>
-                    </li>
-                  <% end %>
+                  <li>
+                    <%= link_to cars_path, class: "dropdown-item d-flex align-items-center py-2" do %>
+                      <i class="bi bi-grid-1x2 me-2 text-primary"></i> Meus Carros
+                    <% end %>
+                  </li>
                   <li>
                     <%= link_to edit_user_registration_path, class: "dropdown-item d-flex align-items-center py-2" do %>
                       <i class="bi bi-gear me-2 text-secondary"></i> Configurações

@@ -119,20 +119,32 @@ export default class extends Controller {
     reader.readAsDataURL(file)
   }
 
-  submit() {
+  onStart(event) {
     const btn = document.getElementById("autodetection_submit_btn")
     if (btn) {
       btn.disabled = true
       btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Iniciando Detecção...'
     }
-    this.formTarget.requestSubmit()
+  }
+
+  onComplete(event) {
+    // Se a requisição Turbo finalizou (com sucesso ou erro de validação tratado via Stream)
+    // Fechamos o modal e limpamos o estado para não travar a tela
+    const modalElement = document.getElementById('autodetectModal')
+    if (modalElement) {
+      const modal = bootstrap.Modal.getInstance(modalElement) || bootstrap.Modal.getOrCreateInstance(modalElement)
+      if (modal) {
+        modal.hide()
+      }
+    }
     
-    // Fecha o modal após o envio e limpa o estado
-    setTimeout(() => {
-      const modalElement = document.getElementById('autodetectModal')
-      const modal = bootstrap.Modal.getInstance(modalElement)
-      if (modal) modal.hide()
-      this.reset()
-    }, 500)
+    // Restauramos o botão caso o usuário abra o modal novamente no futuro
+    const btn = document.getElementById("autodetection_submit_btn")
+    if (btn) {
+      btn.disabled = false
+      btn.innerHTML = '<i class="bi bi-magic"></i> <span id="autodetection_submit_text">Confirmar</span>'
+    }
+    
+    this.reset()
   }
 }

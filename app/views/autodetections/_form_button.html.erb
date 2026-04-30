@@ -17,7 +17,10 @@
         
         <div class="modal-body p-4">
           <%= form_with model: autodetection, url: autodetections_path, 
-                data: { autodetection_upload_target: "form" }, 
+                data: { 
+                  autodetection_upload_target: "form",
+                  action: "turbo:submit-start->autodetection-upload#onStart turbo:submit-end->autodetection-upload#onComplete"
+                }, 
                 multipart: true do |f| %>
                 
             <%= f.file_field :photo, 
@@ -81,8 +84,8 @@
                     </button>
                   </div>
                   <div class="col-6">
-                    <button type="button" id="autodetection_submit_btn" class="btn btn-premium rounded-pill w-100 py-2 d-flex align-items-center justify-content-center gap-2" data-action="click->autodetection-upload#submit">
-                      <i class="bi bi-magic"></i> <span>Confirmar</span>
+                    <button type="submit" id="autodetection_submit_btn" class="btn btn-premium rounded-pill w-100 py-2 d-flex align-items-center justify-content-center gap-2">
+                      <i class="bi bi-magic"></i> <span id="autodetection_submit_text">Confirmar</span>
                     </button>
                   </div>
                 </div>

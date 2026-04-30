@@ -15,7 +15,9 @@ class CarsController < ApplicationController
 
     respond_to do |format|
       format.html
-      format.turbo_stream
+      # Apenas renderiza o stream (infinito scroll/busca) se houver parâmetros específicos.
+      # Isso evita que redirecionamentos de outras controllers sejam engolidos por acidente.
+      format.turbo_stream if params.key?(:page) || params.key?(:query) || params.key?(:view)
     end
   end
 
@@ -24,7 +26,9 @@ class CarsController < ApplicationController
     current_user.update(sharing_enabled: !current_user.sharing_enabled)
 
     respond_to do |format|
-      format.turbo_stream
+      format.turbo_stream do
+        render turbo_stream: turbo_stream.update('sharing_settings_toggle', partial: 'cars/sharing_settings')
+      end
       format.html { redirect_to edit_user_registration_path, notice: 'Configuração de compartilhamento atualizada.' }
     end
   end
@@ -56,6 +60,7 @@ class CarsController < ApplicationController
     if @detected_item
       params_to_save[:photo] = File.open(@detected_item.cropped_photo.path) if @detected_item.cropped_photo.present?
       params_to_save[:color] = @detected_item.color if @detected_item.color.present? && params_to_save[:color].blank?
+      params_to_save[:detected_via_ai] = true
     end
 
     @car = car_service.create(params_to_save)

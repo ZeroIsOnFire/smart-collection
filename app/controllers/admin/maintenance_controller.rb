@@ -12,6 +12,11 @@ module Admin
 
       # Tenta obter o tamanho da pasta de uploads de forma simplificada
       @uploads_size = get_dir_size('public/uploads')
+
+      # Carrega métricas do Sidekiq
+      require 'sidekiq/api'
+      @sidekiq_stats = Sidekiq::Stats.new
+      @sidekiq_workers = Sidekiq::Workers.new.size
     end
 
     def cleanup
