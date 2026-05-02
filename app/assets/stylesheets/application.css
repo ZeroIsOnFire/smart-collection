@@ -418,6 +418,41 @@ body {
   animation: fadeIn 0.4s ease-out forwards;
 }
 
+/* Dark Mode: Form Floating Labels */
+[data-theme="dark"] .form-floating > label {
+  color: #94a3b8;
+  opacity: 1;
+}
+
+[data-theme="dark"] .form-floating > .form-control,
+[data-theme="dark"] .form-floating > .form-select {
+  background-color: var(--input-bg);
+  color: var(--text-main);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .form-floating > .form-control:focus,
+[data-theme="dark"] .form-floating > .form-select:focus {
+  background-color: var(--input-bg);
+  color: var(--text-main);
+  border-color: var(--premium-indigo);
+}
+
+[data-theme="dark"] .form-floating > .form-control:focus ~ label,
+[data-theme="dark"] .form-floating > .form-select:focus ~ label,
+[data-theme="dark"] .form-floating > .form-control:not(:placeholder-shown) ~ label,
+[data-theme="dark"] .form-floating > .form-select ~ label {
+  color: #cbd5e1;
+  opacity: 1;
+}
+
+/* Dark Mode: bg-light inputs inside detected items */
+[data-theme="dark"] .bg-light.form-control,
+[data-theme="dark"] .bg-light.form-select {
+  background-color: var(--input-bg) !important;
+  color: var(--text-main) !important;
+}
+
 /* Global Component Fixes for Dark Mode */
 .dropdown-menu {
   background-color: var(--card-bg) !important;
