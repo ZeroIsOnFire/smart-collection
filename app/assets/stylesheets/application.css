@@ -23,9 +23,53 @@
   --glass-border: rgba(255, 255, 255, 0.3);
   --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05), 0 4px 12px -3px rgba(0, 0, 0, 0.02);
   
+  /* Component Variables */
+  --card-bg: #ffffff;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --border-color: #e2e8f0;
+  --input-bg: #ffffff;
+  --soft-secondary-bg: #f8fafc;
+  --soft-danger-bg: #fef2f2;
+  --soft-warning-bg: #fffbeb;
+
   /* Standardized Responsive Margins */
   --app-px: 1.25rem;
   --app-gap: 1.5rem;
+}
+
+[data-theme="dark"] {
+  --premium-indigo: #818cf8;
+  --premium-slate: #f1f5f9;
+  --premium-background: #020617;
+  --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  --secondary-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  --glass-bg: rgba(15, 23, 42, 0.8);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.4), 0 4px 12px -3px rgba(0, 0, 0, 0.3);
+  
+  --card-bg: #0f172a;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --border-color: #1e293b;
+  --input-bg: #1e293b;
+  --soft-secondary-bg: #1e293b;
+  --soft-danger-bg: rgba(239, 68, 68, 0.15);
+  --soft-warning-bg: rgba(245, 158, 11, 0.15);
+  
+  /* Bootstrap Overrides */
+  --bs-body-bg: var(--premium-background);
+  --bs-body-color: var(--text-main);
+  --bs-tertiary-bg: #0f172a;
+  --bs-emphasis-color: #fff;
+  --bs-secondary-color: var(--text-muted);
+  --bs-secondary-bg: #1e293b;
+  --bs-border-color: var(--border-color);
+  --bs-primary: var(--premium-indigo);
+}
+
+[data-theme="dark"] .text-primary {
+  color: var(--premium-indigo) !important;
 }
 
 @media (min-width: 768px) {
@@ -74,9 +118,10 @@
 body {
   font-family: 'Outfit', sans-serif;
   background-color: var(--premium-background);
-  color: var(--premium-slate);
+  color: var(--text-main);
   min-height: 100vh;
   letter-spacing: -0.01em;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .tracking-tight { letter-spacing: -0.025em; }
@@ -99,9 +144,37 @@ body {
   transition: all 0.3s ease;
 }
 
-.navbar .nav-link {
-  font-weight: 500;
+.navbar .nav-link:hover {
+  color: var(--premium-indigo);
+}
+
+.navbar-brand {
+  color: var(--text-main) !important;
+}
+
+/* Logos are handled via JS source swapping, no filters needed */
+.theme-logo {
+  transition: opacity 0.3s ease;
+}
+
+/* logo-dark.png has a black background — lighten blend mode makes it transparent on dark surfaces */
+[data-theme="dark"] .theme-logo {
+  mix-blend-mode: lighten;
+}
+
+.theme-toggle-btn {
+  color: var(--text-muted);
   transition: all 0.2s ease;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme-toggle-btn:hover {
+  color: var(--premium-indigo);
+  background-color: var(--soft-secondary-bg);
 }
 
 /* Landing Page Navbar Overrides */
@@ -114,30 +187,49 @@ body {
 }
 
 /* Premium Cards */
+.card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+}
+
 .card.premium-card {
   border: 1px solid var(--glass-border);
-  background: white;
+  background: var(--card-bg);
   box-shadow: var(--card-shadow);
-  transition: box-shadow 0.3s ease;
+  transition: all 0.3s ease;
+  color: var(--text-main);
+}
+
+[data-theme="dark"] .card {
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
 }
 
 .card.premium-card:hover {
   box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1);
 }
 
+[data-theme="dark"] .card:hover {
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
 /* Form Styling */
 .form-control {
-  border: 1.5px solid #e2e8f0;
+  border: 1.5px solid var(--border-color);
   border-radius: 0.75rem;
   padding: 0.75rem 1rem;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  background-color: #fff;
+  background-color: var(--input-bg);
+  color: var(--text-main);
 }
 
 .form-control:focus {
   border-color: var(--premium-indigo);
   box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
-  background-color: #fff;
+  background-color: var(--input-bg);
+  color: var(--text-main);
 }
 
 /* Buttons */
@@ -159,22 +251,22 @@ body {
 }
 
 .btn-soft-secondary {
-  background-color: #f8fafc;
-  color: #64748b;
-  border: 1px solid #e2e8f0;
+  background-color: var(--soft-secondary-bg);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
   font-weight: 500;
   transition: all 0.2s ease;
 }
 .btn-soft-secondary:hover {
-  background-color: #f1f5f9;
-  color: #0f172a;
-  border-color: #cbd5e1;
+  background-color: var(--border-color);
+  color: var(--text-main);
+  border-color: var(--border-color);
 }
 
 .btn-soft-danger {
-  background-color: #fef2f2;
+  background-color: var(--soft-danger-bg);
   color: #ef4444;
-  border: 1px solid #fee2e2;
+  border: 1px solid var(--soft-danger-bg);
   font-weight: 500;
   transition: all 0.2s ease;
 }
@@ -184,10 +276,15 @@ body {
   border-color: #fecaca;
 }
 
+[data-theme="dark"] .btn-soft-danger:hover {
+  background-color: rgba(239, 68, 68, 0.25);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
 .btn-soft-warning {
-  background-color: #fffbeb;
+  background-color: var(--soft-warning-bg);
   color: #d97706;
-  border: 1px solid #fef3c7;
+  border: 1px solid var(--soft-warning-bg);
   font-weight: 500;
   transition: all 0.2s ease;
 }
@@ -195,6 +292,11 @@ body {
   background-color: #fef3c7;
   color: #b45309;
   border-color: #fde68a;
+}
+
+[data-theme="dark"] .btn-soft-warning:hover {
+  background-color: rgba(245, 158, 11, 0.25);
+  border-color: rgba(245, 158, 11, 0.3);
 }
 
 /* Landing Page Sections */
@@ -233,11 +335,16 @@ body {
 /* Feature Cards */
 .feature-card {
   padding: 2.5rem;
-  background: white;
+  background: var(--card-bg);
   border-radius: 1.5rem;
   transition: all 0.3s ease;
   height: 100%;
-  border: 1px solid #f1f5f9;
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+}
+
+.feature-card h4 {
+  color: var(--text-main);
 }
 
 .feature-card:hover {
@@ -310,6 +417,70 @@ body {
 .animate-fade-in {
   animation: fadeIn 0.4s ease-out forwards;
 }
+
+/* Global Component Fixes for Dark Mode */
+.dropdown-menu {
+  background-color: var(--card-bg) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: var(--card-shadow);
+}
+
+.dropdown-item {
+  color: var(--text-main) !important;
+}
+
+.dropdown-item:hover {
+  background-color: var(--soft-secondary-bg) !important;
+}
+
+.dropdown-divider {
+  border-top: 1px solid var(--border-color) !important;
+  opacity: 0.2;
+}
+
+.text-dark {
+  color: var(--text-main) !important;
+}
+
+.link-dark {
+  color: var(--text-main) !important;
+}
+
+.link-dark:hover {
+  color: var(--premium-indigo) !important;
+}
+
+.brand-text {
+  color: var(--text-main) !important;
+}
+
+.modal-content {
+  background-color: var(--card-bg);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--card-shadow);
+}
+
+.modal-header, .modal-footer {
+  border-color: var(--border-color);
+}
+
+.bg-white {
+  background-color: var(--card-bg) !important;
+}
+
+.bg-light {
+  background-color: var(--soft-secondary-bg) !important;
+}
+
+.border-light {
+  border-color: var(--border-color) !important;
+}
+
+.text-muted {
+  color: var(--text-muted) !important;
+}
+
 /* Showcase Styles */
 .public-showcase-hero {
   background: var(--primary-gradient);
@@ -368,9 +539,9 @@ body {
   gap: 0 !important;
   margin: 0 !important;
   padding: 0 !important;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
   border-radius: 1rem;
-  background: white;
+  background: var(--card-bg);
   box-shadow: var(--card-shadow);
 }
 
@@ -396,10 +567,11 @@ body {
   min-height: 0;
   border: none !important;
   border-radius: 0 !important;
-  border-bottom: 1px solid #f1f5f9 !important;
+  border-bottom: 1px solid var(--border-color) !important;
   box-shadow: none !important;
   transition: background-color 0.2s;
   overflow: visible !important; /* Allow dropdown to escape the thin card row */
+  color: var(--text-main);
 }
 
 /* Ensure corners are visually contained without overflow: hidden on parent */
@@ -415,7 +587,7 @@ body {
 }
 
 .view-list .card:hover {
-  background-color: #f8fafc !important;
+  background-color: var(--soft-secondary-bg) !important;
   transform: none !important;
   box-shadow: none !important;
 }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html data-controller="theme">
   <head>
     <title>Smart Collection</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -23,15 +23,23 @@
     <link rel="shortcut icon" href="/logo/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="/logo/apple-touch-icon.png" />
     <link rel="manifest" href="/logo/site.webmanifest" />
+    <script>
+      (function() {
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme = savedTheme || (prefersDark ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
+    </script>
   </head>
 
   <body>
     <%= render 'shared/flash_toasts' %>
 
-    <header class="navbar navbar-expand-lg navbar-light bg-white sticky-top border-bottom py-3">
+    <header class="navbar navbar-expand-lg sticky-top border-bottom py-3">
       <div class="container-fluid app-container">
         <%= link_to root_path, class: "navbar-brand d-flex align-items-center" do %>
-          <%= image_tag "/logo/logo.png", alt: "Smart Collection", height: 32, class: "me-2" %>
+          <%= image_tag "/logo/logo.png", alt: "Smart Collection", height: 32, class: "me-2 theme-logo", data: { theme_target: "logo", dark_src: "/logo/logo-dark.png", light_src: "/logo/logo.png" } %>
           <span class="fw-bold tracking-tight">Smart<span class="text-primary">Collection</span></span>
         <% end %>
 
@@ -44,7 +52,17 @@
             <!-- Espaço reservado para links futuros, se necessário -->
           </ul>
 
-          <div class="d-flex align-items-center gap-3">
+          <div class="d-flex align-items-center gap-2">
+            <!-- Theme Toggle -->
+            <button class="btn btn-link text-decoration-none p-2 rounded-circle hover-bg-light theme-toggle-btn" 
+                    data-action="click->theme#toggle" 
+                    title="Alternar tema">
+              <i class="bi bi-moon-stars-fill fs-5" data-theme-target="icon"></i>
+            </button>
+
+            <div class="vr mx-1 opacity-10"></div>
+
+            <div class="d-flex align-items-center gap-3">
             <% if user_signed_in? %>
               <!-- User Dropdown with Initials -->
               <div class="dropdown">
