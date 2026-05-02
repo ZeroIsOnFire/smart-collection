@@ -46,7 +46,7 @@
   </div>
 </section>
 
-<section id="features" class="py-5 bg-white">
+<section id="features" class="py-5" style="background-color: var(--card-bg);">
   <div class="container py-5">
     <div class="text-center mb-5 animate-fade-up">
       <h2 class="display-5 fw-bold mb-3">Tudo o que você precisa</h2>
@@ -98,7 +98,7 @@
   </div>
 </section>
 
-<section class="py-5 bg-light border-top">
+<section class="py-5 border-top" style="background-color: var(--premium-background);">
   <div class="container py-5">
     <div class="row align-items-center">
       <div class="col-lg-6 mb-5 mb-lg-0">
@@ -113,7 +113,7 @@
         <% end %>
       </div>
       <div class="col-lg-6">
-        <div class="p-4 bg-white shadow-lg rounded-4 border">
+        <div class="p-4 shadow-lg rounded-4 border" style="background-color: var(--card-bg);">
           <div class="d-flex align-items-center mb-3">
              <div class="rounded-circle bg-success bg-opacity-10 p-2 me-3">
                <i class="bi bi-check-lg text-success"></i>
@@ -138,10 +138,10 @@
   </div>
 </section>
 
-<footer class="py-5 bg-white border-top">
+<footer class="py-5 border-top" style="background-color: var(--card-bg);">
   <div class="container text-center">
     <div class="navbar-brand d-flex align-items-center justify-content-center mb-4 text-dark">
-      <%= image_tag "/logo/logo.png", alt: "Smart Collection", height: 32, class: "me-2" %>
+      <%= image_tag "/logo/logo.png", alt: "Smart Collection", height: 32, class: "me-2 theme-logo" %>
       <span class="fw-bold tracking-tight">Smart<span class="text-primary">Collection</span></span>
     </div>
     <p class="text-muted small">© <%= Time.now.year %> Smart Collection Catalog. Todos os direitos reservados.</p>
