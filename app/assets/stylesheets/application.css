@@ -233,6 +233,30 @@ body {
 }
 
 /* Buttons */
+.btn:not(.btn-close):not(.rounded-circle) {
+  min-height: 48px;
+  line-height: 1.2;
+}
+
+.btn:not(.btn-close):not(.rounded-circle):not(.dropdown-item) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn.btn-sm:not(.btn-close):not(.rounded-circle) {
+  min-height: 38px;
+}
+
+.btn.btn-lg:not(.btn-close):not(.rounded-circle) {
+  min-height: 56px;
+}
+
+.btn .spinner-border-sm {
+  flex-shrink: 0;
+}
+
 .btn-premium {
   background: var(--primary-gradient);
   border: none;
