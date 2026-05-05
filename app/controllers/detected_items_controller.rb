@@ -27,18 +27,11 @@ class DetectedItemsController < ApplicationController
 
       respond_to do |format|
         format.turbo_stream do
-          render turbo_stream: [
-            turbo_stream.append(
-              "detected_items_list_#{@autodetection.id}",
-              partial: 'detected_items/detected_item',
-              locals: { detected_item: @detected_item }
-            ),
-            turbo_stream.append(
-              'local_toast_container',
-              partial: 'shared/toast',
-              locals: { type: 'success', message: 'Item adicionado com sucesso!' }
-            )
-          ]
+          render turbo_stream: turbo_stream.append(
+            "detected_items_list_#{@autodetection.id}",
+            partial: 'detected_items/detected_item',
+            locals: { detected_item: @detected_item }
+          )
         end
         format.html { redirect_to @autodetection, notice: 'Item adicionado manualmente.' }
       end

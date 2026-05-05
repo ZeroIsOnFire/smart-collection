@@ -8,30 +8,35 @@ export default class extends Controller {
   }
 
   connect() {
-    this.modalElement = this.element.closest('.modal')
-    
+    this.modalElement = this.element.closest(".modal")
+
     if (this.modalElement) {
       this.handleModalShown = () => {
         if (!this.cropper) {
           this.initCropper()
         }
       }
+
       this.handleModalHidden = () => {
         if (this.cropper) {
           this.cropper.destroy()
           this.cropper = null
         }
       }
-      this.modalElement.addEventListener('shown.bs.modal', this.handleModalShown)
-      this.modalElement.addEventListener('hidden.bs.modal', this.handleModalHidden)
+
+      this.modalElement.addEventListener("shown.bs.modal", this.handleModalShown)
+      this.modalElement.addEventListener("hidden.bs.modal", this.handleModalHidden)
     }
   }
 
   disconnect() {
+    this.clearSuccessTimer()
+
     if (this.modalElement) {
-      this.modalElement.removeEventListener('shown.bs.modal', this.handleModalShown)
-      this.modalElement.removeEventListener('hidden.bs.modal', this.handleModalHidden)
+      this.modalElement.removeEventListener("shown.bs.modal", this.handleModalShown)
+      this.modalElement.removeEventListener("hidden.bs.modal", this.handleModalHidden)
     }
+
     if (this.cropper) {
       this.cropper.destroy()
       this.cropper = null
@@ -39,16 +44,16 @@ export default class extends Controller {
   }
 
   initCropper() {
-    if (typeof Cropper === 'undefined') {
-      console.error('Cropper.js não encontrado!')
+    if (typeof Cropper === "undefined") {
+      console.error("Cropper.js nao encontrado!")
       return
     }
 
     const image = this.imageTarget
     this.cropper = new Cropper(image, {
       viewMode: 1,
-      dragMode: 'crop',
-      autoCropArea: 0.2, // Começa com uma seleção pequena no centro
+      dragMode: "crop",
+      autoCropArea: 0.2,
       restore: false,
       guides: true,
       center: true,
@@ -61,15 +66,12 @@ export default class extends Controller {
 
   async save(event) {
     const btn = event.currentTarget
-    const originalText = btn.innerHTML
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Criando...'
-    btn.disabled = true
+    this.setLoadingState(btn)
 
     try {
       const data = this.cropper.getData()
       const imageData = this.cropper.getImageData()
-      
-      // Normaliza as coordenadas para o backend (0 a 1)
+
       const normalized = {
         x: data.x / imageData.naturalWidth,
         y: data.y / imageData.naturalHeight,
@@ -78,11 +80,11 @@ export default class extends Controller {
       }
 
       const response = await fetch(this.createUrlValue, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
-          'Accept': 'text/vnd.turbo-stream.html'
+          "Content-Type": "application/json",
+          "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content,
+          "Accept": "text/vnd.turbo-stream.html"
         },
         body: JSON.stringify(normalized)
       })
@@ -90,21 +92,59 @@ export default class extends Controller {
       if (response.ok) {
         const html = await response.text()
         Turbo.renderStreamMessage(html)
-        
-        // Resetamos a área de seleção mas mantemos o modal aberto
         this.cropper.reset()
-        
+        this.setSuccessState(btn)
       } else {
-        alert('Erro ao criar o item. O servidor retornou ' + response.status)
+        alert("Erro ao criar o item. O servidor retornou " + response.status)
+        this.resetButton(btn)
       }
     } catch (error) {
-      console.error('Erro na criação manual:', error)
-      alert('Ocorreu um erro inesperado: ' + error.message)
-    } finally {
-      if (document.body.contains(btn)) {
-        btn.innerHTML = originalText
-        btn.disabled = false
-      }
+      console.error("Erro na criacao manual:", error)
+      alert("Ocorreu um erro inesperado: " + error.message)
+      this.resetButton(btn)
+    }
+  }
+
+  setLoadingState(btn) {
+    this.clearSuccessTimer()
+    this.storeOriginalState(btn)
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Criando...'
+    btn.disabled = true
+  }
+
+  setSuccessState(btn) {
+    if (!document.body.contains(btn)) return
+
+    this.storeOriginalState(btn)
+    btn.classList.remove("btn-premium")
+    btn.classList.add("btn-success")
+    btn.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> Adicionado!'
+    btn.disabled = true
+
+    this.successTimer = setTimeout(() => {
+      this.resetButton(btn)
+    }, 1800)
+  }
+
+  resetButton(btn) {
+    if (!btn || !document.body.contains(btn)) return
+
+    btn.innerHTML = btn.dataset.originalHtml || btn.innerHTML
+    btn.classList.remove("btn-success")
+    btn.classList.add("btn-premium")
+    btn.disabled = false
+  }
+
+  storeOriginalState(btn) {
+    if (!btn.dataset.originalHtml) {
+      btn.dataset.originalHtml = btn.innerHTML
+    }
+  }
+
+  clearSuccessTimer() {
+    if (this.successTimer) {
+      clearTimeout(this.successTimer)
+      this.successTimer = null
     }
   }
 }

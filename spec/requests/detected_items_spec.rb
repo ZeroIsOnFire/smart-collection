@@ -84,6 +84,21 @@ RSpec.describe 'DetectedItems', type: :request do
       expect(new_item.status).to eq('pending')
       expect(new_item.position_data['score']).to eq(1.0)
     end
+
+    it 'does not append a local toast on turbo stream success' do
+      allow(ImageCropperService).to receive(:crop).and_return(
+        File.open('/rails/spec/fixtures/files/car_sample.jpg')
+      )
+
+      post autodetection_detected_items_path(@autodetection),
+           params: create_params,
+           headers: { 'Accept' => 'text/vnd.turbo-stream.html' }
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("detected_items_list_#{@autodetection.id}")
+      expect(response.body).not_to include('local_toast_container')
+      expect(response.body).not_to include('Item adicionado com sucesso!')
+    end
   end
 
   describe 'DELETE /destroy' do
