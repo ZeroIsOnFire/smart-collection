@@ -215,9 +215,9 @@ class ExportPdfService
         # Logo no Rodapé (Esquerda)
         logo_path = Rails.root.join('public', 'logo', 'logo.png')
         if File.exist?(logo_path)
-          pdf.image logo_path, at: [pdf.bounds.left, -17], height: 12
+          pdf.image logo_path, at: [pdf.bounds.left, -10], height: 24
           pdf.fill_color '94A3B8'
-          pdf.draw_text 'SmartCollection', at: [pdf.bounds.left + 20, -26], size: 8, style: :bold
+          pdf.draw_text 'SmartCollection', at: [pdf.bounds.left + 32, -26], size: 8, style: :bold
         else
           pdf.fill_color '3B82F6'
           pdf.fill_circle [pdf.bounds.left + 10, -20.5], 4
