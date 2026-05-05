@@ -1,6 +1,19 @@
 # frozen_string_literal: true
 
 module ApplicationHelper
+  def javascript_i18n_payload
+    backend = I18n.backend
+    backend.send(:init_translations) if backend.respond_to?(:init_translations, true)
+
+    {
+      locale: I18n.locale.to_s,
+      defaultLocale: I18n.default_locale.to_s,
+      translations: I18n.available_locales.each_with_object({}) do |locale, result|
+        result[locale.to_s] = deep_stringify_translation_tree(backend.send(:translations)[locale] || {})
+      end
+    }
+  end
+
   def user_initials(user)
     if user.name?
       user.name.split.map(&:first).join.upcase[0..1]
@@ -19,5 +32,18 @@ module ApplicationHelper
     return user.email unless user.name?
 
     user.name.gsub(/\s+[a-f0-9]{24}$/i, '')
+  end
+
+  private
+
+  def deep_stringify_translation_tree(value)
+    case value
+    when Hash
+      value.each_with_object({}) do |(key, child), result|
+        result[key.to_s] = deep_stringify_translation_tree(child)
+      end
+    else
+      value
+    end
   end
 end

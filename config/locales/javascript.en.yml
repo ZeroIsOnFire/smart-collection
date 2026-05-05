@@ -1,0 +1,24 @@
+en:
+  javascript:
+    autodetection_upload:
+      loading: "Starting detection..."
+      errors:
+        camera_console: "Error accessing the camera:"
+        camera_access: "Could not access the device camera."
+    manual_selection:
+      loading: "Creating..."
+      success: "Added!"
+      errors:
+        cropper_missing_console: "Cropper.js was not found."
+        create_failed: "Error creating the item. The server returned %{status}."
+        create_unexpected_console: "Unexpected error during manual creation:"
+        create_unexpected: "An unexpected error occurred: %{message}"
+    selection_adjustment:
+      loading: "Saving..."
+      errors:
+        cropper_missing_console: "Cropper.js was not found. Check whether the layout CDNs are correct."
+        save_failed: "Error saving the adjustment. The server returned %{status}."
+        save_unexpected_console: "Unexpected error while saving the selection adjustment:"
+        save_unexpected: "An unexpected error occurred while saving the adjustment: %{message}"
+    poll:
+      error_console: "Polling error:"

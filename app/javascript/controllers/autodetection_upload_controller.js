@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import * as bootstrap from "bootstrap"
+import { t } from "i18n"
 
 export default class extends Controller {
   static targets = ["video", "canvas", "preview", "previewContainer", "input", "form", "dropzone", "captureBtn", "cameraInterface", "uploadInterface"]
@@ -12,22 +13,20 @@ export default class extends Controller {
     this.stopCamera()
   }
 
-  // --- CAMERA LOGIC ---
-
   async openCamera() {
     try {
       this.uploadInterfaceTarget.classList.add("d-none")
       this.cameraInterfaceTarget.classList.remove("d-none")
 
-      this.stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: "environment" }, // Prioritiza a câmera traseira em mobile
-        audio: false 
+      this.stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment" },
+        audio: false
       })
       this.videoTarget.srcObject = this.stream
       this.videoTarget.play()
     } catch (err) {
-      console.error("Erro ao acessar a câmera:", err)
-      alert("Não foi possível acessar a câmera do dispositivo.")
+      console.error(t("javascript.autodetection_upload.errors.camera_console"), err)
+      alert(t("javascript.autodetection_upload.errors.camera_access"))
       this.closeCamera()
     }
   }
@@ -40,7 +39,7 @@ export default class extends Controller {
 
   stopCamera() {
     if (this.stream) {
-      this.stream.getTracks().forEach(track => track.stop())
+      this.stream.getTracks().forEach((track) => track.stop())
       this.stream = null
     }
   }
@@ -56,18 +55,15 @@ export default class extends Controller {
       this.setFile(file)
       this.stopCamera()
       this.cameraInterfaceTarget.classList.add("d-none")
-      // REMOVIDO: this.submit() - Agora o usuário confirma manualmente
     }, "image/jpeg", 0.9)
   }
-
-  // --- DRAG & DROP LOGIC ---
 
   dragOver(event) {
     event.preventDefault()
     this.dropzoneTarget.classList.add("drag-over")
   }
 
-  dragLeave(event) {
+  dragLeave() {
     this.dropzoneTarget.classList.remove("drag-over")
   }
 
@@ -78,11 +74,8 @@ export default class extends Controller {
     const file = event.dataTransfer.files[0]
     if (file && file.type.startsWith("image/")) {
       this.setFile(file)
-      // REMOVIDO: this.submit() - Agora o usuário confirma manualmente
     }
   }
-
-  // --- SELECTION LOGIC ---
 
   selectFile() {
     this.inputTarget.click()
@@ -96,7 +89,6 @@ export default class extends Controller {
   }
 
   reset() {
-    // Limpa o input e as prévias
     this.inputTarget.value = ""
     this.previewTarget.src = ""
     this.previewContainerTarget.classList.add("d-none")
@@ -109,42 +101,38 @@ export default class extends Controller {
     const dataTransfer = new DataTransfer()
     dataTransfer.items.add(file)
     this.inputTarget.files = dataTransfer.files
-    
+
     const reader = new FileReader()
-    reader.onload = (e) => {
-      this.previewTarget.src = e.target.result
+    reader.onload = (event) => {
+      this.previewTarget.src = event.target.result
       this.previewContainerTarget.classList.remove("d-none")
       this.uploadInterfaceTarget.classList.add("d-none")
     }
     reader.readAsDataURL(file)
   }
 
-  onStart(event) {
+  onStart() {
     const btn = document.getElementById("autodetection_submit_btn")
     if (btn) {
+      btn.dataset.originalHtml ||= btn.innerHTML
       btn.disabled = true
-      btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Iniciando Detecção...'
+      btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> ${t("javascript.autodetection_upload.loading")}`
     }
   }
 
-  onComplete(event) {
-    // Se a requisição Turbo finalizou (com sucesso ou erro de validação tratado via Stream)
-    // Fechamos o modal e limpamos o estado para não travar a tela
-    const modalElement = document.getElementById('autodetectModal')
+  onComplete() {
+    const modalElement = document.getElementById("autodetectModal")
     if (modalElement) {
       const modal = bootstrap.Modal.getInstance(modalElement) || bootstrap.Modal.getOrCreateInstance(modalElement)
-      if (modal) {
-        modal.hide()
-      }
+      if (modal) modal.hide()
     }
-    
-    // Restauramos o botão caso o usuário abra o modal novamente no futuro
+
     const btn = document.getElementById("autodetection_submit_btn")
     if (btn) {
       btn.disabled = false
-      btn.innerHTML = '<i class="bi bi-magic"></i> <span id="autodetection_submit_text">Confirmar</span>'
+      btn.innerHTML = btn.dataset.originalHtml || btn.innerHTML
     }
-    
+
     this.reset()
   }
 }

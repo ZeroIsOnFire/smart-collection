@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import { Turbo } from "@hotwired/turbo-rails"
+import { t } from "i18n"
 
 export default class extends Controller {
   static targets = ["image"]
@@ -45,7 +46,7 @@ export default class extends Controller {
 
   initCropper() {
     if (typeof Cropper === "undefined") {
-      console.error("Cropper.js nao encontrado!")
+      console.error(t("javascript.manual_selection.errors.cropper_missing_console"))
       return
     }
 
@@ -95,12 +96,12 @@ export default class extends Controller {
         this.cropper.reset()
         this.setSuccessState(btn)
       } else {
-        alert("Erro ao criar o item. O servidor retornou " + response.status)
+        alert(t("javascript.manual_selection.errors.create_failed", { status: response.status }))
         this.resetButton(btn)
       }
     } catch (error) {
-      console.error("Erro na criacao manual:", error)
-      alert("Ocorreu um erro inesperado: " + error.message)
+      console.error(t("javascript.manual_selection.errors.create_unexpected_console"), error)
+      alert(t("javascript.manual_selection.errors.create_unexpected", { message: error.message }))
       this.resetButton(btn)
     }
   }
@@ -108,7 +109,7 @@ export default class extends Controller {
   setLoadingState(btn) {
     this.clearSuccessTimer()
     this.storeOriginalState(btn)
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Criando...'
+    btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> ${t("javascript.manual_selection.loading")}`
     btn.disabled = true
   }
 
@@ -118,7 +119,7 @@ export default class extends Controller {
     this.storeOriginalState(btn)
     btn.classList.remove("btn-premium")
     btn.classList.add("btn-success")
-    btn.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> Adicionado!'
+    btn.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i> ${t("javascript.manual_selection.success")}`
     btn.disabled = true
 
     this.successTimer = setTimeout(() => {
