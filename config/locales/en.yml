@@ -1,33 +1,174 @@
-# Files in the config/locales directory are used for internationalization and
-# are automatically loaded by Rails. If you want to use locales other than
-# English, add the necessary files in this directory.
-#
-# To use the locales, use `I18n.t`:
-#
-#     I18n.t "hello"
-#
-# In views, this is aliased to just `t`:
-#
-#     <%= t("hello") %>
-#
-# To use a different locale, set it with `I18n.locale`:
-#
-#     I18n.locale = :es
-#
-# This would use the information in config/locales/es.yml.
-#
-# To learn more about the API, please read the Rails Internationalization guide
-# at https://guides.rubyonrails.org/i18n.html.
-#
-# Be aware that YAML interprets the following case-insensitive strings as
-# booleans: `true`, `false`, `on`, `off`, `yes`, `no`. Therefore, these strings
-# must be quoted to be interpreted as strings. For example:
-#
-#     en:
-#       "yes": yup
-#       enabled: "ON"
-
 en:
+  hello: "Hello, world!"
+  welcome: "Welcome to Smart Collection Catalog"
+
+  nav:
+    home: "Home"
+    collections: "Collections"
+    profile: "Profile"
+    sign_in: "Sign in"
+    sign_out: "Sign out"
+    sign_up: "Create account"
+    settings: "Settings"
+    language: "Language"
+
+  actions:
+    save: "Save"
+    edit: "Edit"
+    delete: "Delete"
+    cancel: "Cancel"
+    back: "Back"
+    create: "Create"
+    update: "Update"
+    search: "Search"
+    filter: "Filter"
+    export: "Export"
+    share: "Share"
+    confirm: "Confirm"
+    show: "View"
+    new: "New"
+    close: "Close"
+
+  flash:
+    created: "%{resource} was created successfully."
+    updated: "%{resource} was updated successfully."
+    deleted: "%{resource} was deleted successfully."
+    error: "An error occurred. Please try again."
+    not_found: "%{resource} was not found."
+    unauthorized: "You do not have permission to perform this action."
+
+  collections:
+    title: "Collections"
+    new: "New Collection"
+    edit: "Edit Collection"
+    name: "Name"
+    description: "Description"
+    items_count: "Items"
+    created_at: "Created at"
+    empty: "No collections found."
+    delete_confirm: "Are you sure you want to delete this collection?"
+    export_pdf: "Export PDF"
+    export_csv: "Export CSV"
+
+  items:
+    title: "Items"
+    new: "New Item"
+    edit: "Edit Item"
+    type: "Type"
+    brand: "Brand"
+    model: "Model"
+    description: "Description"
+    tags: "Tags"
+    photo: "Photo"
+    empty: "No items found."
+    delete_confirm: "Are you sure you want to delete this item?"
+    scan_photo: "Scan photo"
+    scan_success: "Data was extracted from the photo successfully."
+
+  devise:
+    sessions:
+      new:
+        title: "Sign in"
+        sign_in: "Sign in"
+        remember_me: "Remember me"
+        forgot_password: "Forgot your password?"
+        no_account: "Don't have an account?"
+    registrations:
+      new:
+        title: "Create account"
+        sign_up: "Create account"
+        already_have_account: "Already have an account?"
+    passwords:
+      new:
+        title: "Forgot your password?"
+        send_instructions: "Send instructions"
+    shared:
+      links:
+        sign_in: "Sign in"
+        sign_up: "Create account"
+        forgot_password: "Forgot your password?"
+
+  activerecord:
+    models:
+      user:
+        one: "User"
+        other: "Users"
+      collection:
+        one: "Collection"
+        other: "Collections"
+      item:
+        one: "Item"
+        other: "Items"
+      car:
+        one: "Car"
+        other: "Cars"
+    attributes:
+      user:
+        email: "Email"
+        password: "Password"
+        password_confirmation: "Password confirmation"
+        remember_me: "Remember me"
+      collection:
+        name: "Name"
+        description: "Description"
+      item:
+        type: "Type"
+        brand: "Brand"
+        model: "Model"
+        description: "Description"
+        tags: "Tags"
+      car:
+        name: "Name / Model"
+        brand: "Brand"
+        manufacturer: "Manufacturer"
+        year: "Year"
+        size: "Scale / Size"
+        tags: "Tags"
+        observations: "Notes"
+        photo: "Photo"
+
+  mongoid:
+    models:
+      car:
+        one: "Car"
+        other: "Cars"
+    attributes:
+      car:
+        name: "Name / Model"
+        brand: "Brand"
+        manufacturer: "Manufacturer"
+        year: "Year"
+        size: "Scale / Size"
+        tags: "Tags"
+        observations: "Notes"
+        photo: "Photo"
+
+  errors:
+    format: "%{attribute} %{message}"
+    messages:
+      blank: "can't be blank"
+      empty: "can't be empty"
+      taken: "has already been taken"
+      invalid: "is invalid"
+      too_long:
+        one: "is too long (maximum is 1 character)"
+        other: "is too long (maximum is %{count} characters)"
+      too_short:
+        one: "is too short (minimum is 1 character)"
+        other: "is too short (minimum is %{count} characters)"
+      wrong_length:
+        one: "is the wrong length (should be 1 character)"
+        other: "is the wrong length (should be %{count} characters)"
+      not_a_number: "is not a number"
+      not_an_integer: "must be an integer"
+      greater_than: "must be greater than %{count}"
+      greater_than_or_equal_to: "must be greater than or equal to %{count}"
+      equal_to: "must be equal to %{count}"
+      less_than: "must be less than %{count}"
+      less_than_or_equal_to: "must be less than or equal to %{count}"
+      other_than: "must be other than %{count}"
+      odd: "must be odd"
+
   export_pdf:
     title: "COLLECTION CATALOG"
     user_placeholder: "User"

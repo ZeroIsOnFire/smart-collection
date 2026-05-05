@@ -6,34 +6,34 @@
       <div class="auth-logo">
         <%= image_tag "/logo/logo.png", alt: "Smart Collection", height: 60, class: "theme-logo", data: { theme_target: "logo", dark_src: "/logo/logo-dark.png", light_src: "/logo/logo.png" } %>
       </div>
-      <h1 class="auth-title">Criar conta</h1>
-      <p class="auth-subtitle">Junte-se ao Smart Collection</p>
+      <h1 class="auth-title"><%= t('devise.ui.registrations.new.title') %></h1>
+      <p class="auth-subtitle"><%= t('devise.ui.registrations.new.subtitle') %></p>
     </div>
 
     <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { data: { turbo: false } }) do |f| %>
       <%= render "devise/shared/error_messages", resource: resource %>
 
       <div class="form-group">
-        <%= f.label :name, "Nome completo" %>
+        <%= f.label :name, t('devise.ui.registrations.new.name_label') %>
         <%= f.text_field :name, autofocus: true, autocomplete: "name",
-            placeholder: "Seu nome", class: "form-input",
+            placeholder: t('devise.ui.registrations.new.name_placeholder'), class: "form-input",
             id: "user_name" %>
       </div>
 
       <div class="form-group">
-        <%= f.label :email, "E-mail" %>
+        <%= f.label :email, t('devise.ui.registrations.new.email_label') %>
         <%= f.email_field :email, autocomplete: "email",
-            placeholder: "seu@email.com", class: "form-input",
+            placeholder: t('devise.ui.registrations.new.email_placeholder'), class: "form-input",
             id: "user_email_signup" %>
       </div>
 
       <div class="form-group">
-        <%= f.label :password, "Senha" %>
+        <%= f.label :password, t('devise.ui.registrations.new.password_label') %>
         <% if @minimum_password_length %>
-          <span class="form-hint">mínimo <%= @minimum_password_length %> caracteres</span>
+          <span class="form-hint"><%= t('devise.ui.registrations.new.password_hint', count: @minimum_password_length) %></span>
         <% end %>
         <%= f.password_field :password, autocomplete: "new-password",
-            placeholder: "••••••••", class: "form-input",
+            placeholder: t('devise.ui.registrations.new.password_placeholder'), class: "form-input",
             id: "user_password_signup",
             data: { action: "input->password-strength#evaluate" } %>
         <div class="password-strength" id="password_strength_bar">
@@ -42,19 +42,19 @@
       </div>
 
       <div class="form-group">
-        <%= f.label :password_confirmation, "Confirmar senha" %>
+        <%= f.label :password_confirmation, t('devise.ui.registrations.new.password_confirmation_label') %>
         <%= f.password_field :password_confirmation, autocomplete: "new-password",
-            placeholder: "••••••••", class: "form-input",
+            placeholder: t('devise.ui.registrations.new.password_confirmation_placeholder'), class: "form-input",
             id: "user_password_confirmation" %>
       </div>
 
       <div class="form-actions">
-        <%= f.submit "Criar conta", class: "btn-primary", id: "sign_up_submit" %>
+        <%= f.submit t('devise.ui.registrations.new.submit'), class: "btn-primary", id: "sign_up_submit" %>
       </div>
     <% end %>
 
     <div class="auth-links">
-      Já tem uma conta? <%= link_to "Entrar", new_session_path(resource_name) %>
+      <%= t('devise.ui.registrations.new.already_have_account') %> <%= link_to t('devise.ui.registrations.new.sign_in_link'), new_session_path(resource_name) %>
     </div>
   </div>
 </div>

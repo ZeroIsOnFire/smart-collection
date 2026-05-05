@@ -6,43 +6,43 @@
       <div class="auth-logo">
         <%= image_tag "/logo/logo.png", alt: "Smart Collection", height: 60, class: "theme-logo", data: { theme_target: "logo", dark_src: "/logo/logo-dark.png", light_src: "/logo/logo.png" } %>
       </div>
-      <h1 class="auth-title">Entrar</h1>
-      <p class="auth-subtitle">Acesse sua conta</p>
+      <h1 class="auth-title"><%= t('devise.ui.sessions.new.title') %></h1>
+      <p class="auth-subtitle"><%= t('devise.ui.sessions.new.subtitle') %></p>
     </div>
 
     <%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { data: { turbo: false } }) do |f| %>
       <div class="form-group">
-        <%= f.label :email, "E-mail" %>
+        <%= f.label :email, t('devise.ui.sessions.new.email_label') %>
         <%= f.email_field :email, autofocus: true, autocomplete: "email",
-            placeholder: "seu@email.com", class: "form-input",
+            placeholder: t('devise.ui.sessions.new.email_placeholder'), class: "form-input",
             id: "user_email_login" %>
       </div>
 
       <div class="form-group">
-        <%= f.label :password, "Senha" %>
+        <%= f.label :password, t('devise.ui.sessions.new.password_label') %>
         <%= f.password_field :password, autocomplete: "current-password",
-            placeholder: "••••••••", class: "form-input",
+            placeholder: t('devise.ui.sessions.new.password_placeholder'), class: "form-input",
             id: "user_password_login" %>
       </div>
 
       <% if devise_mapping.rememberable? %>
         <div class="form-remember">
           <%= f.check_box :remember_me, id: "user_remember_me" %>
-          <%= f.label :remember_me, "Lembrar de mim" %>
+          <%= f.label :remember_me, t('devise.ui.sessions.new.remember_me') %>
         </div>
       <% end %>
 
       <div class="form-actions">
-        <%= f.submit "Entrar", class: "btn-primary", id: "sign_in_submit" %>
+        <%= f.submit t('devise.ui.sessions.new.submit'), class: "btn-primary", id: "sign_in_submit" %>
       </div>
     <% end %>
 
     <div class="auth-links">
       <% if devise_mapping.registerable? && controller_name != 'registrations' %>
-        Não tem conta? <%= link_to "Criar conta", new_registration_path(resource_name) %>
+        <%= t('devise.ui.sessions.new.no_account') %> <%= link_to t('devise.ui.sessions.new.sign_up_link'), new_registration_path(resource_name) %>
       <% end %>
       <% if devise_mapping.recoverable? && controller_name != 'passwords' && controller_name != 'registrations' %>
-        <br><%= link_to "Esqueceu sua senha?", new_password_path(resource_name) %>
+        <br><%= link_to t('devise.ui.sessions.new.forgot_password'), new_password_path(resource_name) %>
       <% end %>
     </div>
   </div>

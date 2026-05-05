@@ -1,8 +1,8 @@
 <div class="container-fluid py-4 app-container">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-      <h1 class="fw-bold mb-0 fs-3">Configurações de Conta</h1>
-      <p class="text-muted small mb-0">Gerencie seu perfil e configurações de segurança</p>
+      <h1 class="fw-bold mb-0 fs-3"><%= t('devise.ui.registrations.edit.title') %></h1>
+      <p class="text-muted small mb-0"><%= t('devise.ui.registrations.edit.subtitle') %></p>
     </div>
   </div>
 
@@ -10,57 +10,57 @@
     <div class="col-12 col-lg-8">
       <div class="card premium-card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
         <div class="card-body p-4 p-md-5">
-          <h4 class="fw-bold mb-4">Perfil e Segurança</h4>
+          <h4 class="fw-bold mb-4"><%= t('devise.ui.registrations.edit.profile_title') %></h4>
 
           <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put, data: { turbo: false } }) do |f| %>
             <%= render "devise/shared/error_messages", resource: resource %>
 
             <div class="row g-3 mb-4">
               <div class="col-md-6">
-                <%= f.label :name, "Nome", class: "form-label fw-medium" %>
-                <%= f.text_field :name, autofocus: true, class: "form-control bg-light border-0 py-2", placeholder: "Seu nome" %>
+                <%= f.label :name, t('devise.ui.registrations.edit.name_label'), class: "form-label fw-medium" %>
+                <%= f.text_field :name, autofocus: true, class: "form-control bg-light border-0 py-2", placeholder: t('devise.ui.registrations.edit.name_placeholder') %>
               </div>
               <div class="col-md-6">
-                <%= f.label :email, "Email", class: "form-label fw-medium" %>
-                <%= f.email_field :email, autocomplete: "email", class: "form-control bg-light border-0 py-2", placeholder: "seu@email.com" %>
+                <%= f.label :email, t('devise.ui.registrations.edit.email_label'), class: "form-label fw-medium" %>
+                <%= f.email_field :email, autocomplete: "email", class: "form-control bg-light border-0 py-2", placeholder: t('devise.ui.registrations.edit.email_placeholder') %>
               </div>
             </div>
 
             <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
               <div class="alert alert-warning mb-4">
-                Aguardando confirmação para: <%= resource.unconfirmed_email %>
+                <%= t('devise.ui.registrations.edit.pending_confirmation', email: resource.unconfirmed_email) %>
               </div>
             <% end %>
 
             <hr class="my-4 opacity-10">
 
-            <h5 class="fw-bold mb-3">Alterar Senha</h5>
-            <p class="text-muted small mb-4">Deixe em branco se não quiser alterar a sua senha atual.</p>
+            <h5 class="fw-bold mb-3"><%= t('devise.ui.registrations.edit.password_title') %></h5>
+            <p class="text-muted small mb-4"><%= t('devise.ui.registrations.edit.password_help') %></p>
 
             <div class="row g-3 mb-4">
               <div class="col-md-6">
-                <%= f.label :password, "Nova senha", class: "form-label fw-medium" %>
-                <%= f.password_field :password, autocomplete: "new-password", class: "form-control bg-light border-0 py-2", placeholder: "Mínimo de #{@minimum_password_length} caracteres" %>
+                <%= f.label :password, t('devise.ui.registrations.edit.new_password_label'), class: "form-label fw-medium" %>
+                <%= f.password_field :password, autocomplete: "new-password", class: "form-control bg-light border-0 py-2", placeholder: (@minimum_password_length ? t('devise.ui.registrations.edit.new_password_placeholder', count: @minimum_password_length) : nil) %>
               </div>
               <div class="col-md-6">
-                <%= f.label :password_confirmation, "Confirme a nova senha", class: "form-label fw-medium" %>
-                <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "form-control bg-light border-0 py-2", placeholder: "Repita a nova senha" %>
+                <%= f.label :password_confirmation, t('devise.ui.registrations.edit.password_confirmation_label'), class: "form-label fw-medium" %>
+                <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "form-control bg-light border-0 py-2", placeholder: t('devise.ui.registrations.edit.password_confirmation_placeholder') %>
               </div>
             </div>
 
             <hr class="my-4 opacity-10">
 
-            <h5 class="fw-bold mb-3">Senha Atual</h5>
-            <p class="text-muted small mb-4">Precisamos da sua senha atual para confirmar as alterações feitas acima.</p>
+            <h5 class="fw-bold mb-3"><%= t('devise.ui.registrations.edit.current_password_title') %></h5>
+            <p class="text-muted small mb-4"><%= t('devise.ui.registrations.edit.current_password_help') %></p>
 
             <div class="mb-4">
-              <%= f.label :current_password, "Senha atual", class: "form-label fw-medium" %>
-              <%= f.password_field :current_password, autocomplete: "current-password", class: "form-control bg-light border-0 py-2", required: true, placeholder: "Sua senha atual" %>
+              <%= f.label :current_password, t('devise.ui.registrations.edit.current_password_label'), class: "form-label fw-medium" %>
+              <%= f.password_field :current_password, autocomplete: "current-password", class: "form-control bg-light border-0 py-2", required: true, placeholder: t('devise.ui.registrations.edit.current_password_placeholder') %>
             </div>
 
             <div class="d-flex justify-content-end gap-2 mt-5">
-              <%= link_to "Voltar", :back, class: "btn btn-light rounded-pill px-4" %>
-              <%= f.submit "Salvar Alterações", class: "btn btn-primary rounded-pill px-4" %>
+              <%= link_to t('devise.ui.registrations.edit.back'), :back, class: "btn btn-light rounded-pill px-4" %>
+              <%= f.submit t('devise.ui.registrations.edit.submit'), class: "btn btn-primary rounded-pill px-4" %>
             </div>
           <% end %>
         </div>
@@ -68,18 +68,17 @@
     </div>
 
     <div class="col-12 col-lg-4">
-      <!-- Public Sharing Settings Card -->
       <div class="card premium-card border-0 shadow-sm rounded-4 overflow-hidden">
         <div class="card-body p-4">
           <div class="d-flex align-items-center gap-3 mb-3">
             <div class="bg-primary bg-opacity-10 text-primary p-3 rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
               <i class="bi bi-globe fs-4"></i>
             </div>
-            <h5 class="fw-bold mb-0">Visão Pública</h5>
+            <h5 class="fw-bold mb-0"><%= t('devise.ui.registrations.edit.sharing_title') %></h5>
           </div>
 
           <p class="text-muted small mb-4">
-            Ative o compartilhamento público para permitir que outras pessoas visualizem a sua coleção através de um link exclusivo.
+            <%= t('devise.ui.registrations.edit.sharing_help') %>
           </p>
 
           <div id="sharing_settings_toggle">
@@ -88,12 +87,11 @@
         </div>
       </div>
 
-      <!-- Cancel Account Card -->
       <div class="card border-0 shadow-sm rounded-4 overflow-hidden mt-4">
         <div class="card-body p-4">
-          <h5 class="fw-bold text-danger mb-3">Encerrar Conta</h5>
-          <p class="text-muted small mb-4">Ao excluir sua conta, todos os seus dados e coleções serão removidos permanentemente. Esta ação não pode ser desfeita.</p>
-          <%= button_to "Excluir minha conta", registration_path(resource_name), data: { confirm: "Tem certeza que deseja excluir sua conta?", turbo_confirm: "Tem certeza que deseja excluir sua conta?" }, method: :delete, class: "btn btn-outline-danger rounded-pill w-100" %>
+          <h5 class="fw-bold text-danger mb-3"><%= t('devise.ui.registrations.edit.cancel_title') %></h5>
+          <p class="text-muted small mb-4"><%= t('devise.ui.registrations.edit.cancel_help') %></p>
+          <%= button_to t('devise.ui.registrations.edit.destroy_account'), registration_path(resource_name), data: { confirm: t('devise.ui.registrations.edit.destroy_confirm'), turbo_confirm: t('devise.ui.registrations.edit.destroy_confirm') }, method: :delete, class: "btn btn-outline-danger rounded-pill w-100" %>
         </div>
       </div>
     </div>
