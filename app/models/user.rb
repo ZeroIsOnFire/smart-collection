@@ -23,6 +23,9 @@ class User
   field :name, type: String, default: ''
   field :share_token, type: String
   field :sharing_enabled, type: Boolean, default: false
+  
+  index({ sharing_enabled: 1 }, { background: true })
+  index({ name: 'text', email: 'text' }, { name: 'UserTextIndex', background: true })
 
   index({ share_token: 1 }, { unique: true, sparse: true, background: true })
 
@@ -45,4 +48,5 @@ class User
 
   index({ email: 1 }, { unique: true, background: true })
   index({ reset_password_token: 1 }, { unique: true, sparse: true, background: true })
+  index({ created_at: -1 }, { background: true })
 end

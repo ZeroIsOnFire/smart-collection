@@ -56,7 +56,7 @@ class CarsController < ApplicationController
     # CarrierWave remote_photo_url falha para arquivos locais / uploads/
     params_to_save = car_params
     if @detected_item
-      params_to_save[:photo] = File.open(@detected_item.cropped_photo.path) if @detected_item.cropped_photo.present?
+      params_to_save[:photo] = @detected_item.cropped_photo.file.to_file if @detected_item.cropped_photo.present?
       params_to_save[:color] = @detected_item.color if @detected_item.color.present? && params_to_save[:color].blank?
       params_to_save[:detected_via_ai] = true
     end

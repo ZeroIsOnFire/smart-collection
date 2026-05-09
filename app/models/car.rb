@@ -68,8 +68,9 @@ class Car
         })
   index({ user_id: 1, created_at: -1 })
   index({ user_id: 1, name: 1 })
+  index({ detected_via_ai: 1 }, { background: true })
 
-  belongs_to :user
+  belongs_to :user, touch: true
 
   # Assume standard ActiveStorage with mongoid wrapper setup later or skip if unsupported natively without gem.
   # For now just basic fields to fulfill the crud.

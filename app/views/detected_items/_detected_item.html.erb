@@ -1,6 +1,7 @@
 <turbo-frame id="detected_item_<%= detected_item.id %>"
      class="col-12 mb-4 d-block"
      data-controller="detected-item">
+  <% cache detected_item do %>
   <%
     is_saved = detected_item.status == 'saved'
     is_rejected = detected_item.status == 'rejected'
@@ -215,5 +216,6 @@
       </div>
     </div>
   </div>
+  <% end %>
 </turbo-frame>
 

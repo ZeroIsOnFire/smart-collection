@@ -26,6 +26,7 @@
   </div>
 
   <div class="row g-5">
+    <% cache ['public', @car] do %>
     <!-- Coluna da Foto -->
     <div class="col-lg-7 mb-4 mb-lg-0">
       <div class="card car-detail-card border-0 shadow-sm rounded-4 overflow-hidden bg-white h-100">
@@ -109,6 +110,7 @@
         </div>
       </div>
     </div>
+    <% end %>
   </div>
 </div>
 

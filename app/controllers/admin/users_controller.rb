@@ -8,10 +8,7 @@ module Admin
     def index
       @users = if params[:q].present?
                  User.where(
-                   '$or' => [
-                     { name: /#{Regexp.escape(params[:q])}/i },
-                     { email: /#{Regexp.escape(params[:q])}/i }
-                   ]
+                   '$text' => { '$search' => params[:q] }
                  )
                else
                  User.all
@@ -35,7 +32,9 @@ module Admin
 
     # PATCH/PUT /admin/users/1
     def update
-      if @user.update(user_params)
+      @user.assign_attributes(user_params)
+      @user.admin = params[:user][:admin] if params.dig(:user, :admin).present? || params[:user].key?(:admin)
+      if @user.save
         redirect_to admin_user_path(@user), notice: 'Usuário atualizado com sucesso.'
       else
         render :edit, status: :unprocessable_content
@@ -59,7 +58,7 @@ module Admin
     end
 
     def user_params
-      params.require(:user).permit(:name, :email, :admin)
+      params.require(:user).permit(:name, :email)
     end
   end
 end

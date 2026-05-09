@@ -3,15 +3,21 @@
 module Admin
   class MaintenanceController < DashboardController
     def index
-      @autodetections_by_status = Autodetection.collection.aggregate([
-                                                                       { '$group' => { _id: '$status',
-                                                                                       count: { '$sum' => 1 } } }
-                                                                     ]).to_a
+      @autodetections_by_status = Rails.cache.fetch('admin_maintenance_autodetections_by_status', expires_in: 10.minutes) do
+        Autodetection.collection.aggregate([
+                                             { '$group' => { _id: '$status',
+                                                             count: { '$sum' => 1 } } }
+                                           ]).to_a
+      end
 
-      @old_records_count = Autodetection.where(:status.in => %w[completed error], :updated_at.lt => 24.hours.ago).count
+      @old_records_count = Rails.cache.fetch('admin_maintenance_old_records', expires_in: 10.minutes) do
+        Autodetection.where(:status.in => %w[completed error], :updated_at.lt => 24.hours.ago).count
+      end
 
       # Tenta obter o tamanho da pasta de uploads de forma simplificada
-      @uploads_size = get_dir_size('public/uploads')
+      @uploads_size = Rails.cache.fetch('admin_maintenance_uploads_size', expires_in: 1.hour) do
+        get_dir_size('public/uploads')
+      end
 
       # Carrega métricas do Sidekiq
       require 'sidekiq/api'

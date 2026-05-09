@@ -108,7 +108,7 @@
       <div id="cars_list_container" class="position-relative">
         <% if @cars.any? || current_user.cars.any? %>
           <div id="cars_grid_inner" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4 mt-2 grid-view">
-            <%= render partial: "cars/car", collection: @cars %>
+            <%= render partial: "cars/car", collection: @cars, cached: true %>
           </div>
 
           <!-- Sentinela para infinite scroll -->

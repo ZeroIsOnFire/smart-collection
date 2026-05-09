@@ -16,6 +16,7 @@ class DetectedItem
   mount_uploader :cropped_photo, CroppedPhotoUploader
 
   belongs_to :autodetection
+  index({ autodetection_id: 1 }, { background: true })
 
   STATUSES = %w[pending saved rejected].freeze
   validates :status, inclusion: { in: STATUSES }

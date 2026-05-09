@@ -35,23 +35,10 @@ class CarService
   end
 
   def search(query)
-    # Dividimos a busca em palavras para permitir termos fora de ordem (ex: 'azul match' encontra 'Matchbox Azul')
-    # Cada palavra deve ser encontrada em pelo menos um dos campos ($and de vários $or)
-    words = query.to_s.split(/\s+/).compact_blank
+    # Utilize MongoDB native text index search
+    words = query.to_s.strip
     return user.cars if words.empty?
 
-    query_conditions = words.map do |word|
-      regex = /#{Regexp.escape(word)}/i
-      { '$or' => [
-        { name: regex },
-        { brand: regex },
-        { manufacturer: regex },
-        { observations: regex },
-        { size: regex },
-        { tags: regex }
-      ] }
-    end
-
-    user.cars.where('$and' => query_conditions)
+    user.cars.where('$text' => { '$search' => words })
   end
 end
