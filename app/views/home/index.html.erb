@@ -1,3 +1,4 @@
+<% cache 'landing_hero_intro' do %>
 <section class="hero-section">
   <%= image_tag "hero_car_collection_1775696111841.png", class: "hero-bg-image", alt: "Premium Car Collection Showcase" %>
   
@@ -14,6 +15,7 @@
           O Smart Collection utiliza IA avançada para reconhecer seus itens através de fotos, organizando sua paixão automaticamente e com precisão cirúrgica.
         </p>
         <div class="d-flex flex-wrap gap-3">
+<% end %>
           <% if user_signed_in? %>
             <%= link_to cars_path, class: "btn btn-primary btn-lg rounded-pill px-5 py-3 fs-5 fw-semibold d-flex align-items-center" do %>
               <i class="bi bi-person-circle me-2 fs-4"></i>
@@ -33,6 +35,7 @@
         </div>
       </div>
       
+<% cache 'landing_hero_feature_box' do %>
       <div class="col-lg-5 d-none d-lg-block animate-fade-up" style="animation-delay: 0.2s;">
         <div class="glass-card p-4 text-center">
           <div class="bg-primary bg-opacity-20 rounded-4 p-5 mb-4 border border-white border-opacity-10">
@@ -45,6 +48,9 @@
     </div>
   </div>
 </section>
+<% end %>
+
+<% cache 'landing_features' do %>
 
 <section id="features" class="py-5" style="background-color: var(--card-bg);">
   <div class="container py-5">
@@ -97,21 +103,25 @@
     </div>
   </div>
 </section>
+<% end %>
 
 <section class="py-5 border-top" style="background-color: var(--premium-background);">
   <div class="container py-5">
     <div class="row align-items-center">
       <div class="col-lg-6 mb-5 mb-lg-0">
+        <% cache 'landing_cta_text' do %>
         <h2 class="display-6 fw-bold mb-4">Pronto para digitalizar sua paixão?</h2>
         <p class="lead text-muted mb-5">
           Junte-se a milhares de colecionadores e transforme sua paixão em um catálogo digital organizado e compartilhável.
         </p>
+        <% end %>
         <% unless user_signed_in? %>
           <%= link_to "Criar Minha Conta Grátis", new_user_registration_path, class: "btn btn-primary btn-lg rounded-pill px-5 py-3 fw-bold" %>
         <% else %>
            <%= link_to "Acessar Meus Carros", cars_path, class: "btn btn-primary btn-lg rounded-pill px-5 py-3 fw-bold" %>
         <% end %>
       </div>
+      <% cache 'landing_cta_features' do %>
       <div class="col-lg-6">
         <div class="p-4 shadow-lg rounded-4 border" style="background-color: var(--card-bg);">
           <div class="d-flex align-items-center mb-3">
@@ -135,9 +145,11 @@
         </div>
       </div>
     </div>
+      <% end %>
   </div>
 </section>
 
+<% cache 'landing_footer' do %>
 <footer class="py-5 border-top" style="background-color: var(--card-bg);">
   <div class="container text-center">
     <div class="navbar-brand d-flex align-items-center justify-content-center mb-4 text-dark">
@@ -147,3 +159,4 @@
     <p class="text-muted small">© <%= Time.now.year %> Smart Collection Catalog. Todos os direitos reservados.</p>
   </div>
 </footer>
+<% end %>
