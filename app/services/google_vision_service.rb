@@ -9,6 +9,9 @@ class GoogleVisionService
   def self.analyze(photo_path)
     return [] unless credentials_configured?
 
+    # Enhance image if it's too small before sending to Google
+    enhance_image!(photo_path)
+
     begin
       image_annotator = Google::Cloud::Vision.image_annotator do |config|
         config.credentials = ENV.fetch('GOOGLE_CLOUD_CREDENTIALS_PATH', nil)
@@ -74,4 +77,31 @@ class GoogleVisionService
 
     credentials_path.present? && File.exist?(credentials_path)
   end
+
+  def self.enhance_image!(photo_path)
+    image = MiniMagick::Image.open(photo_path)
+    # Check if any side is less than 1080px
+    if image.width < 1080 || image.height < 1080
+      Rails.logger.info "Enhancing small image (#{image.width}x#{image.height}) before Vision API analysis"
+      image.combine_options do |c|
+        # Resize so the smaller side is at least 1080px (maintaining aspect ratio)
+        c.resize "1080x1080^"
+        # Sharpening
+        c.sharpen "0x1"
+        # Contrast improvement (auto-level is generally very effective)
+        c.auto_level
+        # Quality improvement/setting
+        c.quality "100"
+        # Improve contrast
+        c.contrast
+        # Ensure correct orientation based on EXIF
+        c.auto_orient
+      end
+      image.write(photo_path)
+    end
+  rescue StandardError => e
+    Rails.logger.error "Image enhancement failed: #{e.message}"
+  end
+
+  private_class_method :enhance_image!
 end
