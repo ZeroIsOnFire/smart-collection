@@ -9,14 +9,15 @@ RSpec.describe AutodetectJob do
 
   describe '#perform' do
     it 'processa a imagem e cria detected items vinculados à autodetection' do
-      # Mock dos serviços para evitar chamadas reais e dependência de MiniMagick/Vision
-      allow(GoogleVisionService).to receive(:analyze).and_return([
+      allow(YoloDetectionService).to receive(:service_configured?).and_return(true)
+      allow(YoloDetectionService).to receive(:analyze).and_return([
                                                                    {
-                                                                     label: 'Toy car',
-                                                                     score: 0.95,
+                                                                     label: 'YOLO car',
+                                                                     score: 0.99,
                                                                      vertices: [{ x: 0.1, y: 0.1 }, { x: 0.9, y: 0.9 }]
                                                                    }
                                                                  ])
+      allow(GoogleVisionService).to receive(:credentials_configured?).and_return(false)
 
       # Mock do arquivo retornado pelo cropper
       mock_file_path = Rails.root.join('tmp/mock_crop.jpg')
@@ -31,7 +32,7 @@ RSpec.describe AutodetectJob do
 
         autodetection.reload
         expect(autodetection.status).to eq('to_verify')
-        expect(autodetection.detected_items.first.label).to eq('Toy car')
+        expect(autodetection.detected_items.first.label).to eq('YOLO car')
         expect(autodetection.detected_items.first.cropped_photo).to be_present
       end
 
@@ -39,13 +40,14 @@ RSpec.describe AutodetectJob do
     end
 
     it 'marca como erro caso o processamento falhe' do
-      allow(GoogleVisionService).to receive(:analyze).and_raise('Simulated API Error')
+      allow(YoloDetectionService).to receive(:service_configured?).and_return(true)
+      allow(YoloDetectionService).to receive(:analyze).and_raise('Simulated YOLO API Error')
 
       described_class.new.perform(autodetection.id.to_s)
 
       autodetection.reload
       expect(autodetection.status).to eq('error')
-      expect(autodetection.error_message).to eq('Simulated API Error')
+      expect(autodetection.error_message).to eq('Simulated YOLO API Error')
     end
   end
 end

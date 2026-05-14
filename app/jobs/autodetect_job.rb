@@ -11,10 +11,21 @@ class AutodetectJob < ApplicationJob
     autodetection.update!(status: 'processing')
 
     begin
-      # 1. Analisar a imagem com Google Vision
-      detected_items_data = GoogleVisionService.analyze(autodetection.photo.path)
+      # 1. Analisar a imagem (Prioriza YOLO local, fallback para Google Vision)
+      detected_items_data = []
 
-      Rails.logger.info "AutodetectJob: Blue items found for autodetection #{autodetection_id}" if detected_items_data.empty?
+      if YoloDetectionService.service_configured?
+        Rails.logger.info "AutodetectJob: Attempting YOLO detection for autodetection #{autodetection_id}"
+        detected_items_data = YoloDetectionService.analyze(autodetection.photo.path)
+      end
+
+      # Fallback ou se YOLO não encontrou nada (opcional: Vision é melhor para texto/objetos variados)
+      if detected_items_data.empty? && GoogleVisionService.credentials_configured?
+        Rails.logger.info "AutodetectJob: Attempting Google Vision detection for autodetection #{autodetection_id}"
+        detected_items_data = GoogleVisionService.analyze(autodetection.photo.path)
+      end
+
+      Rails.logger.info "AutodetectJob: No items found for autodetection #{autodetection_id}" if detected_items_data.empty?
 
       # 2. Processar cada item detectado
       detected_items_data.each do |data|

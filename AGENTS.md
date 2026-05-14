@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-Serviço web premium para registro e gerenciamento de coleções variadas. Permite cadastro de coleções e seus itens, compartilhamento público seguro, indexação automática via fotos (Google Vision API — credenciais fornecidas pelo usuário), recorte interativo de imagens e exportação em PDF/CSV. O design é focado em alta fidelidade ("Premium Vibe"), utilizando Glassmorphism e layouts responsivos avançados (Grid/List views).
+Serviço web premium para registro e gerenciamento de coleções variadas. Permite cadastro de coleções e seus itens, compartilhamento público seguro, indexação automática via fotos (YOLO Local / Google Vision API), recorte interativo de imagens e exportação em PDF/CSV. O design é focado em alta fidelidade ("Premium Vibe"), utilizando Glassmorphism e layouts responsivos avançados (Grid/List views).
 
 ---
 
@@ -31,10 +31,11 @@ A segurança e privacidade dos dados do usuário são a principal prioridade des
 | Storage        | ActiveStorage                       |
 | Background     | Solid Queue                         |
 | Cache          | Solid Cache                         |
-| OCR/Visão      | Google Cloud Vision API (user-key)  |
-| Exportação     | Prawn (PDF), CSV (Ruby stdlib)      |
-| i18n           | rails-i18n (pt-BR / en)             |
-| Infraestrutura | Docker + Docker Compose             |
+| OCR/Visão      | YOLO11s (Local) + Google Cloud Vision API |
+| Exportação     | Prawn (PDF), CSV (Ruby stdlib)            |
+| i18n           | rails-i18n (pt-BR / en)                   |
+| Infraestrutura | Docker + Docker Compose                   |
+| Detecção Local | SCC YOLO Service (Python/FastAPI)         |
 
 ---
 
@@ -58,6 +59,10 @@ app/
 ├── javascript/      # Stimulus controllers (ex: clipboard, view-toggle)
 ├── assets/
 │   └── stylesheets/ # index.css / application.css (Variáveis Premium)
+yolo/                # Microserviço de detecção local (Python)
+├── main.py
+├── Dockerfile
+└── AGENTS.md
 spec/
 ├── controllers/
 ├── models/
@@ -83,8 +88,8 @@ spec/
 - Variáveis de ambiente via arquivo `.env` (template em `.env.example`).
 
 ### Autodetecção e Visão
-- As credenciais da Vision API **devem ser fornecidas pelo próprio usuário** via variáveis de ambiente (`GOOGLE_CLOUD_PROJECT_ID`, `GOOGLE_CLOUD_CREDENTIALS_PATH`).
-- A aplicação **não** possui chave própria da API.
+- **Local (YOLO)**: A aplicação utiliza o `SCC YOLO Service` (YOLO11s) rodando localmente para detecção rápida de carros e localização. Esta é a opção preferencial.
+- **Cloud (Vision API)**: As credenciais da Vision API podem ser fornecidas pelo usuário para OCR avançado ou como fallback. Atualmente, o foco de detecção foi migrado para o YOLO local.
 - O fluxo conta com *fallback* manual caso o recorte falhe ou seja impreciso, e a interface deve atualizar via WebSockets/Turbo Streams em tempo real.
 
 ### Dependências

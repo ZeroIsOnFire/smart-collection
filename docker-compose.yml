@@ -31,6 +31,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      yolo-service:
+        condition: service_healthy
     env_file:
       - .env
     environment:
@@ -38,6 +40,18 @@ services:
       - REDIS_URL=redis://redis:6379/1
       - MONGODB_URI=mongodb://${MONGODB_USERNAME:-scc_admin}:${MONGODB_PASSWORD:-scc_dev}@mongodb:27017/smart_collection_catalog_development?authSource=admin
     restart: unless-stopped
+
+  yolo-service:
+    build:
+      context: ./yolo
+    environment:
+      - YOLO_API_KEY=${YOLO_API_KEY}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   mongodb:
     image: mongo:7

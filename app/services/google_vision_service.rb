@@ -5,6 +5,7 @@ require 'google/cloud/vision/v1'
 
 class GoogleVisionService
   TARGET_LABELS = ['Toy', 'Car', 'Vehicle', 'Model car'].freeze
+  MAX_RESULTS = 100.freeze
 
   def self.analyze(photo_path)
     return [] unless credentials_configured?
@@ -16,7 +17,7 @@ class GoogleVisionService
       image_annotator = Google::Cloud::Vision.image_annotator do |config|
         config.credentials = ENV.fetch('GOOGLE_CLOUD_CREDENTIALS_PATH', nil)
       end
-      response = image_annotator.object_localization_detection(image: photo_path)
+      response = image_annotator.object_localization_detection(image: photo_path, max_results: MAX_RESULTS)
     rescue StandardError => e
       if simulation_mode? || e.message.include?('billing')
         Rails.logger.warn "GoogleVisionService: Simulation mode enabled (due to error: #{e.message})"
@@ -34,8 +35,8 @@ class GoogleVisionService
         # Verifica se a label está na nossa lista de alvos ou se tem um score decente
         next unless TARGET_LABELS.any? { |label| obj.name.to_s.downcase.include?(label.downcase) }
 
+        puts entity.description
         detected_items << {
-          label: obj.name,
           score: obj.score,
           # O Vision retorna vértices normalizados (0.0 a 1.0)
           vertices: obj.bounding_poly.normalized_vertices.map { |v| { x: v.x, y: v.y } }
