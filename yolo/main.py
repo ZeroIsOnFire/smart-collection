@@ -1,9 +1,23 @@
 import os
 import io
+import torch
+
+# Monkeypatch torch.load BEFORE importing ultralytics
+# to handle PyTorch 2.6+ weights_only=True default
+original_load = torch.load
+def patched_load(*args, **kwargs):
+    if 'weights_only' not in kwargs:
+        kwargs['weights_only'] = False
+    return original_load(*args, **kwargs)
+torch.load = patched_load
+
 from fastapi import FastAPI, File, UploadFile, HTTPException, Header, Depends
 from ultralytics import YOLO
 from PIL import Image
 import numpy as np
+
+# Disable Ultralytics online checks
+os.environ["ULTRALYTICS_OFFLINE"] = "True"
 
 app = FastAPI(title="SCC YOLO Detection Service")
 
@@ -29,8 +43,8 @@ async def detect(file: UploadFile = File(...)):
     contents = await file.read()
     image = Image.open(io.BytesIO(contents)).convert("RGB")
     
-    # Run inference
-    results = model.predict(image, conf=0.25)
+    # Run inference - filtering classes 1 to 8 (bicycle, car, motorcycle, airplane, bus, train, truck, boat)
+    results = model.predict(image, conf=0.25, classes=list(range(1, 9)))
     
     detections = []
     for r in results:

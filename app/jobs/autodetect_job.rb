@@ -35,7 +35,7 @@ class AutodetectJob < ApplicationJob
         next unless cropped_file
 
         autodetection.detected_items.create!(
-          label: data[:label],
+          label: 'Veículo',
           position_data: {
             vertices: data[:vertices],
             score: data[:score]
