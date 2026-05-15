@@ -123,32 +123,34 @@
         </div>
 
         <!-- Direita: Ações (20%) -->
-        <div class="col-md-3 border-start p-4 bg-light d-flex flex-column gap-2 justify-content-center">
+        <div class="col-md-3 border-start p-4 bg-light d-flex flex-column gap-3 justify-content-center h-100 min-h-200">
           <% if is_saved || is_rejected %>
              <%= button_to undo_detected_item_path(detected_item),
                   method: :patch,
-                  class: "btn btn-soft-secondary w-100 rounded-pill",
+                  class: "btn btn-soft-secondary w-100 rounded-pill py-2",
                   data: { turbo_frame: "detected_item_#{detected_item.id}" } do %>
                 <i class="bi bi-arrow-counterclockwise me-2"></i><%= t('autodetections.detected_item.undo') %>
              <% end %>
           <% else %>
-            <button type="submit" form="form_detected_item_<%= detected_item.id %>" class="btn btn-premium w-100 rounded-pill shadow-sm">
-              <i class="bi bi-check2-circle me-2"></i><%= t('autodetections.detected_item.save_item') %>
-            </button>
+            <div class="d-grid gap-2 w-100">
+              <button type="submit" form="form_detected_item_<%= detected_item.id %>" class="btn btn-premium w-100 rounded-pill py-2 shadow-sm">
+                <i class="bi bi-check2-circle me-2"></i><%= t('autodetections.detected_item.save_item') %>
+              </button>
 
-            <!-- Botão de Ajustar Seleção (Abre modal Cropper) -->
-            <button type="button"
-                    class="btn btn-soft-secondary w-100 rounded-pill"
-                    data-action="click->detected-item#openAdjustmentModal">
-              <i class="bi bi-crop me-2"></i><%= t('autodetections.detected_item.adjust_selection') %>
-            </button>
+              <!-- Botão de Ajustar Seleção (Abre modal Cropper) -->
+              <button type="button"
+                      class="btn btn-soft-secondary w-100 rounded-pill py-2"
+                      data-action="click->detected-item#openAdjustmentModal">
+                <i class="bi bi-crop me-2"></i><%= t('autodetections.detected_item.adjust_selection') %>
+              </button>
 
-            <%= button_to reject_detected_item_path(detected_item),
-                  method: :patch,
-                  class: "btn btn-soft-danger w-100 rounded-pill",
-                  data: { turbo_frame: "detected_item_#{detected_item.id}" } do %>
-              <i class="bi bi-trash3 me-2"></i><%= t('autodetections.detected_item.discard') %>
-            <% end %>
+              <%= button_to reject_detected_item_path(detected_item),
+                    method: :patch,
+                    class: "btn btn-soft-danger w-100 rounded-pill py-2",
+                    data: { turbo_frame: "detected_item_#{detected_item.id}", action: "click->detected-item#showLoading" } do %>
+                <i class="bi bi-trash3 me-2"></i><%= t('autodetections.detected_item.discard') %>
+              <% end %>
+            </div>
           <% end %>
         </div>
       </div>
@@ -175,7 +177,10 @@
            data-selection-adjustment-initial-width-value="<%= w %>"
            data-selection-adjustment-initial-height-value="<%= h %>"
            data-selection-adjustment-update-url-value="<%= update_selection_detected_item_path(detected_item) %>"
-           data-selection-adjustment-item-id-value="<%= detected_item.id %>">
+           data-selection-adjustment-item-id-value="<%= detected_item.id %>"
+           data-selection-adjustment-loading-text-value="<%= t('autodetections.messages.saving') %>"
+           data-selection-adjustment-save-error-text-value="<%= t('autodetections.messages.item_error') %>"
+           data-selection-adjustment-unexpected-error-text-value="<%= t('flash.error') %>">
         
         <div class="modal-header border-0 pb-0">
           <h5 class="modal-title fw-bold"><i class="bi bi-crop me-2 text-primary"></i> <%= t('autodetections.detected_item.adjust_selection') %></h5>

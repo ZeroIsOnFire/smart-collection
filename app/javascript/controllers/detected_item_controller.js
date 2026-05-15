@@ -18,13 +18,25 @@ export default class extends Controller {
   }
 
   stopLoading() {
-    // Note: If the element is replaced by a Turbo Stream, this disconnects automatically.
-    // However, if we're doing a simple redirect and the element persists, we clear it.
     this.element.classList.remove("is-loading")
   }
 
-  // Action for non-form buttons (like button_to which is also a form, but just in case)
   showLoading() {
     this.startLoading()
+  }
+
+  openAdjustmentModal(event) {
+    event.preventDefault()
+    
+    // O frame id é detected_item_ID
+    const frameId = this.element.id
+    const itemId = frameId.replace("detected_item_", "")
+    const modalId = `adjustmentModal_${itemId}`
+    const modalElement = document.getElementById(modalId)
+    
+    if (modalElement && typeof bootstrap !== 'undefined') {
+      const modal = new bootstrap.Modal(modalElement)
+      modal.show()
+    }
   }
 }

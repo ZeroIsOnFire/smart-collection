@@ -246,6 +246,7 @@ en:
       removed: "Autodetection removed/cancelled successfully."
       deleted: "Autodetection deleted successfully."
       restarted: "Process restarted."
+      saving: "Saving..."
       no_photo: "No photo provided"
       item_added: "Item added manually."
       item_error: "Error adding item."

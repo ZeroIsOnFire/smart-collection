@@ -258,6 +258,7 @@ pt-BR:
       removed: "Autodetecção removida/cancelada com sucesso."
       deleted: "Autodetecção excluída com sucesso."
       restarted: "Processo reiniciado."
+      saving: "Salvando..."
       no_photo: "Nenhuma foto fornecida"
       item_added: "Item adicionado manualmente."
       item_error: "Erro ao adicionar item."
