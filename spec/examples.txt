@@ -53,11 +53,11 @@ example_id                                             | status | run_time      
 ./spec/requests/cars_spec.rb[1:5:1:3]                  | passed | 0.38581 seconds |
 ./spec/requests/cars_spec.rb[1:6:1]                    | passed | 0.06369 seconds |
 ./spec/requests/cars_spec.rb[1:6:2]                    | passed | 0.05142 seconds |
-./spec/requests/detected_items_spec.rb[1:1:1]          | passed | 4.23 seconds    |
-./spec/requests/detected_items_spec.rb[1:1:2]          | passed | 0.5956 seconds  |
-./spec/requests/detected_items_spec.rb[1:2:1]          | passed | 0.66323 seconds |
-./spec/requests/detected_items_spec.rb[1:2:2]          | passed | 0.62554 seconds |
-./spec/requests/detected_items_spec.rb[1:3:1]          | passed | 0.48224 seconds |
+./spec/requests/detected_items_spec.rb[1:1:1]          | failed | 1.81 seconds    |
+./spec/requests/detected_items_spec.rb[1:1:2]          | passed | 0.67627 seconds |
+./spec/requests/detected_items_spec.rb[1:2:1]          | passed | 0.76656 seconds |
+./spec/requests/detected_items_spec.rb[1:2:2]          | passed | 0.80309 seconds |
+./spec/requests/detected_items_spec.rb[1:3:1]          | passed | 0.62515 seconds |
 ./spec/requests/detected_items_undo_spec.rb[1:1:1]     | passed | 0.80874 seconds |
 ./spec/requests/detected_items_undo_spec.rb[1:1:2]     | passed | 0.65745 seconds |
 ./spec/requests/public_collections_spec.rb[1:1:1]      | passed | 0.096 seconds   |

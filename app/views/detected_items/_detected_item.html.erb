@@ -8,9 +8,7 @@
     is_processed = is_saved || is_rejected
   %>
 
-  <div class="card shadow rounded-4 border-0 overflow-hidden position-relative
-              <%= 'bg-light opacity-75' if is_processed %>">
-
+  <div class="card shadow-sm rounded-4 border-0 overflow-hidden position-relative detected-item-card <%= 'is-processed' if is_processed %>">
     <!-- Loading Overlay -->
     <div class="detected-item-loader">
       <div class="spinner-border text-primary" role="status">
@@ -18,126 +16,117 @@
       </div>
     </div>
     <div class="card-body p-0">
-      <div class="row g-0 align-items-center">
+      <div class="row g-0 align-items-stretch">
 
         <!-- Lado Esquerdo: Foto (25%) -->
-        <div class="col-md-3 bg-light border-end">
+        <div class="col-md-3 detected-item-photo-col border-end">
           <% if detected_item.cropped_photo? %>
             <%= image_tag detected_item.cropped_photo.url,
                           loading: "lazy",
-                          class: "img-fluid w-100 object-fit-cover",
-                          style: "height: 200px;" %>
+                          class: "img-fluid w-100 h-100 object-fit-cover",
+                          style: "min-height: 220px;" %>
           <% else %>
-            <div class="d-flex align-items-center justify-content-center bg-white" style="height: 200px;">
-              <i class="bi bi-camera display-4 text-muted"></i>
+            <div class="d-flex align-items-center justify-content-center bg-soft-secondary w-100" style="min-height: 220px;">
+              <i class="bi bi-camera display-4 text-muted opacity-25"></i>
             </div>
           <% end %>
         </div>
 
-        <!-- Centro: Formulário ou Status (55%) -->
-        <div class="col-md-6 p-4">
+        <!-- Centro: Formulário ou Status (50%) -->
+        <div class="col-md-6 p-4 d-flex flex-column justify-content-center">
           <% if is_saved %>
-            <div class="d-flex align-items-center h-100">
-              <div class="text-success">
-                <h5 class="fw-bold mb-1"><i class="bi bi-check-circle-fill me-2"></i> <%= t('autodetections.detected_item.statuses.saved_title') %></h5>
-                <p class="mb-0 text-muted"><%= t('autodetections.detected_item.statuses.saved_text') %></p>
+            <div class="animate-fade-in">
+              <div class="d-flex align-items-center mb-2">
+                <div class="icon-box bg-emerald-light rounded-circle me-3" style="width: 45px; height: 45px; margin-bottom: 0;">
+                  <i class="bi bi-check-lg"></i>
+                </div>
+                <h5 class="fw-bold mb-0 text-success"><%= t('autodetections.detected_item.statuses.saved_title') %></h5>
               </div>
+              <p class="mb-0 text-muted ps-5"><%= t('autodetections.detected_item.statuses.saved_text') %></p>
             </div>
           <% elsif is_rejected %>
-            <div class="d-flex align-items-center h-100">
-              <div class="text-danger">
-                <h5 class="fw-bold mb-1"><i class="bi bi-x-circle-fill me-2"></i> <%= t('autodetections.detected_item.statuses.rejected_title') %></h5>
-                <p class="mb-0 text-muted"><%= t('autodetections.detected_item.statuses.rejected_text') %></p>
+            <div class="animate-fade-in">
+              <div class="d-flex align-items-center mb-2">
+                <div class="icon-box bg-soft-danger rounded-circle me-3" style="width: 45px; height: 45px; margin-bottom: 0;">
+                  <i class="bi bi-x-lg"></i>
+                </div>
+                <h5 class="fw-bold mb-0 text-danger"><%= t('autodetections.detected_item.statuses.rejected_title') %></h5>
               </div>
+              <p class="mb-0 text-muted ps-5"><%= t('autodetections.detected_item.statuses.rejected_text') %></p>
             </div>
           <% else %>
-            <%= form_with model: Car.new, url: cars_path, id: "form_detected_item_#{detected_item.id}", class: "row g-3" do |f| %>
+            <%= simple_form_for(Car.new, url: cars_path, html: { id: "form_detected_item_#{detected_item.id}", class: "row g-3 detected-item-form" }) do |f| %>
               <%= hidden_field_tag :detected_item_id, detected_item.id %>
 
               <div class="col-md-6">
-                <div class="form-floating">
-                  <%= f.text_field :brand,
-                        value: detected_item.brand,
-                        class: "form-control border-0 bg-light",
-                        id: "brand_#{detected_item.id}",
-                        placeholder: "Hot Wheels" %>
-                  <label for="brand_<%= detected_item.id %>"><%= t('autodetections.detected_item.brand_optional') %></label>
-                </div>
+                <%= f.input :brand,
+                            label: t('autodetections.detected_item.brand_optional'),
+                            input_html: { value: detected_item.brand, id: "brand_#{detected_item.id}", class: "bg-light border-0" },
+                            label_html: { class: "text-secondary small text-uppercase tracking-wide", for: "brand_#{detected_item.id}" } %>
               </div>
 
               <div class="col-md-6">
-                <div class="form-floating">
-                  <%= f.text_field :manufacturer,
-                        value: detected_item.manufacturer,
-                        class: "form-control border-0 bg-light",
-                        id: "manufacturer_#{detected_item.id}",
-                        placeholder: "Porsche" %>
-                  <label for="manufacturer_<%= detected_item.id %>"><%= t('autodetections.detected_item.manufacturer_optional') %></label>
-                </div>
+                <%= f.input :manufacturer,
+                            label: t('autodetections.detected_item.manufacturer_optional'),
+                            input_html: { value: detected_item.manufacturer, id: "manufacturer_#{detected_item.id}", class: "bg-light border-0" },
+                            label_html: { class: "text-secondary small text-uppercase tracking-wide", for: "manufacturer_#{detected_item.id}" } %>
               </div>
 
-              <div class="col-12 mb-2">
-                <div class="form-floating">
-                  <%= f.text_field :name,
-                        value: detected_item.label,
-                        class: "form-control border-0 bg-light fw-bold",
-                        id: "name_#{detected_item.id}",
-                        placeholder: "911 Carrera",
-                        required: true %>
-                  <label for="name_<%= detected_item.id %>"><%= t('autodetections.detected_item.model_required') %></label>
-                </div>
+              <div class="col-12">
+                <%= f.input :name,
+                            label: t('autodetections.detected_item.model_required'),
+                            required: true,
+                            input_html: { value: detected_item.label, id: "name_#{detected_item.id}", class: "bg-light border-0 fw-bold" },
+                            label_html: { class: "text-secondary small text-uppercase tracking-wide", for: "name_#{detected_item.id}" } %>
               </div>
 
-              <div class="col-md-4">
-                <div class="form-floating">
-                  <%= f.select :color,
-                        Car.color_options,
-                        { selected: detected_item.color, prompt: t('autodetections.detected_item.select_prompt') },
-                        { class: "form-select border-0 bg-light", id: "color_#{detected_item.id}" } %>
-                  <label for="color_<%= detected_item.id %>"><%= t('autodetections.detected_item.color') %></label>
-                </div>
+              <div class="col-md-5">
+                <%= f.input :color,
+                            as: :select,
+                            collection: Car.color_options,
+                            selected: detected_item.color,
+                            include_blank: t('autodetections.detected_item.select_prompt'),
+                            label: t('autodetections.detected_item.color'),
+                            input_html: { id: "color_#{detected_item.id}", class: "form-select bg-light border-0" },
+                            label_html: { class: "text-secondary small text-uppercase tracking-wide", for: "color_#{detected_item.id}" } %>
               </div>
 
-              <div class="col-md-4">
-                <div class="form-floating">
-                  <%= f.text_field :year,
-                        value: detected_item.year,
-                        class: "form-control border-0 bg-light",
-                        id: "year_#{detected_item.id}",
-                        placeholder: "1998" %>
-                  <label for="year_<%= detected_item.id %>"><%= t('autodetections.detected_item.year') %></label>
-                </div>
+              <div class="col-md-3">
+                <%= f.input :year,
+                            label: t('autodetections.detected_item.year'),
+                            input_html: { value: detected_item.year, id: "year_#{detected_item.id}", class: "bg-light border-0" },
+                            label_html: { class: "text-secondary small text-uppercase tracking-wide", for: "year_#{detected_item.id}" } %>
               </div>
 
               <div class="col-md-4">
-                <div class="form-floating">
-                  <%= f.select :size,
-                        Car.scale_options,
-                        { selected: detected_item.size, prompt: t('autodetections.detected_item.select_prompt') },
-                        { class: "form-select border-0 bg-light", id: "size_#{detected_item.id}" } %>
-                  <label for="size_<%= detected_item.id %>"><%= t('autodetections.detected_item.size_scale') %></label>
-                </div>
+                <%= f.input :size,
+                            as: :select,
+                            collection: Car.scale_options,
+                            selected: detected_item.size,
+                            include_blank: t('autodetections.detected_item.select_prompt'),
+                            label: t('autodetections.detected_item.size_scale'),
+                            input_html: { id: "size_#{detected_item.id}", class: "form-select bg-light border-0" },
+                            label_html: { class: "text-secondary small text-uppercase tracking-wide", for: "size_#{detected_item.id}" } %>
               </div>
             <% end %>
           <% end %>
         </div>
 
-        <!-- Direita: Ações (20%) -->
-        <div class="col-md-3 border-start p-4 bg-light d-flex flex-column gap-3 justify-content-center h-100 min-h-200">
+        <!-- Direita: Ações (25%) -->
+        <div class="col-md-3 detected-item-actions-col">
           <% if is_saved || is_rejected %>
              <%= button_to undo_detected_item_path(detected_item),
                   method: :patch,
-                  class: "btn btn-soft-secondary w-100 rounded-pill py-2",
+                  class: "btn btn-soft-secondary w-100 rounded-pill py-2 border-0 shadow-sm",
                   data: { turbo_frame: "detected_item_#{detected_item.id}" } do %>
                 <i class="bi bi-arrow-counterclockwise me-2"></i><%= t('autodetections.detected_item.undo') %>
              <% end %>
           <% else %>
-            <div class="d-grid gap-2 w-100">
-              <button type="submit" form="form_detected_item_<%= detected_item.id %>" class="btn btn-premium w-100 rounded-pill py-2 shadow-sm">
-                <i class="bi bi-check2-circle me-2"></i><%= t('autodetections.detected_item.save_item') %>
+            <div class="d-grid gap-3 w-100">
+              <button type="submit" form="form_detected_item_<%= detected_item.id %>" class="btn btn-premium w-100 rounded-pill py-3">
+                <i class="bi bi-check2-circle fs-5 me-2"></i><%= t('autodetections.detected_item.save_item') %>
               </button>
 
-              <!-- Botão de Ajustar Seleção (Abre modal Cropper) -->
               <button type="button"
                       class="btn btn-soft-secondary w-100 rounded-pill py-2"
                       data-action="click->detected-item#openAdjustmentModal">
@@ -156,6 +145,7 @@
       </div>
     </div>
   </div>
+
 
   <!-- Modal de Ajuste de Seleção (Cropper) -->
   <div class="modal fade" id="adjustmentModal_<%= detected_item.id %>" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">

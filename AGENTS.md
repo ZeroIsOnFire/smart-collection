@@ -193,6 +193,7 @@ refactor(items): extrair lógica de tags para TagService
 ## Convenções para Agentes
 
 - **PRIORIDADE MÁXIMA**: Segurança e Segregação de Dados (`current_user`).
+- **Internacionalização Obrigatória**: É proibido adicionar textos "hardcoded" em views, controllers ou javascript. Tudo deve ser traduzido utilizando a API de I18n do Rails (ex: `t('chave.da.traducao')`).
 - Ao criar ou editar views, garanta a adequação ao padrão Premium Design (usando CSS e ícones existentes).
 - Sempre execute `bundle exec rspec` antes de considerar uma tarefa concluída.
 - Commits devem ser atômicos e com mensagens claras em português.

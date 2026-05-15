@@ -179,27 +179,17 @@
         </div>
  
         <div class="col-md-12 mt-4">
-          <div class="input-group input-group-lg border-0 bg-light rounded-3 overflow-hidden">
-            <span class="input-group-text bg-light border-0 ps-3">
-              <div data-color-detector-target="preview"
-                   class="rounded-circle shadow-sm"
-                   style="width: 24px; height: 24px; transition: background-color 0.3s ease; border: 1px solid #dee2e6;">
-              </div>
-            </span>
-            <%= f.input :color,
-                        as: :select,
-                        label: false,
-                        collection: Car.color_options,
-                        include_blank: t('cars.form.select_color'),
-                        input_html: {
-                          class: "form-select border-0 bg-light py-3",
-                          data: {
-                            "color-detector-target": "select",
-                            action: "change->color-detector#updatePreview"
-                          }
-                        },
-                        wrapper: false %>
-          </div>
+          <%= f.input :color,
+                      as: :select,
+                      collection: Car.color_options,
+                      include_blank: t('cars.form.select_color'),
+                      input_html: {
+                        class: "form-select form-select-lg bg-light border-0",
+                        data: {
+                          "color-detector-target": "select"
+                        }
+                      },
+                      label_html: { class: "text-secondary small text-uppercase tracking-wide" } %>
           <small class="text-secondary small text-uppercase tracking-wide mt-2 d-block ms-1" style="font-size: 0.7rem;"><%= t('cars.form.predominant_color') %></small>
         </div>
       </div>

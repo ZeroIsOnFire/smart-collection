@@ -19,12 +19,14 @@ pt-BR:
   nav:
     home: "Início"
     collections: "Coleções"
+    my_cars: "Meus Carros"
     profile: "Perfil"
     sign_in: "Entrar"
     sign_out: "Sair"
     sign_up: "Criar conta"
     settings: "Configurações"
     language: "Idioma"
+    admin_panel: "Painel Admin"
 
   # ── Ações comuns ───────────────────────────────────────
   actions:
@@ -143,6 +145,7 @@ pt-BR:
         manufacturer: "Fabricante (Veículo)"
         year: "Ano de Fabricação"
         size: "Escala / Tamanho"
+        color: "Cor"
         tags: "Tags"
         observations: "Observações do Item"
         photo: "Foto Principal"
@@ -160,6 +163,7 @@ pt-BR:
         manufacturer: "Fabricante (Veículo)"
         year: "Ano de Fabricação"
         size: "Escala / Tamanho"
+        color: "Cor"
         tags: "Tags"
         observations: "Observações do Item"
         photo: "Foto Principal"
