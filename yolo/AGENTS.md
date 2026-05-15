@@ -31,3 +31,10 @@ A segurança deste serviço é garantida por:
 - **Manutenção de Modelo**: O modelo `yolo11s.pt` é baixado automaticamente no primeiro boot se não estiver presente.
 - **Formato de Resposta**: Sempre retornar coordenadas normalizadas (0.0 a 1.0) no formato de vértices para compatibilidade com o `ImageCropperService` do Rails.
 - **Hardware**: Otimizado para execução em CPU. Não assumir presença de CUDA/GPU NVIDIA.
+
+---
+
+## ⚠️ Troubleshooting & Gotchas (Problemas Conhecidos)
+- **PyTorch 2.6+ Crash**: A partir do PyTorch 2.6, a função `torch.load` adota `weights_only=True` por padrão, o que quebra a desserialização do pacote `ultralytics`. Para corrigir isso, **deve-se realizar um monkeypatch** na função `torch.load` antes de importar o `ultralytics`, forçando `weights_only=False`.
+- **Dependência de Rede Ultralytics**: O pacote ultralytics tenta fazer chamadas de rede para verificar atualizações ou analytics, o que pode travar o container ou falhar em redes isoladas. Por isso, a variável de ambiente `ULTRALYTICS_OFFLINE=True` **deve** estar definida.
+- **Detecção de Cor**: A detecção de cor não usa um modelo ML adicional. Ela emprega K-Means clustering no espaço HSV em um recorte do centro da imagem, filtrando reflexos brancos/pretos para achar a cor dominante. A lógica completa vive em `main.py` na classe `ColorDetector`.

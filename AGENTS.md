@@ -91,6 +91,11 @@ spec/
 - **Local (YOLO)**: A aplicação utiliza o `SCC YOLO Service` (YOLO11s) rodando localmente para detecção rápida de carros e localização. Esta é a opção preferencial.
 - **Cloud (Vision API)**: As credenciais da Vision API podem ser fornecidas pelo usuário para OCR avançado ou como fallback. Atualmente, o foco de detecção foi migrado para o YOLO local.
 - O fluxo conta com *fallback* manual caso o recorte falhe ou seja impreciso, e a interface deve atualizar via WebSockets/Turbo Streams em tempo real.
+- **⚠️ Gotchas do Microserviço YOLO**:
+  - **PyTorch 2.6+ Crash**: O serviço exige um *monkeypatch* em `torch.load` para forçar `weights_only=False`, evitando a quebra do pacote `ultralytics`.
+  - **Offline Mode**: A variável `ULTRALYTICS_OFFLINE=True` é estritamente obrigatória para impedir travamentos de rede no container.
+  - **Detecção de Cor**: O serviço não usa ML adicional para cores; utiliza algoritmo de K-Means no espaço HSV em `main.py` para melhor performance.
+  - *Consulte o arquivo `yolo/AGENTS.md` para as regras completas do microserviço.*
 
 ### Dependências
 - **Não adicionar gems ou bibliotecas novas sem autorização explícita do usuário.**
