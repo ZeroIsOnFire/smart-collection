@@ -21,6 +21,7 @@ Rails.application.routes.draw do
   resources :autodetections, only: %i[create show destroy] do
     collection do
       post :detect_color
+      post :classify
     end
     member do
       patch :retry

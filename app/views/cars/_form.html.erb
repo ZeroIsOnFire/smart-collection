@@ -9,28 +9,32 @@
   }
 }) do |f| %>
   <%= f.error_notification %>
-
+ 
   <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
     <div class="card-body p-4 p-md-5">
-
+ 
       <!-- Foto Principal -->
       <h5 class="fw-bold mb-4 text-dark pb-2 border-bottom">
         <i class="bi bi-camera me-2 text-primary"></i> Foto Principal
       </h5>
-
+ 
       <div class="col-12 mb-5"
            data-controller="photo-upload image-cropper"
+           data-image-cropper-detect-url-value="<%= classify_autodetections_path %>"
            data-action="dragover->photo-upload#dragOver dragleave->photo-upload#dragLeave drop->photo-upload#drop">
-
+ 
         <%= f.hidden_field :crop_x, data: { "image-cropper-target": "x" } %>
         <%= f.hidden_field :crop_y, data: { "image-cropper-target": "y" } %>
         <%= f.hidden_field :crop_w, data: { "image-cropper-target": "w" } %>
         <%= f.hidden_field :crop_h, data: { "image-cropper-target": "h" } %>
+ 
+        <!-- Atributo para persistência do CarrierWave entre falhas de validação -->
+        <%= f.hidden_field :photo_cache %>
 
         <!-- Hidden input for remove_photo -->
         <%= f.hidden_field :remove_photo, value: "", data: { "photo-upload-target": "removeField" } %>
         <%= f.hidden_field :remote_photo_url %>
-
+ 
         <!-- File input (hidden but accessible for programmatic .click()) -->
         <%= f.file_field :photo,
               accept: "image/png,image/gif,image/jpeg",
@@ -102,9 +106,14 @@
                 <h5 class="modal-title fw-bold"><i class="bi bi-crop me-2 text-primary"></i> Ajustar Foto</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
-              <div class="modal-body p-4">
-                <div class="bg-light rounded-3 overflow-hidden" style="max-height: 60vh;">
-                  <img src="" data-image-cropper-target="image" class="img-fluid" data-action="load->image-cropper#initCropper">
+              <div class="modal-body p-0">
+                <div class="d-flex align-items-center justify-content-center overflow-hidden p-4" 
+                     style="min-height: 450px; max-height: 70vh; background-color: #0f172a;">
+                  <div class="rounded-1 shadow-lg" style="border: 1px solid rgba(255,255,255,0.3); line-height: 0;">
+                    <img src="" data-image-cropper-target="image" class="img-fluid" 
+                         style="display: block; max-width: 100%;"
+                         data-action="load->image-cropper#initCropper">
+                  </div>
                 </div>
               </div>
               <div class="modal-footer border-0 p-4 pt-0">

@@ -15,8 +15,9 @@ export default class extends Controller {
 
   // ------ Click on drop zone ------
   openFilePicker(event) {
-    // Don't trigger if clicking the remove button or its children
+    // Don't trigger if clicking the remove button or crop button or its children
     if (event.target.closest("[data-action~='photo-upload#removePhoto']")) return
+    if (event.target.closest("[data-action~='image-cropper#open']")) return
     this.inputTarget.click()
   }
 

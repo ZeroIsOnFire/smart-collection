@@ -14,6 +14,12 @@ class Car
   field :color, type: String
   field :tags, type: Array, default: []
   field :detected_via_ai, type: Boolean, default: false
+  
+  # Atributo para persistência do CarrierWave entre falhas de validação
+  field :photo_cache, type: String
+
+  # Virtual attributes for image cropping
+  attr_accessor :crop_x, :crop_y, :crop_w, :crop_h
 
   COLORS = {
     'Branco' => '#FFFFFF',

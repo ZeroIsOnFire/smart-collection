@@ -77,6 +77,16 @@ class AutodetectionsController < ApplicationController
     end
   end
 
+  def classify
+    photo = params[:photo]
+    if photo.present?
+      result = YoloDetectionService.classify(photo.path)
+      render json: result
+    else
+      render json: { error: 'Nenhuma foto fornecida' }, status: :bad_request
+    end
+  end
+
   private
 
   def set_autodetection
