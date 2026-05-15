@@ -29,7 +29,7 @@ class CarsController < ApplicationController
       format.turbo_stream do
         render turbo_stream: turbo_stream.update('sharing_settings_toggle', partial: 'cars/sharing_settings')
       end
-      format.html { redirect_to edit_user_registration_path, notice: 'Configuração de compartilhamento atualizada.' }
+      format.html { redirect_to edit_user_registration_path, notice: t('flash.updated', resource: t('nav.settings')) }
     end
   end
 
@@ -49,7 +49,7 @@ class CarsController < ApplicationController
     if params[:detected_item_id].present?
       @detected_item = DetectedItem.find_by(id: params[:detected_item_id])
       # Garante que o item detectado pertence ao usuário atual
-      return redirect_to cars_path, alert: 'Item detectado inválido ou não autorizado.' if @detected_item.nil? || @detected_item.autodetection.user_id.to_s != current_user.id.to_s
+      return redirect_to cars_path, alert: t('flash.unauthorized') if @detected_item.nil? || @detected_item.autodetection.user_id.to_s != current_user.id.to_s
     end
 
     # Se vier de um item detectado, garante que a foto seja carregada do arquivo local
@@ -77,7 +77,7 @@ class CarsController < ApplicationController
       end
 
       respond_to do |format|
-        format.html { redirect_to car_url(@car), notice: 'Carro criado com sucesso.' }
+        format.html { redirect_to car_url(@car), notice: t('flash.created', resource: t('activerecord.models.car.one')) }
         render_detected_item_replacement(format)
       end
     else
@@ -93,7 +93,7 @@ class CarsController < ApplicationController
     @car = car_service.update(@car.id, car_params)
 
     if @car.errors.empty?
-      redirect_to car_url(@car), notice: 'Carro atualizado com sucesso.'
+      redirect_to car_url(@car), notice: t('flash.updated', resource: t('activerecord.models.car.one'))
     else
       render :edit, status: :unprocessable_content
     end
@@ -102,7 +102,7 @@ class CarsController < ApplicationController
   # DELETE /cars/1
   def destroy
     car_service.destroy(@car.id)
-    redirect_to cars_url, notice: 'Carro deletado com sucesso.'
+    redirect_to cars_url, notice: t('flash.deleted', resource: t('activerecord.models.car.one'))
   end
 
   private

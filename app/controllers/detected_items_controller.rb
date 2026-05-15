@@ -17,7 +17,7 @@ class DetectedItemsController < ApplicationController
 
     @detected_item = @autodetection.detected_items.new(
       status: 'pending',
-      label: classification[:label] ? classification[:label].to_s.capitalize : 'Novo Item',
+      label: classification[:label] ? classification[:label].to_s.capitalize : t('autodetections.detected_item.new_item'),
       color: classification[:color],
       position_data: {
         'score' => 1.0, # Manual
@@ -37,11 +37,11 @@ class DetectedItemsController < ApplicationController
             locals: { detected_item: @detected_item }
           )
         end
-        format.html { redirect_to @autodetection, notice: 'Item adicionado manualmente.' }
+        format.html { redirect_to @autodetection, notice: t('autodetections.messages.item_added') }
       end
     else
       respond_to do |format|
-        format.html { redirect_to @autodetection, alert: 'Erro ao adicionar item.' }
+        format.html { redirect_to @autodetection, alert: t('autodetections.messages.item_error') }
         format.json { render json: @detected_item.errors, status: :unprocessable_content }
       end
     end
@@ -57,7 +57,7 @@ class DetectedItemsController < ApplicationController
       format.turbo_stream do
         render turbo_stream: turbo_stream.remove("detected_item_#{params[:id]}")
       end
-      format.html { redirect_back_or_to(root_path, notice: 'Item removido.') }
+      format.html { redirect_back_or_to(root_path, notice: t('autodetections.messages.item_removed')) }
     end
   end
 
@@ -145,12 +145,12 @@ class DetectedItemsController < ApplicationController
   def set_detected_item
     @detected_item = DetectedItem.find_by(id: params[:id])
 
-    render json: { error: 'Não encontrado' }, status: :not_found and return if @detected_item.nil?
+    render json: { error: t('flash.not_found', resource: t('activerecord.models.item.one')) }, status: :not_found and return if @detected_item.nil?
 
     # Verifica se pertence ao usuário através da autodetection
     return if @detected_item.autodetection.user_id.to_s == current_user.id.to_s
 
-    render json: { error: 'Não autorizado' }, status: :unauthorized and return
+    render json: { error: t('flash.unauthorized') }, status: :unauthorized and return
   end
 
   # Monta os vértices normalizados (0.0 a 1.0) a partir dos params x, y, width, height

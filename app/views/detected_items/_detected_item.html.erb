@@ -1,6 +1,6 @@
 <turbo-frame id="detected_item_<%= detected_item.id %>"
-     class="col-12 mb-4 d-block"
-     data-controller="detected-item">
+             class="col-12 mb-4 d-block"
+             data-controller="detected-item">
   <% cache detected_item do %>
   <%
     is_saved = detected_item.status == 'saved'
@@ -39,15 +39,15 @@
           <% if is_saved %>
             <div class="d-flex align-items-center h-100">
               <div class="text-success">
-                <h5 class="fw-bold mb-1"><i class="bi bi-check-circle-fill me-2"></i> Adicionado com Sucesso!</h5>
-                <p class="mb-0 text-muted">Este item já faz parte da sua coleção.</p>
+                <h5 class="fw-bold mb-1"><i class="bi bi-check-circle-fill me-2"></i> <%= t('autodetections.detected_item.statuses.saved_title') %></h5>
+                <p class="mb-0 text-muted"><%= t('autodetections.detected_item.statuses.saved_text') %></p>
               </div>
             </div>
           <% elsif is_rejected %>
             <div class="d-flex align-items-center h-100">
               <div class="text-danger">
-                <h5 class="fw-bold mb-1"><i class="bi bi-x-circle-fill me-2"></i> Item Rejeitado</h5>
-                <p class="mb-0 text-muted">Este item foi ignorado e não será salvo.</p>
+                <h5 class="fw-bold mb-1"><i class="bi bi-x-circle-fill me-2"></i> <%= t('autodetections.detected_item.statuses.rejected_title') %></h5>
+                <p class="mb-0 text-muted"><%= t('autodetections.detected_item.statuses.rejected_text') %></p>
               </div>
             </div>
           <% else %>
@@ -61,7 +61,7 @@
                         class: "form-control border-0 bg-light",
                         id: "brand_#{detected_item.id}",
                         placeholder: "Hot Wheels" %>
-                  <label for="brand_<%= detected_item.id %>">Marca (opcional)</label>
+                  <label for="brand_<%= detected_item.id %>"><%= t('autodetections.detected_item.brand_optional') %></label>
                 </div>
               </div>
 
@@ -72,7 +72,7 @@
                         class: "form-control border-0 bg-light",
                         id: "manufacturer_#{detected_item.id}",
                         placeholder: "Porsche" %>
-                  <label for="manufacturer_<%= detected_item.id %>">Fabricante (opcional)</label>
+                  <label for="manufacturer_<%= detected_item.id %>"><%= t('autodetections.detected_item.manufacturer_optional') %></label>
                 </div>
               </div>
 
@@ -84,7 +84,7 @@
                         id: "name_#{detected_item.id}",
                         placeholder: "911 Carrera",
                         required: true %>
-                  <label for="name_<%= detected_item.id %>">Nome / Modelo (Obrigatório)</label>
+                  <label for="name_<%= detected_item.id %>"><%= t('autodetections.detected_item.model_required') %></label>
                 </div>
               </div>
 
@@ -92,20 +92,20 @@
                 <div class="form-floating">
                   <%= f.select :color,
                         Car.color_options,
-                        { selected: detected_item.color, prompt: "Selecione..." },
+                        { selected: detected_item.color, prompt: t('autodetections.detected_item.select_prompt') },
                         { class: "form-select border-0 bg-light", id: "color_#{detected_item.id}" } %>
-                  <label for="color_<%= detected_item.id %>">Cor</label>
+                  <label for="color_<%= detected_item.id %>"><%= t('autodetections.detected_item.color') %></label>
                 </div>
               </div>
 
               <div class="col-md-4">
                 <div class="form-floating">
-                  <%= f.number_field :year,
+                  <%= f.text_field :year,
                         value: detected_item.year,
                         class: "form-control border-0 bg-light",
                         id: "year_#{detected_item.id}",
-                        placeholder: "2024" %>
-                  <label for="year_<%= detected_item.id %>">Ano</label>
+                        placeholder: "1998" %>
+                  <label for="year_<%= detected_item.id %>"><%= t('autodetections.detected_item.year') %></label>
                 </div>
               </div>
 
@@ -113,111 +113,94 @@
                 <div class="form-floating">
                   <%= f.select :size,
                         Car.scale_options,
-                        { selected: (detected_item.size || '1:64'), prompt: "Escala..." },
+                        { selected: detected_item.size, prompt: t('autodetections.detected_item.select_prompt') },
                         { class: "form-select border-0 bg-light", id: "size_#{detected_item.id}" } %>
-                  <label for="size_<%= detected_item.id %>">Escala</label>
+                  <label for="size_<%= detected_item.id %>"><%= t('autodetections.detected_item.size_scale') %></label>
                 </div>
               </div>
             <% end %>
           <% end %>
         </div>
 
-        <!-- Lado Direito: Ações (20%) -->
-        <div class="col-md-3 p-4 border-start text-center">
-          <% if is_processed %>
-             <div class="<%= is_saved ? 'text-success' : 'text-danger' %> mb-3">
-               <i class="bi <%= is_saved ? 'bi-patch-check' : 'bi-trash3' %> display-1"></i>
-               <div class="fw-bold"><%= is_saved ? 'SALVO' : 'REJEITADO' %></div>
-             </div>
-
+        <!-- Direita: Ações (20%) -->
+        <div class="col-md-3 border-start p-4 bg-light d-flex flex-column gap-2 justify-content-center">
+          <% if is_saved || is_rejected %>
              <%= button_to undo_detected_item_path(detected_item),
-                           method: :patch,
-                           class: "btn btn-sm btn-outline-secondary rounded-pill px-4" do %>
-               <i class="bi bi-arrow-counterclockwise me-1"></i> Desfazer
+                  method: :patch,
+                  class: "btn btn-soft-secondary w-100 rounded-pill",
+                  data: { turbo_frame: "detected_item_#{detected_item.id}" } do %>
+                <i class="bi bi-arrow-counterclockwise me-2"></i><%= t('autodetections.detected_item.undo') %>
              <% end %>
           <% else %>
-            <div class="d-flex flex-column gap-2 mb-3">
-              <button type="submit"
-                      form="form_detected_item_<%= detected_item.id %>"
-                      class="btn btn-premium rounded-pill shadow-sm py-2">
-                <i class="bi bi-plus-circle-fill me-1"></i> Adicionar ao Catálogo
-              </button>
+            <button type="submit" form="form_detected_item_<%= detected_item.id %>" class="btn btn-premium w-100 rounded-pill shadow-sm">
+              <i class="bi bi-check2-circle me-2"></i><%= t('autodetections.detected_item.save_item') %>
+            </button>
 
-              <div class="d-flex gap-2">
-                <%= button_to reject_detected_item_path(detected_item),
-                              method: :patch,
-                              form_class: "w-100",
-                              class: "btn btn-outline-warning w-100 rounded-pill shadow-sm py-2 px-0",
-                              title: "Ignorar item e não salvar" do %>
-                  <i class="bi bi-eye-slash-fill me-1"></i> Ignorar
-                <% end %>
+            <!-- Botão de Ajustar Seleção (Abre modal Cropper) -->
+            <button type="button"
+                    class="btn btn-soft-secondary w-100 rounded-pill"
+                    data-action="click->detected-item#openAdjustmentModal">
+              <i class="bi bi-crop me-2"></i><%= t('autodetections.detected_item.adjust_selection') %>
+            </button>
 
-                <button type="button"
-                        class="btn btn-outline-secondary w-100 rounded-pill shadow-sm py-2 px-0"
-                        data-bs-toggle="modal"
-                        data-bs-target="#adjustModal_<%= detected_item.id %>"
-                        title="Recortar imagem novamente">
-                  <i class="bi bi-crop me-1"></i> Ajustar
-                </button>
-              </div>
-            </div>
-
-            <div class="text-center text-muted extra-small bg-light rounded px-2 py-1 mx-auto" style="width: fit-content;">
-              <i class="bi bi-robot me-1"></i> Score da IA: <%= (detected_item.position_data["score"] * 100).to_i %>%
-            </div>
-
-            <!-- Modal de Ajuste de Seleção -->
-            <div class="modal fade" id="adjustModal_<%= detected_item.id %>" tabindex="-1" aria-hidden="true">
-              <div class="modal-dialog modal-lg modal-dialog-centered">
-                <%
-                  vertices = detected_item.position_data["vertices"] || []
-                  xs = vertices.map { |v| (v["x"] || v[:x] || 0).to_f }
-                  ys = vertices.map { |v| (v["y"] || v[:y] || 0).to_f }
-                  min_x = xs.min || 0
-                  min_y = ys.min || 0
-                  w = (xs.max || 0) - min_x
-                  h = (ys.max || 0) - min_y
-                %>
-                <div class="modal-content border-0 shadow-lg rounded-4"
-                     data-controller="selection-adjustment"
-                     data-selection-adjustment-initial-x-value="<%= min_x %>"
-                     data-selection-adjustment-initial-y-value="<%= min_y %>"
-                     data-selection-adjustment-initial-width-value="<%= w %>"
-                     data-selection-adjustment-initial-height-value="<%= h %>"
-                     data-selection-adjustment-update-url-value="<%= update_selection_detected_item_path(detected_item) %>">
-                  <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title fw-bold"><i class="bi bi-crop me-2 text-primary"></i> Ajustar Seleção</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                  </div>
-                  <div class="modal-body p-4">
-                    <p class="text-muted small mb-4">Arraste e redimensione o quadro para enquadrar melhor o carro na foto original.</p>
-
-                    <div class="bg-light rounded-3 overflow-hidden position-relative"
-                         style="max-height: 60vh;">
-
-                      <img src="<%= detected_item.autodetection.photo.url %>"
-                           class="img-fluid d-block mx-auto"
-                           data-selection-adjustment-target="image">
-                    </div>
-                  </div>
-
-                  <div class="modal-footer border-0 p-4 pt-0">
-                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button"
-                            class="btn btn-premium rounded-pill px-4"
-                            data-action="click->selection-adjustment#save">
-                      Confirmar Ajuste
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <%= button_to reject_detected_item_path(detected_item),
+                  method: :patch,
+                  class: "btn btn-soft-danger w-100 rounded-pill",
+                  data: { turbo_frame: "detected_item_#{detected_item.id}" } do %>
+              <i class="bi bi-trash3 me-2"></i><%= t('autodetections.detected_item.discard') %>
+            <% end %>
           <% end %>
         </div>
+      </div>
+    </div>
+  </div>
 
+  <!-- Modal de Ajuste de Seleção (Cropper) -->
+  <div class="modal fade" id="adjustmentModal_<%= detected_item.id %>" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <%
+        # Calcular coordenadas iniciais para o cropper baseadas no position_data
+        vertices = detected_item.position_data["vertices"] || []
+        xs = vertices.map { |v| (v["x"] || v[:x] || 0).to_f }
+        ys = vertices.map { |v| (v["y"] || v[:y] || 0).to_f }
+        min_x = xs.min || 0
+        min_y = ys.min || 0
+        w = (xs.max || 0) - min_x
+        h = (ys.max || 0) - min_y
+      %>
+      <div class="modal-content border-0 shadow-lg rounded-4"
+           data-controller="selection-adjustment"
+           data-selection-adjustment-initial-x-value="<%= min_x %>"
+           data-selection-adjustment-initial-y-value="<%= min_y %>"
+           data-selection-adjustment-initial-width-value="<%= w %>"
+           data-selection-adjustment-initial-height-value="<%= h %>"
+           data-selection-adjustment-update-url-value="<%= update_selection_detected_item_path(detected_item) %>"
+           data-selection-adjustment-item-id-value="<%= detected_item.id %>">
+        
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold"><i class="bi bi-crop me-2 text-primary"></i> <%= t('autodetections.detected_item.adjust_selection') %></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        
+        <div class="modal-body p-0">
+          <div class="d-flex align-items-center justify-content-center overflow-hidden p-4" 
+               style="min-height: 450px; max-height: 70vh; background-color: #0f172a;">
+            <div class="rounded-1 shadow-lg" style="border: 1px solid rgba(255,255,255,0.3); line-height: 0;">
+              <img src="<%= detected_item.autodetection.photo.url %>"
+                   data-selection-adjustment-target="image"
+                   class="img-fluid"
+                   style="display: block; max-width: 100%;"
+                   data-action="load->selection-adjustment#initCropper">
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer border-0 p-4 pt-0">
+          <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal"><%= t('actions.cancel') %></button>
+          <button type="button" class="btn btn-premium rounded-pill px-4" data-action="click->selection-adjustment#save"><%= t('autodetections.detected_item.confirm_adjustment') %></button>
+        </div>
       </div>
     </div>
   </div>
   <% end %>
 </turbo-frame>
-

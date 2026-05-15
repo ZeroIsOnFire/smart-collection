@@ -45,11 +45,14 @@ class Car
   ].freeze
 
   def self.color_options
-    COLORS.keys.map { |name| [name, name] }
+    COLORS.keys.map { |name| [I18n.t("colors.#{name}", default: name), name] }
   end
 
   def self.scale_options
-    SCALES.map { |s| [s, s] }
+    SCALES.map do |s|
+      label = s == 'Outra' ? I18n.t('scales.other', default: s) : s
+      [label, s]
+    end
   end
 
   mount_uploader :photo, PhotoUploader

@@ -15,7 +15,7 @@
  
       <!-- Foto Principal -->
       <h5 class="fw-bold mb-4 text-dark pb-2 border-bottom">
-        <i class="bi bi-camera me-2 text-primary"></i> Foto Principal
+        <i class="bi bi-camera me-2 text-primary"></i> <%= t('cars.form.main_photo') %>
       </h5>
  
       <div class="col-12 mb-5"
@@ -40,7 +40,7 @@
               accept: "image/png,image/gif,image/jpeg",
               style: "position: absolute; width: 0; height: 0; opacity: 0; overflow: hidden;",
               data: { "photo-upload-target": "input", "color-detector-target": "input", action: "change->photo-upload#fileSelected change->color-detector#detect" } %>
-
+ 
         <!-- Existing photo data (only on edit) -->
         <% if car.photo? %>
           <span data-photo-upload-target="existingPhoto"
@@ -51,23 +51,23 @@
                 data-url="<%= car.remote_photo_url %>"
                 class="d-none"></span>
         <% end %>
-
+ 
         <!-- Drop zone / Upload prompt -->
         <div class="position-relative border rounded-4 p-5 text-center bg-light photo-dropzone"
              style="border-style: dashed !important; border-width: 2px !important; border-color: #dee2e6 !important; cursor: pointer;"
              data-photo-upload-target="dropzone"
              data-action="click->photo-upload#openFilePicker">
-
+ 
           <!-- Upload prompt (shown when no photo) -->
           <div data-photo-upload-target="uploadPrompt">
             <div class="d-inline-flex align-items-center justify-content-center bg-white shadow-sm rounded-circle mb-3"
                  style="width: 64px; height: 64px;">
               <i class="bi bi-cloud-upload text-primary fs-3"></i>
             </div>
-            <h6 class="fw-bold text-dark mb-1">Clique ou arraste a imagem aqui</h6>
-            <p class="text-muted small mb-0">JPG, PNG ou GIF &mdash; máx. 5 MB</p>
+            <h6 class="fw-bold text-dark mb-1"><%= t('cars.form.upload_prompt') %></h6>
+            <p class="text-muted small mb-0"><%= t('cars.form.upload_limits') %></p>
           </div>
-
+ 
           <!-- Preview (hidden initially, shown after photo selected or existing) -->
           <div data-photo-upload-target="preview" class="d-none">
             <div class="position-relative d-inline-block">
@@ -77,33 +77,33 @@
                    alt="Preview"
                    class="rounded-3 shadow-sm"
                    style="max-height: 240px; max-width: 100%; object-fit: contain;">
-
+ 
               <button type="button"
                       class="btn btn-premium btn-sm rounded-circle position-absolute shadow"
                       style="top: -10px; right: 25px; width: 32px; height: 32px; padding: 0; line-height: 1;"
-                      title="Ajustar recorte"
+                      title="<%= t('cars.form.crop_button') %>"
                       data-action="click->image-cropper#open">
                 <i class="bi bi-crop"></i>
               </button>
-
+ 
               <button type="button"
                       class="btn btn-danger btn-sm rounded-circle position-absolute shadow"
                       style="top: -10px; right: -10px; width: 32px; height: 32px; padding: 0; line-height: 1;"
-                      title="Remover foto"
+                      title="<%= t('cars.form.remove_button') %>"
                       data-action="click->photo-upload#removePhoto">
                 <i class="bi bi-x-lg"></i>
               </button>
             </div>
-            <p class="text-muted small mt-3 mb-0">Clique ou arraste para substituir a foto</p>
+            <p class="text-muted small mt-3 mb-0"><%= t('cars.form.replace_button') %></p>
           </div>
         </div>
-
+ 
         <!-- Modal de Cropper -->
         <div class="modal fade" id="cropperModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
           <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg rounded-4">
               <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold"><i class="bi bi-crop me-2 text-primary"></i> Ajustar Foto</h5>
+                <h5 class="modal-title fw-bold"><i class="bi bi-crop me-2 text-primary"></i> <%= t('cars.form.adjust_photo') %></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="modal-body p-0">
@@ -117,75 +117,70 @@
                 </div>
               </div>
               <div class="modal-footer border-0 p-4 pt-0">
-                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-premium rounded-pill px-4" data-action="click->image-cropper#save">Salvar Recorte</button>
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal"><%= t('actions.cancel') %></button>
+                <button type="button" class="btn btn-premium rounded-pill px-4" data-action="click->image-cropper#save"><%= t('cars.form.save_crop') %></button>
               </div>
             </div>
           </div>
         </div>
-
+ 
         <% if car.errors[:photo].any? %>
           <div class="invalid-feedback d-block text-start mt-2">
             <%= car.errors[:photo].to_sentence %>
           </div>
         <% end %>
       </div>
-
+ 
       <!-- Informações Básicas -->
       <h5 class="fw-bold mb-4 text-dark pb-2 border-bottom">
-        <i class="bi bi-box-seam me-2 text-primary"></i> Informações Básicas
+        <i class="bi bi-box-seam me-2 text-primary"></i> <%= t('cars.form.basic_info') %>
       </h5>
-
+ 
       <div class="row g-4 mb-4">
         <div class="col-12">
           <%= f.input :brand,
-                      label: "Marca (Item)",
                       placeholder: "Ex: Hot Wheels, Matchbox, Maisto",
                       input_html: { class: "form-control-lg bg-light border-0" },
                       label_html: { class: "text-secondary small text-uppercase tracking-wide" } %>
         </div>
-
+ 
         <div class="col-12">
           <%= f.input :manufacturer,
-                      label: "Fabricante (Veículo)",
                       placeholder: "Ex: Porsche, Ferrari, Ford",
                       input_html: { class: "form-control-lg bg-light border-0" },
                       label_html: { class: "text-secondary small text-uppercase tracking-wide" } %>
         </div>
-
+ 
         <div class="col-12">
           <%= f.input :name,
-                      label: "Nome / Modelo do Veículo",
                       placeholder: "Ex: 911 Carrera, Mustang GT, LaFerrari",
                       input_html: { class: "form-control-lg bg-light border-0" },
                       label_html: { class: "text-secondary small text-uppercase tracking-wide" } %>
         </div>
       </div>
-
+ 
       <!-- Especificações -->
       <h5 class="fw-bold mb-4 text-dark pb-2 border-bottom">
-        <i class="bi bi-sliders me-2 text-primary"></i> Especificações
+        <i class="bi bi-sliders me-2 text-primary"></i> <%= t('cars.form.specifications') %>
       </h5>
-
+ 
       <div class="row g-4 mb-5">
         <div class="col-md-6">
           <%= f.input :year,
-                      label: "Ano de Fabricação",
                       placeholder: "Ex: 1998",
                       input_html: { class: "form-control-lg bg-light border-0" },
                       label_html: { class: "text-secondary small text-uppercase tracking-wide" } %>
         </div>
-
+ 
         <div class="col-md-6">
           <%= f.input :size,
                       as: :select,
-                      label: "Escala / Tamanho",
                       collection: Car.scale_options,
-                      include_blank: "Selecione a escala...",
+                      include_blank: t('cars.form.select_scale'),
                       input_html: { class: "form-select form-select-lg bg-light border-0" },
                       label_html: { class: "text-secondary small text-uppercase tracking-wide" } %>
         </div>
-
+ 
         <div class="col-md-12 mt-4">
           <div class="input-group input-group-lg border-0 bg-light rounded-3 overflow-hidden">
             <span class="input-group-text bg-light border-0 ps-3">
@@ -198,7 +193,7 @@
                         as: :select,
                         label: false,
                         collection: Car.color_options,
-                        include_blank: "Selecione a cor...",
+                        include_blank: t('cars.form.select_color'),
                         input_html: {
                           class: "form-select border-0 bg-light py-3",
                           data: {
@@ -208,38 +203,38 @@
                         },
                         wrapper: false %>
           </div>
-          <small class="text-secondary small text-uppercase tracking-wide mt-2 d-block ms-1" style="font-size: 0.7rem;">Cor Principal</small>
+          <small class="text-secondary small text-uppercase tracking-wide mt-2 d-block ms-1" style="font-size: 0.7rem;"><%= t('cars.form.predominant_color') %></small>
         </div>
       </div>
-
+ 
       <!-- Detalhes Adicionais -->
       <h5 class="fw-bold mb-4 text-dark pb-2 border-bottom">
-        <i class="bi bi-card-text me-2 text-primary"></i> Detalhes Adicionais
+        <i class="bi bi-card-text me-2 text-primary"></i> <%= t('activerecord.attributes.car.observations') %>
       </h5>
-
+ 
       <div class="row g-4 mb-2">
         <div class="col-12">
           <%= f.input :observations,
                       as: :text,
-                      label: "Observações do Item",
+                      label: false,
                       placeholder: "Escreva detalhes sobre o estado de conservação...",
                       input_html: { class: "bg-light border-0", rows: 4 },
                       label_html: { class: "text-secondary small text-uppercase tracking-wide" } %>
         </div>
       </div>
-
+ 
     </div>
-
+ 
     <div class="card-footer bg-light border-0 p-4 p-md-5 d-flex justify-content-between align-items-center">
       <%= link_to cars_path, class: "btn btn-link text-secondary text-decoration-none fw-semibold px-0" do %>
-        <i class="bi bi-arrow-left me-2"></i>Voltar
+        <i class="bi bi-arrow-left me-2"></i><%= t('actions.back') %>
       <% end %>
-
-      <%= f.button :submit, car.persisted? ? "Salvar Alterações" : "Adicionar ao Acervo", class: "btn-primary btn-lg rounded-pill px-5 fw-bold shadow-sm" %>
+ 
+      <%= f.button :submit, car.persisted? ? t('actions.save') : t('actions.create'), class: "btn-primary btn-lg rounded-pill px-5 fw-bold shadow-sm" %>
     </div>
   </div>
 <% end %>
-
+ 
 <style>
   .tracking-wide { letter-spacing: 0.05em; }
   .form-control { transition: all 0.2s ease-in-out; }
@@ -249,10 +244,14 @@
     border: 1px solid #dee2e6 !important;
   }
   .photo-dropzone {
-    transition: border-color 0.2s, background-color 0.2s;
+    transition: all 0.2s ease-in-out;
+  }
+  .photo-dropzone:hover {
+    background-color: #f1f3f5 !important;
+    border-color: #ced4da !important;
   }
   .photo-dropzone.drag-over {
+    background-color: #e9ecef !important;
     border-color: #0d6efd !important;
-    background-color: #e8f0fe !important;
   }
 </style>
