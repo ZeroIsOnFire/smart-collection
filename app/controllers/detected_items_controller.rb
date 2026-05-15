@@ -12,9 +12,13 @@ class DetectedItemsController < ApplicationController
     # Recortar imagem
     cropped_file = ImageCropperService.crop(@autodetection.photo.path, normalized_vertices, padding: 0)
 
+    # Autodetecção completa baseada no recorte manual
+    classification = YoloDetectionService.classify(cropped_file.path) if cropped_file
+
     @detected_item = @autodetection.detected_items.new(
       status: 'pending',
-      label: 'Novo Item',
+      label: classification[:label] ? classification[:label].to_s.capitalize : 'Novo Item',
+      color: classification[:color],
       position_data: {
         'score' => 1.0, # Manual
         'vertices' => normalized_vertices
@@ -84,9 +88,14 @@ class DetectedItemsController < ApplicationController
       new_position_data = @detected_item.position_data.dup
       new_position_data['vertices'] = normalized_vertices
 
+      # Autodetecção completa baseada no novo recorte
+      classification = YoloDetectionService.classify(cropped_file.path)
+
       @detected_item.update(
         position_data: new_position_data,
-        cropped_photo: cropped_file
+        cropped_photo: cropped_file,
+        label: classification[:label] ? classification[:label].to_s.capitalize : @detected_item.label,
+        color: classification[:color] || @detected_item.color
       )
     end
 

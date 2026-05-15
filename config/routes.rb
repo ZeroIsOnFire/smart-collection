@@ -19,6 +19,9 @@ Rails.application.routes.draw do
   get '/s/:share_token/car/:id', to: 'public_collections#show', as: :public_share_car
 
   resources :autodetections, only: %i[create show destroy] do
+    collection do
+      post :detect_color
+    end
     member do
       patch :retry
     end

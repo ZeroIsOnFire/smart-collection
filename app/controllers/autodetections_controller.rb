@@ -67,6 +67,15 @@ class AutodetectionsController < ApplicationController
     autodetection_service.retry(@autodetection.id.to_s)
     redirect_to root_path, notice: 'Processo reiniciado.'
   end
+  def detect_color
+    photo = params[:photo]
+    if photo.present?
+      color = YoloDetectionService.classify_color(photo.path)
+      render json: { color: color }
+    else
+      render json: { error: 'Nenhuma foto fornecida' }, status: :bad_request
+    end
+  end
 
   private
 

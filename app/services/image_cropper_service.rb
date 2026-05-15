@@ -48,6 +48,11 @@ class ImageCropperService
       # MiniMagick crop format: "widthxheight+x+y"
       image.crop "#{w.to_i}x#{h.to_i}+#{left.to_i}+#{top.to_i}"
 
+      # Upscale proporcional se a menor dimensão for menor que 500px
+      if [image.width, image.height].min < 500
+        image.resize '500x500^'
+      end
+
       # Usar Tempfile para que o Ruby/OS gerencie a remoção automaticamente
       output = Tempfile.new(['crop_', '.jpg'], Rails.root.join('tmp'))
       output.binmode

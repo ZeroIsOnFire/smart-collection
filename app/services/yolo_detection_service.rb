@@ -36,6 +36,65 @@ class YoloDetectionService
     end
   end
 
+  def self.classify_color(photo_path)
+    return nil unless service_configured?
+
+    url = URI.parse("#{ENV.fetch('YOLO_SERVICE_URL')}/classify_color")
+    api_key = ENV.fetch('YOLO_API_KEY')
+
+    begin
+      request = Net::HTTP::Post.new(url)
+      request['X-API-Key'] = api_key
+      
+      form_data = [['file', File.open(photo_path)]]
+      request.set_form(form_data, 'multipart/form-data')
+
+      response = Net::HTTP.start(url.host, url.port) do |http|
+        http.request(request)
+      end
+
+      if response.is_a?(Net::HTTPSuccess)
+        data = JSON.parse(response.body)
+        data['color']
+      else
+        Rails.logger.error "YoloDetectionService classify_color Error: #{response.code} - #{response.body}"
+        nil
+      end
+    rescue StandardError => e
+      Rails.logger.error "YoloDetectionService classify_color Exception: #{e.message}"
+      nil
+    end
+  end
+
+  def self.classify(photo_path)
+    return {} unless service_configured?
+
+    url = URI.parse("#{ENV.fetch('YOLO_SERVICE_URL')}/classify")
+    api_key = ENV.fetch('YOLO_API_KEY')
+
+    begin
+      request = Net::HTTP::Post.new(url)
+      request['X-API-Key'] = api_key
+      
+      form_data = [['file', File.open(photo_path)]]
+      request.set_form(form_data, 'multipart/form-data')
+
+      response = Net::HTTP.start(url.host, url.port) do |http|
+        http.request(request)
+      end
+
+      if response.is_a?(Net::HTTPSuccess)
+        JSON.parse(response.body).symbolize_keys
+      else
+        Rails.logger.error "YoloDetectionService classify Error: #{response.code} - #{response.body}"
+        {}
+      end
+    rescue StandardError => e
+      Rails.logger.error "YoloDetectionService classify Exception: #{e.message}"
+      {}
+    end
+  end
+
   def self.service_configured?
     ENV['YOLO_SERVICE_URL'].present? && ENV['YOLO_API_KEY'].present?
   end
@@ -45,6 +104,7 @@ class YoloDetectionService
       {
         label: det['label'],
         score: det['score'],
+        color: det['color'],
         vertices: det['vertices'].map { |v| { x: v['x'], y: v['y'] } }
       }
     end

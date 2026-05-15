@@ -22,6 +22,11 @@ RSpec.describe ImageCropperService do
       expect(File).to exist(result.path)
       expect(result.path).to include('crop_')
 
+      # Verify upscale (original test_image.png is very small)
+      final_image = MiniMagick::Image.open(result.path)
+      expect(final_image.width).to be >= 500
+      expect(final_image.height).to be >= 500
+
       # Clean up after test
       result.close
       FileUtils.rm_f(result.path)

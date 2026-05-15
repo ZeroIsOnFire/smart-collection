@@ -15,6 +15,86 @@ from fastapi import FastAPI, File, UploadFile, HTTPException, Header, Depends
 from ultralytics import YOLO
 from PIL import Image
 import numpy as np
+from sklearn.cluster import KMeans
+
+class ColorDetector:
+    def detect(self, image):
+        # Resize for faster processing
+        img = image.copy()
+        img.thumbnail((100, 100))
+        
+        # Focus on center area to avoid background
+        w, h = img.size
+        left, top, right, bottom = w * 0.3, h * 0.3, w * 0.7, h * 0.7
+        img = img.crop((left, top, right, bottom))
+        
+        # Convert to HSV using PIL
+        # PIL HSV: H(0-255), S(0-255), V(0-255)
+        hsv_img = img.convert('HSV')
+        data = np.array(hsv_img).reshape(-1, 3)
+        
+        # Filter pixels (ignore very dark shadows and specular highlights)
+        filtered = data[(data[:, 2] > 25) & ~((data[:, 2] > 220) & (data[:, 1] < 30))]
+        
+        if len(filtered) == 0:
+            # If all filtered out, check original data for Black/White
+            avg_v = np.mean(data[:, 2])
+            return "Preto" if avg_v < 128 else "Branco"
+        
+        # KMeans with 3 clusters to separate color from remaining reflections/shadows
+        n_clusters = min(3, len(filtered))
+        kmeans = KMeans(n_clusters=n_clusters, n_init=5)
+        kmeans.fit(filtered)
+        
+        centers = kmeans.cluster_centers_
+        labels = kmeans.labels_
+        counts = np.bincount(labels)
+        
+        # Strategy: Pick the most "vibrant" (saturated) cluster if it's large enough,
+        # otherwise pick the largest cluster.
+        best_idx = np.argmax(counts)
+        max_sat = centers[best_idx][1]
+        
+        for i in range(len(centers)):
+            # If a cluster is reasonably large (> 20% of filtered pixels) and more saturated
+            if counts[i] > len(filtered) * 0.2 and centers[i][1] > max_sat:
+                max_sat = centers[i][1]
+                best_idx = i
+                
+        h, s, v = centers[best_idx]
+        return self.classify_hsv(h, s, v)
+
+    def classify_hsv(self, h, s, v):
+        # Normalize to 360, 100, 100
+        h_norm = (h / 255.0) * 360
+        s_norm = (s / 255.0) * 100
+        v_norm = (v / 255.0) * 100
+        
+        # Achromatic check (Black, White, Gray, Silver)
+        if s_norm < 15:
+            if v_norm > 90: return "Branco"
+            if v_norm < 20: return "Preto"
+            if v_norm > 75: return "Prata"
+            if v_norm > 35: return "Cinza"
+            return "Preto"
+        
+        # Chromatic colors
+        if h_norm < 12 or h_norm > 345: return "Vermelho"
+        if h_norm < 30:
+            if v_norm < 50: return "Marrom"
+            return "Laranja"
+        if h_norm < 65:
+            if s_norm < 30 and v_norm > 70: return "Bege"
+            if s_norm < 60 and v_norm < 85: return "Dourado"
+            return "Amarelo"
+        if h_norm < 165: return "Verde"
+        if h_norm < 265: return "Azul"
+        if h_norm < 300: return "Roxo"
+        if h_norm < 345: return "Rosa"
+        
+        return "Cinza"
+
+color_detector = ColorDetector()
 
 # Disable Ultralytics online checks
 os.environ["ULTRALYTICS_OFFLINE"] = "True"
@@ -71,13 +151,50 @@ async def detect(file: UploadFile = File(...)):
                 {"x": xyxyn[0], "y": xyxyn[3]}
             ]
             
+            # Color detection
+            # Crop image for color classification
+            # PIL uses [left, top, right, bottom]
+            # xyxyn is [x1, y1, x2, y2] normalized
+            w, h = image.size
+            crop_box = (xyxyn[0]*w, xyxyn[1]*h, xyxyn[2]*w, xyxyn[3]*h)
+            car_crop = image.crop(crop_box)
+            color_name = color_detector.detect(car_crop)
+            
             detections.append({
                 "label": label,
                 "score": float(box.conf[0]),
-                "vertices": vertices
+                "vertices": vertices,
+                "color": color_name
             })
             
     return {"detections": detections}
+
+@app.post("/classify_color", dependencies=[Depends(verify_api_key)])
+async def classify_color(file: UploadFile = File(...)):
+    contents = await file.read()
+    image = Image.open(io.BytesIO(contents)).convert("RGB")
+    color_name = color_detector.detect(image)
+    return {"color": color_name}
+
+@app.post("/classify", dependencies=[Depends(verify_api_key)])
+async def classify(file: UploadFile = File(...)):
+    contents = await file.read()
+    image = Image.open(io.BytesIO(contents)).convert("RGB")
+    
+    # Run inference to get label
+    results = model.predict(image, conf=0.1) # Lower confidence for forced classification
+    label = "Veículo"
+    if results and len(results[0].boxes) > 0:
+        cls = int(results[0].boxes.cls[0])
+        label = results[0].names[cls]
+    
+    # Detect color
+    color_name = color_detector.detect(image)
+    
+    return {
+        "label": label,
+        "color": color_name
+    }
 
 if __name__ == "__main__":
     import uvicorn

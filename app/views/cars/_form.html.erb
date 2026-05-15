@@ -4,7 +4,8 @@
   multipart: true,
   data: {
     controller: "color-detector",
-    "color-detector-colors-value": Car::COLORS.to_json
+    "color-detector-colors-value": Car::COLORS.to_json,
+    "color-detector-detect-url-value": detect_color_autodetections_path
   }
 }) do |f| %>
   <%= f.error_notification %>

@@ -11,18 +11,12 @@ class AutodetectJob < ApplicationJob
     autodetection.update!(status: 'processing')
 
     begin
-      # 1. Analisar a imagem (Prioriza YOLO local, fallback para Google Vision)
+      # 1. Analisar a imagem usando YOLO local
       detected_items_data = []
 
       if YoloDetectionService.service_configured?
         Rails.logger.info "AutodetectJob: Attempting YOLO detection for autodetection #{autodetection_id}"
         detected_items_data = YoloDetectionService.analyze(autodetection.photo.path)
-      end
-
-      # Fallback ou se YOLO não encontrou nada (opcional: Vision é melhor para texto/objetos variados)
-      if detected_items_data.empty? && GoogleVisionService.credentials_configured?
-        Rails.logger.info "AutodetectJob: Attempting Google Vision detection for autodetection #{autodetection_id}"
-        detected_items_data = GoogleVisionService.analyze(autodetection.photo.path)
       end
 
       Rails.logger.info "AutodetectJob: No items found for autodetection #{autodetection_id}" if detected_items_data.empty?
@@ -35,7 +29,8 @@ class AutodetectJob < ApplicationJob
         next unless cropped_file
 
         autodetection.detected_items.create!(
-          label: 'Veículo',
+          label: data[:label].to_s.capitalize,
+          color: data[:color],
           position_data: {
             vertices: data[:vertices],
             score: data[:score]
