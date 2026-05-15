@@ -65,6 +65,8 @@ export default class extends Controller {
       cropBoxMovable: true,
       cropBoxResizable: true,
       toggleDragModeOnDblclick: false,
+      responsive: true,
+      background: false,
       ready: () => {
         const imageData = this.cropper.getImageData()
         const naturalWidth = imageData.naturalWidth
@@ -81,6 +83,8 @@ export default class extends Controller {
           width: width,
           height: height
         })
+
+        image.style.opacity = '1'
       }
     })
   }

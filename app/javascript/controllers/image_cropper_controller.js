@@ -4,21 +4,34 @@ export default class extends Controller {
   static targets = ["image", "x", "y", "w", "h", "previewImg"]
 
   connect() {
-    this.modal = new bootstrap.Modal(document.getElementById('cropperModal'))
+    this.modalElement = document.getElementById('cropperModal')
+    if (this.modalElement) {
+      this.modal = new bootstrap.Modal(this.modalElement)
+      
+      // Inicializar cropper apenas quando o modal terminar de abrir
+      // para garantir que as dimensões do container estejam corretas
+      this.modalElement.addEventListener('shown.bs.modal', () => {
+        this.initCropper()
+      })
+
+      // Destruir ao fechar para evitar vazamento de memória
+      this.modalElement.addEventListener('hidden.bs.modal', () => {
+        if (this.cropper) {
+          this.cropper.destroy()
+          this.cropper = null
+        }
+      })
+    }
   }
 
   open(event) {
     event.preventDefault()
     event.stopPropagation()
     const src = this.previewImgTarget.src
-    if (!src || src.includes('data:image')) {
-      // Se for base64 (upload novo), precisamos carregar no cropper
+    if (src) {
       this.imageTarget.src = src
-    } else {
-      this.imageTarget.src = src
+      this.modal.show()
     }
-    
-    this.modal.show()
   }
 
   initCropper() {
@@ -29,7 +42,7 @@ export default class extends Controller {
     this.cropper = new Cropper(this.imageTarget, {
       viewMode: 1,
       dragMode: 'move',
-      autoCropArea: 1, // Preenche a imagem toda inicialmente
+      autoCropArea: 1,
       restore: false,
       guides: true,
       center: true,
@@ -39,11 +52,17 @@ export default class extends Controller {
       toggleDragModeOnDblclick: false,
       responsive: true,
       checkOrientation: true,
-      background: false
+      background: false,
+      ready: () => {
+        // Tornar a imagem visível apenas quando o cropper estiver pronto
+        this.imageTarget.style.opacity = '1'
+      }
     })
   }
 
   save() {
+    if (!this.cropper) return
+
     const data = this.cropper.getData()
     const imageData = this.cropper.getImageData()
 
@@ -92,9 +111,7 @@ export default class extends Controller {
   }
 
   updateFormFields(result) {
-    // Busca os campos de nome e fabricante se estiverem vazios
     const nameField = document.querySelector('input[name="car[name]"]')
-    const manufacturerField = document.querySelector('input[name="car[manufacturer]"]')
     const colorSelect = document.querySelector('select[name="car[color]"]')
 
     if (nameField && !nameField.value && result.label) {
@@ -103,7 +120,6 @@ export default class extends Controller {
 
     if (colorSelect && result.color) {
       colorSelect.value = result.color
-      // Notifica o controlador de cor para atualizar o preview (bolinha)
       colorSelect.dispatchEvent(new Event('change', { bubbles: true }))
     }
   }

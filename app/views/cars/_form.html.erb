@@ -107,13 +107,10 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="modal-body p-0">
-                <div class="d-flex align-items-center justify-content-center overflow-hidden p-4" 
-                     style="min-height: 450px; max-height: 70vh; background-color: #0f172a;">
-                  <div class="rounded-1 shadow-lg" style="border: 1px solid rgba(255,255,255,0.3); line-height: 0;">
-                    <img src="" data-image-cropper-target="image" class="img-fluid" 
-                         style="display: block; max-width: 100%;"
-                         data-action="load->image-cropper#initCropper">
-                  </div>
+                <div class="cropper-container-wrapper" 
+                     style="height: 450px; max-height: 70vh; background-color: #0f172a; position: relative;">
+                  <img src="" data-image-cropper-target="image" class="img-fluid" 
+                       style="display: block; max-width: 100%; opacity: 0;">
                 </div>
               </div>
               <div class="modal-footer border-0 p-4 pt-0">
@@ -239,19 +236,32 @@
   .tracking-wide { letter-spacing: 0.05em; }
   .form-control { transition: all 0.2s ease-in-out; }
   .form-control:focus {
-    background-color: #fff !important;
+    background-color: var(--input-bg) !important;
     box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1) !important;
-    border: 1px solid #dee2e6 !important;
+    border: 1px solid var(--premium-indigo) !important;
   }
   .photo-dropzone {
     transition: all 0.2s ease-in-out;
   }
   .photo-dropzone:hover {
-    background-color: #f1f3f5 !important;
-    border-color: #ced4da !important;
+    background-color: var(--soft-secondary-bg) !important;
+    border-color: var(--border-color) !important;
   }
   .photo-dropzone.drag-over {
-    background-color: #e9ecef !important;
-    border-color: #0d6efd !important;
+    background-color: var(--soft-secondary-bg) !important;
+    border-color: var(--premium-indigo) !important;
+    opacity: 0.8;
+  }
+  
+  /* Cropper Customization */
+  .cropper-view-box, .cropper-face {
+    border-radius: 4px;
+  }
+  .cropper-line, .cropper-point {
+    background-color: var(--premium-indigo);
+  }
+  .cropper-container-wrapper .cropper-container {
+    width: 100% !important;
+    height: 100% !important;
   }
 </style>
