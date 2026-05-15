@@ -19,8 +19,13 @@
       </h5>
 
       <div class="col-12 mb-5"
-           data-controller="photo-upload"
+           data-controller="photo-upload image-cropper"
            data-action="dragover->photo-upload#dragOver dragleave->photo-upload#dragLeave drop->photo-upload#drop">
+
+        <%= f.hidden_field :crop_x, data: { "image-cropper-target": "x" } %>
+        <%= f.hidden_field :crop_y, data: { "image-cropper-target": "y" } %>
+        <%= f.hidden_field :crop_w, data: { "image-cropper-target": "w" } %>
+        <%= f.hidden_field :crop_h, data: { "image-cropper-target": "h" } %>
 
         <!-- Hidden input for remove_photo -->
         <%= f.hidden_field :remove_photo, value: "", data: { "photo-upload-target": "removeField" } %>
@@ -63,10 +68,19 @@
           <div data-photo-upload-target="preview" class="d-none">
             <div class="position-relative d-inline-block">
               <img data-photo-upload-target="previewImg"
+                   data-image-cropper-target="previewImg"
                    src=""
                    alt="Preview"
                    class="rounded-3 shadow-sm"
                    style="max-height: 240px; max-width: 100%; object-fit: contain;">
+
+              <button type="button"
+                      class="btn btn-premium btn-sm rounded-circle position-absolute shadow"
+                      style="top: -10px; right: 25px; width: 32px; height: 32px; padding: 0; line-height: 1;"
+                      title="Ajustar recorte"
+                      data-action="click->image-cropper#open">
+                <i class="bi bi-crop"></i>
+              </button>
 
               <button type="button"
                       class="btn btn-danger btn-sm rounded-circle position-absolute shadow"
@@ -77,6 +91,27 @@
               </button>
             </div>
             <p class="text-muted small mt-3 mb-0">Clique ou arraste para substituir a foto</p>
+          </div>
+        </div>
+
+        <!-- Modal de Cropper -->
+        <div class="modal fade" id="cropperModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+          <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+              <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold"><i class="bi bi-crop me-2 text-primary"></i> Ajustar Foto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body p-4">
+                <div class="bg-light rounded-3 overflow-hidden" style="max-height: 60vh;">
+                  <img src="" data-image-cropper-target="image" class="img-fluid" data-action="load->image-cropper#initCropper">
+                </div>
+              </div>
+              <div class="modal-footer border-0 p-4 pt-0">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-premium rounded-pill px-4" data-action="click->image-cropper#save">Salvar Recorte</button>
+              </div>
+            </div>
           </div>
         </div>
 

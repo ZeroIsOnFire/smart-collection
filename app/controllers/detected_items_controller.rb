@@ -94,8 +94,12 @@ class DetectedItemsController < ApplicationController
       @detected_item.update(
         position_data: new_position_data,
         cropped_photo: cropped_file,
-        label: classification[:label] ? classification[:label].to_s.capitalize : @detected_item.label,
-        color: classification[:color] || @detected_item.color
+        label: params[:name].presence || classification[:label].to_s.capitalize || @detected_item.label,
+        color: params[:color].presence || classification[:color] || @detected_item.color,
+        brand: params[:brand],
+        manufacturer: params[:manufacturer],
+        year: params[:year],
+        size: params[:size]
       )
     end
 

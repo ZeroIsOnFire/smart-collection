@@ -102,6 +102,26 @@ export default class extends Controller {
         height: data.height / imageData.naturalHeight
       }
 
+      // Coletar dados do formulário atual para não perdê-los no reload
+      const frameId = this.element.closest("turbo-frame").id
+      const itemId = frameId.replace("detected_item_", "")
+      const brand = document.getElementById(`brand_${itemId}`)?.value
+      const manufacturer = document.getElementById(`manufacturer_${itemId}`)?.value
+      const name = document.getElementById(`name_${itemId}`)?.value
+      const color = document.getElementById(`color_${itemId}`)?.value
+      const year = document.getElementById(`year_${itemId}`)?.value
+      const size = document.getElementById(`size_${itemId}`)?.value
+
+      const payload = {
+        ...normalized,
+        brand,
+        manufacturer,
+        name,
+        color,
+        year,
+        size
+      }
+
       const response = await fetch(this.updateUrlValue, {
         method: "PATCH",
         headers: {
@@ -109,7 +129,7 @@ export default class extends Controller {
           "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content,
           "Accept": "text/vnd.turbo-stream.html"
         },
-        body: JSON.stringify(normalized)
+        body: JSON.stringify(payload)
       })
 
       if (response.ok) {

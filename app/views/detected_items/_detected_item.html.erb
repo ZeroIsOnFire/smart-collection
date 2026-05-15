@@ -57,6 +57,7 @@
               <div class="col-md-6">
                 <div class="form-floating">
                   <%= f.text_field :brand,
+                        value: detected_item.brand,
                         class: "form-control border-0 bg-light",
                         id: "brand_#{detected_item.id}",
                         placeholder: "Hot Wheels" %>
@@ -67,6 +68,7 @@
               <div class="col-md-6">
                 <div class="form-floating">
                   <%= f.text_field :manufacturer,
+                        value: detected_item.manufacturer,
                         class: "form-control border-0 bg-light",
                         id: "manufacturer_#{detected_item.id}",
                         placeholder: "Porsche" %>

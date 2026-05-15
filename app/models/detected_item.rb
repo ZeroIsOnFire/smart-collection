@@ -12,6 +12,8 @@ class DetectedItem
   field :color, type: String
   field :year, type: Integer
   field :size, type: String
+  field :brand, type: String
+  field :manufacturer, type: String
 
   mount_uploader :cropped_photo, CroppedPhotoUploader
 
