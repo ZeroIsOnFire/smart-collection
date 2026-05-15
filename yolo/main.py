@@ -181,9 +181,9 @@ async def classify(file: UploadFile = File(...)):
     contents = await file.read()
     image = Image.open(io.BytesIO(contents)).convert("RGB")
     
-    # Run inference to get label
-    results = model.predict(image, conf=0.1) # Lower confidence for forced classification
-    label = "Veículo"
+    # Run inference to get label - restricted to vehicle classes
+    results = model.predict(image, conf=0.3, classes=list(range(1, 9))) 
+    label = None
     if results and len(results[0].boxes) > 0:
         cls = int(results[0].boxes.cls[0])
         label = results[0].names[cls]

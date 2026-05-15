@@ -114,9 +114,8 @@ export default class extends Controller {
     const nameField = document.querySelector('input[name="car[name]"]')
     const colorSelect = document.querySelector('select[name="car[color]"]')
 
-    if (nameField && !nameField.value && result.label) {
-      nameField.value = result.label.charAt(0).toUpperCase() + result.label.slice(1)
-    }
+    // Removido auto-preenchimento de nome pois 'car' ou 'truck' não é útil como nome de colecionável
+    // e o usuário não solicitou este comportamento neste formulário.
 
     if (colorSelect && result.color) {
       colorSelect.value = result.color
