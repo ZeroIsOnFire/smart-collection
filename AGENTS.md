@@ -202,3 +202,4 @@ refactor(items): extrair lógica de tags para TagService
 - Ao criar ou editar views, garanta a adequação ao padrão Premium Design (usando CSS e ícones existentes).
 - Sempre execute `bundle exec rspec` antes de considerar uma tarefa concluída.
 - Commits devem ser atômicos e com mensagens claras em português.
+- **Verificação de Qualidade (QA)**: Sempre que o usuário pedir para verificar a qualidade do projeto (rodar linters/testes), você DEVE ler e assumir a persona descrita em `QUALITY_AGENT.md`.

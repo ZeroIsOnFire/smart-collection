@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Este script automatiza a verificação de qualidade do projeto.
+# Ele executa linters, corrigindo o que for seguro, e depois roda os testes.
+
+set -e # Falha caso algum comando essencial quebre, porém não os linters em si
+
+echo "========================================="
+echo "🔍 Iniciando Verificação de Qualidade (QA)"
+echo "========================================="
+
+echo ""
+echo "👉 1. Rodando Rubocop (Autocorreção Segura)"
+bundle exec rubocop -a || true # Evita falhar o script se o rubocop encontrar ofensas
+
+echo ""
+echo "👉 2. Rodando Rails Best Practices"
+bundle exec rails_best_practices || true
+
+echo ""
+echo "👉 3. Rodando Flay (Duplicação de Código)"
+bundle exec flay app/ || true
+
+echo ""
+echo "👉 4. Rodando Testes (RSpec)"
+bundle exec rspec
+
+echo ""
+echo "✅ Processo finalizado."
