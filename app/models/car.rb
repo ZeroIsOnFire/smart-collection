@@ -15,6 +15,12 @@ class Car
   field :tags, type: Array, default: []
   field :detected_via_ai, type: Boolean, default: false
 
+  # Atributo para persistência do CarrierWave entre falhas de validação
+  field :photo_cache, type: String
+
+  # Virtual attributes for image cropping
+  attr_accessor :crop_x, :crop_y, :crop_w, :crop_h
+
   COLORS = {
     'Branco' => '#FFFFFF',
     'Preto' => '#000000',
@@ -39,11 +45,14 @@ class Car
   ].freeze
 
   def self.color_options
-    COLORS.keys.map { |name| [name, name] }
+    COLORS.keys.map { |name| [I18n.t("colors.#{name}", default: name), name] }
   end
 
   def self.scale_options
-    SCALES.map { |s| [s, s] }
+    SCALES.map do |s|
+      label = s == 'Outra' ? I18n.t('scales.other', default: s) : s
+      [label, s]
+    end
   end
 
   mount_uploader :photo, PhotoUploader

@@ -12,9 +12,13 @@ class DetectedItemsController < ApplicationController
     # Recortar imagem
     cropped_file = ImageCropperService.crop(@autodetection.photo.path, normalized_vertices, padding: 0)
 
+    # Autodetecção completa baseada no recorte manual
+    classification = YoloDetectionService.classify(cropped_file.path) if cropped_file
+
     @detected_item = @autodetection.detected_items.new(
       status: 'pending',
-      label: 'Novo Item',
+      label: classification[:label].presence || t('autodetections.detected_item.new_item'),
+      color: classification[:color],
       position_data: {
         'score' => 1.0, # Manual
         'vertices' => normalized_vertices
@@ -33,11 +37,11 @@ class DetectedItemsController < ApplicationController
             locals: { detected_item: @detected_item }
           )
         end
-        format.html { redirect_to @autodetection, notice: 'Item adicionado manualmente.' }
+        format.html { redirect_to @autodetection, notice: t('autodetections.messages.item_added') }
       end
     else
       respond_to do |format|
-        format.html { redirect_to @autodetection, alert: 'Erro ao adicionar item.' }
+        format.html { redirect_to @autodetection, alert: t('autodetections.messages.item_error') }
         format.json { render json: @detected_item.errors, status: :unprocessable_content }
       end
     end
@@ -53,7 +57,7 @@ class DetectedItemsController < ApplicationController
       format.turbo_stream do
         render turbo_stream: turbo_stream.remove("detected_item_#{params[:id]}")
       end
-      format.html { redirect_back_or_to(root_path, notice: 'Item removido.') }
+      format.html { redirect_back_or_to(root_path, notice: t('autodetections.messages.item_removed')) }
     end
   end
 
@@ -84,9 +88,24 @@ class DetectedItemsController < ApplicationController
       new_position_data = @detected_item.position_data.dup
       new_position_data['vertices'] = normalized_vertices
 
+      # Autodetecção completa baseada no novo recorte
+      classification = YoloDetectionService.classify(cropped_file.path)
+
+      # Lógica de atualização de cor:
+      # Se a cor no formulário for igual à cor atual do item, significa que o usuário não a alterou manualmente.
+      # Nesse caso, priorizamos a nova detecção da IA baseada no novo recorte.
+      new_color = params[:color]
+      new_color = classification[:color] if new_color == @detected_item.color && classification[:color].present?
+
       @detected_item.update(
         position_data: new_position_data,
-        cropped_photo: cropped_file
+        cropped_photo: cropped_file,
+        label: params[:name].presence || classification[:label].presence || @detected_item.label,
+        color: new_color.presence || @detected_item.color,
+        brand: params[:brand],
+        manufacturer: params[:manufacturer],
+        year: params[:year],
+        size: params[:size]
       )
     end
 
@@ -124,12 +143,12 @@ class DetectedItemsController < ApplicationController
   def set_detected_item
     @detected_item = DetectedItem.find_by(id: params[:id])
 
-    render json: { error: 'Não encontrado' }, status: :not_found and return if @detected_item.nil?
+    render json: { error: t('flash.not_found', resource: t('activerecord.models.item.one')) }, status: :not_found and return if @detected_item.nil?
 
     # Verifica se pertence ao usuário através da autodetection
     return if @detected_item.autodetection.user_id.to_s == current_user.id.to_s
 
-    render json: { error: 'Não autorizado' }, status: :unauthorized and return
+    render json: { error: t('flash.unauthorized') }, status: :unauthorized and return
   end
 
   # Monta os vértices normalizados (0.0 a 1.0) a partir dos params x, y, width, height

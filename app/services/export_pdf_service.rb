@@ -213,7 +213,7 @@ class ExportPdfService
         pdf.stroke_horizontal_line pdf.bounds.left, pdf.bounds.right, at: -5
 
         # Logo no Rodapé (Esquerda)
-        logo_path = Rails.root.join('public', 'logo', 'logo.png')
+        logo_path = Rails.public_path.join('logo/logo.png')
         if File.exist?(logo_path)
           pdf.image logo_path, at: [pdf.bounds.left, -10], height: 24
           pdf.fill_color '94A3B8'

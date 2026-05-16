@@ -1,6 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
 import { Turbo } from "@hotwired/turbo-rails"
-import { t } from "i18n"
 
 export default class extends Controller {
   static targets = ["image"]
@@ -9,7 +8,10 @@ export default class extends Controller {
     initialY: Number,
     initialWidth: Number,
     initialHeight: Number,
-    updateUrl: String
+    updateUrl: String,
+    loadingText: String,
+    saveErrorText: String,
+    unexpectedErrorText: String
   }
 
   connect() {
@@ -49,7 +51,7 @@ export default class extends Controller {
 
   initCropper() {
     if (typeof Cropper === "undefined") {
-      console.error(t("javascript.selection_adjustment.errors.cropper_missing_console"))
+      console.error("Cropper.js not found!")
       return
     }
 
@@ -65,6 +67,8 @@ export default class extends Controller {
       cropBoxMovable: true,
       cropBoxResizable: true,
       toggleDragModeOnDblclick: false,
+      responsive: true,
+      background: false,
       ready: () => {
         const imageData = this.cropper.getImageData()
         const naturalWidth = imageData.naturalWidth
@@ -81,6 +85,8 @@ export default class extends Controller {
           width: width,
           height: height
         })
+
+        image.style.opacity = '1'
       }
     })
   }
@@ -88,7 +94,9 @@ export default class extends Controller {
   async save(event) {
     const btn = event.currentTarget
     const originalText = btn.innerHTML
-    btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> ${t("javascript.selection_adjustment.loading")}`
+    const loadingText = this.loadingTextValue || "Saving..."
+    
+    btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> ${loadingText}`
     btn.disabled = true
 
     try {
@@ -102,6 +110,26 @@ export default class extends Controller {
         height: data.height / imageData.naturalHeight
       }
 
+      // Coletar dados do formulário atual para não perdê-los no reload
+      const frameId = this.element.closest("turbo-frame").id
+      const itemId = frameId.replace("detected_item_", "")
+      const brand = document.getElementById(`brand_${itemId}`)?.value
+      const manufacturer = document.getElementById(`manufacturer_${itemId}`)?.value
+      const name = document.getElementById(`name_${itemId}`)?.value
+      const color = document.getElementById(`color_${itemId}`)?.value
+      const year = document.getElementById(`year_${itemId}`)?.value
+      const size = document.getElementById(`size_${itemId}`)?.value
+
+      const payload = {
+        ...normalized,
+        brand,
+        manufacturer,
+        name,
+        color,
+        year,
+        size
+      }
+
       const response = await fetch(this.updateUrlValue, {
         method: "PATCH",
         headers: {
@@ -109,7 +137,7 @@ export default class extends Controller {
           "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content,
           "Accept": "text/vnd.turbo-stream.html"
         },
-        body: JSON.stringify(normalized)
+        body: JSON.stringify(payload)
       })
 
       if (response.ok) {
@@ -127,11 +155,13 @@ export default class extends Controller {
         const html = await response.text()
         Turbo.renderStreamMessage(html)
       } else {
-        alert(t("javascript.selection_adjustment.errors.save_failed", { status: response.status }))
+        const errorMsg = this.saveErrorTextValue || "Error saving selection"
+        alert(`${errorMsg} (${response.status})`)
       }
     } catch (error) {
-      console.error(t("javascript.selection_adjustment.errors.save_unexpected_console"), error)
-      alert(t("javascript.selection_adjustment.errors.save_unexpected", { message: error.message }))
+      console.error("Error saving adjustment:", error)
+      const unexpectedMsg = this.unexpectedErrorTextValue || "An unexpected error occurred"
+      alert(`${unexpectedMsg}: ${error.message}`)
     } finally {
       if (document.body.contains(btn)) {
         btn.innerHTML = originalText

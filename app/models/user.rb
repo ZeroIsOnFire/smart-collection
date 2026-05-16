@@ -23,7 +23,7 @@ class User
   field :name, type: String, default: ''
   field :share_token, type: String
   field :sharing_enabled, type: Boolean, default: false
-  
+
   index({ sharing_enabled: 1 }, { background: true })
   index({ name: 'text', email: 'text' }, { name: 'UserTextIndex', background: true })
 

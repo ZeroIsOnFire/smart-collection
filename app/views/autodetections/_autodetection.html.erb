@@ -9,15 +9,15 @@
 
   status_badge = case autodetection.status
                  when 'pending'
-                   '<span class="badge bg-secondary">Aguardando</span>'
+                   "<span class=\"badge bg-secondary\">#{t('autodetections.status.pending')}</span>"
                  when 'processing'
-                   '<span class="badge bg-primary"><span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Processando...</span>'
+                   "<span class=\"badge bg-primary\"><span class=\"spinner-border spinner-border-sm me-1\" role=\"status\" aria-hidden=\"true\"></span>#{t('autodetections.status.processing')}</span>"
                  when 'to_verify'
-                   '<span class="badge bg-warning text-dark"><i class="bi bi-eye me-1"></i>Ação Necessária</span>'
+                   "<span class=\"badge bg-warning text-dark\"><i class=\"bi bi-eye me-1\"></i>#{t('autodetections.status.to_verify')}</span>"
                  when 'completed'
-                   '<span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Concluído</span>'
+                   "<span class=\"badge bg-success\"><i class=\"bi bi-check-circle me-1\"></i>#{t('autodetections.status.completed')}</span>"
                  when 'error'
-                   '<span class="badge bg-danger"><i class="bi bi-exclamation-triangle me-1"></i>Erro</span>'
+                   "<span class=\"badge bg-danger\"><i class=\"bi bi-exclamation-triangle me-1\"></i>#{t('autodetections.status.error')}</span>"
                  end
 %>
 
@@ -36,9 +36,9 @@
 
       <!-- Informações Principais -->
       <div class="flex-grow-1">
-        <h6 class="mb-1 text-dark fw-bold">Autodetecção via Foto</h6>
+        <h6 class="mb-1 text-dark fw-bold"><%= t('autodetections.title') %></h6>
         <div class="text-muted small">
-          <i class="bi bi-clock me-1"></i> <%= autodetection.created_at.strftime("%d/%m/%Y às %H:%M") %>
+          <i class="bi bi-clock me-1"></i> <%= l(autodetection.created_at, format: :short) rescue autodetection.created_at.strftime("%d/%m/%Y às %H:%M") %>
         </div>
       </div>
 
@@ -51,25 +51,25 @@
         <!-- Ações condicionais -->
         <% if autodetection.status == 'completed' || autodetection.status == 'to_verify' %>
           <div class="d-flex align-items-center gap-2">
-            <%= button_to autodetection_path(autodetection), method: :delete, class: "btn btn-sm btn-outline-danger", form: { data: { turbo_confirm: "Excluir esta autodetecção e todos os seus itens?" } }, title: "Excluir Registro" do %>
+            <%= button_to autodetection_path(autodetection), method: :delete, class: "btn btn-sm btn-outline-danger", form: { data: { turbo_confirm: t('autodetections.actions.delete_confirm') } }, title: t('actions.delete') do %>
               <i class="bi bi-x-lg"></i>
             <% end %>
-            <%= link_to "Verificar itens", autodetection_path(autodetection), class: "btn btn-sm #{autodetection.status == 'to_verify' ? 'btn-warning' : 'btn-outline-success'}", data: { turbo: false } %>
+            <%= link_to t('autodetections.actions.verify_items'), autodetection_path(autodetection), class: "btn btn-sm #{autodetection.status == 'to_verify' ? 'btn-warning' : 'btn-outline-success'}", data: { turbo: false } %>
           </div>
         <% elsif autodetection.status == 'error' %>
           <div class="d-flex align-items-center">
             <span class="text-danger small me-3 text-end" style="max-width: 250px;"><%= autodetection.error_message %></span>
             <div class="d-flex gap-2">
-              <%= button_to autodetection_path(autodetection), method: :delete, class: "btn btn-sm btn-outline-danger", form: { data: { turbo_confirm: "Cancelar e remover este erro?" } }, title: "Remover" do %>
+              <%= button_to autodetection_path(autodetection), method: :delete, class: "btn btn-sm btn-outline-danger", form: { data: { turbo_confirm: t('autodetections.actions.cancel_confirm') } }, title: t('actions.delete') do %>
                 <i class="bi bi-x-lg"></i>
               <% end %>
-              <%= button_to "Tentar Novamente", retry_autodetection_path(autodetection), method: :patch, class: "btn btn-sm btn-danger" %>
+              <%= button_to t('autodetections.actions.retry'), retry_autodetection_path(autodetection), method: :patch, class: "btn btn-sm btn-danger" %>
             </div>
           </div>
         <% else %>
           <!-- pending ou processing -->
-          <%= button_to autodetection_path(autodetection), method: :delete, class: "btn btn-sm btn-outline-danger", form: { data: { turbo_confirm: "Cancelar e remover esta autodetecção?" } } do %>
-            <i class="bi bi-x-circle me-1"></i> Parar
+          <%= button_to autodetection_path(autodetection), method: :delete, class: "btn btn-sm btn-outline-danger", form: { data: { turbo_confirm: t('autodetections.actions.stop_confirm') } } do %>
+            <i class="bi bi-x-circle me-1"></i> <%= t('autodetections.actions.stop') %>
           <% end %>
         <% end %>
       </div>

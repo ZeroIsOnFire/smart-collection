@@ -2,17 +2,31 @@ pt-BR:
   # ── Geral ──────────────────────────────────────────────
   hello: "Olá, mundo!"
   welcome: "Bem-vindo ao Smart Collection Catalog"
+  date:
+    formats:
+      default: "%d/%m/%Y"
+      short: "%d %b"
+      long: "%d de %B de %Y"
+  time:
+    formats:
+      default: "%a, %d de %b de %Y, %H:%M:%S %z"
+      short: "%d/%m/%Y às %H:%M"
+      long: "%d de %B de %Y às %H:%M"
+    am: "am"
+    pm: "pm"
 
   # ── Navegação ──────────────────────────────────────────
   nav:
     home: "Início"
     collections: "Coleções"
+    my_cars: "Meus Carros"
     profile: "Perfil"
     sign_in: "Entrar"
     sign_out: "Sair"
     sign_up: "Criar conta"
     settings: "Configurações"
     language: "Idioma"
+    admin_panel: "Painel Admin"
 
   # ── Ações comuns ───────────────────────────────────────
   actions:
@@ -126,14 +140,15 @@ pt-BR:
         description: "Descrição"
         tags: "Tags"
       car:
-        name: "Nome / Modelo"
-        brand: "Marca"
-        manufacturer: "Fabricante"
-        year: "Ano"
+        name: "Nome / Modelo do Veículo"
+        brand: "Marca (Item)"
+        manufacturer: "Fabricante (Veículo)"
+        year: "Ano de Fabricação"
         size: "Escala / Tamanho"
+        color: "Cor"
         tags: "Tags"
-        observations: "Observações"
-        photo: "Foto"
+        observations: "Observações do Item"
+        photo: "Foto Principal"
 
   # ── Mongoid ──────────────────────────────────────────
   mongoid:
@@ -143,14 +158,15 @@ pt-BR:
         other: "Carros"
     attributes:
       car:
-        name: "Nome / Modelo"
-        brand: "Marca"
-        manufacturer: "Fabricante"
-        year: "Ano"
+        name: "Nome / Modelo do Veículo"
+        brand: "Marca (Item)"
+        manufacturer: "Fabricante (Veículo)"
+        year: "Ano de Fabricação"
         size: "Escala / Tamanho"
+        color: "Cor"
         tags: "Tags"
-        observations: "Observações"
-        photo: "Foto"
+        observations: "Observações do Item"
+        photo: "Foto Principal"
 
   # ── Erros de Validação ─────────────────────────────────
   errors:
@@ -186,3 +202,89 @@ pt-BR:
     no_image: "Sem Imagem"
     no_photo: "Sem Foto"
     page_info: "Página %{page} de %{total}"
+
+  # ── Carros ─────────────────────────────────────────────
+  cars:
+    form:
+      main_photo: "Foto Principal"
+      upload_prompt: "Clique ou arraste a imagem aqui"
+      upload_limits: "JPG, PNG ou GIF — máx. 5 MB"
+      crop_button: "Recortar"
+      replace_button: "Substituir Foto"
+      remove_button: "Remover Foto"
+      basic_info: "Informações Básicas"
+      specifications: "Especificações"
+      select_scale: "Selecione a escala..."
+      select_color: "Selecione a cor..."
+      adjust_photo: "Ajustar Foto"
+      save_crop: "Salvar Recorte"
+      predominant_color: "Cor Predominante"
+
+  # ── Autodetecção ───────────────────────────────────────
+  autodetections:
+    title: "Autodetecção via Foto"
+    status:
+      pending: "Aguardando"
+      processing: "Processando..."
+      to_verify: "Ação Necessária"
+      completed: "Concluído"
+      error: "Erro"
+    actions:
+      verify_items: "Verificar itens"
+      retry: "Tentar Novamente"
+      stop: "Parar"
+      delete_confirm: "Excluir esta autodetecção e todos os seus itens?"
+      cancel_confirm: "Cancelar e remover este erro?"
+      stop_confirm: "Cancelar e remover esta autodetecção?"
+    detected_item:
+      new_item: "Novo Item"
+      model_name: "Modelo/Nome"
+      brand_optional: "Marca (opcional)"
+      manufacturer_optional: "Fabricante (opcional)"
+      model_required: "Nome / Modelo (Obrigatório)"
+      color: "Cor"
+      year: "Ano"
+      size_scale: "Tamanho / Escala"
+      select_prompt: "Selecione..."
+      adjust_selection: "Ajustar Recorte"
+      confirm_adjustment: "Confirmar Ajuste"
+      discard: "Descartar"
+      save_item: "Salvar Item"
+      undo: "Desfazer"
+      statuses:
+        saved_title: "Adicionado com Sucesso!"
+        saved_text: "Este item já faz parte da sua coleção."
+        rejected_title: "Item Rejeitado"
+        rejected_text: "Este item foi ignorado e não será salvo."
+    messages:
+      started: "Autodetect iniciado com sucesso!"
+      error_starting: "Erro ao iniciar Autodetect"
+      removed: "Autodetecção removida/cancelada com sucesso."
+      deleted: "Autodetecção excluída com sucesso."
+      restarted: "Processo reiniciado."
+      saving: "Salvando..."
+      no_photo: "Nenhuma foto fornecida"
+      item_added: "Item adicionado manualmente."
+      item_error: "Erro ao adicionar item."
+      item_removed: "Item removido."
+
+  # ── Cores ──────────────────────────────────────────────
+  colors:
+    Branco: "Branco"
+    Preto: "Preto"
+    Prata: "Prata"
+    Cinza: "Cinza"
+    Vermelho: "Vermelho"
+    Azul: "Azul"
+    Amarelo: "Amarelo"
+    Verde: "Verde"
+    Laranja: "Laranja"
+    Roxo: "Roxo"
+    Rosa: "Rosa"
+    Marrom: "Marrom"
+    Dourado: "Dourado"
+    Bege: "Bege"
+
+  # ── Escalas ────────────────────────────────────────────
+  scales:
+    other: "Outra"

@@ -1,6 +1,18 @@
 en:
   hello: "Hello, world!"
   welcome: "Welcome to Smart Collection Catalog"
+  date:
+    formats:
+      default: "%Y-%m-%d"
+      short: "%b %d"
+      long: "%B %d, %Y"
+  time:
+    formats:
+      default: "%a, %d %b %Y %H:%M:%S %z"
+      short: "%m/%d/%Y %H:%M"
+      long: "%B %d, %Y %H:%M"
+    am: "am"
+    pm: "pm"
 
   nav:
     home: "Home"
@@ -118,14 +130,14 @@ en:
         description: "Description"
         tags: "Tags"
       car:
-        name: "Name / Model"
-        brand: "Brand"
-        manufacturer: "Manufacturer"
-        year: "Year"
+        name: "Vehicle Name / Model"
+        brand: "Brand (Item)"
+        manufacturer: "Manufacturer (Vehicle)"
+        year: "Manufacture Year"
         size: "Scale / Size"
         tags: "Tags"
-        observations: "Notes"
-        photo: "Photo"
+        observations: "Item Notes"
+        photo: "Main Photo"
 
   mongoid:
     models:
@@ -134,14 +146,14 @@ en:
         other: "Cars"
     attributes:
       car:
-        name: "Name / Model"
-        brand: "Brand"
-        manufacturer: "Manufacturer"
-        year: "Year"
+        name: "Vehicle Name / Model"
+        brand: "Brand (Item)"
+        manufacturer: "Manufacturer (Vehicle)"
+        year: "Manufacture Year"
         size: "Scale / Size"
         tags: "Tags"
-        observations: "Notes"
-        photo: "Photo"
+        observations: "Item Notes"
+        photo: "Main Photo"
 
   errors:
     format: "%{attribute} %{message}"
@@ -176,3 +188,85 @@ en:
     no_image: "No Image"
     no_photo: "No Photo"
     page_info: "Page %{page} of %{total}"
+
+  cars:
+    form:
+      main_photo: "Main Photo"
+      upload_prompt: "Click or drag image here"
+      upload_limits: "JPG, PNG or GIF — max. 5 MB"
+      crop_button: "Crop"
+      replace_button: "Replace Photo"
+      remove_button: "Remove Photo"
+      basic_info: "Basic Information"
+      specifications: "Specifications"
+      select_scale: "Select scale..."
+      select_color: "Select color..."
+      adjust_photo: "Adjust Photo"
+      save_crop: "Save Crop"
+      predominant_color: "Predominant Color"
+
+  autodetections:
+    title: "Photo Autodetection"
+    status:
+      pending: "Pending"
+      processing: "Processing..."
+      to_verify: "Action Required"
+      completed: "Completed"
+      error: "Error"
+    actions:
+      verify_items: "Verify items"
+      retry: "Try Again"
+      stop: "Stop"
+      delete_confirm: "Delete this autodetection and all its items?"
+      cancel_confirm: "Cancel and remove this error?"
+      stop_confirm: "Cancel and remove this autodetection?"
+    detected_item:
+      new_item: "New Item"
+      model_name: "Model/Name"
+      brand_optional: "Brand (optional)"
+      manufacturer_optional: "Manufacturer (optional)"
+      model_required: "Name / Model (Required)"
+      color: "Color"
+      year: "Year"
+      size_scale: "Size / Scale"
+      select_prompt: "Select..."
+      adjust_selection: "Adjust Selection"
+      confirm_adjustment: "Confirm Adjustment"
+      discard: "Discard"
+      save_item: "Save Item"
+      undo: "Undo"
+      statuses:
+        saved_title: "Added Successfully!"
+        saved_text: "This item is now part of your collection."
+        rejected_title: "Item Rejected"
+        rejected_text: "This item was ignored and will not be saved."
+    messages:
+      started: "Autodetect started successfully!"
+      error_starting: "Error starting Autodetect"
+      removed: "Autodetection removed/cancelled successfully."
+      deleted: "Autodetection deleted successfully."
+      restarted: "Process restarted."
+      saving: "Saving..."
+      no_photo: "No photo provided"
+      item_added: "Item added manually."
+      item_error: "Error adding item."
+      item_removed: "Item removed."
+
+  colors:
+    Branco: "White"
+    Preto: "Black"
+    Prata: "Silver"
+    Cinza: "Gray"
+    Vermelho: "Red"
+    Azul: "Blue"
+    Amarelo: "Yellow"
+    Verde: "Green"
+    Laranja: "Orange"
+    Roxo: "Purple"
+    Rosa: "Pink"
+    Marrom: "Brown"
+    Dourado: "Golden"
+    Bege: "Beige"
+
+  scales:
+    other: "Other"

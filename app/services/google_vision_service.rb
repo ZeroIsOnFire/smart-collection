@@ -5,6 +5,7 @@ require 'google/cloud/vision/v1'
 
 class GoogleVisionService
   TARGET_LABELS = ['Toy', 'Car', 'Vehicle', 'Model car'].freeze
+  MAX_RESULTS = 100
 
   def self.analyze(photo_path)
     return [] unless credentials_configured?
@@ -16,7 +17,7 @@ class GoogleVisionService
       image_annotator = Google::Cloud::Vision.image_annotator do |config|
         config.credentials = ENV.fetch('GOOGLE_CLOUD_CREDENTIALS_PATH', nil)
       end
-      response = image_annotator.object_localization_detection(image: photo_path)
+      response = image_annotator.object_localization_detection(image: photo_path, max_results: MAX_RESULTS)
     rescue StandardError => e
       if simulation_mode? || e.message.include?('billing')
         Rails.logger.warn "GoogleVisionService: Simulation mode enabled (due to error: #{e.message})"
@@ -85,13 +86,13 @@ class GoogleVisionService
       Rails.logger.info "Enhancing small image (#{image.width}x#{image.height}) before Vision API analysis"
       image.combine_options do |c|
         # Resize so the smaller side is at least 1080px (maintaining aspect ratio)
-        c.resize "1080x1080^"
+        c.resize '1080x1080^'
         # Sharpening
-        c.sharpen "0x1"
+        c.sharpen '0x1'
         # Contrast improvement (auto-level is generally very effective)
         c.auto_level
         # Quality improvement/setting
-        c.quality "100"
+        c.quality '100'
         # Improve contrast
         c.contrast
         # Ensure correct orientation based on EXIF

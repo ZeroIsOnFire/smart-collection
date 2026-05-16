@@ -50,7 +50,13 @@
 
         <div class="collapse navbar-collapse" id="mainNavbar">
           <ul class="navbar-nav me-auto">
-            <!-- Espaço reservado para links futuros, se necessário -->
+            <% if user_signed_in? %>
+              <li class="nav-item">
+                <%= link_to cars_path, class: "nav-link fw-medium d-flex align-items-center" do %>
+                  <i class="bi bi-grid-1x2 me-2 text-primary"></i> <%= t('nav.my_cars') %>
+                <% end %>
+              </li>
+            <% end %>
           </ul>
 
           <div class="d-flex align-items-center gap-2">
@@ -82,32 +88,32 @@
                   </li>
                   <li>
                     <%= link_to cars_path, class: "dropdown-item d-flex align-items-center py-2" do %>
-                      <i class="bi bi-grid-1x2 me-2 text-primary"></i> Meus Carros
+                      <i class="bi bi-grid-1x2 me-2 text-primary"></i> <%= t('nav.my_cars') %>
                     <% end %>
                   </li>
                   <% if current_user.admin? %>
                     <li>
                       <%= link_to admin_dashboard_path, class: "dropdown-item d-flex align-items-center py-2 text-warning" do %>
-                        <i class="bi bi-shield-lock me-2"></i> Painel Admin
+                        <i class="bi bi-shield-lock me-2"></i> <%= t('nav.admin_panel') %>
                       <% end %>
                     </li>
                   <% end %>
                   <li>
                     <%= link_to edit_user_registration_path, class: "dropdown-item d-flex align-items-center py-2" do %>
-                      <i class="bi bi-gear me-2 text-secondary"></i> Configurações
+                      <i class="bi bi-gear me-2 text-secondary"></i> <%= t('nav.settings') %>
                     <% end %>
                   </li>
                   <li><hr class="dropdown-divider opacity-50"></li>
                   <li>
                     <%= link_to destroy_user_session_path, data: { turbo_method: :delete }, class: "dropdown-item d-flex align-items-center py-2 text-danger" do %>
-                      <i class="bi bi-box-arrow-right me-2"></i> Sair
+                      <i class="bi bi-box-arrow-right me-2"></i> <%= t('nav.sign_out') %>
                     <% end %>
                   </li>
                 </ul>
               </div>
             <% else %>
-              <%= link_to "Entrar", new_user_session_path, class: "btn btn-link link-dark text-decoration-none fw-medium" %>
-              <%= link_to "Criar conta", new_user_registration_path, class: "btn btn-primary rounded-pill px-4" %>
+              <%= link_to t('nav.sign_in'), new_user_session_path, class: "btn btn-link link-dark text-decoration-none fw-medium" %>
+              <%= link_to t('nav.sign_up'), new_user_registration_path, class: "btn btn-primary rounded-pill px-4" %>
             <% end %>
           </div>
         </div>
