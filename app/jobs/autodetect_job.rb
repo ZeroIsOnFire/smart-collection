@@ -29,7 +29,7 @@ class AutodetectJob < ApplicationJob
         next unless cropped_file
 
         autodetection.detected_items.create!(
-          label: data[:label].to_s.capitalize,
+          label: data[:label].to_s,
           color: data[:color],
           position_data: {
             vertices: data[:vertices],

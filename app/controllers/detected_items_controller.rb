@@ -17,7 +17,7 @@ class DetectedItemsController < ApplicationController
 
     @detected_item = @autodetection.detected_items.new(
       status: 'pending',
-      label: classification[:label] ? classification[:label].to_s.capitalize : t('autodetections.detected_item.new_item'),
+      label: classification[:label].presence || t('autodetections.detected_item.new_item'),
       color: classification[:color],
       position_data: {
         'score' => 1.0, # Manual
@@ -95,14 +95,12 @@ class DetectedItemsController < ApplicationController
       # Se a cor no formulário for igual à cor atual do item, significa que o usuário não a alterou manualmente.
       # Nesse caso, priorizamos a nova detecção da IA baseada no novo recorte.
       new_color = params[:color]
-      if new_color == @detected_item.color && classification[:color].present?
-        new_color = classification[:color]
-      end
+      new_color = classification[:color] if new_color == @detected_item.color && classification[:color].present?
 
       @detected_item.update(
         position_data: new_position_data,
         cropped_photo: cropped_file,
-        label: params[:name].presence || classification[:label].to_s.capitalize || @detected_item.label,
+        label: params[:name].presence || classification[:label].presence || @detected_item.label,
         color: new_color.presence || @detected_item.color,
         brand: params[:brand],
         manufacturer: params[:manufacturer],

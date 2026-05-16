@@ -5,7 +5,7 @@ require 'google/cloud/vision/v1'
 
 class GoogleVisionService
   TARGET_LABELS = ['Toy', 'Car', 'Vehicle', 'Model car'].freeze
-  MAX_RESULTS = 100.freeze
+  MAX_RESULTS = 100
 
   def self.analyze(photo_path)
     return [] unless credentials_configured?
@@ -35,8 +35,8 @@ class GoogleVisionService
         # Verifica se a label está na nossa lista de alvos ou se tem um score decente
         next unless TARGET_LABELS.any? { |label| obj.name.to_s.downcase.include?(label.downcase) }
 
-        puts entity.description
         detected_items << {
+          label: obj.name,
           score: obj.score,
           # O Vision retorna vértices normalizados (0.0 a 1.0)
           vertices: obj.bounding_poly.normalized_vertices.map { |v| { x: v.x, y: v.y } }
@@ -86,13 +86,13 @@ class GoogleVisionService
       Rails.logger.info "Enhancing small image (#{image.width}x#{image.height}) before Vision API analysis"
       image.combine_options do |c|
         # Resize so the smaller side is at least 1080px (maintaining aspect ratio)
-        c.resize "1080x1080^"
+        c.resize '1080x1080^'
         # Sharpening
-        c.sharpen "0x1"
+        c.sharpen '0x1'
         # Contrast improvement (auto-level is generally very effective)
         c.auto_level
         # Quality improvement/setting
-        c.quality "100"
+        c.quality '100'
         # Improve contrast
         c.contrast
         # Ensure correct orientation based on EXIF
