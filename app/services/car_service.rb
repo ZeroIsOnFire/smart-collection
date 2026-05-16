@@ -52,16 +52,16 @@ class CarService
   def process_car_image(car, params)
     # 1. Aplicar recorte se houver coordenadas
     apply_crop(car, params)
-    
+
     # 2. Limpar coordenadas para evitar duplo recorte em caso de erro de validação subsequente
     # Como a foto já foi recortada e salva no cache, não precisamos aplicar as mesmas coordenadas de novo.
     car.crop_x = car.crop_y = car.crop_w = car.crop_h = nil
 
     # 3. Detectar cor sincronamente se houver foto nova (ou recortada) e a cor estiver em branco
-    if car.photo.present? && car.color.blank?
-      detected_color = YoloDetectionService.classify_color(car.photo.path)
-      car.color = detected_color if detected_color
-    end
+    return unless car.photo.present? && car.color.blank?
+
+    detected_color = YoloDetectionService.classify_color(car.photo.path)
+    car.color = detected_color if detected_color
   end
 
   def apply_crop(car, params)
@@ -78,7 +78,7 @@ class CarService
       { 'x' => crop_x.to_f + crop_w.to_f, 'y' => crop_y.to_f + crop_h.to_f },
       { 'x' => crop_x.to_f, 'y' => crop_y.to_f + crop_h.to_f }
     ]
-    
+
     cropped_file = ImageCropperService.crop(car.photo.path, vertices, padding: 0)
     car.photo = cropped_file if cropped_file
   end

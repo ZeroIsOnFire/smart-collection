@@ -12,7 +12,7 @@ RSpec.describe YoloDetectionService do
     allow(ENV).to receive(:fetch).with('YOLO_API_KEY').and_return(api_key)
     allow(ENV).to receive(:[]).with('YOLO_SERVICE_URL').and_return(service_url)
     allow(ENV).to receive(:[]).with('YOLO_API_KEY').and_return(api_key)
-    
+
     # Ensure fixture exists or mock File.open
     allow(File).to receive(:open).and_call_original
     allow(File).to receive(:open).with(photo_path.to_s).and_return(double('File', path: photo_path.to_s, close: nil))

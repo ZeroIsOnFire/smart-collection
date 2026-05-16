@@ -14,7 +14,7 @@ class YoloDetectionService
     begin
       request = Net::HTTP::Post.new(url)
       request['X-API-Key'] = api_key
-      
+
       # Use multipart form data for file upload
       form_data = [['file', File.open(photo_path)]]
       request.set_form(form_data, 'multipart/form-data')
@@ -45,7 +45,7 @@ class YoloDetectionService
     begin
       request = Net::HTTP::Post.new(url)
       request['X-API-Key'] = api_key
-      
+
       form_data = [['file', File.open(photo_path)]]
       request.set_form(form_data, 'multipart/form-data')
 
@@ -75,7 +75,7 @@ class YoloDetectionService
     begin
       request = Net::HTTP::Post.new(url)
       request['X-API-Key'] = api_key
-      
+
       form_data = [['file', File.open(photo_path)]]
       request.set_form(form_data, 'multipart/form-data')
 

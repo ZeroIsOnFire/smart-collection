@@ -14,7 +14,7 @@ class Car
   field :color, type: String
   field :tags, type: Array, default: []
   field :detected_via_ai, type: Boolean, default: false
-  
+
   # Atributo para persistência do CarrierWave entre falhas de validação
   field :photo_cache, type: String
 

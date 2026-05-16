@@ -11,12 +11,12 @@ RSpec.describe AutodetectJob do
     it 'processa a imagem e cria detected items vinculados à autodetection' do
       allow(YoloDetectionService).to receive(:service_configured?).and_return(true)
       allow(YoloDetectionService).to receive(:analyze).and_return([
-                                                                   {
-                                                                     label: 'YOLO car',
-                                                                     score: 0.99,
-                                                                     vertices: [{ x: 0.1, y: 0.1 }, { x: 0.9, y: 0.9 }]
-                                                                   }
-                                                                 ])
+                                                                    {
+                                                                      label: 'YOLO car',
+                                                                      score: 0.99,
+                                                                      vertices: [{ x: 0.1, y: 0.1 }, { x: 0.9, y: 0.9 }]
+                                                                    }
+                                                                  ])
       allow(GoogleVisionService).to receive(:credentials_configured?).and_return(false)
 
       # Mock do arquivo retornado pelo cropper
