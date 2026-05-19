@@ -19,6 +19,8 @@ services:
       - RAILS_ENV=development
       - REDIS_URL=redis://redis:6379/1
       - MONGODB_URI=mongodb://${MONGODB_USERNAME:-scc_admin}:${MONGODB_PASSWORD:-scc_dev}@mongodb:27017/smart_collection_catalog_development?authSource=admin
+      - IMAGE_UPSCALE_SERVICE_URL=http://upscale-service:8000
+      - IMAGE_UPSCALE_API_KEY=${IMAGE_UPSCALE_API_KEY:-}
     restart: unless-stopped
 
   sidekiq:
@@ -39,6 +41,8 @@ services:
       - RAILS_ENV=development
       - REDIS_URL=redis://redis:6379/1
       - MONGODB_URI=mongodb://${MONGODB_USERNAME:-scc_admin}:${MONGODB_PASSWORD:-scc_dev}@mongodb:27017/smart_collection_catalog_development?authSource=admin
+      - IMAGE_UPSCALE_SERVICE_URL=http://upscale-service:8000
+      - IMAGE_UPSCALE_API_KEY=${IMAGE_UPSCALE_API_KEY:-}
     restart: unless-stopped
 
   yolo-service:
@@ -46,6 +50,24 @@ services:
       context: ./yolo
     environment:
       - YOLO_API_KEY=${YOLO_API_KEY}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  upscale-service:
+    build:
+      context: ./upscale
+    env_file:
+      - .env
+    environment:
+      - IMAGE_UPSCALE_API_KEY=${IMAGE_UPSCALE_API_KEY:-}
+      - USE_GPU_UPSCALER=${USE_GPU_UPSCALER:-true}
+      - UPSCALE_OUTPUT_SIDE=${UPSCALE_OUTPUT_SIDE:-1080}
+      - REAL_ESRGAN_GPU_MODEL_PATH=${REAL_ESRGAN_GPU_MODEL_PATH:-/app/models/RealESRGAN_x4plus.pth}
+      - REAL_ESRGAN_CPU_MODEL_PATH=${REAL_ESRGAN_CPU_MODEL_PATH:-/app/models/realesr-general-x4v3.pth}
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]

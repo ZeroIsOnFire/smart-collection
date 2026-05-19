@@ -1,6 +1,11 @@
 import io
+import logging
 import os
 from functools import lru_cache
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("upscale-service")
 
 import cv2
 import numpy as np
@@ -10,10 +15,28 @@ from PIL import Image, ImageOps
 
 try:
     import torch
+    # Monkeypatch torch.load BEFORE importing realesrgan
+    # to handle PyTorch 2.6+ weights_only=True default
+    original_load = torch.load
+    def patched_load(*args, **kwargs):
+        if 'weights_only' not in kwargs:
+            kwargs['weights_only'] = False
+        return original_load(*args, **kwargs)
+    torch.load = patched_load
+
+    # Monkeypatch torchvision functional_tensor for basicsr compatibility in modern torchvision
+    import sys
+    import types
+    import torchvision.transforms.functional as F
+    functional_tensor = types.ModuleType("torchvision.transforms.functional_tensor")
+    functional_tensor.rgb_to_grayscale = F.rgb_to_grayscale
+    sys.modules["torchvision.transforms.functional_tensor"] = functional_tensor
+
     from realesrgan import RealESRGANer
-    from realesrgan.archs.rrdbnet_arch import RRDBNet
+    from basicsr.archs.rrdbnet_arch import RRDBNet
     from realesrgan.archs.srvgg_arch import SRVGGNetCompact
-except ImportError:  # pragma: no cover - handled in runtime fallback paths
+except ImportError as ie:
+    logger.error(f"Failed to import Real-ESRGAN dependencies: {ie}", exc_info=True)
     torch = None
     RealESRGANer = None
     RRDBNet = None
@@ -128,21 +151,6 @@ def upscale_with_lanczos(image_bgr, minimum_side):
     return cv2.resize(image_bgr, (new_width, new_height), interpolation=cv2.INTER_LANCZOS4)
 
 
-def fit_to_square(image_bgr, square_side):
-    if square_side <= 0:
-        return image_bgr
-
-    image_rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
-    pil_image = Image.fromarray(image_rgb)
-    fitted = ImageOps.fit(
-        pil_image,
-        (square_side, square_side),
-        method=Image.Resampling.LANCZOS,
-        centering=(0.5, 0.5)
-    )
-    return cv2.cvtColor(np.array(fitted), cv2.COLOR_RGB2BGR)
-
-
 def upscale_until_min_side(image_bgr, minimum_side):
     current = image_bgr
     passes = 0
@@ -152,26 +160,49 @@ def upscale_until_min_side(image_bgr, minimum_side):
         try:
             current = upscale_with_realesrgan(current, prefer_gpu=prefer_gpu)
             passes += 1
-        except Exception:
+        except Exception as e:
+            logger.error(f"Error during Real-ESRGAN upscale (prefer_gpu={prefer_gpu}): {e}", exc_info=True)
             if prefer_gpu:
                 try:
+                    logger.info("Attempting fallback to CPU Real-ESRGAN...")
                     current = upscale_with_realesrgan(current, prefer_gpu=False)
                     passes += 1
                     prefer_gpu = False
                     continue
-                except Exception:
+                except Exception as cpu_e:
+                    logger.error(f"Error during fallback CPU Real-ESRGAN upscale: {cpu_e}", exc_info=True)
                     break
             break
 
     if min(current.shape[0], current.shape[1]) < minimum_side:
+        logger.warning(f"AI Upscale was not sufficient or failed. Falling back to Lanczos resize to {minimum_side}px")
         current = upscale_with_lanczos(current, minimum_side)
 
     return current
 
 
 def finalize_output(image_bgr):
-    target_output_side = env_int("UPSCALE_OUTPUT_SIDE", 1080)
-    return fit_to_square(image_bgr, target_output_side)
+    return image_bgr
+
+
+@app.on_event("startup")
+async def startup_event():
+    logger.info("Initializing SCC Image Upscale Service...")
+    gpu_mode = should_use_gpu_upscaler()
+    logger.info(f"Target mode: {'GPU' if gpu_mode else 'CPU'}")
+    
+    try:
+        if gpu_mode:
+            logger.info("Pre-loading GPU upscaler model...")
+            get_gpu_upscaler()
+            logger.info("GPU upscaler model pre-loaded successfully!")
+        else:
+            logger.info("Pre-loading CPU upscaler model...")
+            get_cpu_upscaler()
+            logger.info("CPU upscaler model pre-loaded successfully!")
+    except Exception as e:
+        logger.error(f"Failed to pre-load upscaler model on startup: {e}", exc_info=True)
+        logger.warning("Service will start but will fall back to Lanczos resizing for all upscaling requests.")
 
 
 @app.get("/health")
@@ -179,7 +210,7 @@ async def health():
     return {
         "status": "ok",
         "mode": "gpu" if should_use_gpu_upscaler() else "cpu",
-        "target_output_side": env_int("UPSCALE_OUTPUT_SIDE", 1080),
+        "target_min_side": TARGET_MIN_SIDE,
         "scale": REAL_ESRGAN_SCALE
     }
 

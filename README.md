@@ -64,3 +64,20 @@ docker-compose exec web bundle exec rspec
 ## ⚖️ Licença
 
 Este projeto é de uso privado e segue as diretrizes estabelecidas no documento `AGENTS.md`.
+## Image Upscaler
+
+The project uses a dedicated Docker upscaler service.
+
+- General flows use a minimum side of `512x512`.
+- Autodetection creation uses a minimum side of `1080x1080`.
+- The service returns a square image sized by `UPSCALE_OUTPUT_SIDE` (`1080` by default).
+- GPU mode is the default. Set `USE_GPU_UPSCALER=false` to force the lighter CPU fallback.
+
+Environment variables:
+
+- `IMAGE_UPSCALE_SERVICE_URL`: internal URL used by Rails to call the service.
+- `IMAGE_UPSCALE_API_KEY`: shared API key for the service, if enabled.
+- `USE_GPU_UPSCALER`: enables the GPU Real-ESRGAN path when `true`.
+- `UPSCALE_OUTPUT_SIDE`: final square output size from the service.
+- `REAL_ESRGAN_GPU_MODEL_PATH`: optional custom GPU model path inside the container.
+- `REAL_ESRGAN_CPU_MODEL_PATH`: optional custom CPU model path inside the container.

@@ -167,5 +167,43 @@ RSpec.describe 'Cars', type: :request do
       delete car_path(car)
       expect(response).to redirect_to(cars_path)
     end
+
+    it 'removes the car card when requested as turbo stream' do
+      car_to_destroy = create(:car, user: user)
+
+      expect do
+        delete car_path(car_to_destroy), as: :turbo_stream
+      end.to change(Car, :count).by(-1)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("turbo-stream action=\"remove\" target=\"car_#{car_to_destroy.id}\"")
+      expect(response.body).to include('flash_toasts')
+      expect(response.body).to include(I18n.t('flash.deleted', resource: I18n.t('activerecord.models.car.one')))
+    end
+
+    it 'does not fail when the car is already gone and the remove is retried' do
+      car_to_destroy = create(:car, user: user)
+      car_id = car_to_destroy.id.to_s
+
+      delete "/cars/#{car_id}", as: :turbo_stream
+
+      expect do
+        delete "/cars/#{car_id}", as: :turbo_stream
+      end.not_to raise_error
+    end
+
+    it 'shows a flash message when destroy raises an error' do
+      car_to_destroy = create(:car, user: user)
+      service = instance_double(CarService)
+
+      allow_any_instance_of(CarsController).to receive(:car_service).and_return(service)
+      allow(service).to receive(:destroy).and_raise(StandardError, 'boom')
+
+      delete car_path(car_to_destroy), as: :turbo_stream
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(response.body).to include('flash_toasts')
+      expect(response.body).to include(I18n.t('flash.error'))
+    end
   end
 end

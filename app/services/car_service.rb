@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class CarService
+  CAR_IMAGE_MINIMUM_SIDE = ImageUpscalerService::DEFAULT_MINIMUM_SIDE
   attr_reader :user
 
   def initialize(user)
@@ -8,22 +9,37 @@ class CarService
   end
 
   def create(params)
-    car = user.cars.build(params)
-    process_car_image(car, params)
+    prepared_params, upscaled_file = prepare_photo_for_save(params, minimum_side: CAR_IMAGE_MINIMUM_SIDE)
+    car = user.cars.build(prepared_params)
+    process_car_image(car, prepared_params)
     car.save
     car
+  rescue ImageUpscalerService::UpscaleError => e
+    car = user.cars.build(params.to_h.deep_symbolize_keys.except(:photo))
+    car.errors.add(:photo, e.message)
+    car
+  ensure
+    cleanup_tempfile(upscaled_file)
   end
 
   def update(car_id, params)
     car = user.cars.find(car_id)
-    car.attributes = params
-    process_car_image(car, params)
+    prepared_params, upscaled_file = prepare_photo_for_save(params, minimum_side: CAR_IMAGE_MINIMUM_SIDE)
+    car.attributes = prepared_params
+    process_car_image(car, prepared_params)
     car.save
     car
+  rescue ImageUpscalerService::UpscaleError => e
+    car.errors.add(:photo, e.message)
+    car
+  ensure
+    cleanup_tempfile(upscaled_file)
   end
 
   def destroy(car_id)
-    car = user.cars.find(car_id)
+    car = user.cars.find_by(id: car_id)
+    return nil unless car
+
     car.destroy
     car
   end
@@ -35,12 +51,10 @@ class CarService
 
     scope = query.present? ? search(query) : user.cars.all
 
-    # Ordenação por data de criação decrescente e paginação manual
     scope.desc(:created_at).page(page).per(per_page)
   end
 
   def search(query)
-    # Utilize MongoDB native text index search
     words = query.to_s.strip
     return user.cars if words.empty?
 
@@ -49,15 +63,23 @@ class CarService
 
   private
 
+  def prepare_photo_for_save(params, minimum_side:)
+    normalized_params = params.to_h.deep_symbolize_keys
+    photo = normalized_params[:photo]
+
+    return [normalized_params, nil] if photo.blank?
+
+    upscaled_file = ImageUpscalerService.upscale_if_needed(photo, minimum_side: minimum_side)
+    normalized_params[:photo] = upscaled_file if upscaled_file
+
+    [normalized_params, upscaled_file]
+  end
+
   def process_car_image(car, params)
-    # 1. Aplicar recorte se houver coordenadas
     apply_crop(car, params)
 
-    # 2. Limpar coordenadas para evitar duplo recorte em caso de erro de validação subsequente
-    # Como a foto já foi recortada e salva no cache, não precisamos aplicar as mesmas coordenadas de novo.
     car.crop_x = car.crop_y = car.crop_w = car.crop_h = nil
 
-    # 3. Detectar cor sincronamente se houver foto nova (ou recortada) e a cor estiver em branco
     return unless car.photo.present? && car.color.blank?
 
     detected_color = YoloDetectionService.classify_color(car.photo.path)
@@ -79,7 +101,16 @@ class CarService
       { 'x' => crop_x.to_f, 'y' => crop_y.to_f + crop_h.to_f }
     ]
 
-    cropped_file = ImageCropperService.crop(car.photo.path, vertices, padding: 0)
+    cropped_file = ImageCropperService.crop(car.photo.path, vertices, padding: 0, minimum_side: CAR_IMAGE_MINIMUM_SIDE)
     car.photo = cropped_file if cropped_file
+  end
+
+  def cleanup_tempfile(tempfile)
+    return unless tempfile.respond_to?(:close)
+
+    tempfile.close
+    tempfile.unlink
+  rescue StandardError
+    nil
   end
 end

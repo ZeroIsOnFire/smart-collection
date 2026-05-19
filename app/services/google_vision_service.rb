@@ -2,6 +2,7 @@
 
 require 'google/cloud/vision'
 require 'google/cloud/vision/v1'
+require 'tempfile'
 
 class GoogleVisionService
   TARGET_LABELS = ['Toy', 'Car', 'Vehicle', 'Model car'].freeze
@@ -10,20 +11,25 @@ class GoogleVisionService
   def self.analyze(photo_path)
     return [] unless credentials_configured?
 
-    # Enhance image if it's too small before sending to Google
-    enhance_image!(photo_path)
+    upscaled_file = ImageUpscalerService.upscale_if_needed(photo_path, minimum_side: ImageUpscalerService::DEFAULT_MINIMUM_SIDE)
+    working_path = upscaled_file&.path || photo_path
+    vision_enhanced_file = ImageUpscalerService.upscale_if_needed(working_path, minimum_side: 1080)
+    analysis_path = vision_enhanced_file&.path || working_path
 
     begin
       image_annotator = Google::Cloud::Vision.image_annotator do |config|
         config.credentials = ENV.fetch('GOOGLE_CLOUD_CREDENTIALS_PATH', nil)
       end
-      response = image_annotator.object_localization_detection(image: photo_path, max_results: MAX_RESULTS)
+      response = image_annotator.object_localization_detection(image: analysis_path, max_results: MAX_RESULTS)
     rescue StandardError => e
       if simulation_mode? || e.message.include?('billing')
         Rails.logger.warn "GoogleVisionService: Simulation mode enabled (due to error: #{e.message})"
         return simulate_detection
       end
       raise e
+    ensure
+      cleanup_tempfile(vision_enhanced_file)
+      cleanup_tempfile(upscaled_file)
     end
 
     return simulate_detection if simulation_mode?
@@ -32,13 +38,11 @@ class GoogleVisionService
 
     response.responses.each do |res|
       res.localized_object_annotations.each do |obj|
-        # Verifica se a label está na nossa lista de alvos ou se tem um score decente
         next unless TARGET_LABELS.any? { |label| obj.name.to_s.downcase.include?(label.downcase) }
 
         detected_items << {
           label: obj.name,
           score: obj.score,
-          # O Vision retorna vértices normalizados (0.0 a 1.0)
           vertices: obj.bounding_poly.normalized_vertices.map { |v| { x: v.x, y: v.y } }
         }
       end
@@ -49,7 +53,7 @@ class GoogleVisionService
 
   def self.simulation_mode?
     enabled = ENV['VISION_SIMULATION_MODE'] == 'true'
-    Rails.logger.error '[SEGURANÇA] VISION_SIMULATION_MODE está habilitado em produção! Desabilite imediatamente.' if enabled && Rails.env.production?
+    Rails.logger.error '[SEGURANCA] VISION_SIMULATION_MODE is enabled in production!' if enabled && Rails.env.production?
     enabled
   end
 
@@ -79,30 +83,13 @@ class GoogleVisionService
     credentials_path.present? && File.exist?(credentials_path)
   end
 
-  def self.enhance_image!(photo_path)
-    image = MiniMagick::Image.open(photo_path)
-    # Check if any side is less than 1080px
-    if image.width < 1080 || image.height < 1080
-      Rails.logger.info "Enhancing small image (#{image.width}x#{image.height}) before Vision API analysis"
-      image.combine_options do |c|
-        # Resize so the smaller side is at least 1080px (maintaining aspect ratio)
-        c.resize '1080x1080^'
-        # Sharpening
-        c.sharpen '0x1'
-        # Contrast improvement (auto-level is generally very effective)
-        c.auto_level
-        # Quality improvement/setting
-        c.quality '100'
-        # Improve contrast
-        c.contrast
-        # Ensure correct orientation based on EXIF
-        c.auto_orient
-      end
-      image.write(photo_path)
-    end
-  rescue StandardError => e
-    Rails.logger.error "Image enhancement failed: #{e.message}"
-  end
+  def self.cleanup_tempfile(tempfile)
+    return unless tempfile.respond_to?(:close)
 
-  private_class_method :enhance_image!
+    tempfile.close
+    tempfile.unlink
+  rescue StandardError
+    nil
+  end
+  private_class_method :cleanup_tempfile
 end

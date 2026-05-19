@@ -69,6 +69,13 @@ RSpec.describe 'Authentications', type: :request do
   end
 
   describe 'POST /users/sign_in' do
+    it 'renders dark autofill overrides for the email field' do
+      get new_user_session_path
+
+      expect(response.body).to include(':-webkit-autofill')
+      expect(response.body).to include('-webkit-text-fill-color: #f1f5f9')
+    end
+
     it 'redirects a normal user to root' do
       post user_session_path, params: { user: { email: user.email, password: 'password123' } }
       expect(response).to redirect_to(cars_path)

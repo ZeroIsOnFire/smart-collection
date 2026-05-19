@@ -24,7 +24,9 @@ RSpec.describe AutodetectJob do
       File.write(mock_file_path, 'fake content')
 
       File.open(mock_file_path) do |mock_file|
-        allow(ImageCropperService).to receive(:crop).and_return(mock_file)
+        expect(ImageCropperService).to receive(:crop)
+          .with(anything, anything, minimum_side: ImageCropperService::DEFAULT_MINIMUM_SIDE)
+          .and_return(mock_file)
 
         expect do
           described_class.new.perform(autodetection.id.to_s)

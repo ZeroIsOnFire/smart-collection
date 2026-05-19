@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class AutodetectionService
+  AUTODETECTION_MINIMUM_SIDE = 1080
   attr_reader :user
 
   def initialize(user)
@@ -8,11 +9,18 @@ class AutodetectionService
   end
 
   def create(params)
-    autodetection = user.autodetections.create(params)
+    prepared_params, upscaled_file = prepare_photo_for_save(params, minimum_side: AUTODETECTION_MINIMUM_SIDE)
+    autodetection = user.autodetections.create(prepared_params)
 
     AutodetectJob.perform_later(autodetection.id.to_s) if autodetection.persisted?
 
     autodetection
+  rescue ImageUpscalerService::UpscaleError => e
+    autodetection = user.autodetections.new(params.to_h.deep_symbolize_keys)
+    autodetection.errors.add(:photo, e.message)
+    autodetection
+  ensure
+    cleanup_tempfile(upscaled_file)
   end
 
   def retry(autodetection_id)
@@ -24,5 +32,28 @@ class AutodetectionService
     end
 
     autodetection
+  end
+
+  private
+
+  def prepare_photo_for_save(params, minimum_side:)
+    normalized_params = params.to_h.deep_symbolize_keys
+    photo = normalized_params[:photo]
+
+    return [normalized_params, nil] if photo.blank?
+
+    upscaled_file = ImageUpscalerService.upscale_if_needed(photo, minimum_side: minimum_side)
+    normalized_params[:photo] = upscaled_file if upscaled_file
+
+    [normalized_params, upscaled_file]
+  end
+
+  def cleanup_tempfile(tempfile)
+    return unless tempfile.respond_to?(:close)
+
+    tempfile.close
+    tempfile.unlink
+  rescue StandardError
+    nil
   end
 end

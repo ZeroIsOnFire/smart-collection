@@ -4,13 +4,19 @@ class DetectedItemsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_autodetection, only: [:create]
   before_action :set_detected_item, only: %i[reject undo update_selection destroy]
+  rescue_from ImageUpscalerService::UpscaleError, with: :handle_upscale_error
 
   # POST /autodetections/:autodetection_id/detected_items
   def create
     normalized_vertices = normalized_vertices_from_params
 
     # Recortar imagem
-    cropped_file = ImageCropperService.crop(@autodetection.photo.path, normalized_vertices, padding: 0)
+    cropped_file = ImageCropperService.crop(
+      @autodetection.photo.path,
+      normalized_vertices,
+      padding: 0,
+      minimum_side: ImageCropperService::DEFAULT_MINIMUM_SIDE
+    )
 
     # Autodetecção completa baseada no recorte manual
     classification = YoloDetectionService.classify(cropped_file.path) if cropped_file
@@ -81,7 +87,12 @@ class DetectedItemsController < ApplicationController
     normalized_vertices = normalized_vertices_from_params
 
     # Recortar novamente sem padding extra
-    cropped_file = ImageCropperService.crop(@detected_item.autodetection.photo.path, normalized_vertices, padding: 0)
+    cropped_file = ImageCropperService.crop(
+      @detected_item.autodetection.photo.path,
+      normalized_vertices,
+      padding: 0,
+      minimum_side: ImageCropperService::DEFAULT_MINIMUM_SIDE
+    )
 
     if cropped_file
       # Atualiza position_data e a foto recortada
@@ -163,5 +174,20 @@ class DetectedItemsController < ApplicationController
       { 'x' => x + w, 'y' => y + h },
       { 'x' => x,     'y' => y + h }
     ]
+  end
+
+  def handle_upscale_error(exception)
+    message = exception.message.presence || t('flash.error')
+
+    respond_to do |format|
+      format.turbo_stream do
+        render turbo_stream: turbo_stream.append(
+          'flash_toasts',
+          partial: 'shared/toast',
+          locals: { type: :alert, message: message }
+        ), status: :unprocessable_content
+      end
+      format.html { redirect_back_or_to(@autodetection, alert: message) }
+    end
   end
 end

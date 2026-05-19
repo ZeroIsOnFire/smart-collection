@@ -24,7 +24,11 @@ class AutodetectJob < ApplicationJob
       # 2. Processar cada item detectado
       detected_items_data.each do |data|
         # Recortar a imagem baseado nas coordenadas retornadas
-        cropped_file = ImageCropperService.crop(autodetection.photo.path, data[:vertices])
+        cropped_file = ImageCropperService.crop(
+          autodetection.photo.path,
+          data[:vertices],
+          minimum_side: ImageCropperService::DEFAULT_MINIMUM_SIDE
+        )
 
         next unless cropped_file
 
