@@ -55,6 +55,14 @@ CPU_MODEL_PATH = os.getenv(
     "/app/models/realesr-general-x4v3.pth"
 )
 
+# AI Upscale Threshold: if the shortest image side is already >= (target * threshold),
+# skip the neural network and use Lanczos4 instead. This avoids the "painted" look
+# that neural upscalers introduce on images that already have reasonable detail.
+# CPU model (SRVGGNetCompact) distorts more easily → lower threshold.
+# GPU model (RRDBNet/x4plus) is higher quality → can afford a higher threshold.
+AI_UPSCALE_THRESHOLD_CPU = float(os.getenv("AI_UPSCALE_THRESHOLD_CPU", "0.66"))
+AI_UPSCALE_THRESHOLD_GPU = float(os.getenv("AI_UPSCALE_THRESHOLD_GPU", "0.85"))
+
 app = FastAPI(title="SCC Image Upscale Service")
 
 
@@ -73,6 +81,15 @@ def env_int(name, default):
 
 def should_use_gpu_upscaler():
     return env_flag("USE_GPU_UPSCALER", "true")
+
+
+def get_ai_threshold(prefer_gpu: bool) -> float:
+    """Return the AI upscale threshold for the active mode.
+
+    Images whose shortest side is already >= (minimum_side * threshold)
+    will skip the neural network and be resized with Lanczos4 instead.
+    """
+    return AI_UPSCALE_THRESHOLD_GPU if prefer_gpu else AI_UPSCALE_THRESHOLD_CPU
 
 
 async def verify_api_key(x_api_key: str = Header(None)):
@@ -155,6 +172,26 @@ def upscale_until_min_side(image_bgr, minimum_side):
     current = image_bgr
     passes = 0
     prefer_gpu = should_use_gpu_upscaler()
+    current_min_side = min(current.shape[0], current.shape[1])
+    threshold = get_ai_threshold(prefer_gpu)
+    ai_threshold_px = minimum_side * threshold
+
+    # --- Threshold Guard ---
+    # If the image's shortest side is already a significant fraction of the target,
+    # the neural upscaler would only introduce artificial textures. Skip straight to Lanczos.
+    if current_min_side >= ai_threshold_px:
+        mode_label = "GPU" if prefer_gpu else "CPU"
+        logger.info(
+            f"[Threshold] Image min-side {current_min_side}px >= "
+            f"{ai_threshold_px:.0f}px ({threshold:.0%} of target {minimum_side}px, {mode_label} mode). "
+            f"Skipping AI upscaler — using Lanczos4 to avoid distortion."
+        )
+        return upscale_with_lanczos(current, minimum_side)
+
+    logger.info(
+        f"[AI Upscale] Image min-side {current_min_side}px < "
+        f"{ai_threshold_px:.0f}px threshold. Engaging Real-ESRGAN."
+    )
 
     while min(current.shape[0], current.shape[1]) < minimum_side and passes < MAX_AI_PASSES:
         try:
@@ -207,11 +244,14 @@ async def startup_event():
 
 @app.get("/health")
 async def health():
+    gpu_mode = should_use_gpu_upscaler()
     return {
         "status": "ok",
-        "mode": "gpu" if should_use_gpu_upscaler() else "cpu",
+        "mode": "gpu" if gpu_mode else "cpu",
         "target_min_side": TARGET_MIN_SIDE,
-        "scale": REAL_ESRGAN_SCALE
+        "scale": REAL_ESRGAN_SCALE,
+        "ai_threshold": get_ai_threshold(gpu_mode),
+        "ai_threshold_px": int(TARGET_MIN_SIDE * get_ai_threshold(gpu_mode)),
     }
 
 

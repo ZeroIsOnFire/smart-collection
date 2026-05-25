@@ -60,6 +60,47 @@ class UpscaleServiceTests(unittest.TestCase):
         mock_log_error.assert_called()
         self.assertGreaterEqual(min(result.shape[:2]), 512)
 
+    # --- Threshold Guard Tests ---
+
+    def test_threshold_guard_skips_ai_for_cpu_when_image_is_medium_sized(self):
+        """Image at 70% of target (338px) exceeds the 66% CPU threshold (337px). Must skip AI."""
+        # 70% of 512 = 358px minimum side
+        img_min_side = int(512 * 0.70)
+        image = np.zeros((img_min_side, img_min_side + 50, 3), dtype=np.uint8)
+
+        with patch.object(main, "should_use_gpu_upscaler", return_value=False), \
+             patch.object(main, "upscale_with_realesrgan") as mock_ai:
+            result = main.upscale_until_min_side(image, 512)
+
+        mock_ai.assert_not_called()
+        self.assertGreaterEqual(min(result.shape[:2]), 512)
+
+    def test_threshold_guard_skips_ai_for_gpu_when_image_is_large_enough(self):
+        """Image at 90% of target exceeds the 85% GPU threshold. Must skip AI."""
+        img_min_side = int(512 * 0.90)
+        image = np.zeros((img_min_side, img_min_side + 50, 3), dtype=np.uint8)
+
+        with patch.object(main, "should_use_gpu_upscaler", return_value=True), \
+             patch.object(main, "upscale_with_realesrgan") as mock_ai:
+            result = main.upscale_until_min_side(image, 512)
+
+        mock_ai.assert_not_called()
+        self.assertGreaterEqual(min(result.shape[:2]), 512)
+
+    def test_threshold_guard_engages_ai_when_image_is_too_small(self):
+        """Image at 50% of target is below both thresholds. AI must be called."""
+        img_min_side = int(512 * 0.50)  # 256px — well below 66% CPU threshold
+        image = np.zeros((img_min_side, img_min_side + 50, 3), dtype=np.uint8)
+        # Return a large enough image so the while loop exits cleanly
+        big_image = np.zeros((600, 700, 3), dtype=np.uint8)
+
+        with patch.object(main, "should_use_gpu_upscaler", return_value=False), \
+             patch.object(main, "upscale_with_realesrgan", return_value=big_image) as mock_ai:
+            result = main.upscale_until_min_side(image, 512)
+
+        mock_ai.assert_called_once()
+        self.assertGreaterEqual(min(result.shape[:2]), 512)
+
     def test_endpoint_preserves_aspect_ratio(self):
         source = build_test_jpeg()
         upscale_result = np.zeros((540, 720, 3), dtype=np.uint8)
