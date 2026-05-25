@@ -62,6 +62,7 @@ CPU_MODEL_PATH = os.getenv(
 # GPU model (RRDBNet/x4plus) is higher quality → can afford a higher threshold.
 AI_UPSCALE_THRESHOLD_CPU = float(os.getenv("AI_UPSCALE_THRESHOLD_CPU", "0.66"))
 AI_UPSCALE_THRESHOLD_GPU = float(os.getenv("AI_UPSCALE_THRESHOLD_GPU", "0.85"))
+AI_UPSCALE_THRESHOLD_ESPCN_CPU = float(os.getenv("AI_UPSCALE_THRESHOLD_ESPCN_CPU", "0.85"))
 
 app = FastAPI(title="SCC Image Upscale Service")
 
@@ -160,6 +161,20 @@ def upscale_with_realesrgan(image_bgr, prefer_gpu=True):
     return output_bgr
 
 
+@lru_cache(maxsize=1)
+def get_espcn_upscaler():
+    model_path = _require_model("/app/models/ESPCN_x4.pb")
+    sr = cv2.dnn_superres.DnnSuperResImpl_create()
+    sr.readModel(model_path)
+    sr.setModel("espcn", 4)
+    return sr
+
+
+def upscale_with_espcn(image_bgr):
+    sr = get_espcn_upscaler()
+    return sr.upsample(image_bgr)
+
+
 def upscale_with_lanczos(image_bgr, minimum_side):
     height, width = image_bgr.shape[:2]
     scale = minimum_side / float(min(height, width))
@@ -175,21 +190,36 @@ def upscale_until_min_side(image_bgr, minimum_side):
     current_min_side = min(current.shape[0], current.shape[1])
     threshold = get_ai_threshold(prefer_gpu)
     ai_threshold_px = minimum_side * threshold
+    espcn_threshold_px = minimum_side * AI_UPSCALE_THRESHOLD_ESPCN_CPU if not prefer_gpu else ai_threshold_px
 
     # --- Threshold Guard ---
-    # If the image's shortest side is already a significant fraction of the target,
-    # the neural upscaler would only introduce artificial textures. Skip straight to Lanczos.
-    if current_min_side >= ai_threshold_px:
+    if current_min_side >= espcn_threshold_px:
         mode_label = "GPU" if prefer_gpu else "CPU"
+        threshold_val = AI_UPSCALE_THRESHOLD_ESPCN_CPU if not prefer_gpu else threshold
         logger.info(
             f"[Threshold] Image min-side {current_min_side}px >= "
-            f"{ai_threshold_px:.0f}px ({threshold:.0%} of target {minimum_side}px, {mode_label} mode). "
+            f"{(minimum_side * threshold_val):.0f}px ({threshold_val:.0%} of target {minimum_side}px, {mode_label} mode). "
             f"Skipping AI upscaler — using Lanczos4 to avoid distortion."
         )
         return upscale_with_lanczos(current, minimum_side)
 
+    if not prefer_gpu and current_min_side >= ai_threshold_px and current_min_side < espcn_threshold_px:
+        logger.info(
+            f"[AI Upscale - ESPCN] Image min-side {current_min_side}px is between "
+            f"{ai_threshold_px:.0f}px and {espcn_threshold_px:.0f}px (CPU mode). "
+            f"Engaging lightweight ESPCN model."
+        )
+        try:
+            current = upscale_with_espcn(current)
+            if min(current.shape[0], current.shape[1]) < minimum_side:
+                 current = upscale_with_lanczos(current, minimum_side)
+            return current
+        except Exception as e:
+            logger.error(f"Error during ESPCN upscale: {e}", exc_info=True)
+            return upscale_with_lanczos(current, minimum_side)
+
     logger.info(
-        f"[AI Upscale] Image min-side {current_min_side}px < "
+        f"[AI Upscale - RealESRGAN] Image min-side {current_min_side}px < "
         f"{ai_threshold_px:.0f}px threshold. Engaging Real-ESRGAN."
     )
 

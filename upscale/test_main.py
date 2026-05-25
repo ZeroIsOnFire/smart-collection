@@ -62,17 +62,33 @@ class UpscaleServiceTests(unittest.TestCase):
 
     # --- Threshold Guard Tests ---
 
-    def test_threshold_guard_skips_ai_for_cpu_when_image_is_medium_sized(self):
-        """Image at 70% of target (338px) exceeds the 66% CPU threshold (337px). Must skip AI."""
-        # 70% of 512 = 358px minimum side
+    def test_threshold_guard_engages_espcn_for_cpu_when_image_is_medium_sized(self):
+        """Image at 70% of target (358px) is between 66% and 85%. Must use ESPCN."""
         img_min_side = int(512 * 0.70)
         image = np.zeros((img_min_side, img_min_side + 50, 3), dtype=np.uint8)
+        big_image = np.zeros((600, 700, 3), dtype=np.uint8)
 
         with patch.object(main, "should_use_gpu_upscaler", return_value=False), \
-             patch.object(main, "upscale_with_realesrgan") as mock_ai:
+             patch.object(main, "upscale_with_realesrgan") as mock_ai, \
+             patch.object(main, "upscale_with_espcn", return_value=big_image) as mock_espcn:
             result = main.upscale_until_min_side(image, 512)
 
         mock_ai.assert_not_called()
+        mock_espcn.assert_called_once()
+        self.assertGreaterEqual(min(result.shape[:2]), 512)
+
+    def test_threshold_guard_skips_ai_for_cpu_when_image_is_large_enough(self):
+        """Image at 90% of target (460px) exceeds the 85% ESPCN threshold. Must skip AI entirely."""
+        img_min_side = int(512 * 0.90)
+        image = np.zeros((img_min_side, img_min_side + 50, 3), dtype=np.uint8)
+
+        with patch.object(main, "should_use_gpu_upscaler", return_value=False), \
+             patch.object(main, "upscale_with_realesrgan") as mock_ai, \
+             patch.object(main, "upscale_with_espcn") as mock_espcn:
+            result = main.upscale_until_min_side(image, 512)
+
+        mock_ai.assert_not_called()
+        mock_espcn.assert_not_called()
         self.assertGreaterEqual(min(result.shape[:2]), 512)
 
     def test_threshold_guard_skips_ai_for_gpu_when_image_is_large_enough(self):
@@ -81,10 +97,12 @@ class UpscaleServiceTests(unittest.TestCase):
         image = np.zeros((img_min_side, img_min_side + 50, 3), dtype=np.uint8)
 
         with patch.object(main, "should_use_gpu_upscaler", return_value=True), \
-             patch.object(main, "upscale_with_realesrgan") as mock_ai:
+             patch.object(main, "upscale_with_realesrgan") as mock_ai, \
+             patch.object(main, "upscale_with_espcn") as mock_espcn:
             result = main.upscale_until_min_side(image, 512)
 
         mock_ai.assert_not_called()
+        mock_espcn.assert_not_called()
         self.assertGreaterEqual(min(result.shape[:2]), 512)
 
     def test_threshold_guard_engages_ai_when_image_is_too_small(self):
@@ -95,10 +113,12 @@ class UpscaleServiceTests(unittest.TestCase):
         big_image = np.zeros((600, 700, 3), dtype=np.uint8)
 
         with patch.object(main, "should_use_gpu_upscaler", return_value=False), \
-             patch.object(main, "upscale_with_realesrgan", return_value=big_image) as mock_ai:
+             patch.object(main, "upscale_with_realesrgan", return_value=big_image) as mock_ai, \
+             patch.object(main, "upscale_with_espcn") as mock_espcn:
             result = main.upscale_until_min_side(image, 512)
 
         mock_ai.assert_called_once()
+        mock_espcn.assert_not_called()
         self.assertGreaterEqual(min(result.shape[:2]), 512)
 
     def test_endpoint_preserves_aspect_ratio(self):

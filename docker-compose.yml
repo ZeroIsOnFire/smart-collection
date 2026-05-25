@@ -70,6 +70,7 @@ services:
       - REAL_ESRGAN_CPU_MODEL_PATH=${REAL_ESRGAN_CPU_MODEL_PATH:-/app/models/realesr-general-x4v3.pth}
       - AI_UPSCALE_THRESHOLD_CPU=${AI_UPSCALE_THRESHOLD_CPU:-0.66}
       - AI_UPSCALE_THRESHOLD_GPU=${AI_UPSCALE_THRESHOLD_GPU:-0.85}
+      - AI_UPSCALE_THRESHOLD_ESPCN_CPU=${AI_UPSCALE_THRESHOLD_ESPCN_CPU:-0.85}
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]

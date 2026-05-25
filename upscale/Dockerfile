@@ -16,7 +16,8 @@ COPY main.py .
 
 RUN mkdir -p /app/models \
     && curl -L --fail -o /app/models/RealESRGAN_x4plus.pth https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth \
-    && curl -L --fail -o /app/models/realesr-general-x4v3.pth https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesr-general-x4v3.pth
+    && curl -L --fail -o /app/models/realesr-general-x4v3.pth https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesr-general-x4v3.pth \
+    && curl -L --fail -o /app/models/ESPCN_x4.pb https://github.com/fannymonori/TF-ESPCN/raw/master/export/ESPCN_x4.pb
 
 EXPOSE 8000
 
