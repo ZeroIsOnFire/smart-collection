@@ -1,0 +1,190 @@
+# =============================================================================
+# docker-compose.example.yml — Template de Configuração do Smart Collection
+# =============================================================================
+#
+# INSTRUÇÃO DE USO:
+#   1. Copie este arquivo para docker-compose.yml:
+#        cp docker-compose.example.yml docker-compose.yml
+#   2. Ajuste as variáveis de ambiente no arquivo .env (veja .env.example).
+#   3. Escolha a configuração de GPU do upscale-service conforme sua placa:
+#        - AMD (ROCm)  → mantenha as seções "AMD" descomentadas (padrão abaixo)
+#        - NVIDIA (CUDA) → comente as seções "AMD" e descomente as "NVIDIA"
+#        - CPU apenas    → comente TODAS as seções de GPU e ajuste USE_GPU_UPSCALER=false
+#
+# O docker-compose.yml local NÃO é versionado (está no .gitignore).
+# Este arquivo (.example) é o template oficial versionado no repositório.
+# =============================================================================
+
+name: smart-collection
+
+services:
+  web:
+    build: .
+    command: bundle exec rails server -b 0.0.0.0
+    volumes:
+      - .:/rails
+    ports:
+      - "3000:3000"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      - RAILS_ENV=development
+      - REDIS_URL=redis://redis:6379/1
+      - MONGODB_URI=mongodb://${MONGODB_USERNAME:-scc_admin}:${MONGODB_PASSWORD:-scc_dev}@mongodb:27017/smart_collection_catalog_development?authSource=admin
+      - IMAGE_UPSCALE_SERVICE_URL=http://upscale-service:8000
+      - IMAGE_UPSCALE_API_KEY=${IMAGE_UPSCALE_API_KEY:-}
+    restart: unless-stopped
+
+  sidekiq:
+    build: .
+    command: bundle exec sidekiq
+    volumes:
+      - .:/rails
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      yolo-service:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      - RAILS_ENV=development
+      - REDIS_URL=redis://redis:6379/1
+      - MONGODB_URI=mongodb://${MONGODB_USERNAME:-scc_admin}:${MONGODB_PASSWORD:-scc_dev}@mongodb:27017/smart_collection_catalog_development?authSource=admin
+      - IMAGE_UPSCALE_SERVICE_URL=http://upscale-service:8000
+      - IMAGE_UPSCALE_API_KEY=${IMAGE_UPSCALE_API_KEY:-}
+    restart: unless-stopped
+
+  yolo-service:
+    build:
+      context: ./yolo
+    environment:
+      - YOLO_API_KEY=${YOLO_API_KEY}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ---------------------------------------------------------------------------
+  # upscale-service — Serviço de upscaling de imagens via Real-ESRGAN
+  # ---------------------------------------------------------------------------
+  # Este serviço possui dois Dockerfiles distintos conforme o tipo de GPU:
+  #
+  #   • Dockerfile     → NVIDIA (CUDA) — padrão upstream
+  #   • Dockerfile.amd → AMD (ROCm)    — necessário para placas Radeon
+  #
+  # Escolha UMA das configurações abaixo e comente a outra.
+  # ---------------------------------------------------------------------------
+
+  upscale-service:
+
+    # ── OPÇÃO A: AMD / ROCm (placas Radeon — ex.: RX 6600, RX 7900 XTX) ─────
+    # Usa o Dockerfile.amd que instala PyTorch com suporte a ROCm.
+    # As entradas `devices` e `group_add` são obrigatórias para o Linux/WSL2
+    # expor os dispositivos de renderização AMD ao container.
+    build:
+      context: ./upscale
+      dockerfile: Dockerfile.amd          # ROCm: usa imagem base pytorch/pytorch:*-rocm*
+
+    devices:
+      - "/dev/kfd:/dev/kfd"               # Kernel Fusion Driver — interface principal ROCm
+      - "/dev/dri:/dev/dri"               # Direct Rendering Infrastructure — acesso à GPU
+
+    group_add:
+      - video                             # Adiciona o container ao grupo 'video' do host
+                                          # para ter permissão de leitura nos dispositivos DRI
+    # ── FIM OPÇÃO A ───────────────────────────────────────────────────────────
+
+
+    # ── OPÇÃO B: NVIDIA / CUDA (placas GeForce / RTX / Quadro) ──────────────
+    # Descomente este bloco e comente o bloco "OPÇÃO A" acima.
+    # Requer o NVIDIA Container Toolkit instalado no host:
+    #   https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html
+    #
+    # build:
+    #   context: ./upscale
+    #   dockerfile: Dockerfile              # CUDA: usa imagem base pytorch/pytorch:*-cuda*
+    #
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all                  # ou especifique: count: 1
+    #           capabilities: [gpu]
+    # ── FIM OPÇÃO B ───────────────────────────────────────────────────────────
+
+
+    # ── OPÇÃO C: CPU apenas (sem GPU) ─────────────────────────────────────────
+    # Descomente este bloco e comente os blocos A e B.
+    # O upscaling será feito via CPU (mais lento, mas sem dependência de GPU).
+    # Lembre-se de ajustar USE_GPU_UPSCALER=false abaixo.
+    #
+    # build:
+    #   context: ./upscale
+    #   dockerfile: Dockerfile              # Dockerfile padrão sem aceleração GPU
+    # ── FIM OPÇÃO C ───────────────────────────────────────────────────────────
+
+    env_file:
+      - .env
+    environment:
+      - IMAGE_UPSCALE_API_KEY=${IMAGE_UPSCALE_API_KEY:-}
+      - USE_GPU_UPSCALER=${USE_GPU_UPSCALER:-true}           # false para Opção C (CPU)
+      - UPSCALE_OUTPUT_SIDE=${UPSCALE_OUTPUT_SIDE:-1080}
+      - REAL_ESRGAN_GPU_MODEL_PATH=${REAL_ESRGAN_GPU_MODEL_PATH:-/app/models/RealESRGAN_x4plus.pth}
+      - REAL_ESRGAN_CPU_MODEL_PATH=${REAL_ESRGAN_CPU_MODEL_PATH:-/app/models/realesr-general-x4v3.pth}
+      - AI_UPSCALE_THRESHOLD_CPU=${AI_UPSCALE_THRESHOLD_CPU:-0.66}
+      - AI_UPSCALE_THRESHOLD_GPU=${AI_UPSCALE_THRESHOLD_GPU:-0.85}
+      - AI_UPSCALE_THRESHOLD_ESPCN_CPU=${AI_UPSCALE_THRESHOLD_ESPCN_CPU:-0.85}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  mongodb:
+    image: mongo:7
+    volumes:
+      - mongodb_data:/data/db
+    ports:
+      - "127.0.0.1:27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USERNAME:-scc_admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD:-scc_dev}
+      MONGO_INITDB_DATABASE: smart_collection_catalog_development
+    healthcheck:
+      test: mongosh --eval 'db.runCommand("ping").ok' --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    ports:
+      - "127.0.0.1:6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    restart: unless-stopped
+
+volumes:
+  mongodb_data:
+  redis_data:
+  bundle_cache:
