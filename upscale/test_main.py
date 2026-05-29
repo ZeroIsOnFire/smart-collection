@@ -23,16 +23,64 @@ def build_test_jpeg(width=128, height=96, color=(40, 90, 150)):
 class UpscaleServiceTests(unittest.TestCase):
     def setUp(self):
         self.client = TestClient(main.app)
+        self.tier_4x_patcher = patch.object(main, "TIER_4X_THRESHOLD", 0.50)
+        self.tier_2x_patcher = patch.object(main, "TIER_2X_THRESHOLD", 0.75)
+        self.tier_4x_patcher.start()
+        self.tier_2x_patcher.start()
+        self.addCleanup(self.tier_4x_patcher.stop)
+        self.addCleanup(self.tier_2x_patcher.stop)
 
     # ── env helpers ─────────────────────────────────────────────────────────
 
-    def test_env_flag_defaults_to_enabled_for_gpu_mode(self):
+    def test_runtime_defaults_to_cpu(self):
         with patch.dict(os.environ, {}, clear=True):
-            self.assertTrue(main.should_use_gpu_upscaler())
+            self.assertEqual(main.upscale_runtime(), "cpu")
 
-    def test_env_flag_can_disable_gpu_mode(self):
-        with patch.dict(os.environ, {"USE_GPU_UPSCALER": "false"}, clear=True):
-            self.assertFalse(main.should_use_gpu_upscaler())
+    def test_runtime_accepts_nvidia_aliases(self):
+        with patch.dict(os.environ, {"UPSCALE_RUNTIME": "cuda"}, clear=True):
+            self.assertEqual(main.upscale_runtime(), "nvidia")
+
+    def test_runtime_accepts_amd_aliases(self):
+        with patch.dict(os.environ, {"UPSCALE_RUNTIME": "rocm"}, clear=True):
+            self.assertEqual(main.upscale_runtime(), "amd")
+
+    def test_runtime_rejects_unknown_values(self):
+        with patch.dict(os.environ, {"UPSCALE_RUNTIME": "quantum"}, clear=True):
+            with self.assertRaises(RuntimeError):
+                main.upscale_runtime()
+
+    def test_cpu_runtime_uses_lightweight_model_by_default(self):
+        with patch.dict(os.environ, {"REAL_ESRGAN_MODEL_PATH": ""}, clear=True):
+            self.assertEqual(main.model_path_for_runtime("cpu"), "/app/models/realesr-general-x4v3.pth")
+
+    def test_cpu_denoise_strength_defaults_to_keep_noise(self):
+        with patch.dict(os.environ, {}, clear=True):
+            self.assertEqual(main.cpu_denoise_strength(), 0.0)
+
+    def test_cpu_denoise_strength_uses_configured_value(self):
+        with patch.dict(os.environ, {"REAL_ESRGAN_DENOISE_STRENGTH": "0.3"}, clear=True):
+            self.assertEqual(main.cpu_denoise_strength(), 0.3)
+
+    def test_cpu_denoise_strength_is_clamped_between_zero_and_one(self):
+        with patch.dict(os.environ, {"REAL_ESRGAN_DENOISE_STRENGTH": "2"}, clear=True):
+            self.assertEqual(main.cpu_denoise_strength(), 1.0)
+        with patch.dict(os.environ, {"REAL_ESRGAN_DENOISE_STRENGTH": "-1"}, clear=True):
+            self.assertEqual(main.cpu_denoise_strength(), 0.0)
+
+    def test_cpu_model_config_uses_dni_when_denoise_strength_is_below_one(self):
+        model_path, dni_weight = main.cpu_model_config(0.3)
+
+        self.assertEqual(
+            model_path,
+            ["/app/models/realesr-general-x4v3.pth", "/app/models/realesr-general-wdn-x4v3.pth"]
+        )
+        self.assertEqual(dni_weight, [0.3, 0.7])
+
+    def test_cpu_model_config_uses_base_model_only_for_strong_denoise(self):
+        model_path, dni_weight = main.cpu_model_config(1.0)
+
+        self.assertEqual(model_path, "/app/models/realesr-general-x4v3.pth")
+        self.assertIsNone(dni_weight)
 
     def test_finalize_output_preserves_aspect_ratio(self):
         source = np.zeros((320, 520, 3), dtype=np.uint8)
@@ -48,14 +96,11 @@ class UpscaleServiceTests(unittest.TestCase):
         image = np.zeros((img_min_side, img_min_side + 50, 3), dtype=np.uint8)
         big_image = np.zeros((600, 700, 3), dtype=np.uint8)
 
-        with patch.object(main, "should_use_gpu_upscaler", return_value=False), \
-             patch.object(main, "upscale_with_realesrgan", return_value=big_image) as mock_ai, \
-             patch.object(main, "apply_denoise", side_effect=lambda x: x) as mock_denoise:
+        with patch.object(main, "upscale_runtime", return_value="cpu"), \
+             patch.object(main, "upscale_with_realesrgan", return_value=big_image) as mock_ai:
             result = main.upscale_until_min_side(image, 360)
 
         mock_ai.assert_called()
-        # The 4x tier should not denoise before the AI call
-        mock_denoise.assert_not_called()
         self.assertGreaterEqual(min(result.shape[:2]), 360)
 
     def test_tier_4x_fallback_to_lanczos_when_ai_fails(self):
@@ -63,7 +108,7 @@ class UpscaleServiceTests(unittest.TestCase):
         img_min_side = int(360 * 0.30)
         image = np.zeros((img_min_side, img_min_side + 50, 3), dtype=np.uint8)
 
-        with patch.object(main, "should_use_gpu_upscaler", return_value=False), \
+        with patch.object(main, "upscale_runtime", return_value="cpu"), \
              patch.object(main, "upscale_with_realesrgan", side_effect=RuntimeError("boom")):
             result = main.upscale_until_min_side(image, 360)
 
@@ -73,7 +118,7 @@ class UpscaleServiceTests(unittest.TestCase):
         img_min_side = int(360 * 0.30)
         image = np.zeros((img_min_side, img_min_side + 50, 3), dtype=np.uint8)
 
-        with patch.object(main, "should_use_gpu_upscaler", return_value=False), \
+        with patch.object(main, "upscale_runtime", return_value="cpu"), \
              patch.object(main, "upscale_with_realesrgan", side_effect=RuntimeError("boom")), \
              patch.object(main.logger, "error") as mock_log_error:
             result = main.upscale_until_min_side(image, 360)
@@ -81,24 +126,21 @@ class UpscaleServiceTests(unittest.TestCase):
         mock_log_error.assert_called()
         self.assertGreaterEqual(min(result.shape[:2]), 360)
 
-    # ── Tier 2: 50–74.9% → Denoise + 2x Real-ESRGAN ─────────────────────────
+    # ── Tier 2: 50–74.9% → 2x Real-ESRGAN ───────────────────────────────────
 
     def test_tier_2x_engaged_when_ratio_between_50_and_74_percent(self):
-        """Image at 60% of target (216px for target 360px) must use Denoise + 2x."""
+        """Image at 60% of target (216px for target 360px) must use 2x AI."""
         img_min_side = int(360 * 0.60)  # 216px
         image = np.zeros((img_min_side, img_min_side + 50, 3), dtype=np.uint8)
         upscaled_2x = np.zeros((img_min_side * 2 + 50, (img_min_side + 50) * 2, 3), dtype=np.uint8)
 
-        with patch.object(main, "should_use_gpu_upscaler", return_value=False), \
-             patch.object(main, "upscale_with_realesrgan", return_value=upscaled_2x) as mock_ai, \
-             patch.object(main, "apply_denoise", side_effect=lambda x: x) as mock_denoise:
+        with patch.object(main, "upscale_runtime", return_value="cpu"), \
+             patch.object(main, "upscale_with_realesrgan", return_value=upscaled_2x) as mock_ai:
             result = main.upscale_until_min_side(image, 360)
 
-        # Denoise must be called before AI in this tier
-        mock_denoise.assert_called_once()
         # outscale=2 must be passed to the AI
-        call_kwargs = mock_ai.call_args
-        self.assertEqual(call_kwargs.kwargs.get("outscale") or call_kwargs.args[2] if len(call_kwargs.args) > 2 else None, 2)
+        _, kwargs = mock_ai.call_args
+        self.assertEqual(kwargs.get("outscale"), 2)
         self.assertGreaterEqual(min(result.shape[:2]), 360)
 
     def test_tier_2x_calls_realesrgan_with_outscale_2(self):
@@ -107,8 +149,7 @@ class UpscaleServiceTests(unittest.TestCase):
         image = np.zeros((img_min_side, img_min_side + 50, 3), dtype=np.uint8)
         big_enough = np.zeros((600, 700, 3), dtype=np.uint8)
 
-        with patch.object(main, "should_use_gpu_upscaler", return_value=False), \
-             patch.object(main, "apply_denoise", side_effect=lambda x: x), \
+        with patch.object(main, "upscale_runtime", return_value="cpu"), \
              patch.object(main, "upscale_with_realesrgan", return_value=big_enough) as mock_ai:
             main.upscale_until_min_side(image, 360)
 
@@ -121,41 +162,87 @@ class UpscaleServiceTests(unittest.TestCase):
         img_min_side = int(360 * 0.60)
         image = np.zeros((img_min_side, img_min_side + 50, 3), dtype=np.uint8)
 
-        with patch.object(main, "should_use_gpu_upscaler", return_value=False), \
-             patch.object(main, "apply_denoise", side_effect=lambda x: x), \
+        with patch.object(main, "upscale_runtime", return_value="cpu"), \
              patch.object(main, "upscale_with_realesrgan", side_effect=RuntimeError("boom")):
             result = main.upscale_until_min_side(image, 360)
 
         self.assertGreaterEqual(min(result.shape[:2]), 360)
 
-    # ── Tier 3: >= 75% → Denoise + Lanczos ──────────────────────────────────
+    # ── Tier 3: >= 75% → Lanczos ────────────────────────────────────────────
 
     def test_tier_lanczos_engaged_when_ratio_at_or_above_75_percent(self):
-        """Image at 80% of target (288px) must skip AI entirely and use Denoise+Lanczos."""
+        """Image at 80% of target (288px) must skip AI entirely and use Lanczos."""
         img_min_side = int(360 * 0.80)  # 288px
         image = np.zeros((img_min_side, img_min_side + 50, 3), dtype=np.uint8)
 
-        with patch.object(main, "should_use_gpu_upscaler", return_value=False), \
-             patch.object(main, "upscale_with_realesrgan") as mock_ai, \
-             patch.object(main, "apply_denoise", side_effect=lambda x: x) as mock_denoise:
+        with patch.object(main, "upscale_runtime", return_value="cpu"), \
+             patch.object(main, "upscale_with_realesrgan") as mock_ai:
             result = main.upscale_until_min_side(image, 360)
 
         mock_ai.assert_not_called()
-        mock_denoise.assert_called_once()
-        self.assertGreaterEqual(min(result.shape[:2]), 360)
-
-    def test_tier_lanczos_still_works_when_denoise_fails(self):
-        """If denoise raises, tier 3 must still produce a valid image via Lanczos."""
-        img_min_side = int(360 * 0.80)
-        image = np.zeros((img_min_side, img_min_side + 50, 3), dtype=np.uint8)
-
-        with patch.object(main, "should_use_gpu_upscaler", return_value=False), \
-             patch.object(main, "apply_denoise", side_effect=Exception("denoise failed")):
-            result = main.upscale_until_min_side(image, 360)
-
         self.assertGreaterEqual(min(result.shape[:2]), 360)
 
     # ── Downscale after AI ───────────────────────────────────────────────────
+
+    def test_tier_lanczos_applies_denoise_before_resize(self):
+        img_min_side = int(360 * 0.80)
+        image = np.zeros((img_min_side, img_min_side + 50, 3), dtype=np.uint8)
+        denoised = np.ones_like(image)
+        sharpened = np.full((360, 423, 3), 2, dtype=np.uint8)
+
+        with patch.object(main, "upscale_runtime", return_value="cpu"), \
+             patch.object(main, "apply_denoise", return_value=denoised) as mock_denoise, \
+             patch.object(main, "upscale_with_lanczos", wraps=main.upscale_with_lanczos) as mock_lanczos, \
+             patch.object(main, "apply_sharpen", return_value=sharpened) as mock_sharpen:
+            result = main.upscale_until_min_side(image, 360)
+
+        mock_denoise.assert_called_once_with(image)
+        mock_lanczos.assert_called_once()
+        self.assertIs(mock_lanczos.call_args.args[0], denoised)
+        mock_sharpen.assert_called_once()
+        self.assertIs(result, sharpened)
+        self.assertGreaterEqual(min(result.shape[:2]), 360)
+
+    def test_tier_lanczos_skips_denoise_when_filter_fails(self):
+        img_min_side = int(360 * 0.80)
+        image = np.zeros((img_min_side, img_min_side + 50, 3), dtype=np.uint8)
+
+        with patch.object(main, "upscale_runtime", return_value="cpu"), \
+             patch.object(main, "apply_denoise", side_effect=RuntimeError("boom")), \
+             patch.object(main.logger, "warning") as mock_warning:
+            result = main.upscale_until_min_side(image, 360)
+
+        mock_warning.assert_called()
+        self.assertGreaterEqual(min(result.shape[:2]), 360)
+
+    def test_tier_lanczos_skips_sharpen_when_filter_fails(self):
+        img_min_side = int(360 * 0.80)
+        image = np.zeros((img_min_side, img_min_side + 50, 3), dtype=np.uint8)
+
+        with patch.object(main, "upscale_runtime", return_value="cpu"), \
+             patch.object(main, "apply_sharpen", side_effect=RuntimeError("boom")), \
+             patch.object(main.logger, "warning") as mock_warning:
+            result = main.upscale_until_min_side(image, 360)
+
+        mock_warning.assert_called()
+        self.assertGreaterEqual(min(result.shape[:2]), 360)
+
+    def test_apply_cas_sharpen_returns_original_when_disabled(self):
+        image = np.zeros((32, 32, 3), dtype=np.uint8)
+
+        with patch.object(main, "LANCZOS_CAS_AMOUNT", 0):
+            result = main.apply_cas_sharpen(image)
+
+        self.assertIs(result, image)
+
+    def test_apply_cas_sharpen_preserves_shape_and_dtype(self):
+        image = np.full((32, 48, 3), 120, dtype=np.uint8)
+        image[:, 24:] = 180
+
+        result = main.apply_cas_sharpen(image)
+
+        self.assertEqual(result.shape, image.shape)
+        self.assertEqual(result.dtype, image.dtype)
 
     def test_downscale_to_target_reduces_overshot_image(self):
         """After a 4x AI upscale, a 270px image becomes 1080px. Must downscale to 360px."""
@@ -182,7 +269,7 @@ class UpscaleServiceTests(unittest.TestCase):
         image = np.zeros((270, 360, 3), dtype=np.uint8)
         upscaled = np.zeros((1080, 1440, 3), dtype=np.uint8)
 
-        with patch.object(main, "should_use_gpu_upscaler", return_value=False), \
+        with patch.object(main, "upscale_runtime", return_value="cpu"), \
              patch.object(main, "upscale_with_realesrgan", return_value=upscaled):
             result = main.upscale_until_min_side(image, 360)
 
@@ -194,8 +281,7 @@ class UpscaleServiceTests(unittest.TestCase):
         # Simulate 2x upscale result: 200 → 400, 260 → 520
         upscaled_2x = np.zeros((400, 520, 3), dtype=np.uint8)
 
-        with patch.object(main, "should_use_gpu_upscaler", return_value=False), \
-             patch.object(main, "apply_denoise", side_effect=lambda x: x), \
+        with patch.object(main, "upscale_runtime", return_value="cpu"), \
              patch.object(main, "upscale_with_realesrgan", return_value=upscaled_2x):
             result = main.upscale_until_min_side(image, 360)
 

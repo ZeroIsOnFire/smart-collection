@@ -1,71 +1,76 @@
 # AGENTS.md - SCC Image Upscale Service
 
-## Visão Geral
-Microserviço local especializado para upscale inteligente de imagens com base em modelos Real-ESRGAN (Super-Resolução), otimizado para CPU/GPU. Melhora a nitidez e a resolução de fotos e recortes de itens antes da autodetecção ou salvamento final.
+## Visao Geral
+Microservico local para upscale inteligente de imagens com Real-ESRGAN e fallback Lanczos. Ele melhora nitidez e resolucao de fotos/recortes antes da autodeteccao ou do salvamento final.
 
-## Stack Tecnológica
-- **Base padrão**: `python:3.11-slim` em `Dockerfile`
-- **Base AMD/ROCm**: `rocm/pytorch:latest` em `Dockerfile.amd`
-- **Framework API**: FastAPI + Uvicorn
-- **Motor de Inferência**: Real-ESRGAN (via PyTorch / torchvision)
-- **Fallbacks de imagem**: denoise OpenCV + `cv2.INTER_LANCZOS4`
-- **Modelos**:
-  - `4x-UltraSharp.pth` (GPU / Alta Fidelidade — fotorrealista, sem efeito de pintura)
-  - `realesr-general-x4v3.pth` (CPU / Fallback Leve)
-  - `ESPCN_x4.pb` (fallback OpenCV — não mais usado ativamente, mantido para compatibilidade)
+## Stack Tecnologica
+- **CPU**: `python:3.11-slim` em `Dockerfile.cpu`
+- **NVIDIA/CUDA**: `pytorch/pytorch:*-cuda*-runtime` em `Dockerfile.nvidia`
+- **AMD/ROCm**: `rocm/pytorch:latest` em `Dockerfile.amd`
+- **API**: FastAPI + Uvicorn
+- **Inferencia**: Real-ESRGAN via PyTorch/torchvision
+- **Fallbacks**: `cv2.INTER_LANCZOS4`
+- **Modelos por imagem**:
+  - CPU baixa `realesr-general-x4v3.pth` e `realesr-general-wdn-x4v3.pth` (DNI para denoise strength)
+  - NVIDIA baixa somente `4x-UltraSharp.pth`
+  - AMD baixa somente `4x-UltraSharp.pth`
 
 ## Contrato HTTP
-- `GET /health`: retorna status, modo alvo (`gpu`/`cpu`) e parâmetros ativos de tier/denoise.
+- `GET /health`: retorna status, runtime ativo, modelo ativo e parametros de tier/denoise.
 - `POST /upscale?minimum_side=<px>`: recebe multipart `file` e retorna `image/jpeg`.
-- `minimum_side` deve ser positivo. Arquivos vazios ou inválidos retornam erro `422`.
-- A saída preserva proporção; não force saída quadrada se o pipeline atual estiver preservando aspect ratio.
+- `minimum_side` deve ser positivo. Arquivos vazios ou invalidos retornam erro `422`.
+- A saida preserva proporcao; nao force saida quadrada.
 
 ## Regras e Funcionamento
 
-### Sistema de 3 Camadas (Tier System)
-O motor de decisão é baseado no **ratio** entre o lado menor atual da imagem e o `minimum_side` solicitado:
+### Runtime
+O runtime e definido pela imagem Docker.
 
-```
+| Dockerfile | Runtime interno | Modelo baixado |
+| --- | --- | --- |
+| `Dockerfile.cpu` | `cpu` | `realesr-general-x4v3.pth` + `realesr-general-wdn-x4v3.pth` |
+| `Dockerfile.nvidia` | `nvidia` | `4x-UltraSharp.pth` |
+| `Dockerfile.amd` | `amd` | `4x-UltraSharp.pth` |
+
+Nao reintroduza modelos antigos nem baixe pesos que nao pertencam ao Dockerfile escolhido.
+
+### Sistema de 3 Camadas
+O motor de decisao usa o ratio entre o lado menor atual e o `minimum_side` solicitado:
+
+```text
 ratio = current_min_side / minimum_side
 ```
 
-| Tier | Condição | Ação |
-|------|----------|------|
-| **Tier 1 — 4x AI** | `ratio < TIER_4X_THRESHOLD` (padrão `0.50`) | Real-ESRGAN 4x — reconstrução neural densa |
-| **Tier 2 — 2x AI** | `TIER_4X_THRESHOLD <= ratio < TIER_2X_THRESHOLD` (padrão `0.75`) | Denoise + Real-ESRGAN 2x — boost moderado |
-| **Tier 3 — Lanczos** | `ratio >= TIER_2X_THRESHOLD` | Denoise + Lanczos4 — redimensionamento clássico |
+| Tier | Condicao | Acao |
+| --- | --- | --- |
+| Tier 1 - 4x AI | `ratio < TIER_4X_THRESHOLD` (padrao `0.50`) | Real-ESRGAN 4x |
+| Tier 2 - 2x AI | `TIER_4X_THRESHOLD <= ratio < TIER_2X_THRESHOLD` (padrao `0.75`) | Real-ESRGAN 2x |
+| Tier 3 - Lanczos | `ratio >= TIER_2X_THRESHOLD` | Lanczos4 |
 
-- **Denoise**: Utiliza `cv2.fastNlMeansDenoisingColored` antes do upscale nos Tiers 2 e 3.
-- **Downscale pós-AI**: Após os Tiers 1 e 2, o resultado (que pode ultrapassar o target em incrementos de 4x ou 2x) é sempre redimensionado de volta para `minimum_side` via Lanczos4.
-- **Fallback Crítico**: Qualquer falha nos modelos de IA resulta em Lanczos4 puro, garantindo que o serviço nunca retorne erro 500 por ausência de GPU ou modelo.
+- Apos os Tiers 1 e 2, sempre aplique `downscale_to_target()`.
+- Qualquer falha de Real-ESRGAN deve cair para Lanczos4, mantendo o endpoint funcional.
+- Nao faca fallback entre modelos CPU/GPU dentro do runtime; se a imagem GPU falhar, use Lanczos.
 
-### Autenticação
-Requer o header `X-API-Key` correspondente à variável de ambiente `IMAGE_UPSCALE_API_KEY` quando configurada.
+### Autenticacao
+Quando `IMAGE_UPSCALE_API_KEY` estiver configurada, as chamadas exigem o header `X-API-Key`.
 
 ## Testes e Qualidade
-- Os testes vivem em `upscale/test_main.py` e usam `unittest` + `fastapi.testclient`.
-- Antes de concluir mudanças neste serviço, rode `python -m unittest upscale/test_main.py` a partir da raiz do repositório ou o comando equivalente dentro do container.
-- Testes devem mockar os upscalers pesados sempre que possível; não baixe modelos nem dependa de GPU em testes unitários.
-- Ao alterar thresholds, fallback ou tamanho final, atualize também as specs Rails que exercitam `ImageUpscalerService`, `ImageCropperService`, `CarService` e `AutodetectionService`.
+- Testes vivem em `upscale/test_main.py` e usam `unittest` + `fastapi.testclient`.
+- Antes de concluir mudancas neste servico, rode `python -m unittest upscale/test_main.py` a partir da raiz do repositorio ou equivalente no container.
+- Testes devem mockar os upscalers pesados; nao baixe modelos nem dependa de GPU em testes unitarios.
 
-## Variáveis de Ambiente
+## Variaveis de Ambiente
 
-| Variável | Padrão | Descrição |
+| Variavel | Padrao | Descricao |
 | --- | --- | --- |
-| `USE_GPU_UPSCALER` | `true` | Se `true`, tenta usar CUDA/GPU. Cai em CPU em caso de falha. |
-| `IMAGE_UPSCALE_API_KEY` | _(vazio)_ | Chave de autenticação do header `X-API-Key`. Sem ela, qualquer chamada é aceita. |
-| `REAL_ESRGAN_GPU_MODEL_PATH` | `/app/models/4x-UltraSharp.pth` | Caminho do modelo GPU dentro do container. |
-| `REAL_ESRGAN_CPU_MODEL_PATH` | `/app/models/realesr-general-x4v3.pth` | Caminho do modelo CPU dentro do container. |
-| `TIER_4X_THRESHOLD` | `0.50` | Ratio abaixo do qual o Real-ESRGAN 4x é acionado. |
-| `TIER_2X_THRESHOLD` | `0.75` | Ratio abaixo do qual o Real-ESRGAN 2x é acionado. Acima, usa Lanczos. |
-| `DENOISE_H` | `5` | Força do filtro de denoise (fastNlMeansDenoisingColored). Valores maiores = mais agressivo. |
-| `DENOISE_TEMPLATE_WINDOW` | `7` | Tamanho da janela de template para o denoise. |
-| `DENOISE_SEARCH_WINDOW` | `21` | Tamanho da janela de busca para o denoise. |
-
-
-## ⚠️ Troubleshooting & Gotchas (Problemas Conhecidos)
-- **PyTorch 2.6+ Crash**: O modelo Real-ESRGAN requer a desserialização de pesos que, a partir do PyTorch 2.6+, falha devido ao padrão restritivo de `weights_only=True` no `torch.load`. É **mandatório** manter o monkeypatch ativo no topo de `main.py` para forçar `weights_only=False` antes de carregar o stack do Real-ESRGAN.
-- **Compatibilidade torchvision/basicsr**: O `main.py` cria um módulo `torchvision.transforms.functional_tensor` em runtime para manter o `basicsr` compatível com versões modernas do torchvision. Não remova esse shim sem substituir a compatibilidade.
-- **Suporte a AMD GPU (ROCm)**: O código Python suporta AMD nativamente (`torch.cuda.is_available()` é mapeado e funciona). No entanto, o Docker Desktop no Windows **não suporta passthrough de GPU AMD** via `/dev/kfd`. Para rodar com GPU AMD, é necessário ambiente Linux nativo ou WSL2 com suporte explícito ao ROCm.
-- **Pre-loading no Boot**: O serviço tenta pré-carregar o modelo selecionado durante o evento `startup` da aplicação FastAPI. Se faltarem arquivos de pesos ou houver problemas de ambiente, erros explícitos serão emitidos nos logs do container, mantendo o serviço operacional em modo fallback Lanczos.
-- **Downscale Obrigatório**: Após qualquer upscale de IA (Tier 1 ou Tier 2), **sempre** aplicar `downscale_to_target()`. Os modelos operam em incrementos fixos (4x ou 2x) e a imagem resultante frequentemente excede `minimum_side`.
+| `IMAGE_UPSCALE_API_KEY` | vazio | Chave do header `X-API-Key`. Sem ela, qualquer chamada e aceita. |
+| `REAL_ESRGAN_MODEL_PATH` | por runtime | Caminho customizado opcional para pesos dentro do container. |
+| `REAL_ESRGAN_WDN_MODEL_PATH` | `/app/models/realesr-general-wdn-x4v3.pth` | Modelo WDN usado com CPU/DNI quando `REAL_ESRGAN_DENOISE_STRENGTH < 1`. |
+| `REAL_ESRGAN_DENOISE_STRENGTH` | `0` | Denoise do `realesr-general-x4v3`: `0` preserva ruido, `1` aplica denoise forte. |
+| `TIER_4X_THRESHOLD` | `0.50` | Ratio abaixo do qual o Real-ESRGAN 4x e acionado. |
+| `TIER_2X_THRESHOLD` | `0.75` | Ratio abaixo do qual o Real-ESRGAN 2x e acionado. Acima, usa Lanczos. |
+## Gotchas
+- Mantenha o monkeypatch de `torch.load(weights_only=False)` antes de importar Real-ESRGAN.
+- Mantenha o shim `torchvision.transforms.functional_tensor` para compatibilidade do `basicsr`.
+- AMD/ROCm no Windows Docker Desktop nao tem passthrough simples via `/dev/kfd`; prefira Linux nativo ou WSL2 com ROCm suportado.
+- Se faltarem pesos ou GPU, o startup deve logar o erro e o endpoint deve continuar com fallback Lanczos.

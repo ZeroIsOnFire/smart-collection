@@ -1,48 +1,26 @@
-# Plano: upscale híbrido por ENV com Real-ESRGAN GPU e fallback CPU
+# Plano: upscale por Dockerfile dedicado
 
 ## Objetivo
-Implementar um fluxo parametrizável por variavel de ambiente para o microservico de upscale:
+Separar o microservico de upscale em imagens dedicadas para CPU, NVIDIA/CUDA e AMD/ROCm.
 
-- `USE_GPU_UPSCALER=true` usa `Real-ESRGAN` completo via GPU como caminho principal.
-- `USE_GPU_UPSCALER=false` usa `RealESRGAN_x4v3` como fallback leve em CPU.
+- `upscale/Dockerfile.cpu` baixa `realesr-general-x4v3.pth` e `realesr-general-wdn-x4v3.pth`.
+- `upscale/Dockerfile.nvidia` baixa apenas `4x-UltraSharp.pth`.
+- `upscale/Dockerfile.amd` baixa apenas `4x-UltraSharp.pth`.
 
-O comportamento padrao deve ser `true`, priorizando a solucao mais forte quando houver GPU disponivel.
+## Contrato
+- O runtime e definido pela imagem Docker.
+- O compose local fica em CPU por padrao.
+- Cada imagem carrega somente o modelo esperado para o seu runtime.
+- Falhas do Real-ESRGAN caem para Lanczos4, sem tentar trocar de runtime dentro do container.
 
-## Escopo
-
-- Ajustar `upscale/main.py` para escolher o motor correto com base em `USE_GPU_UPSCALER`.
-- Manter a resposta HTTP atual do endpoint `/upscale`.
-- Preservar o resize final para `1080x1080` quando necessario.
-- Garantir fallback seguro em caso de falha do modelo principal.
-
-## Fluxo proposto
-
-1. Ler `USE_GPU_UPSCALER` no arranque do servico.
-2. Se estiver habilitado:
-   - carregar o `Real-ESRGAN` principal para GPU;
-   - executar inferencia com `half=True` quando suportado;
-   - em caso de erro, cair para o fallback CPU.
-3. Se estiver desabilitado:
-   - usar `RealESRGAN_x4v3` em CPU como caminho principal;
-   - se o modelo nao carregar ou falhar, cair para resize Lanczos.
-4. Normalizar a saida final para `1080x1080` com recorte central.
-
-## Requisitos de implementacao
-
-- Nao expor a chave de API em logs.
-- Manter o service leve e previsivel.
-- Evitar dependencias novas sem necessidade clara.
-- Preferir cache de modelos carregados uma unica vez.
-
-## Arquivos provaveis
-
+## Arquivos principais
 - `upscale/main.py`
-- `upscale/Dockerfile`
-- `upscale/requirements.txt`
-- `spec/services/image_upscaler_service_spec.rb`
-- novos testes do microservico, se necessario
-
-## Proxima etapa sugerida
-
-- Antes de codar, definir quais pesos serao baixados no build do container e quais serao carregados sob demanda.
-
+- `upscale/Dockerfile.cpu`
+- `upscale/Dockerfile.nvidia`
+- `upscale/Dockerfile.amd`
+- `docker-compose.yml`
+- `docker-compose.example.yml`
+- `.env.example`
+- `README.md`
+- `AGENTS.md`
+- `upscale/AGENTS.md`

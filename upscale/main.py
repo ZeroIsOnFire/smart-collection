@@ -46,46 +46,70 @@ TARGET_MIN_SIDE = 360
 MAX_AI_PASSES = 5
 REAL_ESRGAN_SCALE = 4
 
-GPU_MODEL_PATH = os.getenv(
-    "REAL_ESRGAN_GPU_MODEL_PATH",
-    "/app/models/4x-UltraSharp.pth"
-)
-CPU_MODEL_PATH = os.getenv(
-    "REAL_ESRGAN_CPU_MODEL_PATH",
-    "/app/models/realesr-general-x4v3.pth"
-)
+CPU_MODEL_PATH = "/app/models/realesr-general-x4v3.pth"
+CPU_WDN_MODEL_PATH = "/app/models/realesr-general-wdn-x4v3.pth"
+GPU_MODEL_PATH = "/app/models/4x-UltraSharp.pth"
+GPU_RUNTIMES = {"nvidia", "amd"}
+RUNTIME_ALIASES = {
+    "cpu": "cpu",
+    "nvidia": "nvidia",
+    "cuda": "nvidia",
+    "gpu": "nvidia",
+    "amd": "amd",
+    "rocm": "amd",
+}
 
 # --- Upscale Tier Thresholds ---
 # Ratio = current_min_side / minimum_side (target)
 #  < 0.50  → 4x Real-ESRGAN (heavy neural reconstruction)
-#  0.50 – 0.7499 → 2x Real-ESRGAN + denoise (medium boost with noise reduction)
-#  >= 0.75 → Lanczos4 + denoise (classical rescale, no AI distortion)
+#  0.50 – 0.7499 → 2x Real-ESRGAN (medium boost)
+#  >= 0.75 → Lanczos4 (classical rescale, no AI distortion)
 TIER_4X_THRESHOLD = float(os.getenv("TIER_4X_THRESHOLD", "0.50"))   # below this → 4x
 TIER_2X_THRESHOLD = float(os.getenv("TIER_2X_THRESHOLD", "0.75"))   # below this → 2x; above → Lanczos
 
-# Denoise strength parameters (OpenCV fastNlMeansDenoisingColored)
-DENOISE_H = int(os.getenv("DENOISE_H", "5"))
+DENOISE_H = int(os.getenv("DENOISE_H", "7"))
 DENOISE_TEMPLATE_WINDOW = int(os.getenv("DENOISE_TEMPLATE_WINDOW", "7"))
 DENOISE_SEARCH_WINDOW = int(os.getenv("DENOISE_SEARCH_WINDOW", "21"))
+LANCZOS_CAS_AMOUNT = float(os.getenv("LANCZOS_CAS_AMOUNT", "0.35"))
 
 app = FastAPI(title="SCC Image Upscale Service")
 
 
-def env_flag(name, default="false"):
-    value = os.getenv(name, default)
-    return str(value).strip().lower() in {"1", "true", "yes", "on"}
-
-
-def env_int(name, default):
+def env_float(name, default):
     value = os.getenv(name, str(default))
     try:
-        return int(value)
+        return float(value)
     except (TypeError, ValueError):
         return default
 
 
-def should_use_gpu_upscaler():
-    return env_flag("USE_GPU_UPSCALER", "true")
+def upscale_runtime():
+    runtime = os.getenv("UPSCALE_RUNTIME", "cpu").strip().lower()
+    if runtime not in RUNTIME_ALIASES:
+        raise RuntimeError(f"Unknown UPSCALE_RUNTIME: {runtime}")
+    return RUNTIME_ALIASES[runtime]
+
+
+def gpu_runtime_name(runtime):
+    return runtime in GPU_RUNTIMES
+
+
+def model_path_for_runtime(runtime):
+    default_path = GPU_MODEL_PATH if gpu_runtime_name(runtime) else CPU_MODEL_PATH
+    return os.getenv("REAL_ESRGAN_MODEL_PATH") or default_path
+
+
+def cpu_denoise_strength():
+    return min(max(env_float("REAL_ESRGAN_DENOISE_STRENGTH", 0.0), 0.0), 1.0)
+
+
+def cpu_model_config(denoise_strength):
+    base_model_path = model_path_for_runtime("cpu")
+    if denoise_strength >= 1.0:
+        return base_model_path, None
+
+    wdn_model_path = os.getenv("REAL_ESRGAN_WDN_MODEL_PATH") or CPU_WDN_MODEL_PATH
+    return [base_model_path, wdn_model_path], [denoise_strength, 1 - denoise_strength]
 
 
 async def verify_api_key(x_api_key: str = Header(None)):
@@ -101,17 +125,29 @@ def _require_model(path):
     return path
 
 
-@lru_cache(maxsize=1)
-def get_gpu_upscaler():
+def require_model_paths(model_path):
+    if isinstance(model_path, list):
+        return [_require_model(path) for path in model_path]
+    return _require_model(model_path)
+
+
+@lru_cache(maxsize=3)
+def get_upscaler(runtime, denoise_strength=None):
+    if runtime == "cpu":
+        return get_cpu_upscaler(denoise_strength if denoise_strength is not None else cpu_denoise_strength())
+    return get_gpu_upscaler(runtime)
+
+
+def get_gpu_upscaler(runtime):
     if RealESRGANer is None or RRDBNet is None or torch is None:
         raise RuntimeError("Real-ESRGAN GPU stack is not installed")
     if not torch.cuda.is_available():
-        raise RuntimeError("CUDA is not available")
+        raise RuntimeError(f"GPU runtime {runtime} is not available")
 
     model = RRDBNet(num_in_ch=3, num_out_ch=3, scale=REAL_ESRGAN_SCALE, num_feat=64, num_block=23, num_grow_ch=32)
     return RealESRGANer(
         scale=REAL_ESRGAN_SCALE,
-        model_path=_require_model(GPU_MODEL_PATH),
+        model_path=require_model_paths(model_path_for_runtime(runtime)),
         model=model,
         tile=0,
         tile_pad=10,
@@ -121,10 +157,12 @@ def get_gpu_upscaler():
     )
 
 
-@lru_cache(maxsize=1)
-def get_cpu_upscaler():
+def get_cpu_upscaler(denoise_strength):
     if RealESRGANer is None or SRVGGNetCompact is None:
         raise RuntimeError("Real-ESRGAN CPU stack is not installed")
+
+    model_path, dni_weight = cpu_model_config(denoise_strength)
+    model_path = require_model_paths(model_path)
 
     model = SRVGGNetCompact(
         num_in_ch=3,
@@ -136,7 +174,8 @@ def get_cpu_upscaler():
     )
     return RealESRGANer(
         scale=REAL_ESRGAN_SCALE,
-        model_path=_require_model(CPU_MODEL_PATH),
+        model_path=model_path,
+        dni_weight=dni_weight,
         model=model,
         tile=0,
         tile_pad=10,
@@ -146,7 +185,7 @@ def get_cpu_upscaler():
     )
 
 
-def upscale_with_realesrgan(image_bgr, prefer_gpu=True, outscale=None):
+def upscale_with_realesrgan(image_bgr, outscale=None):
     """Run Real-ESRGAN on the image.
 
     outscale controls the output scale factor passed to RealESRGANer.enhance().
@@ -155,22 +194,14 @@ def upscale_with_realesrgan(image_bgr, prefer_gpu=True, outscale=None):
     if outscale is None:
         outscale = REAL_ESRGAN_SCALE
 
-    if prefer_gpu:
-        upscaler = get_gpu_upscaler()
-    else:
-        upscaler = get_cpu_upscaler()
-
+    runtime = upscale_runtime()
+    denoise_strength = cpu_denoise_strength() if runtime == "cpu" else None
+    upscaler = get_upscaler(runtime, denoise_strength)
     output_bgr, _ = upscaler.enhance(image_bgr, outscale=outscale)
     return output_bgr
 
 
 def apply_denoise(image_bgr):
-    """Apply fast non-local means denoising (colour) to an image.
-
-    Strength is controlled by DENOISE_H, DENOISE_TEMPLATE_WINDOW and
-    DENOISE_SEARCH_WINDOW environment variables so it can be tuned without
-    rebuilding the container.
-    """
     return cv2.fastNlMeansDenoisingColored(
         image_bgr,
         None,
@@ -181,12 +212,61 @@ def apply_denoise(image_bgr):
     )
 
 
+def apply_cas_sharpen(image_bgr):
+    if LANCZOS_CAS_AMOUNT <= 0:
+        return image_bgr
+
+    image = image_bgr.astype(np.float32) / 255.0
+    padded = cv2.copyMakeBorder(image, 1, 1, 1, 1, cv2.BORDER_REFLECT_101)
+
+    b = padded[:-2, 1:-1]
+    d = padded[1:-1, :-2]
+    e = padded[1:-1, 1:-1]
+    f = padded[1:-1, 2:]
+    h = padded[2:, 1:-1]
+
+    local_min = np.minimum.reduce([b, d, e, f, h])
+    local_max = np.maximum.reduce([b, d, e, f, h])
+    contrast = np.max(local_max - local_min, axis=2, keepdims=True)
+    adaptive_amount = LANCZOS_CAS_AMOUNT * np.clip(1.0 - contrast, 0.15, 1.0)
+
+    cross_average = (b + d + f + h) * 0.25
+    detail = e - cross_average
+    sharpened = e + detail * adaptive_amount
+    return np.clip(sharpened * 255.0, 0, 255).astype(np.uint8)
+
+
+def apply_sharpen(image_bgr):
+    return apply_cas_sharpen(image_bgr)
+
+
 def upscale_with_lanczos(image_bgr, minimum_side):
+    new_width, new_height = dimensions_for_min_side(image_bgr, minimum_side)
+    return cv2.resize(image_bgr, (new_width, new_height), interpolation=cv2.INTER_LANCZOS4)
+
+
+def upscale_with_enhanced_lanczos(image_bgr, minimum_side):
+    current = image_bgr
+    try:
+        current = apply_denoise(current)
+    except Exception as e:
+        logger.warning(f"[Denoise] Failed, skipping: {e}")
+
+    current = upscale_with_lanczos(current, minimum_side)
+    try:
+        current = apply_sharpen(current)
+    except Exception as e:
+        logger.warning(f"[Sharpen] Failed, skipping: {e}")
+
+    return current
+
+
+def dimensions_for_min_side(image_bgr, minimum_side):
     height, width = image_bgr.shape[:2]
     scale = minimum_side / float(min(height, width))
     new_width = max(int(round(width * scale)), minimum_side)
     new_height = max(int(round(height * scale)), minimum_side)
-    return cv2.resize(image_bgr, (new_width, new_height), interpolation=cv2.INTER_LANCZOS4)
+    return new_width, new_height
 
 
 def downscale_to_target(image_bgr, minimum_side):
@@ -200,9 +280,7 @@ def downscale_to_target(image_bgr, minimum_side):
     current_min_side = min(height, width)
     if current_min_side <= minimum_side:
         return image_bgr
-    scale = minimum_side / float(current_min_side)
-    new_width = max(int(round(width * scale)), 1)
-    new_height = max(int(round(height * scale)), 1)
+    new_width, new_height = dimensions_for_min_side(image_bgr, minimum_side)
     logger.info(
         f"[Downscale] Resizing from {width}x{height} to {new_width}x{new_height} "
         f"(target min-side: {minimum_side}px)"
@@ -217,59 +295,42 @@ def upscale_until_min_side(image_bgr, minimum_side):
       ratio < TIER_4X_THRESHOLD (default 0.50)
           → Real-ESRGAN 4x  (heavy neural reconstruction for very small images)
       TIER_4X_THRESHOLD <= ratio < TIER_2X_THRESHOLD (default 0.75)
-          → Denoise + Real-ESRGAN 2x  (light boost for medium images)
+          → Real-ESRGAN 2x  (light boost for medium images)
       ratio >= TIER_2X_THRESHOLD
-          → Denoise + Lanczos4  (classical rescale, avoids any AI "oil painting" look)
+          → Lanczos4  (classical rescale, avoids any AI "oil painting" look)
 
     After any AI upscale the result is always downscaled back to minimum_side so
     the overshoot from fixed-increment models (4x, 2x) is corrected cleanly.
     """
     current = image_bgr
-    prefer_gpu = should_use_gpu_upscaler()
+    runtime = upscale_runtime()
     current_min_side = min(current.shape[0], current.shape[1])
     ratio = current_min_side / float(minimum_side)
 
-    mode_label = "GPU" if prefer_gpu else "CPU"
     logger.info(
         f"[Upscale] Image min-side {current_min_side}px, target {minimum_side}px, "
-        f"ratio {ratio:.2f} ({mode_label} mode)"
+        f"ratio {ratio:.2f} ({runtime.upper()} mode)"
     )
 
-    # ── Tier 3: >= 75% → Lanczos + Denoise ──────────────────────────────────
+    # ── Tier 3: >= 75% → Lanczos ────────────────────────────────────────────
     if ratio >= TIER_2X_THRESHOLD:
         logger.info(
             f"[Tier Lanczos] ratio {ratio:.2f} >= {TIER_2X_THRESHOLD} — "
             "applying Denoise + Lanczos4 (no AI)."
         )
-        try:
-            current = apply_denoise(current)
-        except Exception as e:
-            logger.warning(f"[Denoise] Failed, skipping: {e}")
-        return upscale_with_lanczos(current, minimum_side)
+        return upscale_with_enhanced_lanczos(current, minimum_side)
 
-    # ── Tier 2: 50–74.9% → Denoise + 2x Real-ESRGAN ─────────────────────────
+    # ── Tier 2: 50–74.9% → 2x Real-ESRGAN ───────────────────────────────────
     if ratio >= TIER_4X_THRESHOLD:
         logger.info(
             f"[Tier 2x] ratio {ratio:.2f} in [{TIER_4X_THRESHOLD}, {TIER_2X_THRESHOLD}) — "
-            "applying Denoise + Real-ESRGAN 2x."
+            "applying Real-ESRGAN 2x."
         )
         try:
-            current = apply_denoise(current)
-        except Exception as e:
-            logger.warning(f"[Denoise] Failed, skipping: {e}")
-        try:
-            current = upscale_with_realesrgan(current, prefer_gpu=prefer_gpu, outscale=2)
+            current = upscale_with_realesrgan(current, outscale=2)
         except Exception as e:
             logger.error(f"[Tier 2x] Real-ESRGAN 2x failed: {e}", exc_info=True)
-            if prefer_gpu:
-                try:
-                    logger.info("[Tier 2x] Attempting fallback to CPU Real-ESRGAN 2x...")
-                    current = upscale_with_realesrgan(current, prefer_gpu=False, outscale=2)
-                except Exception as cpu_e:
-                    logger.error(f"[Tier 2x] CPU fallback also failed: {cpu_e}", exc_info=True)
-                    return upscale_with_lanczos(current, minimum_side)
-            else:
-                return upscale_with_lanczos(current, minimum_side)
+            return upscale_with_enhanced_lanczos(current, minimum_side)
 
         # Downscale back to target in case 2x overshot
         current = downscale_to_target(current, minimum_side)
@@ -283,25 +344,15 @@ def upscale_until_min_side(image_bgr, minimum_side):
     passes = 0
     while min(current.shape[0], current.shape[1]) < minimum_side and passes < MAX_AI_PASSES:
         try:
-            current = upscale_with_realesrgan(current, prefer_gpu=prefer_gpu, outscale=REAL_ESRGAN_SCALE)
+            current = upscale_with_realesrgan(current, outscale=REAL_ESRGAN_SCALE)
             passes += 1
         except Exception as e:
-            logger.error(f"[Tier 4x] Real-ESRGAN failed (prefer_gpu={prefer_gpu}): {e}", exc_info=True)
-            if prefer_gpu:
-                try:
-                    logger.info("[Tier 4x] Attempting fallback to CPU Real-ESRGAN...")
-                    current = upscale_with_realesrgan(current, prefer_gpu=False, outscale=REAL_ESRGAN_SCALE)
-                    passes += 1
-                    prefer_gpu = False
-                    continue
-                except Exception as cpu_e:
-                    logger.error(f"[Tier 4x] CPU fallback also failed: {cpu_e}", exc_info=True)
-                    break
+            logger.error(f"[Tier 4x] Real-ESRGAN failed ({runtime}): {e}", exc_info=True)
             break
 
     if min(current.shape[0], current.shape[1]) < minimum_side:
         logger.warning("[Tier 4x] AI upscale insufficient or failed. Falling back to Lanczos.")
-        current = upscale_with_lanczos(current, minimum_side)
+        current = upscale_with_enhanced_lanczos(current, minimum_side)
 
     # Downscale back to target (4x may overshoot, e.g. 270px → 1080px for target 360px)
     current = downscale_to_target(current, minimum_side)
@@ -315,8 +366,8 @@ def finalize_output(image_bgr):
 @app.on_event("startup")
 async def startup_event():
     logger.info("Initializing SCC Image Upscale Service...")
-    gpu_mode = should_use_gpu_upscaler()
-    logger.info(f"Target mode: {'GPU' if gpu_mode else 'CPU'}")
+    runtime = upscale_runtime()
+    logger.info(f"Target mode: {runtime.upper()}")
     logger.info(
         f"Upscale tiers: 4x below {TIER_4X_THRESHOLD:.0%}, "
         f"2x in [{TIER_4X_THRESHOLD:.0%}, {TIER_2X_THRESHOLD:.0%}), "
@@ -324,14 +375,9 @@ async def startup_event():
     )
 
     try:
-        if gpu_mode:
-            logger.info("Pre-loading GPU upscaler model...")
-            get_gpu_upscaler()
-            logger.info("GPU upscaler model pre-loaded successfully!")
-        else:
-            logger.info("Pre-loading CPU upscaler model...")
-            get_cpu_upscaler()
-            logger.info("CPU upscaler model pre-loaded successfully!")
+        logger.info(f"Pre-loading {runtime.upper()} upscaler model...")
+        get_upscaler(runtime, cpu_denoise_strength() if runtime == "cpu" else None)
+        logger.info(f"{runtime.upper()} upscaler model pre-loaded successfully!")
     except Exception as e:
         logger.error(f"Failed to pre-load upscaler model on startup: {e}", exc_info=True)
         logger.warning("Service will start but will fall back to Lanczos resizing for all upscaling requests.")
@@ -339,14 +385,18 @@ async def startup_event():
 
 @app.get("/health")
 async def health():
-    gpu_mode = should_use_gpu_upscaler()
+    runtime = upscale_runtime()
     return {
         "status": "ok",
-        "mode": "gpu" if gpu_mode else "cpu",
+        "mode": runtime,
+        "model_path": model_path_for_runtime(runtime),
+        "cpu_denoise_strength": cpu_denoise_strength() if runtime == "cpu" else None,
         "target_min_side": TARGET_MIN_SIDE,
         "tier_4x_threshold": TIER_4X_THRESHOLD,
         "tier_2x_threshold": TIER_2X_THRESHOLD,
         "denoise_h": DENOISE_H,
+        "lanczos_sharpen_method": "cas",
+        "lanczos_cas_amount": LANCZOS_CAS_AMOUNT,
     }
 
 

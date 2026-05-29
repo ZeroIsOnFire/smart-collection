@@ -32,7 +32,7 @@ A segurança e privacidade dos dados do usuário são a principal prioridade des
 | Background     | Sidekiq                             |
 | Cache/Fila     | Redis                               |
 | OCR/Visão      | YOLO11s (Local) + Google Cloud Vision API |
-| Upscale IA     | Real-ESRGAN / ESPCN / Lanczos via FastAPI |
+| Upscale IA     | Real-ESRGAN / Lanczos via FastAPI |
 | Exportação     | Prawn (PDF), CSV (Ruby stdlib)            |
 | i18n           | rails-i18n (pt-BR / en)                   |
 | Infraestrutura | Docker + Docker Compose                   |
@@ -63,8 +63,9 @@ app/
 │   └── stylesheets/ # index.css / application.css (Variáveis Premium)
 upscale/             # Microserviço de upscaling local (Python/FastAPI)
 ├── main.py
-├── Dockerfile       # Imagem padrão Python slim/CPU
-├── Dockerfile.amd   # ROCm/AMD
+├── Dockerfile.cpu     # CPU
+├── Dockerfile.nvidia  # CUDA/NVIDIA
+├── Dockerfile.amd     # ROCm/AMD
 └── AGENTS.md
 yolo/                # Microserviço de detecção local (Python)
 ├── main.py
@@ -118,9 +119,9 @@ spec/
 ### Upscale Local (Real-ESRGAN)
 - O Rails integra com o `upscale-service` via `IMAGE_UPSCALE_SERVICE_URL` e autentica com `IMAGE_UPSCALE_API_KEY` quando configurada.
 - O endpoint principal é `POST /upscale?minimum_side=<px>` com upload multipart `file`; a resposta é JPEG.
-- O serviço suporta GPU quando `USE_GPU_UPSCALER=true`, mas deve cair para CPU/Lanczos sem quebrar o fluxo do Rails.
-- Existem dois Dockerfiles no microserviço: `upscale/Dockerfile` (imagem padrão Python slim/CPU) e `upscale/Dockerfile.amd` (ROCm/AMD).
-- Gotchas críticos do `upscale/`: manter monkeypatch de `torch.load(weights_only=False)` antes de importar Real-ESRGAN; manter compatibilidade de `torchvision.transforms.functional_tensor`; preservar o sistema de tiers anti-distorção (`TIER_4X_THRESHOLD`, `TIER_2X_THRESHOLD`) e os parâmetros de denoise (`DENOISE_H`, `DENOISE_TEMPLATE_WINDOW`, `DENOISE_SEARCH_WINDOW`).
+- O runtime do serviço e escolhido pelo Dockerfile: `upscale/Dockerfile.cpu`, `upscale/Dockerfile.nvidia` ou `upscale/Dockerfile.amd`.
+- O `docker-compose.yml` local deve ficar em CPU por padrao; NVIDIA/AMD exigem troca explicita do Dockerfile e configuracao de dispositivos.
+- Gotchas críticos do `upscale/`: manter monkeypatch de `torch.load(weights_only=False)` antes de importar Real-ESRGAN; manter compatibilidade de `torchvision.transforms.functional_tensor`; preservar o sistema de tiers anti-distorção (`TIER_4X_THRESHOLD`, `TIER_2X_THRESHOLD`).
 - Consulte `upscale/AGENTS.md` antes de alterar qualquer código do microserviço.
 
 ### Frontend e i18n

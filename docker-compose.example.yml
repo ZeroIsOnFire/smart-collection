@@ -1,18 +1,16 @@
 # =============================================================================
-# docker-compose.example.yml — Template de Configuração do Smart Collection
+# docker-compose.example.yml - Template de configuracao do Smart Collection
 # =============================================================================
 #
-# INSTRUÇÃO DE USO:
-#   1. Copie este arquivo para docker-compose.yml:
-#        cp docker-compose.example.yml docker-compose.yml
-#   2. Ajuste as variáveis de ambiente no arquivo .env (veja .env.example).
-#   3. Escolha a configuração de GPU do upscale-service conforme sua placa:
-#        - AMD (ROCm)  → mantenha as seções "AMD" descomentadas (padrão abaixo)
-#        - NVIDIA (CUDA) → comente as seções "AMD" e descomente as "NVIDIA"
-#        - CPU apenas    → comente TODAS as seções de GPU e ajuste USE_GPU_UPSCALER=false
+# Uso:
+#   1. Copie este arquivo para docker-compose.yml.
+#   2. Ajuste o .env a partir de .env.example.
+#   3. Escolha o Dockerfile do upscale-service:
+#        - CPU:    Dockerfile.cpu
+#        - NVIDIA: Dockerfile.nvidia + NVIDIA Container Toolkit
+#        - AMD:    Dockerfile.amd + dispositivos ROCm
 #
-# O docker-compose.yml local NÃO é versionado (está no .gitignore).
-# Este arquivo (.example) é o template oficial versionado no repositório.
+# O docker-compose.yml local nao e versionado; este arquivo e o template oficial.
 # =============================================================================
 
 name: smart-collection
@@ -29,6 +27,8 @@ services:
       mongodb:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      upscale-service:
         condition: service_healthy
     env_file:
       - .env
@@ -52,6 +52,8 @@ services:
         condition: service_healthy
       yolo-service:
         condition: service_healthy
+      upscale-service:
+        condition: service_healthy
     env_file:
       - .env
     environment:
@@ -74,83 +76,50 @@ services:
       timeout: 10s
       retries: 3
 
-  # ---------------------------------------------------------------------------
-  # upscale-service — Serviço de upscaling de imagens via Real-ESRGAN
-  # ---------------------------------------------------------------------------
-  # Este serviço possui dois Dockerfiles distintos conforme o tipo de GPU:
-  #
-  #   • Dockerfile     → NVIDIA (CUDA) — padrão upstream
-  #   • Dockerfile.amd → AMD (ROCm)    — necessário para placas Radeon
-  #
-  # Escolha UMA das configurações abaixo e comente a outra.
-  # ---------------------------------------------------------------------------
-
   upscale-service:
-
-    # ── OPÇÃO A: AMD / ROCm (placas Radeon — ex.: RX 6600, RX 7900 XTX) ─────
-    # Usa o Dockerfile.amd que instala PyTorch com suporte a ROCm.
-    # As entradas `devices` e `group_add` são obrigatórias para o Linux/WSL2
-    # expor os dispositivos de renderização AMD ao container.
     build:
       context: ./upscale
-      dockerfile: Dockerfile.amd          # ROCm: usa imagem base pytorch/pytorch:*-rocm*
+      dockerfile: Dockerfile.cpu
 
-    devices:
-      - "/dev/kfd:/dev/kfd"               # Kernel Fusion Driver — interface principal ROCm
-      - "/dev/dri:/dev/dri"               # Direct Rendering Infrastructure — acesso à GPU
-
-    group_add:
-      - video                             # Adiciona o container ao grupo 'video' do host
-                                          # para ter permissão de leitura nos dispositivos DRI
-    # ── FIM OPÇÃO A ───────────────────────────────────────────────────────────
-
-
-    # ── OPÇÃO B: NVIDIA / CUDA (placas GeForce / RTX / Quadro) ──────────────
-    # Descomente este bloco e comente o bloco "OPÇÃO A" acima.
-    # Requer o NVIDIA Container Toolkit instalado no host:
-    #   https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html
-    #
+    # NVIDIA:
     # build:
     #   context: ./upscale
-    #   dockerfile: Dockerfile              # CUDA: usa imagem base pytorch/pytorch:*-cuda*
-    #
+    #   dockerfile: Dockerfile.nvidia
     # deploy:
     #   resources:
     #     reservations:
     #       devices:
     #         - driver: nvidia
-    #           count: all                  # ou especifique: count: 1
+    #           count: all
     #           capabilities: [gpu]
-    # ── FIM OPÇÃO B ───────────────────────────────────────────────────────────
 
-
-    # ── OPÇÃO C: CPU apenas (sem GPU) ─────────────────────────────────────────
-    # Descomente este bloco e comente os blocos A e B.
-    # O upscaling será feito via CPU (mais lento, mas sem dependência de GPU).
-    # Lembre-se de ajustar USE_GPU_UPSCALER=false abaixo.
-    #
+    # AMD/ROCm:
     # build:
     #   context: ./upscale
-    #   dockerfile: Dockerfile              # Dockerfile padrão sem aceleração GPU
-    # ── FIM OPÇÃO C ───────────────────────────────────────────────────────────
+    #   dockerfile: Dockerfile.amd
+    # devices:
+    #   - "/dev/kfd:/dev/kfd"
+    #   - "/dev/dri:/dev/dri"
+    # group_add:
+    #   - video
 
     env_file:
       - .env
     environment:
       - IMAGE_UPSCALE_API_KEY=${IMAGE_UPSCALE_API_KEY:-}
-      - USE_GPU_UPSCALER=${USE_GPU_UPSCALER:-true}           # false para Opção C (CPU)
-      - REAL_ESRGAN_GPU_MODEL_PATH=${REAL_ESRGAN_GPU_MODEL_PATH:-/app/models/4x-UltraSharp.pth}
-      - REAL_ESRGAN_CPU_MODEL_PATH=${REAL_ESRGAN_CPU_MODEL_PATH:-/app/models/realesr-general-x4v3.pth}
+      - REAL_ESRGAN_MODEL_PATH=${REAL_ESRGAN_MODEL_PATH:-}
+      - REAL_ESRGAN_WDN_MODEL_PATH=${REAL_ESRGAN_WDN_MODEL_PATH:-}
+      - REAL_ESRGAN_DENOISE_STRENGTH=${REAL_ESRGAN_DENOISE_STRENGTH:-0}
       # Upscale tiers: ratio = current_min_side / minimum_side
-      # < TIER_4X_THRESHOLD     → Real-ESRGAN 4x
-      # < TIER_2X_THRESHOLD     → Denoise + Real-ESRGAN 2x
-      # >= TIER_2X_THRESHOLD    → Denoise + Lanczos4
+      # < TIER_4X_THRESHOLD     -> Real-ESRGAN 4x
+      # < TIER_2X_THRESHOLD     -> Real-ESRGAN 2x
+      # >= TIER_2X_THRESHOLD    -> Denoise + Lanczos4
       - TIER_4X_THRESHOLD=${TIER_4X_THRESHOLD:-0.50}
       - TIER_2X_THRESHOLD=${TIER_2X_THRESHOLD:-0.75}
-      # Denoise strength (fastNlMeansDenoisingColored): lower h = more subtle
-      - DENOISE_H=${DENOISE_H:-5}
+      - DENOISE_H=${DENOISE_H:-7}
       - DENOISE_TEMPLATE_WINDOW=${DENOISE_TEMPLATE_WINDOW:-7}
       - DENOISE_SEARCH_WINDOW=${DENOISE_SEARCH_WINDOW:-21}
+      - LANCZOS_CAS_AMOUNT=${LANCZOS_CAS_AMOUNT:-0.35}
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
@@ -183,7 +152,7 @@ services:
     ports:
       - "127.0.0.1:6379:6379"
     healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
+      test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
