@@ -5,6 +5,7 @@ require 'rails_helper'
 RSpec.describe ImageUpscalerService do
   let(:source_photo_path) { Rails.root.join('spec/fixtures/files/test_image.png').to_s }
   let(:service_url) { 'http://image-upscale-service:8001' }
+  let(:upscale_endpoint) { "#{service_url}/upscale?minimum_side=360" }
 
   def build_small_photo
     tempfile = Tempfile.new(['small_image', '.png'], Rails.root.join('tmp'))
@@ -71,7 +72,7 @@ RSpec.describe ImageUpscalerService do
         image.resize '420x380!'
         image.write(response_tempfile.path)
 
-        stub_request(:post, "#{service_url}/upscale")
+        stub_request(:post, upscale_endpoint)
           .to_return(status: 200, body: File.binread(response_tempfile.path), headers: { 'Content-Type' => 'image/png' })
 
         result = described_class.upscale_if_needed(small_photo.path, minimum_side: 360)
@@ -108,7 +109,7 @@ RSpec.describe ImageUpscalerService do
         image.resize '420x380!'
         image.write(response_tempfile.path)
 
-        stub_request(:post, "#{service_url}/upscale")
+        stub_request(:post, upscale_endpoint)
           .with(headers: { 'X-API-Key' => 'super-secret' })
           .to_return(status: 200, body: File.binread(response_tempfile.path), headers: { 'Content-Type' => 'image/png' })
 
@@ -137,7 +138,7 @@ RSpec.describe ImageUpscalerService do
       it 'raises an explicit error instead of falling back locally' do
         small_photo = build_small_photo
 
-        stub_request(:post, "#{service_url}/upscale")
+        stub_request(:post, upscale_endpoint)
           .to_return(status: 500, body: 'boom')
 
         expect do

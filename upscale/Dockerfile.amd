@@ -1,16 +1,21 @@
-FROM python:3.11-slim
+FROM rocm/pytorch:latest
 
 WORKDIR /app
 
 ENV PYTHONUNBUFFERED=1
 ENV PIP_NO_CACHE_DIR=1
 
+# Install runtime dependencies for OpenCV and system utilities
 RUN apt-get update \
     && apt-get install -y --no-install-recommends libgl1 libglib2.0-0 libgomp1 curl \
     && rm -rf /var/lib/apt/lists/*
 
+# Copy and install requirements.
+# Since rocm/pytorch already contains optimized PyTorch and Torchvision, we only install the other deps
 COPY requirements.txt .
-RUN pip install --upgrade pip && pip install -r requirements.txt
+RUN pip install --upgrade pip \
+    && sed -i '/torch/d' requirements.txt \
+    && pip install -r requirements.txt
 
 COPY main.py .
 

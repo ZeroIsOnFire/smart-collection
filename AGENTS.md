@@ -28,14 +28,16 @@ A segurança e privacidade dos dados do usuário são a principal prioridade des
 | CSS            | Bootstrap 5 + Premium Custom CSS    |
 | UI / UX        | Cropper.js, Fonte Outfit, Ícones BI |
 | Testes         | RSpec, FactoryBot, Shoulda, VCR     |
-| Storage        | ActiveStorage                       |
-| Background     | Solid Queue                         |
-| Cache          | Solid Cache                         |
+| Storage        | CarrierWave + MiniMagick            |
+| Background     | Sidekiq                             |
+| Cache/Fila     | Redis                               |
 | OCR/Visão      | YOLO11s (Local) + Google Cloud Vision API |
+| Upscale IA     | Real-ESRGAN / ESPCN / Lanczos via FastAPI |
 | Exportação     | Prawn (PDF), CSV (Ruby stdlib)            |
 | i18n           | rails-i18n (pt-BR / en)                   |
 | Infraestrutura | Docker + Docker Compose                   |
 | Detecção Local | SCC YOLO Service (Python/FastAPI)         |
+| Runtime Ruby   | Ruby 3.3.10                               |
 
 ---
 
@@ -59,6 +61,11 @@ app/
 ├── javascript/      # Stimulus controllers (ex: clipboard, view-toggle)
 ├── assets/
 │   └── stylesheets/ # index.css / application.css (Variáveis Premium)
+upscale/             # Microserviço de upscaling local (Python/FastAPI)
+├── main.py
+├── Dockerfile       # Imagem padrão Python slim/CPU
+├── Dockerfile.amd   # ROCm/AMD
+└── AGENTS.md
 yolo/                # Microserviço de detecção local (Python)
 ├── main.py
 ├── Dockerfile
@@ -81,11 +88,22 @@ spec/
 3. Factories com `FactoryBot`; matchers com `Shoulda Matchers`.
 4. Usar `VCR` para gravar/reproduzir requisições HTTP externas (ex: Google Vision API), evitando chamadas reais nos testes.
 5. Cobertura mínima esperada: models, services, controllers (request specs).
+6. Mudanças no microserviço `upscale/` devem incluir/ajustar testes em `upscale/test_main.py` e ser verificadas com `python -m unittest upscale/test_main.py` (ou equivalente dentro do container).
 
 ### Docker
 - O projeto **deve** rodar exclusivamente via Docker Compose.
-- Toda configuração de ambiente está centralizada no `docker-compose.yml`.
+- O `docker-compose.yml` local não é versionado; o template oficial versionado é `docker-compose.example.yml`.
 - Variáveis de ambiente via arquivo `.env` (template em `.env.example`).
+- Serviços esperados no ambiente local: `web`, `sidekiq`, `mongodb`, `redis`, `yolo-service` e `upscale-service`.
+- O Rails usa `config.active_job.queue_adapter = :sidekiq`; jobs assíncronos devem continuar compatíveis com Sidekiq e Redis.
+- Comandos Rails/RSpec/RuboCop devem ser executados dentro do container `web` (ex: `docker compose exec web bundle exec rspec`).
+
+### Uploads e Processamento de Imagens
+- O projeto usa **CarrierWave**, não ActiveStorage. Uploaders vivem em `app/uploaders/` e os arquivos são armazenados em `uploads/...`.
+- Fotos são convertidas para JPG pelos uploaders para manter compatibilidade com PDF/exportação.
+- O `ImageUpscalerService` é o ponto central para upscale. Ele usa o microserviço remoto quando `IMAGE_UPSCALE_SERVICE_URL` está configurado; caso contrário, aplica fallback local com MiniMagick/Lanczos.
+- Tamanhos mínimos atuais: itens gerais usam `ImageUpscalerService::DEFAULT_MINIMUM_SIDE` (`360` px) e autodetecções usam `AutodetectionService::AUTODETECTION_MINIMUM_SIDE` (`1080` px).
+- Ao alterar fluxos de imagem, preserve a limpeza de `Tempfile` nos services e cubra erros de `ImageUpscalerService::UpscaleError` em specs.
 
 ### Autodetecção e Visão
 - **Local (YOLO)**: A aplicação utiliza o `SCC YOLO Service` (YOLO11s) rodando localmente para detecção rápida de carros e localização. Esta é a opção preferencial.
@@ -96,6 +114,19 @@ spec/
   - **Offline Mode**: A variável `ULTRALYTICS_OFFLINE=True` é estritamente obrigatória para impedir travamentos de rede no container.
   - **Detecção de Cor**: O serviço não usa ML adicional para cores; utiliza algoritmo de K-Means no espaço HSV em `main.py` para melhor performance.
   - *Consulte o arquivo `yolo/AGENTS.md` para as regras completas do microserviço.*
+
+### Upscale Local (Real-ESRGAN)
+- O Rails integra com o `upscale-service` via `IMAGE_UPSCALE_SERVICE_URL` e autentica com `IMAGE_UPSCALE_API_KEY` quando configurada.
+- O endpoint principal é `POST /upscale?minimum_side=<px>` com upload multipart `file`; a resposta é JPEG.
+- O serviço suporta GPU quando `USE_GPU_UPSCALER=true`, mas deve cair para CPU/Lanczos sem quebrar o fluxo do Rails.
+- Existem dois Dockerfiles no microserviço: `upscale/Dockerfile` (imagem padrão Python slim/CPU) e `upscale/Dockerfile.amd` (ROCm/AMD).
+- Gotchas críticos do `upscale/`: manter monkeypatch de `torch.load(weights_only=False)` antes de importar Real-ESRGAN; manter compatibilidade de `torchvision.transforms.functional_tensor`; preservar o sistema de tiers anti-distorção (`TIER_4X_THRESHOLD`, `TIER_2X_THRESHOLD`) e os parâmetros de denoise (`DENOISE_H`, `DENOISE_TEMPLATE_WINDOW`, `DENOISE_SEARCH_WINDOW`).
+- Consulte `upscale/AGENTS.md` antes de alterar qualquer código do microserviço.
+
+### Frontend e i18n
+- JavaScript usa Stimulus via importmap; novos controllers devem seguir o padrão em `app/javascript/controllers/`.
+- Textos usados em JavaScript devem vir dos arquivos `config/locales/javascript.*.yml` e da infraestrutura de i18n carregada pela partial `shared/_javascript_i18n.html.erb`.
+- Evite texto hardcoded também em Turbo Streams, toasts, botões, labels e mensagens de erro.
 
 ### Dependências
 - **Não adicionar gems ou bibliotecas novas sem autorização explícita do usuário.**
@@ -200,6 +231,7 @@ refactor(items): extrair lógica de tags para TagService
 - **PRIORIDADE MÁXIMA**: Segurança e Segregação de Dados (`current_user`).
 - **Internacionalização Obrigatória**: É proibido adicionar textos "hardcoded" em views, controllers ou javascript. Tudo deve ser traduzido utilizando a API de I18n do Rails (ex: `t('chave.da.traducao')`).
 - Ao criar ou editar views, garanta a adequação ao padrão Premium Design (usando CSS e ícones existentes).
-- Sempre execute `bundle exec rspec` antes de considerar uma tarefa concluída.
+- Sempre execute `docker compose exec web bundle exec rspec` antes de considerar uma tarefa Rails concluída.
+- Para alterações em microserviços Python, execute também os testes do respectivo diretório (`upscale/test_main.py` ou testes do `yolo/`, quando existirem).
 - Commits devem ser atômicos e com mensagens claras em português.
 - **Verificação de Qualidade (QA)**: Sempre que o usuário pedir para verificar a qualidade do projeto (rodar linters/testes), você DEVE ler e assumir a persona descrita em `QUALITY_AGENT.md`.

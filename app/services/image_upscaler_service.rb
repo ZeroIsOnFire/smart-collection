@@ -41,7 +41,7 @@ class ImageUpscalerService
 
   def self.upscale_via_service(source_path, minimum_side)
     service_url = ENV.fetch('IMAGE_UPSCALE_SERVICE_URL')
-    url = URI.join("#{service_url}/", 'upscale')
+    url = URI.parse("#{service_url}/upscale?minimum_side=#{minimum_side}")
     Rails.logger.info "ImageUpscalerService: sending upscale request to #{url} for #{source_path} (min side: #{minimum_side})"
     file = File.open(source_path)
     api_key = ENV['IMAGE_UPSCALE_API_KEY'].presence
@@ -49,8 +49,7 @@ class ImageUpscalerService
     request = Net::HTTP::Post.new(url)
     request['X-API-Key'] = api_key if api_key.present?
     request.set_form([
-                       ['file', file],
-                       ['minimum_side', minimum_side.to_s]
+                       ['file', file]
                      ], 'multipart/form-data')
 
     response = Net::HTTP.start(url.host, url.port, use_ssl: url.scheme == 'https') do |http|

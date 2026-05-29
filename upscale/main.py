@@ -42,27 +42,31 @@ except ImportError as ie:
     RRDBNet = None
     SRVGGNetCompact = None
 
-TARGET_MIN_SIDE = 512
+TARGET_MIN_SIDE = 360
 MAX_AI_PASSES = 5
 REAL_ESRGAN_SCALE = 4
 
 GPU_MODEL_PATH = os.getenv(
     "REAL_ESRGAN_GPU_MODEL_PATH",
-    "/app/models/RealESRGAN_x4plus.pth"
+    "/app/models/4x-UltraSharp.pth"
 )
 CPU_MODEL_PATH = os.getenv(
     "REAL_ESRGAN_CPU_MODEL_PATH",
     "/app/models/realesr-general-x4v3.pth"
 )
 
-# AI Upscale Threshold: if the shortest image side is already >= (target * threshold),
-# skip the neural network and use Lanczos4 instead. This avoids the "painted" look
-# that neural upscalers introduce on images that already have reasonable detail.
-# CPU model (SRVGGNetCompact) distorts more easily → lower threshold.
-# GPU model (RRDBNet/x4plus) is higher quality → can afford a higher threshold.
-AI_UPSCALE_THRESHOLD_CPU = float(os.getenv("AI_UPSCALE_THRESHOLD_CPU", "0.66"))
-AI_UPSCALE_THRESHOLD_GPU = float(os.getenv("AI_UPSCALE_THRESHOLD_GPU", "0.85"))
-AI_UPSCALE_THRESHOLD_ESPCN_CPU = float(os.getenv("AI_UPSCALE_THRESHOLD_ESPCN_CPU", "0.85"))
+# --- Upscale Tier Thresholds ---
+# Ratio = current_min_side / minimum_side (target)
+#  < 0.50  → 4x Real-ESRGAN (heavy neural reconstruction)
+#  0.50 – 0.7499 → 2x Real-ESRGAN + denoise (medium boost with noise reduction)
+#  >= 0.75 → Lanczos4 + denoise (classical rescale, no AI distortion)
+TIER_4X_THRESHOLD = float(os.getenv("TIER_4X_THRESHOLD", "0.50"))   # below this → 4x
+TIER_2X_THRESHOLD = float(os.getenv("TIER_2X_THRESHOLD", "0.75"))   # below this → 2x; above → Lanczos
+
+# Denoise strength parameters (OpenCV fastNlMeansDenoisingColored)
+DENOISE_H = int(os.getenv("DENOISE_H", "5"))
+DENOISE_TEMPLATE_WINDOW = int(os.getenv("DENOISE_TEMPLATE_WINDOW", "7"))
+DENOISE_SEARCH_WINDOW = int(os.getenv("DENOISE_SEARCH_WINDOW", "21"))
 
 app = FastAPI(title="SCC Image Upscale Service")
 
@@ -82,15 +86,6 @@ def env_int(name, default):
 
 def should_use_gpu_upscaler():
     return env_flag("USE_GPU_UPSCALER", "true")
-
-
-def get_ai_threshold(prefer_gpu: bool) -> float:
-    """Return the AI upscale threshold for the active mode.
-
-    Images whose shortest side is already >= (minimum_side * threshold)
-    will skip the neural network and be resized with Lanczos4 instead.
-    """
-    return AI_UPSCALE_THRESHOLD_GPU if prefer_gpu else AI_UPSCALE_THRESHOLD_CPU
 
 
 async def verify_api_key(x_api_key: str = Header(None)):
@@ -151,28 +146,39 @@ def get_cpu_upscaler():
     )
 
 
-def upscale_with_realesrgan(image_bgr, prefer_gpu=True):
+def upscale_with_realesrgan(image_bgr, prefer_gpu=True, outscale=None):
+    """Run Real-ESRGAN on the image.
+
+    outscale controls the output scale factor passed to RealESRGANer.enhance().
+    Defaults to REAL_ESRGAN_SCALE (4x) when not specified.
+    """
+    if outscale is None:
+        outscale = REAL_ESRGAN_SCALE
+
     if prefer_gpu:
         upscaler = get_gpu_upscaler()
     else:
         upscaler = get_cpu_upscaler()
 
-    output_bgr, _ = upscaler.enhance(image_bgr, outscale=REAL_ESRGAN_SCALE)
+    output_bgr, _ = upscaler.enhance(image_bgr, outscale=outscale)
     return output_bgr
 
 
-@lru_cache(maxsize=1)
-def get_espcn_upscaler():
-    model_path = _require_model("/app/models/ESPCN_x4.pb")
-    sr = cv2.dnn_superres.DnnSuperResImpl_create()
-    sr.readModel(model_path)
-    sr.setModel("espcn", 4)
-    return sr
+def apply_denoise(image_bgr):
+    """Apply fast non-local means denoising (colour) to an image.
 
-
-def upscale_with_espcn(image_bgr):
-    sr = get_espcn_upscaler()
-    return sr.upsample(image_bgr)
+    Strength is controlled by DENOISE_H, DENOISE_TEMPLATE_WINDOW and
+    DENOISE_SEARCH_WINDOW environment variables so it can be tuned without
+    rebuilding the container.
+    """
+    return cv2.fastNlMeansDenoisingColored(
+        image_bgr,
+        None,
+        h=DENOISE_H,
+        hColor=DENOISE_H,
+        templateWindowSize=DENOISE_TEMPLATE_WINDOW,
+        searchWindowSize=DENOISE_SEARCH_WINDOW,
+    )
 
 
 def upscale_with_lanczos(image_bgr, minimum_side):
@@ -183,68 +189,122 @@ def upscale_with_lanczos(image_bgr, minimum_side):
     return cv2.resize(image_bgr, (new_width, new_height), interpolation=cv2.INTER_LANCZOS4)
 
 
+def downscale_to_target(image_bgr, minimum_side):
+    """Downscale an image so its shortest side matches minimum_side exactly.
+
+    After AI upscale (which jumps in 4x or 2x increments), the result often
+    overshoots the target. This function resizes down using Lanczos4
+    to preserve quality while hitting the correct final size.
+    """
+    height, width = image_bgr.shape[:2]
+    current_min_side = min(height, width)
+    if current_min_side <= minimum_side:
+        return image_bgr
+    scale = minimum_side / float(current_min_side)
+    new_width = max(int(round(width * scale)), 1)
+    new_height = max(int(round(height * scale)), 1)
+    logger.info(
+        f"[Downscale] Resizing from {width}x{height} to {new_width}x{new_height} "
+        f"(target min-side: {minimum_side}px)"
+    )
+    return cv2.resize(image_bgr, (new_width, new_height), interpolation=cv2.INTER_LANCZOS4)
+
+
 def upscale_until_min_side(image_bgr, minimum_side):
+    """Choose an upscale strategy based on how close the image already is to the target.
+
+    Three tiers (configurable via env vars):
+      ratio < TIER_4X_THRESHOLD (default 0.50)
+          → Real-ESRGAN 4x  (heavy neural reconstruction for very small images)
+      TIER_4X_THRESHOLD <= ratio < TIER_2X_THRESHOLD (default 0.75)
+          → Denoise + Real-ESRGAN 2x  (light boost for medium images)
+      ratio >= TIER_2X_THRESHOLD
+          → Denoise + Lanczos4  (classical rescale, avoids any AI "oil painting" look)
+
+    After any AI upscale the result is always downscaled back to minimum_side so
+    the overshoot from fixed-increment models (4x, 2x) is corrected cleanly.
+    """
     current = image_bgr
-    passes = 0
     prefer_gpu = should_use_gpu_upscaler()
     current_min_side = min(current.shape[0], current.shape[1])
-    threshold = get_ai_threshold(prefer_gpu)
-    ai_threshold_px = minimum_side * threshold
-    espcn_threshold_px = minimum_side * AI_UPSCALE_THRESHOLD_ESPCN_CPU if not prefer_gpu else ai_threshold_px
+    ratio = current_min_side / float(minimum_side)
 
-    # --- Threshold Guard ---
-    if current_min_side >= espcn_threshold_px:
-        mode_label = "GPU" if prefer_gpu else "CPU"
-        threshold_val = AI_UPSCALE_THRESHOLD_ESPCN_CPU if not prefer_gpu else threshold
-        logger.info(
-            f"[Threshold] Image min-side {current_min_side}px >= "
-            f"{(minimum_side * threshold_val):.0f}px ({threshold_val:.0%} of target {minimum_side}px, {mode_label} mode). "
-            f"Skipping AI upscaler — using Lanczos4 to avoid distortion."
-        )
-        return upscale_with_lanczos(current, minimum_side)
-
-    if not prefer_gpu and current_min_side >= ai_threshold_px and current_min_side < espcn_threshold_px:
-        logger.info(
-            f"[AI Upscale - ESPCN] Image min-side {current_min_side}px is between "
-            f"{ai_threshold_px:.0f}px and {espcn_threshold_px:.0f}px (CPU mode). "
-            f"Engaging lightweight ESPCN model."
-        )
-        try:
-            current = upscale_with_espcn(current)
-            if min(current.shape[0], current.shape[1]) < minimum_side:
-                 current = upscale_with_lanczos(current, minimum_side)
-            return current
-        except Exception as e:
-            logger.error(f"Error during ESPCN upscale: {e}", exc_info=True)
-            return upscale_with_lanczos(current, minimum_side)
-
+    mode_label = "GPU" if prefer_gpu else "CPU"
     logger.info(
-        f"[AI Upscale - RealESRGAN] Image min-side {current_min_side}px < "
-        f"{ai_threshold_px:.0f}px threshold. Engaging Real-ESRGAN."
+        f"[Upscale] Image min-side {current_min_side}px, target {minimum_side}px, "
+        f"ratio {ratio:.2f} ({mode_label} mode)"
     )
 
-    while min(current.shape[0], current.shape[1]) < minimum_side and passes < MAX_AI_PASSES:
+    # ── Tier 3: >= 75% → Lanczos + Denoise ──────────────────────────────────
+    if ratio >= TIER_2X_THRESHOLD:
+        logger.info(
+            f"[Tier Lanczos] ratio {ratio:.2f} >= {TIER_2X_THRESHOLD} — "
+            "applying Denoise + Lanczos4 (no AI)."
+        )
         try:
-            current = upscale_with_realesrgan(current, prefer_gpu=prefer_gpu)
-            passes += 1
+            current = apply_denoise(current)
         except Exception as e:
-            logger.error(f"Error during Real-ESRGAN upscale (prefer_gpu={prefer_gpu}): {e}", exc_info=True)
+            logger.warning(f"[Denoise] Failed, skipping: {e}")
+        return upscale_with_lanczos(current, minimum_side)
+
+    # ── Tier 2: 50–74.9% → Denoise + 2x Real-ESRGAN ─────────────────────────
+    if ratio >= TIER_4X_THRESHOLD:
+        logger.info(
+            f"[Tier 2x] ratio {ratio:.2f} in [{TIER_4X_THRESHOLD}, {TIER_2X_THRESHOLD}) — "
+            "applying Denoise + Real-ESRGAN 2x."
+        )
+        try:
+            current = apply_denoise(current)
+        except Exception as e:
+            logger.warning(f"[Denoise] Failed, skipping: {e}")
+        try:
+            current = upscale_with_realesrgan(current, prefer_gpu=prefer_gpu, outscale=2)
+        except Exception as e:
+            logger.error(f"[Tier 2x] Real-ESRGAN 2x failed: {e}", exc_info=True)
             if prefer_gpu:
                 try:
-                    logger.info("Attempting fallback to CPU Real-ESRGAN...")
-                    current = upscale_with_realesrgan(current, prefer_gpu=False)
+                    logger.info("[Tier 2x] Attempting fallback to CPU Real-ESRGAN 2x...")
+                    current = upscale_with_realesrgan(current, prefer_gpu=False, outscale=2)
+                except Exception as cpu_e:
+                    logger.error(f"[Tier 2x] CPU fallback also failed: {cpu_e}", exc_info=True)
+                    return upscale_with_lanczos(current, minimum_side)
+            else:
+                return upscale_with_lanczos(current, minimum_side)
+
+        # Downscale back to target in case 2x overshot
+        current = downscale_to_target(current, minimum_side)
+        return current
+
+    # ── Tier 1: < 50% → Real-ESRGAN 4x (loop until target reached) ──────────
+    logger.info(
+        f"[Tier 4x] ratio {ratio:.2f} < {TIER_4X_THRESHOLD} — "
+        "applying Real-ESRGAN 4x."
+    )
+    passes = 0
+    while min(current.shape[0], current.shape[1]) < minimum_side and passes < MAX_AI_PASSES:
+        try:
+            current = upscale_with_realesrgan(current, prefer_gpu=prefer_gpu, outscale=REAL_ESRGAN_SCALE)
+            passes += 1
+        except Exception as e:
+            logger.error(f"[Tier 4x] Real-ESRGAN failed (prefer_gpu={prefer_gpu}): {e}", exc_info=True)
+            if prefer_gpu:
+                try:
+                    logger.info("[Tier 4x] Attempting fallback to CPU Real-ESRGAN...")
+                    current = upscale_with_realesrgan(current, prefer_gpu=False, outscale=REAL_ESRGAN_SCALE)
                     passes += 1
                     prefer_gpu = False
                     continue
                 except Exception as cpu_e:
-                    logger.error(f"Error during fallback CPU Real-ESRGAN upscale: {cpu_e}", exc_info=True)
+                    logger.error(f"[Tier 4x] CPU fallback also failed: {cpu_e}", exc_info=True)
                     break
             break
 
     if min(current.shape[0], current.shape[1]) < minimum_side:
-        logger.warning(f"AI Upscale was not sufficient or failed. Falling back to Lanczos resize to {minimum_side}px")
+        logger.warning("[Tier 4x] AI upscale insufficient or failed. Falling back to Lanczos.")
         current = upscale_with_lanczos(current, minimum_side)
 
+    # Downscale back to target (4x may overshoot, e.g. 270px → 1080px for target 360px)
+    current = downscale_to_target(current, minimum_side)
     return current
 
 
@@ -257,7 +317,12 @@ async def startup_event():
     logger.info("Initializing SCC Image Upscale Service...")
     gpu_mode = should_use_gpu_upscaler()
     logger.info(f"Target mode: {'GPU' if gpu_mode else 'CPU'}")
-    
+    logger.info(
+        f"Upscale tiers: 4x below {TIER_4X_THRESHOLD:.0%}, "
+        f"2x in [{TIER_4X_THRESHOLD:.0%}, {TIER_2X_THRESHOLD:.0%}), "
+        f"Lanczos+Denoise at {TIER_2X_THRESHOLD:.0%}+"
+    )
+
     try:
         if gpu_mode:
             logger.info("Pre-loading GPU upscaler model...")
@@ -279,9 +344,9 @@ async def health():
         "status": "ok",
         "mode": "gpu" if gpu_mode else "cpu",
         "target_min_side": TARGET_MIN_SIDE,
-        "scale": REAL_ESRGAN_SCALE,
-        "ai_threshold": get_ai_threshold(gpu_mode),
-        "ai_threshold_px": int(TARGET_MIN_SIDE * get_ai_threshold(gpu_mode)),
+        "tier_4x_threshold": TIER_4X_THRESHOLD,
+        "tier_2x_threshold": TIER_2X_THRESHOLD,
+        "denoise_h": DENOISE_H,
     }
 
 
