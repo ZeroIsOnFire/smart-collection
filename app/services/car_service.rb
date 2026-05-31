@@ -69,7 +69,12 @@ class CarService
 
     return [normalized_params, nil] if photo.blank?
 
-    upscaled_file = ImageUpscalerService.upscale_if_needed(photo, minimum_side: minimum_side)
+    upscaled_file = ImageUpscalerService.upscale_if_needed(
+      photo,
+      minimum_side: minimum_side,
+      use_ai: user.ai_upscaling_enabled?,
+      local_fallback: false
+    )
     normalized_params[:photo] = upscaled_file if upscaled_file
 
     [normalized_params, upscaled_file]
@@ -101,7 +106,13 @@ class CarService
       { 'x' => crop_x.to_f, 'y' => crop_y.to_f + crop_h.to_f }
     ]
 
-    cropped_file = ImageCropperService.crop(car.photo.path, vertices, padding: 0, minimum_side: CAR_IMAGE_MINIMUM_SIDE)
+    cropped_file = ImageCropperService.crop(
+      car.photo.path,
+      vertices,
+      padding: 0,
+      minimum_side: CAR_IMAGE_MINIMUM_SIDE,
+      upscale: { use_ai: user.ai_upscaling_enabled?, local_fallback: false }
+    )
     car.photo = cropped_file if cropped_file
   end
 

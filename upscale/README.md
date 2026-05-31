@@ -1,0 +1,134 @@
+# SCC Image Upscale Service
+
+Microservico FastAPI usado pelo Rails para preparar fotos antes do salvamento final e antes da autodeteccao. O endpoint principal recebe uma imagem e devolve um JPEG com proporcao preservada e lado minimo garantido.
+
+## Endpoints
+
+- `GET /health`: status, runtime ativo, caminho do modelo e parametros dos tiers.
+- `POST /upscale?minimum_side=<px>`: upload multipart no campo `file`; resposta `image/jpeg`.
+
+Quando `IMAGE_UPSCALE_API_KEY` estiver configurada, envie o header `X-API-Key`.
+
+## Runtimes
+
+O runtime e definido pelo Dockerfile usado pelo servico `upscale-service`.
+
+| Dockerfile | Runtime | Modelo |
+| --- | --- | --- |
+| `Dockerfile.cpu` | CPU | `realesr-general-x4v3.pth` + `realesr-general-wdn-x4v3.pth` |
+| `Dockerfile.nvidia` | NVIDIA/CUDA | `RealESRGAN_x4plus.pth` |
+| `Dockerfile.amd` | AMD/ROCm | `RealESRGAN_x4plus.pth` |
+
+O `Dockerfile.amd` esta fixado em `rocm/pytorch:rocm6.4.2_ubuntu24.04_py3.12_pytorch_release_2.6.0`, que foi a combinacao validada no WSL2 com AMD.
+
+## Tiers de upscale
+
+O servico escolhe a estrategia usando:
+
+```text
+ratio = current_min_side / minimum_side
+```
+
+- `ratio < TIER_4X_THRESHOLD` (`0.50` por padrao): Real-ESRGAN 4x.
+- `TIER_4X_THRESHOLD <= ratio < TIER_2X_THRESHOLD` (`0.75` por padrao): Real-ESRGAN 2x.
+- `ratio >= TIER_2X_THRESHOLD`: Lanczos4 com denoise/sharpen, sem IA.
+
+Depois de qualquer upscale por IA, a imagem e reduzida para bater exatamente o lado minimo solicitado.
+
+## Variaveis
+
+- `IMAGE_UPSCALE_API_KEY`: chave opcional exigida no header `X-API-Key`.
+- `REAL_ESRGAN_MODEL_PATH`: caminho customizado de modelo dentro do container.
+- `REAL_ESRGAN_WDN_MODEL_PATH`: caminho do modelo WDN usado no CPU com DNI.
+- `REAL_ESRGAN_DENOISE_STRENGTH`: denoise do CPU entre `0` e `1`; padrao `0`.
+- `TIER_4X_THRESHOLD` / `TIER_2X_THRESHOLD`: limites dos tiers.
+- `DENOISE_H`, `DENOISE_TEMPLATE_WINDOW`, `DENOISE_SEARCH_WINDOW`: parametros do denoise Lanczos.
+- `LANCZOS_CAS_AMOUNT`: intensidade do sharpen CAS no fallback Lanczos.
+
+## AMD/ROCm no WSL2
+
+No WSL2 com AMD, o Docker deve ser executado a partir do Linux/WSL, nao do PowerShell, porque os paths montados existem no filesystem do WSL.
+
+### Verificar o WSL
+
+```sh
+ls -l /dev/dxg /usr/lib/wsl/lib/libdxcore.so /opt/rocm/lib/libhsa-runtime64.so.1
+cat /opt/rocm/.info/version
+docker compose version
+```
+
+O setup validado tinha:
+
+- `/dev/dxg` disponivel.
+- `libdxcore.so` em `/usr/lib/wsl/lib/libdxcore.so`.
+- `libhsa-runtime64.so.1` em `/opt/rocm/lib/libhsa-runtime64.so.1`.
+- ROCm `6.4.2`.
+- GPU detectada dentro do container como `AMD Radeon RX 9070 XT`.
+
+### Configurar o `docker-compose.yml` local
+
+O `docker-compose.yml` local nao e versionado. Para AMD/WSL2, deixe o `upscale-service` com o Dockerfile AMD e as montagens abaixo:
+
+```yaml
+upscale-service:
+  build:
+    context: ./upscale
+    dockerfile: Dockerfile.amd
+  devices:
+    - "/dev/dxg:/dev/dxg"
+  volumes:
+    - "/usr/lib/wsl/lib/libdxcore.so:/usr/lib/libdxcore.so:ro"
+    - "/opt/rocm/lib/libhsa-runtime64.so.1:/opt/rocm/lib/libhsa-runtime64.so.1:ro"
+  security_opt:
+    - seccomp=unconfined
+```
+
+Para Linux AMD nativo, use o padrao ROCm com `/dev/kfd` e `/dev/dri` em vez de `/dev/dxg`.
+
+### Subir pelo WSL
+
+```sh
+cd /mnt/c/Users/junio/OneDrive/Documentos/git/smart-collection
+docker compose up -d --build upscale-service
+```
+
+### Validar GPU
+
+```sh
+docker compose ps upscale-service
+docker compose logs --tail=80 upscale-service
+docker compose exec upscale-service python - <<'PY'
+import torch
+import main
+print("model_path", main.model_path_for_runtime("amd"))
+print("cuda_available", torch.cuda.is_available())
+print("device_count", torch.cuda.device_count())
+print("device_name", torch.cuda.get_device_name(0) if torch.cuda.is_available() else "none")
+PY
+```
+
+Resultado esperado:
+
+- Container `healthy`.
+- Logs com `Target mode: AMD`.
+- Logs com `AMD upscaler model pre-loaded successfully!`.
+- `cuda_available True`.
+
+O aviso `Can't initialize amdsmi - Error code: 34` pode aparecer no WSL2; ele nao impediu o PyTorch de usar a GPU no ambiente validado.
+
+## Gotchas
+
+- Mantenha o monkeypatch de `torch.load(weights_only=False)` antes de importar Real-ESRGAN.
+- Mantenha o shim `torchvision.transforms.functional_tensor` para compatibilidade do `basicsr`.
+- O modelo GPU atual e `RealESRGAN_x4plus.pth`; ele e mais pesado que `realesr-general-x4v3.pth`.
+- Se o pre-load do modelo falhar, o servico continua de pe e cai para Lanczos nas requisicoes.
+- O Rails so deve chamar este servico quando `IMAGE_UPSCALE_SERVICE_URL` estiver configurada e o usuario permitir IA no fluxo aplicavel.
+
+## Testes
+
+Rode os testes do microservico a partir da raiz do projeto. Se o Python local nao tiver as dependencias, use o container:
+
+```sh
+docker compose run --rm -v "$PWD/upscale:/app" upscale-service python -m unittest test_main.py
+```
+

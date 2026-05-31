@@ -9,16 +9,16 @@ class ImageUpscalerService
   DEFAULT_MINIMUM_SIDE = 360
   class UpscaleError < StandardError; end
 
-  def self.upscale_if_needed(photo_path, minimum_side: DEFAULT_MINIMUM_SIDE)
+  def self.upscale_if_needed(photo_path, minimum_side: DEFAULT_MINIMUM_SIDE, use_ai: true, local_fallback: true)
     source_path = resolved_photo_path(photo_path)
     return nil if source_path.blank?
 
     image = MiniMagick::Image.open(source_path)
     return nil if [image.width, image.height].min >= minimum_side
 
-    if service_configured?
+    if use_ai && service_configured?
       upscale_via_service(source_path, minimum_side)
-    else
+    elsif local_fallback
       upscale_locally(source_path, minimum_side)
     end
   rescue UpscaleError
@@ -43,17 +43,18 @@ class ImageUpscalerService
     service_url = ENV.fetch('IMAGE_UPSCALE_SERVICE_URL')
     url = URI.parse("#{service_url}/upscale?minimum_side=#{minimum_side}")
     Rails.logger.info "ImageUpscalerService: sending upscale request to #{url} for #{source_path} (min side: #{minimum_side})"
-    file = File.open(source_path)
     api_key = ENV['IMAGE_UPSCALE_API_KEY'].presence
 
     request = Net::HTTP::Post.new(url)
     request['X-API-Key'] = api_key if api_key.present?
-    request.set_form([
-                       ['file', file]
-                     ], 'multipart/form-data')
+    response = File.open(source_path) do |file|
+      request.set_form([
+                         ['file', file]
+                       ], 'multipart/form-data')
 
-    response = Net::HTTP.start(url.host, url.port, use_ssl: url.scheme == 'https') do |http|
-      http.request(request)
+      Net::HTTP.start(url.host, url.port, use_ssl: url.scheme == 'https') do |http|
+        http.request(request)
+      end
     end
 
     raise UpscaleError, "remote service responded with #{response.code}" unless response.is_a?(Net::HTTPSuccess) && response.body.present?
@@ -70,8 +71,6 @@ class ImageUpscalerService
   rescue StandardError => e
     Rails.logger.error "ImageUpscalerService remote upscale failed: #{e.message}"
     raise UpscaleError, e.message
-  ensure
-    file&.close
   end
   private_class_method :upscale_via_service
 

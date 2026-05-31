@@ -13,6 +13,11 @@ RSpec.describe User, type: :model do
     expect(user.admin).to be false
   end
 
+  it 'defaults AI upscaling to enabled' do
+    user = described_class.new(name: 'Test', email: 'test@example.com', password: 'password123')
+    expect(user.ai_upscaling_enabled).to be true
+  end
+
   it 'can be an admin' do
     user = described_class.new(name: 'Admin', email: 'admin@example.com', password: 'password123', admin: true)
     expect(user.admin).to be true

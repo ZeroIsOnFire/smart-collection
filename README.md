@@ -54,6 +54,15 @@ O **Smart Collection Catalog** é um serviço web premium para registro e gerenc
 - **Página de Exibição Pública**: Compartilhe sua coleção através de um link público elegante com busca integrada e rolagem infinita.
 - **Design Premium**: Interface moderna com modo lista/grade, animações suaves e foco na usabilidade.
 
+## Microservices
+
+The project includes local AI microservices that run through Docker Compose:
+
+- `yolo-service`: local YOLO11s detection and simple color classification for autodetection flows. See [`yolo/README.md`](yolo/README.md).
+- `upscale-service`: local image upscale/preparation service used by item uploads and autodetection. See [`upscale/README.md`](upscale/README.md).
+
+For AMD/ROCm on WSL2, follow the dedicated guide in [`upscale/README.md`](upscale/README.md#amdrocm-no-wsl2). The validated setup runs Docker Compose from WSL, uses `/dev/dxg`, mounts the WSL ROCm/DXCore libraries, and builds `upscale/Dockerfile.amd`.
+
 ## 🧪 Testes
 
 Para rodar a suite de testes (RSpec):
@@ -64,21 +73,3 @@ docker-compose exec web bundle exec rspec
 ## ⚖️ Licença
 
 Este projeto é de uso privado e segue as diretrizes estabelecidas no documento `AGENTS.md`.
-## Image Upscaler
-
-The project uses a dedicated Docker upscaler service.
-
-- General item flows use `ImageUpscalerService::DEFAULT_MINIMUM_SIDE`.
-- Autodetection creation uses `AutodetectionService::AUTODETECTION_MINIMUM_SIDE`.
-- The service preserves aspect ratio and guarantees the requested minimum side.
-- Runtime is selected by the upscale Dockerfile.
-- CPU is the local default in `docker-compose.yml` via `upscale/Dockerfile.cpu`.
-- NVIDIA uses `upscale/Dockerfile.nvidia`; AMD/ROCm uses `upscale/Dockerfile.amd`.
-
-Environment variables:
-
-- `IMAGE_UPSCALE_SERVICE_URL`: internal URL used by Rails to call the service.
-- `IMAGE_UPSCALE_API_KEY`: shared API key for the service, if enabled.
-- `REAL_ESRGAN_MODEL_PATH`: optional custom model path inside the selected container.
-- `REAL_ESRGAN_DENOISE_STRENGTH`: CPU `realesr-general-x4v3` denoise strength from `0` to `1`; default is `0`.
-- `TIER_4X_THRESHOLD` / `TIER_2X_THRESHOLD`: choose Real-ESRGAN 4x, Real-ESRGAN 2x, or Lanczos tiers.

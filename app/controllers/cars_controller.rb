@@ -33,6 +33,20 @@ class CarsController < ApplicationController
     end
   end
 
+  # PATCH /cars/toggle_ai_upscaling
+  def toggle_ai_upscaling
+    return redirect_to edit_user_registration_path unless ImageUpscalerService.service_configured?
+
+    current_user.update(ai_upscaling_enabled: !current_user.ai_upscaling_enabled)
+
+    respond_to do |format|
+      format.turbo_stream do
+        render turbo_stream: turbo_stream.update('ai_upscaling_settings_toggle', partial: 'cars/ai_upscaling_settings')
+      end
+      format.html { redirect_to edit_user_registration_path, notice: t('flash.updated', resource: t('nav.settings')) }
+    end
+  end
+
   # GET /cars/1
   def show; end
 

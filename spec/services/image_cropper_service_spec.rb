@@ -16,7 +16,7 @@ RSpec.describe ImageCropperService do
   describe '.crop' do
     it 'invokes the upscaler before cropping small images' do
       expect(ImageUpscalerService).to receive(:upscale_if_needed)
-        .with(photo_path, minimum_side: 360)
+        .with(photo_path, minimum_side: 360, use_ai: true, local_fallback: false)
         .and_return(nil)
 
       result = described_class.crop(photo_path, vertices)
@@ -37,10 +37,10 @@ RSpec.describe ImageCropperService do
       ]
 
       expect(ImageUpscalerService).to receive(:upscale_if_needed)
-        .with(photo_path, minimum_side: 360)
+        .with(photo_path, minimum_side: 360, use_ai: true, local_fallback: false)
         .ordered.and_return(nil)
       expect(ImageUpscalerService).to receive(:upscale_if_needed)
-        .with(kind_of(String), minimum_side: 360)
+        .with(kind_of(String), minimum_side: 360, use_ai: true, local_fallback: false)
         .ordered.and_return(nil)
 
       result = described_class.crop(photo_path, narrow_vertices)
@@ -51,6 +51,19 @@ RSpec.describe ImageCropperService do
       final_image = MiniMagick::Image.open(result.path)
       expect(final_image.width).to be >= 360
       expect(final_image.height).to be >= 360
+    ensure
+      result&.close
+      FileUtils.rm_f(result.path) if result&.path
+    end
+
+    it 'passes disabled AI and local fallback flags to the upscaler' do
+      expect(ImageUpscalerService).to receive(:upscale_if_needed)
+        .with(photo_path, minimum_side: 360, use_ai: false, local_fallback: true)
+        .and_return(nil)
+
+      result = described_class.crop(photo_path, vertices, upscale: { use_ai: false, local_fallback: true })
+
+      expect(result).to be_a(Tempfile)
     ensure
       result&.close
       FileUtils.rm_f(result.path) if result&.path

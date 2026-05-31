@@ -12,8 +12,8 @@ Microservico local para upscale inteligente de imagens com Real-ESRGAN e fallbac
 - **Fallbacks**: `cv2.INTER_LANCZOS4`
 - **Modelos por imagem**:
   - CPU baixa `realesr-general-x4v3.pth` e `realesr-general-wdn-x4v3.pth` (DNI para denoise strength)
-  - NVIDIA baixa somente `4x-UltraSharp.pth`
-  - AMD baixa somente `4x-UltraSharp.pth`
+  - NVIDIA baixa somente `RealESRGAN_x4plus.pth`
+  - AMD baixa somente `RealESRGAN_x4plus.pth`
 
 ## Contrato HTTP
 - `GET /health`: retorna status, runtime ativo, modelo ativo e parametros de tier/denoise.
@@ -29,8 +29,8 @@ O runtime e definido pela imagem Docker.
 | Dockerfile | Runtime interno | Modelo baixado |
 | --- | --- | --- |
 | `Dockerfile.cpu` | `cpu` | `realesr-general-x4v3.pth` + `realesr-general-wdn-x4v3.pth` |
-| `Dockerfile.nvidia` | `nvidia` | `4x-UltraSharp.pth` |
-| `Dockerfile.amd` | `amd` | `4x-UltraSharp.pth` |
+| `Dockerfile.nvidia` | `nvidia` | `RealESRGAN_x4plus.pth` |
+| `Dockerfile.amd` | `amd` | `RealESRGAN_x4plus.pth` |
 
 Nao reintroduza modelos antigos nem baixe pesos que nao pertencam ao Dockerfile escolhido.
 

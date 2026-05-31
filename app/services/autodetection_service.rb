@@ -42,7 +42,12 @@ class AutodetectionService
 
     return [normalized_params, nil] if photo.blank?
 
-    upscaled_file = ImageUpscalerService.upscale_if_needed(photo, minimum_side: minimum_side)
+    upscaled_file = ImageUpscalerService.upscale_if_needed(
+      photo,
+      minimum_side: minimum_side,
+      use_ai: user.ai_upscaling_enabled?,
+      local_fallback: true
+    )
     normalized_params[:photo] = upscaled_file if upscaled_file
 
     [normalized_params, upscaled_file]

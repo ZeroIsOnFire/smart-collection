@@ -8,10 +8,14 @@ module ApplicationHelper
     {
       locale: I18n.locale.to_s,
       defaultLocale: I18n.default_locale.to_s,
-      translations: I18n.available_locales.each_with_object({}) do |locale, result|
-        result[locale.to_s] = deep_stringify_translation_tree(backend.send(:translations)[locale] || {})
+      translations: I18n.available_locales.to_h do |locale|
+        [locale.to_s, deep_stringify_translation_tree(backend.send(:translations)[locale] || {})]
       end
     }
+  end
+
+  def ai_upscaling_available_for?(user)
+    user&.ai_upscaling_enabled? && ImageUpscalerService.service_configured?
   end
 
   def user_initials(user)

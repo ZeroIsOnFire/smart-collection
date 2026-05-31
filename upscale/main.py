@@ -1,6 +1,7 @@
 import io
 import logging
 import os
+from collections import OrderedDict
 from functools import lru_cache
 
 # Setup logging
@@ -15,13 +16,53 @@ from PIL import Image, ImageOps
 
 try:
     import torch
+
+    def normalize_realesrgan_checkpoint(checkpoint):
+        if not isinstance(checkpoint, (dict, OrderedDict)):
+            return checkpoint
+        if "params" in checkpoint:
+            return checkpoint
+        if "params_ema" in checkpoint:
+            checkpoint["params"] = checkpoint["params_ema"]
+            return checkpoint
+
+        keys = list(checkpoint.keys())
+        if not keys or not all(str(key).startswith("model.") for key in keys):
+            return checkpoint
+
+        normalized = OrderedDict()
+        for key, value in checkpoint.items():
+            normalized_key = key
+            if key.startswith("model.1.sub."):
+                normalized_key = key.replace("model.1.sub.", "body.", 1)
+                normalized_key = normalized_key.replace(".RDB", ".rdb")
+                normalized_key = normalized_key.replace(".conv1.0.", ".conv1.")
+                normalized_key = normalized_key.replace(".conv2.0.", ".conv2.")
+                normalized_key = normalized_key.replace(".conv3.0.", ".conv3.")
+                normalized_key = normalized_key.replace(".conv4.0.", ".conv4.")
+                normalized_key = normalized_key.replace(".conv5.0.", ".conv5.")
+                normalized_key = normalized_key.replace("body.23.", "conv_body.")
+            elif key.startswith("model.0."):
+                normalized_key = key.replace("model.0.", "conv_first.", 1)
+            elif key.startswith("model.3."):
+                normalized_key = key.replace("model.3.", "conv_up1.", 1)
+            elif key.startswith("model.6."):
+                normalized_key = key.replace("model.6.", "conv_up2.", 1)
+            elif key.startswith("model.8."):
+                normalized_key = key.replace("model.8.", "conv_hr.", 1)
+            elif key.startswith("model.10."):
+                normalized_key = key.replace("model.10.", "conv_last.", 1)
+            normalized[normalized_key] = value
+        return {"params": normalized}
+
     # Monkeypatch torch.load BEFORE importing realesrgan
     # to handle PyTorch 2.6+ weights_only=True default
     original_load = torch.load
     def patched_load(*args, **kwargs):
         if 'weights_only' not in kwargs:
             kwargs['weights_only'] = False
-        return original_load(*args, **kwargs)
+        checkpoint = original_load(*args, **kwargs)
+        return normalize_realesrgan_checkpoint(checkpoint)
     torch.load = patched_load
 
     # Monkeypatch torchvision functional_tensor for basicsr compatibility in modern torchvision
@@ -48,7 +89,7 @@ REAL_ESRGAN_SCALE = 4
 
 CPU_MODEL_PATH = "/app/models/realesr-general-x4v3.pth"
 CPU_WDN_MODEL_PATH = "/app/models/realesr-general-wdn-x4v3.pth"
-GPU_MODEL_PATH = "/app/models/4x-UltraSharp.pth"
+GPU_MODEL_PATH = "/app/models/RealESRGAN_x4plus.pth"
 GPU_RUNTIMES = {"nvidia", "amd"}
 RUNTIME_ALIASES = {
     "cpu": "cpu",

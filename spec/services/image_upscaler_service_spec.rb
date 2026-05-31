@@ -54,6 +54,59 @@ RSpec.describe ImageUpscalerService do
         small_photo.close
         small_photo.unlink
       end
+
+      it 'returns nil when local fallback is disabled' do
+        allow(described_class).to receive(:service_configured?).and_return(false)
+        small_photo = build_rectangular_photo
+
+        result = described_class.upscale_if_needed(small_photo.path, minimum_side: 360, local_fallback: false)
+
+        expect(result).to be_nil
+      ensure
+        small_photo&.close
+        small_photo&.unlink
+      end
+    end
+
+    context 'when AI upscaling is disabled by the user' do
+      it 'does not call the remote service when local fallback is disabled' do
+        allow(described_class).to receive(:service_configured?).and_return(true)
+        small_photo = build_rectangular_photo
+
+        expect(described_class).not_to receive(:upscale_via_service)
+
+        result = described_class.upscale_if_needed(
+          small_photo.path,
+          minimum_side: 360,
+          use_ai: false,
+          local_fallback: false
+        )
+
+        expect(result).to be_nil
+      ensure
+        small_photo&.close
+        small_photo&.unlink
+      end
+
+      it 'uses simple local upscale when local fallback is enabled' do
+        allow(described_class).to receive(:service_configured?).and_return(true)
+        small_photo = build_rectangular_photo
+
+        result = described_class.upscale_if_needed(
+          small_photo.path,
+          minimum_side: 360,
+          use_ai: false,
+          local_fallback: true
+        )
+
+        final_image = MiniMagick::Image.open(result.path)
+        expect([final_image.width, final_image.height].min).to be >= 360
+      ensure
+        result&.close
+        FileUtils.rm_f(result.path) if result&.path
+        small_photo&.close
+        small_photo&.unlink
+      end
     end
 
     context 'when the local AI service is configured' do
@@ -88,7 +141,7 @@ RSpec.describe ImageUpscalerService do
         response_tempfile.close
         response_tempfile.unlink
         small_photo&.close
-        small_photo.unlink if small_photo
+        small_photo&.unlink
       end
     end
 
@@ -123,7 +176,7 @@ RSpec.describe ImageUpscalerService do
         response_tempfile.close
         response_tempfile.unlink
         small_photo&.close
-        small_photo.unlink if small_photo
+        small_photo&.unlink
       end
     end
 
@@ -146,7 +199,7 @@ RSpec.describe ImageUpscalerService do
         end.to raise_error(ImageUpscalerService::UpscaleError, /500/)
       ensure
         small_photo&.close
-        small_photo.unlink if small_photo
+        small_photo&.unlink
       end
     end
   end
@@ -155,13 +208,13 @@ RSpec.describe ImageUpscalerService do
     it 'returns true when the env var is present' do
       allow(ENV).to receive(:[]).with('IMAGE_UPSCALE_SERVICE_URL').and_return(service_url)
 
-      expect(described_class.service_configured?).to be_truthy
+      expect(described_class).to be_service_configured
     end
 
     it 'returns false when the env var is missing' do
       allow(ENV).to receive(:[]).with('IMAGE_UPSCALE_SERVICE_URL').and_return(nil)
 
-      expect(described_class.service_configured?).to be_falsey
+      expect(described_class).not_to be_service_configured
     end
   end
 end

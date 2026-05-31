@@ -13,7 +13,7 @@ class ImageCropperService
     ].compact.freeze
   end
 
-  def self.crop(source_path, normalized_vertices, padding: 0.05, minimum_side: DEFAULT_MINIMUM_SIDE)
+  def self.crop(source_path, normalized_vertices, padding: 0.05, minimum_side: DEFAULT_MINIMUM_SIDE, upscale: {})
     return nil if normalized_vertices.blank?
 
     resolved_path = File.expand_path(source_path.to_s)
@@ -22,7 +22,12 @@ class ImageCropperService
       return nil
     end
 
-    upscaled_file = ImageUpscalerService.upscale_if_needed(resolved_path, minimum_side: minimum_side)
+    upscaled_file = ImageUpscalerService.upscale_if_needed(
+      resolved_path,
+      minimum_side: minimum_side,
+      use_ai: upscale.fetch(:use_ai, true),
+      local_fallback: upscale.fetch(:local_fallback, false)
+    )
     working_path = upscaled_file&.path || resolved_path
 
     image = MiniMagick::Image.open(working_path)
@@ -53,7 +58,12 @@ class ImageCropperService
     output.rewind
 
     if [image.width, image.height].min < minimum_side
-      upscaled_output = ImageUpscalerService.upscale_if_needed(output.path, minimum_side: minimum_side)
+      upscaled_output = ImageUpscalerService.upscale_if_needed(
+        output.path,
+        minimum_side: minimum_side,
+        use_ai: upscale.fetch(:use_ai, true),
+        local_fallback: upscale.fetch(:local_fallback, false)
+      )
       if upscaled_output
         cleanup_tempfile(output)
         return upscaled_output

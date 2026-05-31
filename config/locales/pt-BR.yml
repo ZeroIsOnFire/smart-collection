@@ -208,6 +208,7 @@ pt-BR:
     form:
       main_photo: "Foto Principal"
       upload_prompt: "Clique ou arraste a imagem aqui"
+      ai_upscaling_notice: "Se a imagem estiver abaixo de %{minimum_side}px, ela poderá receber upscale por IA."
       upload_limits: "JPG, PNG ou GIF — máx. 5 MB"
       crop_button: "Recortar"
       replace_button: "Substituir Foto"
@@ -223,6 +224,17 @@ pt-BR:
   # ── Autodetecção ───────────────────────────────────────
   autodetections:
     title: "Autodetecção via Foto"
+    form:
+      button: "Autodetectar Minis"
+      title: "Autodetectar Minis"
+      description: "Use uma foto com múltiplos veículos para criar registros rapidamente. A autodetecção localiza os veículos na imagem, mas não identifica o nome ou modelo de cada veículo."
+      dropzone_title: "Arraste uma foto aqui"
+      dropzone_help: "ou clique para selecionar do seu dispositivo"
+      ai_upscaling_notice: "Se a imagem estiver abaixo de %{minimum_side}px, ela poderá receber upscale por IA."
+      camera: "Usar Câmera"
+      gallery: "Galeria"
+      back_to_upload: "Voltar para Upload"
+      confirm_help: "Ao confirmar, a IA analisará sua foto para encontrar veículos."
     status:
       pending: "Aguardando"
       processing: "Processando..."

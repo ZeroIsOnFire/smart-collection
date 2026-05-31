@@ -15,7 +15,8 @@ class DetectedItemsController < ApplicationController
       @autodetection.photo.path,
       normalized_vertices,
       padding: 0,
-      minimum_side: ImageCropperService::DEFAULT_MINIMUM_SIDE
+      minimum_side: ImageCropperService::DEFAULT_MINIMUM_SIDE,
+      upscale: { use_ai: current_user.ai_upscaling_enabled?, local_fallback: true }
     )
 
     # Autodetecção completa baseada no recorte manual
@@ -91,7 +92,8 @@ class DetectedItemsController < ApplicationController
       @detected_item.autodetection.photo.path,
       normalized_vertices,
       padding: 0,
-      minimum_side: ImageCropperService::DEFAULT_MINIMUM_SIDE
+      minimum_side: ImageCropperService::DEFAULT_MINIMUM_SIDE,
+      upscale: { use_ai: current_user.ai_upscaling_enabled?, local_fallback: true }
     )
 
     if cropped_file

@@ -37,7 +37,19 @@ RSpec.describe CarService do
     end
 
     it 'passes the photo through the upscaler before persistence' do
-      expect(ImageUpscalerService).to receive(:upscale_if_needed).at_least(:once).and_return(nil)
+      expect(ImageUpscalerService).to receive(:upscale_if_needed)
+        .with(valid_params[:photo], minimum_side: 360, use_ai: true, local_fallback: false)
+        .and_return(nil)
+
+      described_class.new(user).create(valid_params)
+    end
+
+    it 'does not use AI or local fallback for regular photos when the user disables AI upscaling' do
+      user.update!(ai_upscaling_enabled: false)
+
+      expect(ImageUpscalerService).to receive(:upscale_if_needed)
+        .with(valid_params[:photo], minimum_side: 360, use_ai: false, local_fallback: false)
+        .and_return(nil)
 
       described_class.new(user).create(valid_params)
     end
@@ -52,8 +64,8 @@ RSpec.describe CarService do
       expect(saved_image.width).to eq(420)
       expect(saved_image.height).to eq(280)
     ensure
-      upscaled_file.close if upscaled_file
-      upscaled_file.unlink if upscaled_file
+      upscaled_file&.close
+      upscaled_file&.unlink
     end
 
     it 'creates a car even with an empty year string' do
@@ -81,7 +93,7 @@ RSpec.describe CarService do
 
       car = described_class.new(user).create(valid_params)
 
-      expect(car.persisted?).to be_falsey
+      expect(car).not_to be_persisted
       expect(car.errors[:photo]).to include('upscaler failed')
     end
   end

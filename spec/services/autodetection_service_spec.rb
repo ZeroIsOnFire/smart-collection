@@ -30,7 +30,7 @@ RSpec.describe AutodetectionService do
         expect(autodetection).to be_persisted
         expect(autodetection.status).to eq('pending')
       end.to change { user.reload.autodetections.count }.by(1)
-                                                .and enqueue_job(AutodetectJob)
+                                                        .and enqueue_job(AutodetectJob)
     end
 
     it 'persists the autodetection photo upscaled to 1080px minimum side' do
@@ -43,8 +43,24 @@ RSpec.describe AutodetectionService do
       expect(saved_image.width).to eq(1080)
       expect(saved_image.height).to eq(1080)
     ensure
-      upscaled_file.close if upscaled_file
-      upscaled_file.unlink if upscaled_file
+      upscaled_file&.close
+      upscaled_file&.unlink
+    end
+
+    it 'uses simple local fallback for autodetection photos when the user disables AI upscaling' do
+      user.update!(ai_upscaling_enabled: false)
+      upscaled_file = build_temp_image(width: 1080, height: 1080)
+
+      expect(ImageUpscalerService).to receive(:upscale_if_needed)
+        .with(valid_params[:photo], minimum_side: 1080, use_ai: false, local_fallback: true)
+        .and_return(upscaled_file)
+
+      autodetection = described_class.new(user).create(valid_params)
+
+      expect(autodetection).to be_persisted
+    ensure
+      upscaled_file&.close
+      upscaled_file&.unlink
     end
   end
 

@@ -1,6 +1,8 @@
 import io
 import os
+import tempfile
 import unittest
+from collections import OrderedDict
 from unittest.mock import patch, MagicMock
 
 import numpy as np
@@ -44,6 +46,35 @@ class UpscaleServiceTests(unittest.TestCase):
         with patch.dict(os.environ, {"UPSCALE_RUNTIME": "rocm"}, clear=True):
             self.assertEqual(main.upscale_runtime(), "amd")
 
+    def test_torch_load_normalizes_realesrgan_params_ema_key(self):
+        with tempfile.NamedTemporaryFile(suffix=".pth") as checkpoint:
+            main.torch.save({"params_ema": {"weight": 1}}, checkpoint.name)
+
+            loaded = main.torch.load(checkpoint.name)
+
+        self.assertEqual(loaded["params"], {"weight": 1})
+
+    def test_legacy_rrdb_keys_are_normalized(self):
+        checkpoint = OrderedDict({
+            "model.0.weight": 1,
+            "model.1.sub.0.RDB1.conv1.0.weight": 2,
+            "model.1.sub.23.weight": 3,
+            "model.3.weight": 4,
+            "model.6.weight": 5,
+            "model.8.weight": 6,
+            "model.10.weight": 7,
+        })
+
+        loaded = main.normalize_realesrgan_checkpoint(checkpoint)
+
+        self.assertEqual(loaded["params"]["conv_first.weight"], 1)
+        self.assertEqual(loaded["params"]["body.0.rdb1.conv1.weight"], 2)
+        self.assertEqual(loaded["params"]["conv_body.weight"], 3)
+        self.assertEqual(loaded["params"]["conv_up1.weight"], 4)
+        self.assertEqual(loaded["params"]["conv_up2.weight"], 5)
+        self.assertEqual(loaded["params"]["conv_hr.weight"], 6)
+        self.assertEqual(loaded["params"]["conv_last.weight"], 7)
+
     def test_runtime_rejects_unknown_values(self):
         with patch.dict(os.environ, {"UPSCALE_RUNTIME": "quantum"}, clear=True):
             with self.assertRaises(RuntimeError):
@@ -52,6 +83,26 @@ class UpscaleServiceTests(unittest.TestCase):
     def test_cpu_runtime_uses_lightweight_model_by_default(self):
         with patch.dict(os.environ, {"REAL_ESRGAN_MODEL_PATH": ""}, clear=True):
             self.assertEqual(main.model_path_for_runtime("cpu"), "/app/models/realesr-general-x4v3.pth")
+
+    def test_gpu_runtime_uses_x4plus_model_by_default(self):
+        with patch.dict(os.environ, {"REAL_ESRGAN_MODEL_PATH": ""}, clear=True):
+            self.assertEqual(main.model_path_for_runtime("amd"), "/app/models/RealESRGAN_x4plus.pth")
+
+    def test_gpu_upscaler_uses_rrdb_model(self):
+        main.get_upscaler.cache_clear()
+        self.addCleanup(main.get_upscaler.cache_clear)
+
+        with patch.object(main, "RealESRGANer") as mock_realesrganer, \
+             patch.object(main, "RRDBNet", return_value="rrdb-model") as mock_rrdb, \
+             patch.object(main.torch.cuda, "is_available", return_value=True), \
+             patch.object(main, "require_model_paths", return_value="/app/models/RealESRGAN_x4plus.pth"):
+            main.get_gpu_upscaler("amd")
+
+        mock_rrdb.assert_called_once()
+        _, kwargs = mock_realesrganer.call_args
+        self.assertEqual(kwargs["model"], "rrdb-model")
+        self.assertTrue(kwargs["half"])
+        self.assertEqual(kwargs["device"], "cuda")
 
     def test_cpu_denoise_strength_defaults_to_keep_noise(self):
         with patch.dict(os.environ, {}, clear=True):

@@ -23,10 +23,16 @@ RSpec.describe 'DetectedItems', type: :request do
     it 'updates the detected item position data and photo' do
       # Mock do ImageCropperService para evitar processamento real de imagem nos testes
       expect(ImageCropperService).to receive(:crop)
-        .with(anything, anything, padding: 0, minimum_side: ImageCropperService::DEFAULT_MINIMUM_SIDE)
+        .with(
+          anything,
+          anything,
+          padding: 0,
+          minimum_side: ImageCropperService::DEFAULT_MINIMUM_SIDE,
+          upscale: { use_ai: true, local_fallback: true }
+        )
         .and_return(
-        File.open('/rails/spec/fixtures/files/car_sample.jpg')
-      )
+          File.open('/rails/spec/fixtures/files/car_sample.jpg')
+        )
 
       patch update_selection_detected_item_path(@detected_item),
             params: crop_params,
@@ -42,10 +48,16 @@ RSpec.describe 'DetectedItems', type: :request do
 
     it 'returns turbo stream response' do
       expect(ImageCropperService).to receive(:crop)
-        .with(anything, anything, padding: 0, minimum_side: ImageCropperService::DEFAULT_MINIMUM_SIDE)
+        .with(
+          anything,
+          anything,
+          padding: 0,
+          minimum_side: ImageCropperService::DEFAULT_MINIMUM_SIDE,
+          upscale: { use_ai: true, local_fallback: true }
+        )
         .and_return(
-        File.open('/rails/spec/fixtures/files/car_sample.jpg')
-      )
+          File.open('/rails/spec/fixtures/files/car_sample.jpg')
+        )
 
       patch update_selection_detected_item_path(@detected_item),
             params: crop_params,
@@ -83,10 +95,16 @@ RSpec.describe 'DetectedItems', type: :request do
 
     it 'creates a new detected item manually' do
       expect(ImageCropperService).to receive(:crop)
-        .with(anything, anything, padding: 0, minimum_side: ImageCropperService::DEFAULT_MINIMUM_SIDE)
+        .with(
+          anything,
+          anything,
+          padding: 0,
+          minimum_side: ImageCropperService::DEFAULT_MINIMUM_SIDE,
+          upscale: { use_ai: true, local_fallback: true }
+        )
         .and_return(
-        File.open('/rails/spec/fixtures/files/car_sample.jpg')
-      )
+          File.open('/rails/spec/fixtures/files/car_sample.jpg')
+        )
 
       expect do
         post autodetection_detected_items_path(@autodetection),
@@ -106,10 +124,16 @@ RSpec.describe 'DetectedItems', type: :request do
 
     it 'does not append a local toast on turbo stream success' do
       expect(ImageCropperService).to receive(:crop)
-        .with(anything, anything, padding: 0, minimum_side: ImageCropperService::DEFAULT_MINIMUM_SIDE)
+        .with(
+          anything,
+          anything,
+          padding: 0,
+          minimum_side: ImageCropperService::DEFAULT_MINIMUM_SIDE,
+          upscale: { use_ai: true, local_fallback: true }
+        )
         .and_return(
-        File.open('/rails/spec/fixtures/files/car_sample.jpg')
-      )
+          File.open('/rails/spec/fixtures/files/car_sample.jpg')
+        )
 
       post autodetection_detected_items_path(@autodetection),
            params: create_params,

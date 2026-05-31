@@ -9,14 +9,16 @@ RSpec.describe AutodetectJob do
 
   describe '#perform' do
     it 'processa a imagem e cria detected items vinculados à autodetection' do
-      allow(YoloDetectionService).to receive(:service_configured?).and_return(true)
-      allow(YoloDetectionService).to receive(:analyze).and_return([
-                                                                    {
-                                                                      label: 'YOLO car',
-                                                                      score: 0.99,
-                                                                      vertices: [{ x: 0.1, y: 0.1 }, { x: 0.9, y: 0.9 }]
-                                                                    }
-                                                                  ])
+      allow(YoloDetectionService).to receive_messages(
+        service_configured?: true,
+        analyze: [
+          {
+            label: 'YOLO car',
+            score: 0.99,
+            vertices: [{ x: 0.1, y: 0.1 }, { x: 0.9, y: 0.9 }]
+          }
+        ]
+      )
       allow(GoogleVisionService).to receive(:credentials_configured?).and_return(false)
 
       # Mock do arquivo retornado pelo cropper
@@ -25,7 +27,12 @@ RSpec.describe AutodetectJob do
 
       File.open(mock_file_path) do |mock_file|
         expect(ImageCropperService).to receive(:crop)
-          .with(anything, anything, minimum_side: ImageCropperService::DEFAULT_MINIMUM_SIDE)
+          .with(
+            anything,
+            anything,
+            minimum_side: ImageCropperService::DEFAULT_MINIMUM_SIDE,
+            upscale: { use_ai: true, local_fallback: true }
+          )
           .and_return(mock_file)
 
         expect do
@@ -34,7 +41,7 @@ RSpec.describe AutodetectJob do
 
         autodetection.reload
         expect(autodetection.status).to eq('to_verify')
-        expect(autodetection.detected_items.first.label).to eq('YOLO car')
+        expect(autodetection.detected_items.first.label).to eq(I18n.t('autodetections.detected_item.new_item'))
         expect(autodetection.detected_items.first.cropped_photo).to be_present
       end
 

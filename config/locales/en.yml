@@ -193,6 +193,7 @@ en:
     form:
       main_photo: "Main Photo"
       upload_prompt: "Click or drag image here"
+      ai_upscaling_notice: "If the image is below %{minimum_side}px, it may be upscaled by AI."
       upload_limits: "JPG, PNG or GIF — max. 5 MB"
       crop_button: "Crop"
       replace_button: "Replace Photo"
@@ -207,6 +208,17 @@ en:
 
   autodetections:
     title: "Photo Autodetection"
+    form:
+      button: "Autodetect Minis"
+      title: "Autodetect Minis"
+      description: "Use a photo with multiple vehicles to create records quickly. Autodetection locates vehicles in the image, but it does not identify each vehicle name or model."
+      dropzone_title: "Drag a photo here"
+      dropzone_help: "or click to select from your device"
+      ai_upscaling_notice: "If the image is below %{minimum_side}px, it may be upscaled by AI."
+      camera: "Use Camera"
+      gallery: "Gallery"
+      back_to_upload: "Back to Upload"
+      confirm_help: "After confirmation, AI will analyze your photo to find vehicles."
     status:
       pending: "Pending"
       processing: "Processing..."

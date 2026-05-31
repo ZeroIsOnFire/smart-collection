@@ -18,7 +18,7 @@ RUN pip install --upgrade pip \
 COPY main.py .
 
 RUN mkdir -p /app/models \
-    && curl -L --fail -o /app/models/4x-UltraSharp.pth https://huggingface.co/lokCX/4x-Ultrasharp/resolve/main/4x-UltraSharp.pth
+    && curl -L --fail -o /app/models/RealESRGAN_x4plus.pth https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth
 
 EXPOSE 8000
 

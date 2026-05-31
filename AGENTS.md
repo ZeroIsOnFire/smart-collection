@@ -102,13 +102,17 @@ spec/
 ### Uploads e Processamento de Imagens
 - O projeto usa **CarrierWave**, não ActiveStorage. Uploaders vivem em `app/uploaders/` e os arquivos são armazenados em `uploads/...`.
 - Fotos são convertidas para JPG pelos uploaders para manter compatibilidade com PDF/exportação.
-- O `ImageUpscalerService` é o ponto central para upscale. Ele usa o microserviço remoto quando `IMAGE_UPSCALE_SERVICE_URL` está configurado; caso contrário, aplica fallback local com MiniMagick/Lanczos.
+- O `ImageUpscalerService` é o ponto central para upscale. O uso do upscaler por IA é controlado por usuário via `User#ai_upscaling_enabled` (default `true`) e só deve chamar o microserviço quando `IMAGE_UPSCALE_SERVICE_URL` estiver configurado.
 - Tamanhos mínimos atuais: itens gerais usam `ImageUpscalerService::DEFAULT_MINIMUM_SIDE` (`360` px) e autodetecções usam `AutodetectionService::AUTODETECTION_MINIMUM_SIDE` (`1080` px).
+- Uploads gerais de itens não devem usar fallback local quando o usuário desabilitar o upscaler por IA; nesses casos, a foto deve seguir sem chamar o `upscale-service`.
+- Uploads de autodetecção devem sempre preservar a preparação para YOLO: se o serviço de IA estiver indisponível ou desabilitado pelo usuário, aplique upscale simples local via MiniMagick/ImageMagick até `1080` px.
+- A opção de upscaler por IA só deve aparecer na tela de configurações quando o serviço estiver configurado. Ela deve ficar como toggle lateral independente do formulário de perfil/senha, no mesmo padrão da visão pública. Avisos abaixo dos uploads também só aparecem quando o usuário está com IA habilitada e o serviço existe.
 - Ao alterar fluxos de imagem, preserve a limpeza de `Tempfile` nos services e cubra erros de `ImageUpscalerService::UpscaleError` em specs.
 
 ### Autodetecção e Visão
 - **Local (YOLO)**: A aplicação utiliza o `SCC YOLO Service` (YOLO11s) rodando localmente para detecção rápida de carros e localização. Esta é a opção preferencial.
 - **Cloud (Vision API)**: As credenciais da Vision API podem ser fornecidas pelo usuário para OCR avançado ou como fallback. Atualmente, o foco de detecção foi migrado para o YOLO local.
+- A autodetecção deve criar registros rapidamente a partir de múltiplos veículos na foto, mas não deve preencher nome/modelo a partir do label retornado pelo YOLO; use o label genérico traduzido para novos itens detectados.
 - O fluxo conta com *fallback* manual caso o recorte falhe ou seja impreciso, e a interface deve atualizar via WebSockets/Turbo Streams em tempo real.
 - **⚠️ Gotchas do Microserviço YOLO**:
   - **PyTorch 2.6+ Crash**: O serviço exige um *monkeypatch* em `torch.load` para forçar `weights_only=False`, evitando a quebra do pacote `ultralytics`.
