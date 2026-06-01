@@ -1,0 +1,168 @@
+# =============================================================================
+# docker-compose.example.yml - Template de configuracao do Smart Collection
+# =============================================================================
+#
+# Uso:
+#   1. Copie este arquivo para docker-compose.yml.
+#   2. Ajuste o .env a partir de .env.example.
+#   3. Escolha o Dockerfile do upscale-service:
+#        - CPU:    Dockerfile.cpu
+#        - NVIDIA: Dockerfile.nvidia + NVIDIA Container Toolkit
+#        - AMD:    Dockerfile.amd + dispositivos ROCm
+#
+# O docker-compose.yml local nao e versionado; este arquivo e o template oficial.
+# =============================================================================
+
+name: smart-collection
+
+services:
+  web:
+    build: .
+    command: bundle exec rails server -b 0.0.0.0
+    volumes:
+      - .:/rails
+    ports:
+      - "3000:3000"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      upscale-service:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      - RAILS_ENV=development
+      - REDIS_URL=redis://redis:6379/1
+      - MONGODB_URI=mongodb://${MONGODB_USERNAME:-scc_admin}:${MONGODB_PASSWORD:-scc_dev}@mongodb:27017/smart_collection_catalog_development?authSource=admin
+      - IMAGE_UPSCALE_SERVICE_URL=http://upscale-service:8000
+      - IMAGE_UPSCALE_API_KEY=${IMAGE_UPSCALE_API_KEY:-}
+    restart: unless-stopped
+
+  sidekiq:
+    build: .
+    command: bundle exec sidekiq
+    volumes:
+      - .:/rails
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      yolo-service:
+        condition: service_healthy
+      upscale-service:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      - RAILS_ENV=development
+      - REDIS_URL=redis://redis:6379/1
+      - MONGODB_URI=mongodb://${MONGODB_USERNAME:-scc_admin}:${MONGODB_PASSWORD:-scc_dev}@mongodb:27017/smart_collection_catalog_development?authSource=admin
+      - IMAGE_UPSCALE_SERVICE_URL=http://upscale-service:8000
+      - IMAGE_UPSCALE_API_KEY=${IMAGE_UPSCALE_API_KEY:-}
+    restart: unless-stopped
+
+  yolo-service:
+    build:
+      context: ./yolo
+    environment:
+      - YOLO_API_KEY=${YOLO_API_KEY}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  upscale-service:
+    build:
+      context: ./upscale
+      dockerfile: Dockerfile.cpu
+
+    # NVIDIA:
+    # build:
+    #   context: ./upscale
+    #   dockerfile: Dockerfile.nvidia
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+    # AMD/ROCm:
+    # build:
+    #   context: ./upscale
+    #   dockerfile: Dockerfile.amd
+    # devices:
+    #   - "/dev/kfd:/dev/kfd"
+    #   - "/dev/dri:/dev/dri"
+    # group_add:
+    #   - video
+    #   - render
+    # security_opt:
+    #   - seccomp=unconfined
+
+    env_file:
+      - .env
+    environment:
+      - IMAGE_UPSCALE_API_KEY=${IMAGE_UPSCALE_API_KEY:-}
+      - REAL_ESRGAN_MODEL_PATH=${REAL_ESRGAN_MODEL_PATH:-}
+      - REAL_ESRGAN_WDN_MODEL_PATH=${REAL_ESRGAN_WDN_MODEL_PATH:-}
+      - REAL_ESRGAN_DENOISE_STRENGTH=${REAL_ESRGAN_DENOISE_STRENGTH:-0}
+      # Upscale tiers: ratio = current_min_side / minimum_side
+      # < TIER_4X_THRESHOLD     -> Real-ESRGAN 4x
+      # < TIER_2X_THRESHOLD     -> Real-ESRGAN 2x
+      # >= TIER_2X_THRESHOLD    -> Denoise + Lanczos4
+      - TIER_4X_THRESHOLD=${TIER_4X_THRESHOLD:-0.50}
+      - TIER_2X_THRESHOLD=${TIER_2X_THRESHOLD:-0.75}
+      - DENOISE_H=${DENOISE_H:-7}
+      - DENOISE_TEMPLATE_WINDOW=${DENOISE_TEMPLATE_WINDOW:-7}
+      - DENOISE_SEARCH_WINDOW=${DENOISE_SEARCH_WINDOW:-21}
+      - LANCZOS_CAS_AMOUNT=${LANCZOS_CAS_AMOUNT:-0.35}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  mongodb:
+    image: mongo:7
+    volumes:
+      - mongodb_data:/data/db
+    ports:
+      - "127.0.0.1:27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USERNAME:-scc_admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD:-scc_dev}
+      MONGO_INITDB_DATABASE: smart_collection_catalog_development
+    healthcheck:
+      test: mongosh --eval 'db.runCommand("ping").ok' --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    ports:
+      - "127.0.0.1:6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    restart: unless-stopped
+
+volumes:
+  mongodb_data:
+  redis_data:
+  bundle_cache:

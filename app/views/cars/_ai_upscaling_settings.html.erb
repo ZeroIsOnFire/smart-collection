@@ -1,0 +1,14 @@
+<p class="text-muted small mb-4">
+  <%= t('devise.ui.registrations.edit.ai_upscaling_note') %>
+</p>
+
+<%= button_to toggle_ai_upscaling_cars_path,
+              method: :patch,
+              form: { class: "d-block" },
+              class: "btn #{current_user.ai_upscaling_enabled? ? 'btn-light text-danger' : 'btn-premium'} rounded-pill w-100 py-2 d-flex align-items-center justify-content-center gap-2" do %>
+  <% if current_user.ai_upscaling_enabled? %>
+    <i class="bi bi-x-circle"></i> <span><%= t('devise.ui.registrations.edit.ai_upscaling_disable') %></span>
+  <% else %>
+    <i class="bi bi-check-circle"></i> <span><%= t('devise.ui.registrations.edit.ai_upscaling_enable') %></span>
+  <% end %>
+<% end %>

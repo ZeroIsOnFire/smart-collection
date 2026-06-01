@@ -66,6 +66,9 @@
             </div>
             <h6 class="fw-bold text-dark mb-1"><%= t('cars.form.upload_prompt') %></h6>
             <p class="text-muted small mb-0"><%= t('cars.form.upload_limits') %></p>
+            <%= render "shared/ai_upscaling_notice",
+                       translation_key: "cars.form.ai_upscaling_notice",
+                       minimum_side: CarService::CAR_IMAGE_MINIMUM_SIDE %>
           </div>
  
           <!-- Preview (hidden initially, shown after photo selected or existing) -->

@@ -28,6 +28,14 @@ RSpec.describe 'Cars', type: :request do
       expect(response).to be_successful
     end
 
+    it 'shows the autodetection AI upscaling notice when enabled and configured' do
+      allow(ImageUpscalerService).to receive(:service_configured?).and_return(true)
+
+      get cars_path
+
+      expect(response.body).to include(I18n.t('autodetections.form.ai_upscaling_notice', minimum_side: 1080))
+    end
+
     it 'paginates the cars collection' do
       create_list(:car, 21, user: user)
 
@@ -81,6 +89,23 @@ RSpec.describe 'Cars', type: :request do
     it 'renders a successful response' do
       get new_car_path
       expect(response).to be_successful
+    end
+
+    it 'shows the AI upscaling notice when enabled and configured' do
+      allow(ImageUpscalerService).to receive(:service_configured?).and_return(true)
+
+      get new_car_path
+
+      expect(response.body).to include(I18n.t('cars.form.ai_upscaling_notice', minimum_side: 360))
+    end
+
+    it 'hides the AI upscaling notice when the user disables it' do
+      user.update!(ai_upscaling_enabled: false)
+      allow(ImageUpscalerService).to receive(:service_configured?).and_return(true)
+
+      get new_car_path
+
+      expect(response.body).not_to include(I18n.t('cars.form.ai_upscaling_notice', minimum_side: 360))
     end
   end
 
@@ -155,6 +180,27 @@ RSpec.describe 'Cars', type: :request do
     end
   end
 
+  describe 'PATCH /toggle_ai_upscaling' do
+    it 'toggles the AI upscaling preference with turbo stream' do
+      allow(ImageUpscalerService).to receive(:service_configured?).and_return(true)
+
+      patch toggle_ai_upscaling_cars_path, as: :turbo_stream
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('turbo-stream action="update" target="ai_upscaling_settings_toggle"')
+      expect(user.reload.ai_upscaling_enabled).to be false
+    end
+
+    it 'does not toggle the preference when the service is not configured' do
+      allow(ImageUpscalerService).to receive(:service_configured?).and_return(false)
+
+      patch toggle_ai_upscaling_cars_path
+
+      expect(response).to redirect_to(edit_user_registration_path)
+      expect(user.reload.ai_upscaling_enabled).to be true
+    end
+  end
+
   describe 'DELETE /destroy' do
     it 'destroys the requested car' do
       car_to_destroy = create(:car, user: user)
@@ -166,6 +212,45 @@ RSpec.describe 'Cars', type: :request do
     it 'redirects to the cars list' do
       delete car_path(car)
       expect(response).to redirect_to(cars_path)
+    end
+
+    it 'removes the car card when requested as turbo stream' do
+      car_to_destroy = create(:car, user: user)
+
+      expect do
+        delete car_path(car_to_destroy), as: :turbo_stream
+      end.to change(Car, :count).by(-1)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("turbo-stream action=\"remove\" target=\"car_#{car_to_destroy.id}\"")
+      expect(response.body).to include('flash_toasts')
+      expect(response.body).to include(I18n.t('flash.deleted', resource: I18n.t('activerecord.models.car.one')))
+    end
+
+    it 'does not fail when the car is already gone and the remove is retried' do
+      car_to_destroy = create(:car, user: user)
+      car_id = car_to_destroy.id.to_s
+
+      delete "/cars/#{car_id}", as: :turbo_stream
+
+      expect do
+        delete "/cars/#{car_id}", as: :turbo_stream
+      end.not_to raise_error
+    end
+
+    it 'shows a flash message when destroy raises an error' do
+      car_to_destroy = create(:car, user: user)
+      service = instance_double(CarService)
+
+      allow(CarService).to receive(:new).and_call_original
+      allow(CarService).to receive(:new).with(instance_of(User)).and_return(service)
+      allow(service).to receive(:destroy).and_raise(StandardError, 'boom')
+
+      delete car_path(car_to_destroy), as: :turbo_stream
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(response.body).to include('flash_toasts')
+      expect(response.body).to include(I18n.t('flash.error'))
     end
   end
 end

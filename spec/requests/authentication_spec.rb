@@ -69,6 +69,13 @@ RSpec.describe 'Authentications', type: :request do
   end
 
   describe 'POST /users/sign_in' do
+    it 'renders dark autofill overrides for the email field' do
+      get new_user_session_path
+
+      expect(response.body).to include(':-webkit-autofill')
+      expect(response.body).to include('-webkit-text-fill-color: #f1f5f9')
+    end
+
     it 'redirects a normal user to root' do
       post user_session_path, params: { user: { email: user.email, password: 'password123' } }
       expect(response).to redirect_to(cars_path)
@@ -77,6 +84,51 @@ RSpec.describe 'Authentications', type: :request do
     it 'redirects an admin user to admin dashboard' do
       post user_session_path, params: { user: { email: admin.email, password: 'password123' } }
       expect(response).to redirect_to(admin_dashboard_path)
+    end
+  end
+
+  describe 'GET /users/edit' do
+    before do
+      sign_in user
+    end
+
+    it 'shows the AI upscaling setting when the service is configured' do
+      allow(ImageUpscalerService).to receive(:service_configured?).and_return(true)
+
+      get edit_user_registration_path
+
+      expect(response.body).to include('ai_upscaling_settings_toggle')
+      expect(response.body).to include(toggle_ai_upscaling_cars_path)
+      expect(response.body).to include(I18n.t('devise.ui.registrations.edit.ai_upscaling_note'))
+      expect(response.body).not_to include('user_ai_upscaling_enabled')
+    end
+
+    it 'hides the AI upscaling setting when the service is not configured' do
+      allow(ImageUpscalerService).to receive(:service_configured?).and_return(false)
+
+      get edit_user_registration_path
+
+      expect(response.body).not_to include('ai_upscaling_settings_toggle')
+      expect(response.body).not_to include('user_ai_upscaling_enabled')
+    end
+  end
+
+  describe 'PATCH /users' do
+    before do
+      sign_in user
+    end
+
+    it 'does not update the AI upscaling preference through the account form' do
+      patch user_registration_path, params: {
+        user: {
+          name: user.name,
+          email: user.email,
+          ai_upscaling_enabled: '0',
+          current_password: 'password123'
+        }
+      }
+
+      expect(user.reload.ai_upscaling_enabled).to be true
     end
   end
 

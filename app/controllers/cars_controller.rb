@@ -2,7 +2,7 @@
 
 class CarsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_car, only: %i[show edit update destroy]
+  before_action :set_car, only: %i[show edit update]
 
   PER_PAGE = 20
 
@@ -28,6 +28,20 @@ class CarsController < ApplicationController
     respond_to do |format|
       format.turbo_stream do
         render turbo_stream: turbo_stream.update('sharing_settings_toggle', partial: 'cars/sharing_settings')
+      end
+      format.html { redirect_to edit_user_registration_path, notice: t('flash.updated', resource: t('nav.settings')) }
+    end
+  end
+
+  # PATCH /cars/toggle_ai_upscaling
+  def toggle_ai_upscaling
+    return redirect_to edit_user_registration_path unless ImageUpscalerService.service_configured?
+
+    current_user.update(ai_upscaling_enabled: !current_user.ai_upscaling_enabled)
+
+    respond_to do |format|
+      format.turbo_stream do
+        render turbo_stream: turbo_stream.update('ai_upscaling_settings_toggle', partial: 'cars/ai_upscaling_settings')
       end
       format.html { redirect_to edit_user_registration_path, notice: t('flash.updated', resource: t('nav.settings')) }
     end
@@ -101,8 +115,40 @@ class CarsController < ApplicationController
 
   # DELETE /cars/1
   def destroy
-    car_service.destroy(@car.id)
-    redirect_to cars_url, notice: t('flash.deleted', resource: t('activerecord.models.car.one'))
+    car = current_user.cars.find_by(id: params[:id])
+    unless car
+      respond_to do |format|
+        format.turbo_stream do
+          render turbo_stream: turbo_stream.remove("car_#{params[:id]}")
+        end
+        format.html { redirect_to cars_url, notice: t('flash.deleted', resource: t('activerecord.models.car.one')) }
+      end
+      return
+    end
+
+    car_service.destroy(car.id)
+
+    respond_to do |format|
+      format.turbo_stream do
+        render turbo_stream: turbo_stream.remove("car_#{params[:id]}") +
+                             turbo_stream.append('flash_toasts', partial: 'shared/toast',
+                                                                 locals: { type: :notice, message: t('flash.deleted', resource: t('activerecord.models.car.one')) })
+      end
+      format.html { redirect_to cars_url, notice: t('flash.deleted', resource: t('activerecord.models.car.one')) }
+    end
+  rescue StandardError => e
+    Rails.logger.error "CarsController#destroy failed: #{e.message}"
+
+    respond_to do |format|
+      format.turbo_stream do
+        render turbo_stream: turbo_stream.append(
+          'flash_toasts',
+          partial: 'shared/toast',
+          locals: { type: :alert, message: t('flash.error') }
+        ), status: :unprocessable_content
+      end
+      format.html { redirect_to cars_url, alert: t('flash.error') }
+    end
   end
 
   private

@@ -54,6 +54,15 @@ O **Smart Collection Catalog** é um serviço web premium para registro e gerenc
 - **Página de Exibição Pública**: Compartilhe sua coleção através de um link público elegante com busca integrada e rolagem infinita.
 - **Design Premium**: Interface moderna com modo lista/grade, animações suaves e foco na usabilidade.
 
+## Microservices
+
+The project includes local AI microservices that run through Docker Compose:
+
+- `yolo-service`: local YOLO11s detection and simple color classification for autodetection flows. See [`yolo/README.md`](yolo/README.md).
+- `upscale-service`: local image upscale/preparation service used by item uploads and autodetection. See [`upscale/README.md`](upscale/README.md).
+
+For AMD/ROCm on WSL2, follow the dedicated guide in [`upscale/README.md`](upscale/README.md#amdrocm-no-wsl2). The validated setup runs Docker Compose from WSL, uses `/dev/dxg`, mounts the WSL ROCm/DXCore libraries, and builds `upscale/Dockerfile.amd`.
+
 ## 🧪 Testes
 
 Para rodar a suite de testes (RSpec):

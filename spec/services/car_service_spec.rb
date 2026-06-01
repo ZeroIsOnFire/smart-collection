@@ -17,24 +17,84 @@ RSpec.describe CarService do
     }
   end
 
+  def build_temp_image(width:, height:, filename: 'upscaled.jpg')
+    tempfile = Tempfile.new(['upscaled', '.jpg'], Rails.root.join('tmp'))
+    image = MiniMagick::Image.open(Rails.root.join('spec/fixtures/files/test_image.png'))
+    image.resize "#{width}x#{height}!"
+    image.write(tempfile.path)
+    tempfile.define_singleton_method(:original_filename) { filename }
+    tempfile.define_singleton_method(:content_type) { 'image/jpeg' }
+    tempfile
+  end
+
   describe '#create' do
     it 'creates a car for the user' do
+      allow(ImageUpscalerService).to receive(:upscale_if_needed).and_return(nil)
+
       expect do
         described_class.new(user).create(valid_params)
-      end.to change(user.cars, :count).by(1)
+      end.to change { user.reload.cars.count }.by(1)
+    end
+
+    it 'passes the photo through the upscaler before persistence' do
+      expect(ImageUpscalerService).to receive(:upscale_if_needed)
+        .with(valid_params[:photo], minimum_side: 360, use_ai: true, local_fallback: false)
+        .and_return(nil)
+
+      described_class.new(user).create(valid_params)
+    end
+
+    it 'does not use AI or local fallback for regular photos when the user disables AI upscaling' do
+      user.update!(ai_upscaling_enabled: false)
+
+      expect(ImageUpscalerService).to receive(:upscale_if_needed)
+        .with(valid_params[:photo], minimum_side: 360, use_ai: false, local_fallback: false)
+        .and_return(nil)
+
+      described_class.new(user).create(valid_params)
+    end
+
+    it 'persists the upscaled photo when the source image is small' do
+      upscaled_file = build_temp_image(width: 420, height: 280)
+      allow(ImageUpscalerService).to receive(:upscale_if_needed).and_return(upscaled_file)
+
+      car = described_class.new(user).create(valid_params)
+
+      saved_image = MiniMagick::Image.open(car.photo.path)
+      expect(saved_image.width).to eq(420)
+      expect(saved_image.height).to eq(280)
+    ensure
+      upscaled_file&.close
+      upscaled_file&.unlink
     end
 
     it 'creates a car even with an empty year string' do
       params = valid_params.merge(year: '', photo: nil)
+      allow(ImageUpscalerService).to receive(:upscale_if_needed).and_return(nil)
+
       expect do
         described_class.new(user).create(params)
-      end.to change(user.cars, :count).by(1)
+      end.to change { user.reload.cars.count }.by(1)
     end
 
     it 'attaches the photo to the car' do
+      allow(ImageUpscalerService).to receive(:upscale_if_needed).and_return(nil)
       car = described_class.new(user).create(valid_params)
+
       expect(car.photo).to be_present
       expect(car.photo.url).to include('test_image.jpg')
+    end
+  end
+
+  describe 'upscale errors' do
+    it 'returns a car with an error when the upscaler fails during create' do
+      allow(ImageUpscalerService).to receive(:upscale_if_needed)
+        .and_raise(ImageUpscalerService::UpscaleError, 'upscaler failed')
+
+      car = described_class.new(user).create(valid_params)
+
+      expect(car).not_to be_persisted
+      expect(car.errors[:photo]).to include('upscaler failed')
     end
   end
 
@@ -42,17 +102,31 @@ RSpec.describe CarService do
     let!(:car) { create(:car, user: user, name: 'Old Name') }
 
     it 'updates the car for the user' do
+      allow(ImageUpscalerService).to receive(:upscale_if_needed).and_return(nil)
+
       described_class.new(user).update(car.id, { name: 'New Name' })
+
       expect(car.reload.name).to eq('New Name')
     end
 
     it 'removes the photo when remove_photo is set to "1"' do
+      allow(ImageUpscalerService).to receive(:upscale_if_needed).and_return(nil)
       car_with_photo = described_class.new(user).create(valid_params)
-      # CarrierWave remove_photo is a virtual attribute — must be set before save
+
       found_car = user.cars.find(car_with_photo.id)
       found_car.remove_photo = true
       found_car.save!
+
       expect(found_car.reload.photo).not_to be_present
+    end
+
+    it 'returns a car with an error when the upscaler fails during update' do
+      allow(ImageUpscalerService).to receive(:upscale_if_needed)
+        .and_raise(ImageUpscalerService::UpscaleError, 'upscaler failed')
+
+      updated_car = described_class.new(user).update(car.id, { photo: valid_params[:photo] })
+
+      expect(updated_car.errors[:photo]).to include('upscaler failed')
     end
   end
 
@@ -62,7 +136,7 @@ RSpec.describe CarService do
     it 'destroys the car' do
       expect do
         described_class.new(user).destroy(car.id)
-      end.to change(user.cars, :count).by(-1)
+      end.to change { user.reload.cars.count }.by(-1)
     end
   end
 

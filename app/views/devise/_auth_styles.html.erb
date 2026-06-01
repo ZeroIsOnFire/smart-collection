@@ -235,6 +235,17 @@
     box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.2);
   }
 
+  [data-theme="dark"] .form-input:-webkit-autofill,
+  [data-theme="dark"] .form-input:-webkit-autofill:hover,
+  [data-theme="dark"] .form-input:-webkit-autofill:focus,
+  [data-theme="dark"] .form-input:-webkit-autofill:active {
+    -webkit-text-fill-color: #f1f5f9;
+    caret-color: #f1f5f9;
+    -webkit-box-shadow: 0 0 0 1000px #1e293b inset;
+    box-shadow: 0 0 0 1000px #1e293b inset;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
   [data-theme="dark"] .form-remember {
     color: var(--text-muted);
   }

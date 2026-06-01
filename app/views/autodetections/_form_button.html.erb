@@ -3,19 +3,22 @@
           class="btn btn-premium rounded-pill px-4 d-flex align-items-center gap-2"
           data-bs-toggle="modal"
           data-bs-target="#autodetectModal">
-    <i class="bi bi-magic"></i> <span>Autodetectar Minis</span>
+    <i class="bi bi-magic"></i> <span><%= t('autodetections.form.button') %></span>
   </button>
 
-  <!-- Modal -->
   <div class="modal fade" id="autodetectModal" tabindex="-1" aria-labelledby="autodetectModalLabel" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content border-0 shadow">
         <div class="modal-header border-0 pb-0">
-          <h5 class="modal-title fw-bold" id="autodetectModalLabel">Autodetectar Minis</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" data-action="click->autodetection-upload#stopCamera"></button>
+          <h5 class="modal-title fw-bold" id="autodetectModalLabel"><%= t('autodetections.form.title') %></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="<%= t('actions.close') %>" data-action="click->autodetection-upload#stopCamera"></button>
         </div>
 
         <div class="modal-body p-4">
+          <p class="text-muted small mb-4">
+            <%= t('autodetections.form.description') %>
+          </p>
+
           <%= form_with model: autodetection, url: autodetections_path,
                 data: {
                   autodetection_upload_target: "form",
@@ -31,33 +34,34 @@
                   },
                   accept: "image/*" %>
 
-            <!-- Interface de Upload / Dropzone -->
             <div data-autodetection-upload-target="uploadInterface">
               <div class="dropzone-area mb-4"
                    data-autodetection-upload-target="dropzone"
                    data-action="dragover->autodetection-upload#dragOver dragleave->autodetection-upload#dragLeave drop->autodetection-upload#drop click->autodetection-upload#selectFile">
                 <i class="bi bi-cloud-arrow-up display-4 text-primary mb-3"></i>
-                <h6 class="fw-bold mb-1">Arraste uma foto aqui</h6>
-                <p class="text-muted small mb-0">ou clique para selecionar do seu dispositivo</p>
+                <h6 class="fw-bold mb-1"><%= t('autodetections.form.dropzone_title') %></h6>
+                <p class="text-muted small mb-0"><%= t('autodetections.form.dropzone_help') %></p>
+                <%= render "shared/ai_upscaling_notice",
+                           translation_key: "autodetections.form.ai_upscaling_notice",
+                           minimum_side: AutodetectionService::AUTODETECTION_MINIMUM_SIDE %>
               </div>
 
               <div class="row g-3">
                 <div class="col-6">
                   <button type="button" class="btn btn-outline-primary w-100 py-3" data-action="click->autodetection-upload#openCamera">
                     <i class="bi bi-camera-fill d-block fs-4 mb-1"></i>
-                    Usar Câmera
+                    <%= t('autodetections.form.camera') %>
                   </button>
                 </div>
                 <div class="col-6">
                   <button type="button" class="btn btn-outline-secondary w-100 py-3" data-action="click->autodetection-upload#selectFile">
                     <i class="bi bi-images d-block fs-4 mb-1"></i>
-                    Galeria
+                    <%= t('autodetections.form.gallery') %>
                   </button>
                 </div>
               </div>
             </div>
 
-            <!-- Interface de Câmera -->
             <div class="d-none" data-autodetection-upload-target="cameraInterface">
               <div class="camera-preview-container mb-3 shadow-sm">
                 <video data-autodetection-upload-target="video" class="video-feed" playsinline></video>
@@ -68,30 +72,30 @@
                 </div>
               </div>
               <button type="button" class="btn btn-sm btn-link text-muted w-100" data-action="click->autodetection-upload#closeCamera">
-                Voltar para Upload
+                <%= t('autodetections.form.back_to_upload') %>
               </button>
             </div>
 
             <div class="mt-4 text-center d-none" data-autodetection-upload-target="previewContainer">
-                <div class="mb-3">
-                  <img data-autodetection-upload-target="preview" class="img-fluid rounded shadow-sm border" style="max-height: 350px;">
-                </div>
+              <div class="mb-3">
+                <img data-autodetection-upload-target="preview" class="img-fluid rounded shadow-sm border" style="max-height: 350px;">
+              </div>
 
-                <div class="row g-2">
-                  <div class="col-6">
-                    <button type="button" class="btn btn-soft-secondary rounded-pill w-100 py-2 d-flex align-items-center justify-content-center gap-2" data-action="click->autodetection-upload#reset">
-                      <i class="bi bi-arrow-left"></i> <span>Cancelar</span>
-                    </button>
-                  </div>
-                  <div class="col-6">
-                    <button type="submit" id="autodetection_submit_btn" class="btn btn-premium rounded-pill w-100 py-2 d-flex align-items-center justify-content-center gap-2">
-                      <i class="bi bi-magic"></i> <span id="autodetection_submit_text">Confirmar</span>
-                    </button>
-                  </div>
+              <div class="row g-2">
+                <div class="col-6">
+                  <button type="button" class="btn btn-soft-secondary rounded-pill w-100 py-2 d-flex align-items-center justify-content-center gap-2" data-action="click->autodetection-upload#reset">
+                    <i class="bi bi-arrow-left"></i> <span><%= t('actions.cancel') %></span>
+                  </button>
                 </div>
-                <p class="text-muted small mt-3 mb-0">
-                  <i class="bi bi-info-circle me-1"></i> Ao confirmar, a IA analisará sua foto para encontrar carrinhos.
-                </p>
+                <div class="col-6">
+                  <button type="submit" id="autodetection_submit_btn" class="btn btn-premium rounded-pill w-100 py-2 d-flex align-items-center justify-content-center gap-2">
+                    <i class="bi bi-magic"></i> <span id="autodetection_submit_text"><%= t('actions.confirm') %></span>
+                  </button>
+                </div>
+              </div>
+              <p class="text-muted small mt-3 mb-0">
+                <i class="bi bi-info-circle me-1"></i> <%= t('autodetections.form.confirm_help') %>
+              </p>
             </div>
           <% end %>
         </div>

@@ -45,3 +45,9 @@
 /*.log
 /*.txt
 /spec/examples.txt
+__pycache__/
+*.py[cod]
+
+# O docker-compose.yml local não é versionado.
+# Use docker-compose.example.yml como template e copie para docker-compose.yml.
+/docker-compose.yml

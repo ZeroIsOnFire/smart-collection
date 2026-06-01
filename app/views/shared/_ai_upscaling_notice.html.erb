@@ -1,0 +1,5 @@
+<% if ai_upscaling_available_for?(current_user) %>
+  <p class="text-muted small mt-2 mb-0">
+    <i class="bi bi-stars me-1"></i><%= t(translation_key, minimum_side: minimum_side) %>
+  </p>
+<% end %>
