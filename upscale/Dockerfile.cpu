@@ -19,8 +19,7 @@ RUN pip install --upgrade pip \
 COPY main.py .
 
 RUN mkdir -p /app/models \
-    && curl -L --fail -o /app/models/realesr-general-x4v3.pth https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesr-general-x4v3.pth \
-    && curl -L --fail -o /app/models/realesr-general-wdn-x4v3.pth https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesr-general-wdn-x4v3.pth
+    && curl -L --fail -o /app/models/realesr-general-x4v3.pth https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesr-general-x4v3.pth
 
 EXPOSE 8000
 

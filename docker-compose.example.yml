@@ -111,8 +111,6 @@ services:
     environment:
       - IMAGE_UPSCALE_API_KEY=${IMAGE_UPSCALE_API_KEY:-}
       - REAL_ESRGAN_MODEL_PATH=${REAL_ESRGAN_MODEL_PATH:-}
-      - REAL_ESRGAN_WDN_MODEL_PATH=${REAL_ESRGAN_WDN_MODEL_PATH:-}
-      - REAL_ESRGAN_DENOISE_STRENGTH=${REAL_ESRGAN_DENOISE_STRENGTH:-0}
       # Upscale tiers: ratio = current_min_side / minimum_side
       # < TIER_4X_THRESHOLD     -> Real-ESRGAN 4x
       # < TIER_2X_THRESHOLD     -> Real-ESRGAN 2x

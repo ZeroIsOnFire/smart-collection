@@ -4,8 +4,8 @@
 Separar o microservico de upscale em imagens dedicadas para CPU, NVIDIA/CUDA e AMD/ROCm.
 
 - `upscale/Dockerfile.cpu` baixa `realesr-general-x4v3.pth` e `realesr-general-wdn-x4v3.pth`.
-- `upscale/Dockerfile.nvidia` baixa apenas `4x-UltraSharp.pth`.
-- `upscale/Dockerfile.amd` baixa apenas `4x-UltraSharp.pth`.
+- `upscale/Dockerfile.nvidia` baixa apenas `4x_NMKD-Siax_200k.pth`.
+- `upscale/Dockerfile.amd` baixa apenas `4x_NMKD-Siax_200k.pth`.
 
 ## Contrato
 - O runtime e definido pela imagem Docker.

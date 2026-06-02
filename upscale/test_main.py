@@ -84,9 +84,9 @@ class UpscaleServiceTests(unittest.TestCase):
         with patch.dict(os.environ, {"REAL_ESRGAN_MODEL_PATH": ""}, clear=True):
             self.assertEqual(main.model_path_for_runtime("cpu"), "/app/models/realesr-general-x4v3.pth")
 
-    def test_gpu_runtime_uses_x4plus_model_by_default(self):
+    def test_gpu_runtime_uses_nmkd_siax_model_by_default(self):
         with patch.dict(os.environ, {"REAL_ESRGAN_MODEL_PATH": ""}, clear=True):
-            self.assertEqual(main.model_path_for_runtime("amd"), "/app/models/RealESRGAN_x4plus.pth")
+            self.assertEqual(main.model_path_for_runtime("amd"), "/app/models/4x_NMKD-Siax_200k.pth")
 
     def test_gpu_upscaler_uses_rrdb_model(self):
         main.get_upscaler.cache_clear()
@@ -95,7 +95,7 @@ class UpscaleServiceTests(unittest.TestCase):
         with patch.object(main, "RealESRGANer") as mock_realesrganer, \
              patch.object(main, "RRDBNet", return_value="rrdb-model") as mock_rrdb, \
              patch.object(main.torch.cuda, "is_available", return_value=True), \
-             patch.object(main, "require_model_paths", return_value="/app/models/RealESRGAN_x4plus.pth"):
+             patch.object(main, "require_model_paths", return_value="/app/models/4x_NMKD-Siax_200k.pth"):
             main.get_gpu_upscaler("amd")
 
         mock_rrdb.assert_called_once()
@@ -104,31 +104,8 @@ class UpscaleServiceTests(unittest.TestCase):
         self.assertTrue(kwargs["half"])
         self.assertEqual(kwargs["device"], "cuda")
 
-    def test_cpu_denoise_strength_defaults_to_keep_noise(self):
-        with patch.dict(os.environ, {}, clear=True):
-            self.assertEqual(main.cpu_denoise_strength(), 0.0)
-
-    def test_cpu_denoise_strength_uses_configured_value(self):
-        with patch.dict(os.environ, {"REAL_ESRGAN_DENOISE_STRENGTH": "0.3"}, clear=True):
-            self.assertEqual(main.cpu_denoise_strength(), 0.3)
-
-    def test_cpu_denoise_strength_is_clamped_between_zero_and_one(self):
-        with patch.dict(os.environ, {"REAL_ESRGAN_DENOISE_STRENGTH": "2"}, clear=True):
-            self.assertEqual(main.cpu_denoise_strength(), 1.0)
-        with patch.dict(os.environ, {"REAL_ESRGAN_DENOISE_STRENGTH": "-1"}, clear=True):
-            self.assertEqual(main.cpu_denoise_strength(), 0.0)
-
-    def test_cpu_model_config_uses_dni_when_denoise_strength_is_below_one(self):
-        model_path, dni_weight = main.cpu_model_config(0.3)
-
-        self.assertEqual(
-            model_path,
-            ["/app/models/realesr-general-x4v3.pth", "/app/models/realesr-general-wdn-x4v3.pth"]
-        )
-        self.assertEqual(dni_weight, [0.3, 0.7])
-
-    def test_cpu_model_config_uses_base_model_only_for_strong_denoise(self):
-        model_path, dni_weight = main.cpu_model_config(1.0)
+    def test_cpu_model_config_uses_base_model_without_ai_denoise(self):
+        model_path, dni_weight = main.cpu_model_config()
 
         self.assertEqual(model_path, "/app/models/realesr-general-x4v3.pth")
         self.assertIsNone(dni_weight)
@@ -242,6 +219,25 @@ class UpscaleServiceTests(unittest.TestCase):
         sharpened = np.full((360, 423, 3), 2, dtype=np.uint8)
 
         with patch.object(main, "upscale_runtime", return_value="cpu"), \
+             patch.object(main, "apply_denoise", return_value=denoised) as mock_denoise, \
+             patch.object(main, "upscale_with_lanczos", wraps=main.upscale_with_lanczos) as mock_lanczos, \
+             patch.object(main, "apply_sharpen", return_value=sharpened) as mock_sharpen:
+            result = main.upscale_until_min_side(image, 360)
+
+        mock_denoise.assert_called_once_with(image)
+        mock_lanczos.assert_called_once()
+        self.assertIs(mock_lanczos.call_args.args[0], denoised)
+        mock_sharpen.assert_called_once()
+        self.assertIs(result, sharpened)
+        self.assertGreaterEqual(min(result.shape[:2]), 360)
+
+    def test_tier_lanczos_keeps_denoise_in_gpu_runtime(self):
+        img_min_side = int(360 * 0.80)
+        image = np.zeros((img_min_side, img_min_side + 50, 3), dtype=np.uint8)
+        denoised = np.ones_like(image)
+        sharpened = np.full((360, 423, 3), 2, dtype=np.uint8)
+
+        with patch.object(main, "upscale_runtime", return_value="amd"), \
              patch.object(main, "apply_denoise", return_value=denoised) as mock_denoise, \
              patch.object(main, "upscale_with_lanczos", wraps=main.upscale_with_lanczos) as mock_lanczos, \
              patch.object(main, "apply_sharpen", return_value=sharpened) as mock_sharpen:

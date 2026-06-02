@@ -15,11 +15,53 @@ O runtime e definido pelo Dockerfile usado pelo servico `upscale-service`.
 
 | Dockerfile | Runtime | Modelo |
 | --- | --- | --- |
-| `Dockerfile.cpu` | CPU | `realesr-general-x4v3.pth` + `realesr-general-wdn-x4v3.pth` |
-| `Dockerfile.nvidia` | NVIDIA/CUDA | `RealESRGAN_x4plus.pth` |
-| `Dockerfile.amd` | AMD/ROCm | `RealESRGAN_x4plus.pth` |
+| `Dockerfile.cpu` | CPU | `realesr-general-x4v3.pth` |
+| `Dockerfile.nvidia` | NVIDIA/CUDA | `4x_NMKD-Siax_200k.pth` |
+| `Dockerfile.amd` | AMD/ROCm | `4x_NMKD-Siax_200k.pth` |
 
 O `Dockerfile.amd` esta fixado em `rocm/pytorch:rocm6.4.2_ubuntu24.04_py3.12_pytorch_release_2.6.0`, que foi a combinacao validada no WSL2 com AMD.
+
+## Modelos compativeis
+
+Os runtimes GPU (`Dockerfile.amd` e `Dockerfile.nvidia`) usam a arquitetura `RRDBNet` 4x do Real-ESRGAN:
+
+```text
+num_feat=64, num_block=23, num_grow_ch=32, scale=4
+```
+
+Para trocar o modelo sem alterar codigo, monte ou copie o peso `.pth` para dentro do container e defina `REAL_ESRGAN_MODEL_PATH` no `docker-compose.yml` local:
+
+```yaml
+upscale-service:
+  environment:
+    - REAL_ESRGAN_MODEL_PATH=/app/models/meu-modelo.pth
+```
+
+O modelo precisa ser um peso ESRGAN/RRDB 4x compativel com essa arquitetura. Modelos SRVGG, compactos, 2x/8x ou com outra topologia nao carregam nesse backend sem alterar o codigo.
+
+Modelos RRDB 4x testados no backend AMD e compativeis com o caminho GPU atual:
+
+| Modelo | Observacao |
+| --- | --- |
+| `4x-UltraSharp.pth` | Compativel com o mesmo `RRDBNet`. Nao e compativel com o caminho CPU atual sem alterar codigo. |
+| `RealESRGAN_x4plus.pth` | Baseline anterior do projeto. Nao e compativel com o caminho CPU atual sem alterar codigo. |
+| `4x_foolhardy_Remacri.pth` | Compativel com o mesmo `RRDBNet`. Nao e compativel com o caminho CPU atual sem alterar codigo. |
+| `4x_NMKD-Siax_200k.pth` | Padrao atual para GPU. Nao e compativel com o caminho CPU atual sem alterar codigo. |
+| `4xNomos8kSC.pth` | Compativel com o mesmo `RRDBNet`. Nao e compativel com o caminho CPU atual sem alterar codigo. |
+
+O runtime CPU atual usa `SRVGGNetCompact` 4x:
+
+```text
+num_feat=64, num_conv=32, upscale=4, act_type=prelu
+```
+
+Modelo compativel com o caminho CPU atual:
+
+| Modelo | Observacao |
+| --- | --- |
+| `realesr-general-x4v3.pth` | Padrao atual para CPU. Nao e compativel com o caminho GPU/RRDB atual sem alterar codigo. |
+
+Se o peso customizado falhar no preload ou na inferencia, o servico continua online e a requisicao cai para Lanczos4.
 
 ## Tiers de upscale
 
@@ -39,8 +81,7 @@ Depois de qualquer upscale por IA, a imagem e reduzida para bater exatamente o l
 
 - `IMAGE_UPSCALE_API_KEY`: chave opcional exigida no header `X-API-Key`.
 - `REAL_ESRGAN_MODEL_PATH`: caminho customizado de modelo dentro do container.
-- `REAL_ESRGAN_WDN_MODEL_PATH`: caminho do modelo WDN usado no CPU com DNI.
-- `REAL_ESRGAN_DENOISE_STRENGTH`: denoise do CPU entre `0` e `1`; padrao `0`.
+- O upscaler por IA nao usa denoise/DNI; denoise e aplicado apenas no tier Lanczos.
 - `TIER_4X_THRESHOLD` / `TIER_2X_THRESHOLD`: limites dos tiers.
 - `DENOISE_H`, `DENOISE_TEMPLATE_WINDOW`, `DENOISE_SEARCH_WINDOW`: parametros do denoise Lanczos.
 - `LANCZOS_CAS_AMOUNT`: intensidade do sharpen CAS no fallback Lanczos.
@@ -120,7 +161,7 @@ O aviso `Can't initialize amdsmi - Error code: 34` pode aparecer no WSL2; ele na
 
 - Mantenha o monkeypatch de `torch.load(weights_only=False)` antes de importar Real-ESRGAN.
 - Mantenha o shim `torchvision.transforms.functional_tensor` para compatibilidade do `basicsr`.
-- O modelo GPU atual e `RealESRGAN_x4plus.pth`; ele e mais pesado que `realesr-general-x4v3.pth`.
+- O modelo GPU atual e `4x_NMKD-Siax_200k.pth`; ele foi escolhido apos comparacao local no backend AMD com fotos reais do projeto.
 - Se o pre-load do modelo falhar, o servico continua de pe e cai para Lanczos nas requisicoes.
 - O Rails so deve chamar este servico quando `IMAGE_UPSCALE_SERVICE_URL` estiver configurada e o usuario permitir IA no fluxo aplicavel.
 
@@ -131,4 +172,3 @@ Rode os testes do microservico a partir da raiz do projeto. Se o Python local na
 ```sh
 docker compose run --rm -v "$PWD/upscale:/app" upscale-service python -m unittest test_main.py
 ```
-

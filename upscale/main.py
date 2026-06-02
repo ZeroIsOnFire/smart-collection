@@ -88,8 +88,7 @@ MAX_AI_PASSES = 5
 REAL_ESRGAN_SCALE = 4
 
 CPU_MODEL_PATH = "/app/models/realesr-general-x4v3.pth"
-CPU_WDN_MODEL_PATH = "/app/models/realesr-general-wdn-x4v3.pth"
-GPU_MODEL_PATH = "/app/models/RealESRGAN_x4plus.pth"
+GPU_MODEL_PATH = "/app/models/4x_NMKD-Siax_200k.pth"
 GPU_RUNTIMES = {"nvidia", "amd"}
 RUNTIME_ALIASES = {
     "cpu": "cpu",
@@ -116,14 +115,6 @@ LANCZOS_CAS_AMOUNT = float(os.getenv("LANCZOS_CAS_AMOUNT", "0.35"))
 app = FastAPI(title="SCC Image Upscale Service")
 
 
-def env_float(name, default):
-    value = os.getenv(name, str(default))
-    try:
-        return float(value)
-    except (TypeError, ValueError):
-        return default
-
-
 def upscale_runtime():
     runtime = os.getenv("UPSCALE_RUNTIME", "cpu").strip().lower()
     if runtime not in RUNTIME_ALIASES:
@@ -140,17 +131,9 @@ def model_path_for_runtime(runtime):
     return os.getenv("REAL_ESRGAN_MODEL_PATH") or default_path
 
 
-def cpu_denoise_strength():
-    return min(max(env_float("REAL_ESRGAN_DENOISE_STRENGTH", 0.0), 0.0), 1.0)
-
-
-def cpu_model_config(denoise_strength):
+def cpu_model_config():
     base_model_path = model_path_for_runtime("cpu")
-    if denoise_strength >= 1.0:
-        return base_model_path, None
-
-    wdn_model_path = os.getenv("REAL_ESRGAN_WDN_MODEL_PATH") or CPU_WDN_MODEL_PATH
-    return [base_model_path, wdn_model_path], [denoise_strength, 1 - denoise_strength]
+    return base_model_path, None
 
 
 async def verify_api_key(x_api_key: str = Header(None)):
@@ -173,9 +156,9 @@ def require_model_paths(model_path):
 
 
 @lru_cache(maxsize=3)
-def get_upscaler(runtime, denoise_strength=None):
+def get_upscaler(runtime):
     if runtime == "cpu":
-        return get_cpu_upscaler(denoise_strength if denoise_strength is not None else cpu_denoise_strength())
+        return get_cpu_upscaler()
     return get_gpu_upscaler(runtime)
 
 
@@ -198,11 +181,11 @@ def get_gpu_upscaler(runtime):
     )
 
 
-def get_cpu_upscaler(denoise_strength):
+def get_cpu_upscaler():
     if RealESRGANer is None or SRVGGNetCompact is None:
         raise RuntimeError("Real-ESRGAN CPU stack is not installed")
 
-    model_path, dni_weight = cpu_model_config(denoise_strength)
+    model_path, dni_weight = cpu_model_config()
     model_path = require_model_paths(model_path)
 
     model = SRVGGNetCompact(
@@ -236,8 +219,7 @@ def upscale_with_realesrgan(image_bgr, outscale=None):
         outscale = REAL_ESRGAN_SCALE
 
     runtime = upscale_runtime()
-    denoise_strength = cpu_denoise_strength() if runtime == "cpu" else None
-    upscaler = get_upscaler(runtime, denoise_strength)
+    upscaler = get_upscaler(runtime)
     output_bgr, _ = upscaler.enhance(image_bgr, outscale=outscale)
     return output_bgr
 
@@ -357,7 +339,7 @@ def upscale_until_min_side(image_bgr, minimum_side):
     if ratio >= TIER_2X_THRESHOLD:
         logger.info(
             f"[Tier Lanczos] ratio {ratio:.2f} >= {TIER_2X_THRESHOLD} — "
-            "applying Denoise + Lanczos4 (no AI)."
+            "applying Lanczos4 + CAS sharpen (no AI)."
         )
         return upscale_with_enhanced_lanczos(current, minimum_side)
 
@@ -412,12 +394,12 @@ async def startup_event():
     logger.info(
         f"Upscale tiers: 4x below {TIER_4X_THRESHOLD:.0%}, "
         f"2x in [{TIER_4X_THRESHOLD:.0%}, {TIER_2X_THRESHOLD:.0%}), "
-        f"Lanczos+Denoise at {TIER_2X_THRESHOLD:.0%}+"
+        f"Lanczos+CAS at {TIER_2X_THRESHOLD:.0%}+"
     )
 
     try:
         logger.info(f"Pre-loading {runtime.upper()} upscaler model...")
-        get_upscaler(runtime, cpu_denoise_strength() if runtime == "cpu" else None)
+        get_upscaler(runtime)
         logger.info(f"{runtime.upper()} upscaler model pre-loaded successfully!")
     except Exception as e:
         logger.error(f"Failed to pre-load upscaler model on startup: {e}", exc_info=True)
@@ -431,10 +413,11 @@ async def health():
         "status": "ok",
         "mode": runtime,
         "model_path": model_path_for_runtime(runtime),
-        "cpu_denoise_strength": cpu_denoise_strength() if runtime == "cpu" else None,
+        "ai_denoise_enabled": False,
         "target_min_side": TARGET_MIN_SIDE,
         "tier_4x_threshold": TIER_4X_THRESHOLD,
         "tier_2x_threshold": TIER_2X_THRESHOLD,
+        "lanczos_denoise_enabled": True,
         "denoise_h": DENOISE_H,
         "lanczos_sharpen_method": "cas",
         "lanczos_cas_amount": LANCZOS_CAS_AMOUNT,
