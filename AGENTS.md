@@ -239,4 +239,4 @@ refactor(items): extrair lógica de tags para TagService
 - Sempre execute `docker compose exec web bundle exec rspec` antes de considerar uma tarefa Rails concluída.
 - Para alterações em microserviços Python, execute também os testes do respectivo diretório (`upscale/test_main.py` ou testes do `yolo/`, quando existirem).
 - Commits devem ser atômicos e com mensagens claras em português.
-- **Verificação de Qualidade (QA)**: Sempre que o usuário pedir para verificar a qualidade do projeto (rodar linters/testes), você DEVE ler e assumir a persona descrita em `QUALITY_AGENT.md`.
+- **Verificação de Qualidade (QA)**: Sempre que o usuário pedir para verificar a qualidade do projeto (rodar linters/testes), você DEVE usar a skill `$quality-agent`.
