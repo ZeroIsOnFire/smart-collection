@@ -15,7 +15,7 @@ class DetectedItemsController < ApplicationController
       @autodetection.photo.path,
       normalized_vertices,
       padding: 0,
-      minimum_side: ImageCropperService::DEFAULT_MINIMUM_SIDE,
+      minimum_side: ImageCropperService.default_minimum_side,
       upscale: { use_ai: current_user.ai_upscaling_enabled?, local_fallback: true }
     )
 
@@ -92,7 +92,7 @@ class DetectedItemsController < ApplicationController
       @detected_item.autodetection.photo.path,
       normalized_vertices,
       padding: 0,
-      minimum_side: ImageCropperService::DEFAULT_MINIMUM_SIDE,
+      minimum_side: ImageCropperService.default_minimum_side,
       upscale: { use_ai: current_user.ai_upscaling_enabled?, local_fallback: true }
     )
 

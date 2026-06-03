@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 class CarService
-  CAR_IMAGE_MINIMUM_SIDE = ImageUpscalerService::DEFAULT_MINIMUM_SIDE
   attr_reader :user
 
   def initialize(user)
@@ -9,7 +8,7 @@ class CarService
   end
 
   def create(params)
-    prepared_params, upscaled_file = prepare_photo_for_save(params, minimum_side: CAR_IMAGE_MINIMUM_SIDE)
+    prepared_params, upscaled_file = prepare_photo_for_save(params, minimum_side: car_image_minimum_side)
     car = user.cars.build(prepared_params)
     process_car_image(car, prepared_params)
     car.save
@@ -24,7 +23,7 @@ class CarService
 
   def update(car_id, params)
     car = user.cars.find(car_id)
-    prepared_params, upscaled_file = prepare_photo_for_save(params, minimum_side: CAR_IMAGE_MINIMUM_SIDE)
+    prepared_params, upscaled_file = prepare_photo_for_save(params, minimum_side: car_image_minimum_side)
     car.attributes = prepared_params
     process_car_image(car, prepared_params)
     car.save
@@ -62,6 +61,10 @@ class CarService
   end
 
   private
+
+  def car_image_minimum_side
+    ImageUpscalerService.default_minimum_side
+  end
 
   def prepare_photo_for_save(params, minimum_side:)
     normalized_params = params.to_h.deep_symbolize_keys
@@ -110,7 +113,7 @@ class CarService
       car.photo.path,
       vertices,
       padding: 0,
-      minimum_side: CAR_IMAGE_MINIMUM_SIDE,
+      minimum_side: car_image_minimum_side,
       upscale: { use_ai: user.ai_upscaling_enabled?, local_fallback: false }
     )
     car.photo = cropped_file if cropped_file

@@ -30,7 +30,7 @@ RSpec.describe AutodetectJob do
           .with(
             anything,
             anything,
-            minimum_side: ImageCropperService::DEFAULT_MINIMUM_SIDE,
+            minimum_side: ImageCropperService.default_minimum_side,
             upscale: { use_ai: true, local_fallback: true }
           )
           .and_return(mock_file)

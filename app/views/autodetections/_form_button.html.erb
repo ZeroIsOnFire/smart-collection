@@ -43,7 +43,7 @@
                 <p class="text-muted small mb-0"><%= t('autodetections.form.dropzone_help') %></p>
                 <%= render "shared/ai_upscaling_notice",
                            translation_key: "autodetections.form.ai_upscaling_notice",
-                           minimum_side: AutodetectionService::AUTODETECTION_MINIMUM_SIDE %>
+                           minimum_side: AutodetectionService.autodetection_minimum_side %>
               </div>
 
               <div class="row g-3">

@@ -38,7 +38,7 @@ RSpec.describe CarService do
 
     it 'passes the photo through the upscaler before persistence' do
       expect(ImageUpscalerService).to receive(:upscale_if_needed)
-        .with(valid_params[:photo], minimum_side: 360, use_ai: true, local_fallback: false)
+        .with(valid_params[:photo], minimum_side: ImageUpscalerService.default_minimum_side, use_ai: true, local_fallback: false)
         .and_return(nil)
 
       described_class.new(user).create(valid_params)
@@ -48,7 +48,7 @@ RSpec.describe CarService do
       user.update!(ai_upscaling_enabled: false)
 
       expect(ImageUpscalerService).to receive(:upscale_if_needed)
-        .with(valid_params[:photo], minimum_side: 360, use_ai: false, local_fallback: false)
+        .with(valid_params[:photo], minimum_side: ImageUpscalerService.default_minimum_side, use_ai: false, local_fallback: false)
         .and_return(nil)
 
       described_class.new(user).create(valid_params)

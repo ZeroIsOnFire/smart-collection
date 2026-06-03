@@ -24,6 +24,25 @@ RSpec.describe ImageUpscalerService do
   end
 
   describe '.upscale_if_needed' do
+    it 'uses the configured default minimum side when none is passed' do
+      allow(ENV).to receive(:fetch).and_call_original
+      allow(ENV).to receive(:fetch).with('IMAGE_UPSCALE_DEFAULT_MINIMUM_SIDE', nil).and_return('420')
+      image = instance_double(MiniMagick::Image, width: 500, height: 419)
+      allow(MiniMagick::Image).to receive(:open).with(source_photo_path).and_return(image)
+
+      expect(described_class).to receive(:service_configured?).and_return(false)
+      expect(described_class).to receive(:upscale_locally).with(source_photo_path, 420)
+
+      described_class.upscale_if_needed(source_photo_path)
+    end
+
+    it 'falls back to 360 when the default minimum side env var is invalid' do
+      allow(ENV).to receive(:fetch).and_call_original
+      allow(ENV).to receive(:fetch).with('IMAGE_UPSCALE_DEFAULT_MINIMUM_SIDE', nil).and_return('nope')
+
+      expect(described_class.default_minimum_side).to eq(360)
+    end
+
     context 'when the image already meets the minimum side' do
       it 'returns nil' do
         image = instance_double(MiniMagick::Image, width: 640, height: 600)

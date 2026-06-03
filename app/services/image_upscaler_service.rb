@@ -7,9 +7,20 @@ require 'uri'
 
 class ImageUpscalerService
   DEFAULT_MINIMUM_SIDE = 360
+  DEFAULT_MINIMUM_SIDE_ENV = 'IMAGE_UPSCALE_DEFAULT_MINIMUM_SIDE'
   class UpscaleError < StandardError; end
 
-  def self.upscale_if_needed(photo_path, minimum_side: DEFAULT_MINIMUM_SIDE, use_ai: true, local_fallback: true)
+  def self.default_minimum_side
+    minimum_side_from_env(DEFAULT_MINIMUM_SIDE_ENV, DEFAULT_MINIMUM_SIDE)
+  end
+
+  def self.minimum_side_from_env(env_key, fallback)
+    value = ENV.fetch(env_key, nil).to_s.to_i
+
+    value.positive? ? value : fallback
+  end
+
+  def self.upscale_if_needed(photo_path, minimum_side: default_minimum_side, use_ai: true, local_fallback: true)
     source_path = resolved_photo_path(photo_path)
     return nil if source_path.blank?
 

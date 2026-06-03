@@ -1,0 +1,4 @@
+interface:
+  display_name: "Quality Agent"
+  short_description: "Run QA checks for Smart Collection."
+  default_prompt: "Use $quality-agent to run the Smart Collection quality checks and fix any issues found."

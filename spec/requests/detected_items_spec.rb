@@ -27,7 +27,7 @@ RSpec.describe 'DetectedItems', type: :request do
           anything,
           anything,
           padding: 0,
-          minimum_side: ImageCropperService::DEFAULT_MINIMUM_SIDE,
+          minimum_side: ImageCropperService.default_minimum_side,
           upscale: { use_ai: true, local_fallback: true }
         )
         .and_return(
@@ -52,7 +52,7 @@ RSpec.describe 'DetectedItems', type: :request do
           anything,
           anything,
           padding: 0,
-          minimum_side: ImageCropperService::DEFAULT_MINIMUM_SIDE,
+          minimum_side: ImageCropperService.default_minimum_side,
           upscale: { use_ai: true, local_fallback: true }
         )
         .and_return(
@@ -99,7 +99,7 @@ RSpec.describe 'DetectedItems', type: :request do
           anything,
           anything,
           padding: 0,
-          minimum_side: ImageCropperService::DEFAULT_MINIMUM_SIDE,
+          minimum_side: ImageCropperService.default_minimum_side,
           upscale: { use_ai: true, local_fallback: true }
         )
         .and_return(
@@ -128,7 +128,7 @@ RSpec.describe 'DetectedItems', type: :request do
           anything,
           anything,
           padding: 0,
-          minimum_side: ImageCropperService::DEFAULT_MINIMUM_SIDE,
+          minimum_side: ImageCropperService.default_minimum_side,
           upscale: { use_ai: true, local_fallback: true }
         )
         .and_return(

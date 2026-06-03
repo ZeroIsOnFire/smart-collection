@@ -103,9 +103,9 @@ spec/
 - O projeto usa **CarrierWave**, não ActiveStorage. Uploaders vivem em `app/uploaders/` e os arquivos são armazenados em `uploads/...`.
 - Fotos são convertidas para JPG pelos uploaders para manter compatibilidade com PDF/exportação.
 - O `ImageUpscalerService` é o ponto central para upscale. O uso do upscaler por IA é controlado por usuário via `User#ai_upscaling_enabled` (default `true`) e só deve chamar o microserviço quando `IMAGE_UPSCALE_SERVICE_URL` estiver configurado.
-- Tamanhos mínimos atuais: itens gerais usam `ImageUpscalerService::DEFAULT_MINIMUM_SIDE` (`360` px) e autodetecções usam `AutodetectionService::AUTODETECTION_MINIMUM_SIDE` (`1080` px).
+- Tamanhos mínimos configuráveis por `.env`: itens gerais usam `IMAGE_UPSCALE_DEFAULT_MINIMUM_SIDE` (padrão `360` px) e autodetecções usam `AUTODETECTION_MINIMUM_SIDE` (padrão `1080` px).
 - Uploads gerais de itens não devem usar fallback local quando o usuário desabilitar o upscaler por IA; nesses casos, a foto deve seguir sem chamar o `upscale-service`.
-- Uploads de autodetecção devem sempre preservar a preparação para YOLO: se o serviço de IA estiver indisponível ou desabilitado pelo usuário, aplique upscale simples local via MiniMagick/ImageMagick até `1080` px.
+- Uploads de autodetecção devem sempre preservar a preparação para YOLO: se o serviço de IA estiver indisponível ou desabilitado pelo usuário, aplique upscale simples local via MiniMagick/ImageMagick até `AUTODETECTION_MINIMUM_SIDE`.
 - A opção de upscaler por IA só deve aparecer na tela de configurações quando o serviço estiver configurado. Ela deve ficar como toggle lateral independente do formulário de perfil/senha, no mesmo padrão da visão pública. Avisos abaixo dos uploads também só aparecem quando o usuário está com IA habilitada e o serviço existe.
 - Ao alterar fluxos de imagem, preserve a limpeza de `Tempfile` nos services e cubra erros de `ImageUpscalerService::UpscaleError` em specs.
 
@@ -239,4 +239,4 @@ refactor(items): extrair lógica de tags para TagService
 - Sempre execute `docker compose exec web bundle exec rspec` antes de considerar uma tarefa Rails concluída.
 - Para alterações em microserviços Python, execute também os testes do respectivo diretório (`upscale/test_main.py` ou testes do `yolo/`, quando existirem).
 - Commits devem ser atômicos e com mensagens claras em português.
-- **Verificação de Qualidade (QA)**: Sempre que o usuário pedir para verificar a qualidade do projeto (rodar linters/testes), você DEVE ler e assumir a persona descrita em `QUALITY_AGENT.md`.
+- **Verificação de Qualidade (QA)**: Sempre que o usuário pedir para verificar a qualidade do projeto (rodar linters/testes), você DEVE usar a skill `$quality-agent`.

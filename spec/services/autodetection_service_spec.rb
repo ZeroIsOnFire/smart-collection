@@ -23,6 +23,26 @@ RSpec.describe AutodetectionService do
   end
 
   describe '#create' do
+    it 'uses the configured autodetection minimum side' do
+      allow(ENV).to receive(:fetch).and_call_original
+      allow(ENV).to receive(:fetch).with('AUTODETECTION_MINIMUM_SIDE', nil).and_return('1440')
+
+      expect(ImageUpscalerService).to receive(:upscale_if_needed)
+        .with(valid_params[:photo], minimum_side: 1440, use_ai: true, local_fallback: true)
+        .and_return(nil)
+
+      autodetection = described_class.new(user).create(valid_params)
+
+      expect(autodetection).to be_persisted
+    end
+
+    it 'falls back to 1080 when the autodetection minimum side env var is invalid' do
+      allow(ENV).to receive(:fetch).and_call_original
+      allow(ENV).to receive(:fetch).with('AUTODETECTION_MINIMUM_SIDE', nil).and_return('0')
+
+      expect(described_class.autodetection_minimum_side).to eq(1080)
+    end
+
     it 'creates an autodetection for the user and enqueues the job' do
       expect do
         service = described_class.new(user)
@@ -52,7 +72,7 @@ RSpec.describe AutodetectionService do
       upscaled_file = build_temp_image(width: 1080, height: 1080)
 
       expect(ImageUpscalerService).to receive(:upscale_if_needed)
-        .with(valid_params[:photo], minimum_side: 1080, use_ai: false, local_fallback: true)
+        .with(valid_params[:photo], minimum_side: described_class.autodetection_minimum_side, use_ai: false, local_fallback: true)
         .and_return(upscaled_file)
 
       autodetection = described_class.new(user).create(valid_params)

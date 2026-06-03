@@ -11,9 +11,12 @@ class GoogleVisionService
   def self.analyze(photo_path)
     return [] unless credentials_configured?
 
-    upscaled_file = ImageUpscalerService.upscale_if_needed(photo_path, minimum_side: ImageUpscalerService::DEFAULT_MINIMUM_SIDE)
+    upscaled_file = ImageUpscalerService.upscale_if_needed(photo_path, minimum_side: ImageUpscalerService.default_minimum_side)
     working_path = upscaled_file&.path || photo_path
-    vision_enhanced_file = ImageUpscalerService.upscale_if_needed(working_path, minimum_side: 1080)
+    vision_enhanced_file = ImageUpscalerService.upscale_if_needed(
+      working_path,
+      minimum_side: AutodetectionService.autodetection_minimum_side
+    )
     analysis_path = vision_enhanced_file&.path || working_path
 
     begin

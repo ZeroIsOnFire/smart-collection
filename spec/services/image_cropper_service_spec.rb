@@ -16,7 +16,7 @@ RSpec.describe ImageCropperService do
   describe '.crop' do
     it 'invokes the upscaler before cropping small images' do
       expect(ImageUpscalerService).to receive(:upscale_if_needed)
-        .with(photo_path, minimum_side: 360, use_ai: true, local_fallback: false)
+        .with(photo_path, minimum_side: ImageUpscalerService.default_minimum_side, use_ai: true, local_fallback: false)
         .and_return(nil)
 
       result = described_class.crop(photo_path, vertices)
@@ -37,10 +37,10 @@ RSpec.describe ImageCropperService do
       ]
 
       expect(ImageUpscalerService).to receive(:upscale_if_needed)
-        .with(photo_path, minimum_side: 360, use_ai: true, local_fallback: false)
+        .with(photo_path, minimum_side: ImageUpscalerService.default_minimum_side, use_ai: true, local_fallback: false)
         .ordered.and_return(nil)
       expect(ImageUpscalerService).to receive(:upscale_if_needed)
-        .with(kind_of(String), minimum_side: 360, use_ai: true, local_fallback: false)
+        .with(kind_of(String), minimum_side: ImageUpscalerService.default_minimum_side, use_ai: true, local_fallback: false)
         .ordered.and_return(nil)
 
       result = described_class.crop(photo_path, narrow_vertices)
@@ -58,7 +58,7 @@ RSpec.describe ImageCropperService do
 
     it 'passes disabled AI and local fallback flags to the upscaler' do
       expect(ImageUpscalerService).to receive(:upscale_if_needed)
-        .with(photo_path, minimum_side: 360, use_ai: false, local_fallback: true)
+        .with(photo_path, minimum_side: ImageUpscalerService.default_minimum_side, use_ai: false, local_fallback: true)
         .and_return(nil)
 
       result = described_class.crop(photo_path, vertices, upscale: { use_ai: false, local_fallback: true })

@@ -18,7 +18,7 @@ RUN pip install --upgrade pip \
 COPY main.py .
 
 RUN mkdir -p /app/models \
-    && curl -L --fail -o /app/models/RealESRGAN_x4plus.pth https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth
+    && curl -L --fail -o /app/models/4x_NMKD-Siax_200k.pth https://huggingface.co/f5aiteam/Upscale_Models/resolve/main/4x_NMKD-Siax_200k.pth
 
 EXPOSE 8000
 

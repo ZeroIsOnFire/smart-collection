@@ -2,14 +2,19 @@
 
 class AutodetectionService
   AUTODETECTION_MINIMUM_SIDE = 1080
+  AUTODETECTION_MINIMUM_SIDE_ENV = 'AUTODETECTION_MINIMUM_SIDE'
   attr_reader :user
+
+  def self.autodetection_minimum_side
+    ImageUpscalerService.minimum_side_from_env(AUTODETECTION_MINIMUM_SIDE_ENV, AUTODETECTION_MINIMUM_SIDE)
+  end
 
   def initialize(user)
     @user = user
   end
 
   def create(params)
-    prepared_params, upscaled_file = prepare_photo_for_save(params, minimum_side: AUTODETECTION_MINIMUM_SIDE)
+    prepared_params, upscaled_file = prepare_photo_for_save(params, minimum_side: self.class.autodetection_minimum_side)
     autodetection = user.autodetections.create(prepared_params)
 
     AutodetectJob.perform_later(autodetection.id.to_s) if autodetection.persisted?

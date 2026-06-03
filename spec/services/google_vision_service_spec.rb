@@ -40,9 +40,9 @@ RSpec.describe GoogleVisionService do
       before do
         allow(described_class).to receive_messages(credentials_configured?: true, simulation_mode?: false)
         expect(ImageUpscalerService).to receive(:upscale_if_needed)
-          .with(photo_path, minimum_side: ImageUpscalerService::DEFAULT_MINIMUM_SIDE).ordered.and_return(nil)
+          .with(photo_path, minimum_side: ImageUpscalerService.default_minimum_side).ordered.and_return(nil)
         expect(ImageUpscalerService).to receive(:upscale_if_needed)
-          .with(photo_path, minimum_side: 1080).ordered.and_return(nil)
+          .with(photo_path, minimum_side: AutodetectionService.autodetection_minimum_side).ordered.and_return(nil)
         allow(Google::Cloud::Vision).to receive(:image_annotator).and_return(mock_annotator)
         allow(mock_annotator).to receive(:object_localization_detection).and_return(mock_response)
       end

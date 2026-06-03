@@ -80,13 +80,21 @@ class UpscaleServiceTests(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 main.upscale_runtime()
 
+    def test_target_min_side_uses_env_value(self):
+        with patch.dict(os.environ, {"IMAGE_UPSCALE_DEFAULT_MINIMUM_SIDE": "512"}, clear=True):
+            self.assertEqual(main.target_min_side(), 512)
+
+    def test_target_min_side_falls_back_when_env_is_invalid(self):
+        with patch.dict(os.environ, {"IMAGE_UPSCALE_DEFAULT_MINIMUM_SIDE": "nope"}, clear=True):
+            self.assertEqual(main.target_min_side(), 360)
+
     def test_cpu_runtime_uses_lightweight_model_by_default(self):
         with patch.dict(os.environ, {"REAL_ESRGAN_MODEL_PATH": ""}, clear=True):
             self.assertEqual(main.model_path_for_runtime("cpu"), "/app/models/realesr-general-x4v3.pth")
 
-    def test_gpu_runtime_uses_x4plus_model_by_default(self):
+    def test_gpu_runtime_uses_nmkd_siax_model_by_default(self):
         with patch.dict(os.environ, {"REAL_ESRGAN_MODEL_PATH": ""}, clear=True):
-            self.assertEqual(main.model_path_for_runtime("amd"), "/app/models/RealESRGAN_x4plus.pth")
+            self.assertEqual(main.model_path_for_runtime("amd"), "/app/models/4x_NMKD-Siax_200k.pth")
 
     def test_gpu_upscaler_uses_rrdb_model(self):
         main.get_upscaler.cache_clear()
@@ -95,7 +103,7 @@ class UpscaleServiceTests(unittest.TestCase):
         with patch.object(main, "RealESRGANer") as mock_realesrganer, \
              patch.object(main, "RRDBNet", return_value="rrdb-model") as mock_rrdb, \
              patch.object(main.torch.cuda, "is_available", return_value=True), \
-             patch.object(main, "require_model_paths", return_value="/app/models/RealESRGAN_x4plus.pth"):
+             patch.object(main, "require_model_paths", return_value="/app/models/4x_NMKD-Siax_200k.pth"):
             main.get_gpu_upscaler("amd")
 
         mock_rrdb.assert_called_once()
@@ -104,31 +112,8 @@ class UpscaleServiceTests(unittest.TestCase):
         self.assertTrue(kwargs["half"])
         self.assertEqual(kwargs["device"], "cuda")
 
-    def test_cpu_denoise_strength_defaults_to_keep_noise(self):
-        with patch.dict(os.environ, {}, clear=True):
-            self.assertEqual(main.cpu_denoise_strength(), 0.0)
-
-    def test_cpu_denoise_strength_uses_configured_value(self):
-        with patch.dict(os.environ, {"REAL_ESRGAN_DENOISE_STRENGTH": "0.3"}, clear=True):
-            self.assertEqual(main.cpu_denoise_strength(), 0.3)
-
-    def test_cpu_denoise_strength_is_clamped_between_zero_and_one(self):
-        with patch.dict(os.environ, {"REAL_ESRGAN_DENOISE_STRENGTH": "2"}, clear=True):
-            self.assertEqual(main.cpu_denoise_strength(), 1.0)
-        with patch.dict(os.environ, {"REAL_ESRGAN_DENOISE_STRENGTH": "-1"}, clear=True):
-            self.assertEqual(main.cpu_denoise_strength(), 0.0)
-
-    def test_cpu_model_config_uses_dni_when_denoise_strength_is_below_one(self):
-        model_path, dni_weight = main.cpu_model_config(0.3)
-
-        self.assertEqual(
-            model_path,
-            ["/app/models/realesr-general-x4v3.pth", "/app/models/realesr-general-wdn-x4v3.pth"]
-        )
-        self.assertEqual(dni_weight, [0.3, 0.7])
-
-    def test_cpu_model_config_uses_base_model_only_for_strong_denoise(self):
-        model_path, dni_weight = main.cpu_model_config(1.0)
+    def test_cpu_model_config_uses_base_model_without_ai_denoise(self):
+        model_path, dni_weight = main.cpu_model_config()
 
         self.assertEqual(model_path, "/app/models/realesr-general-x4v3.pth")
         self.assertIsNone(dni_weight)
@@ -254,6 +239,25 @@ class UpscaleServiceTests(unittest.TestCase):
         self.assertIs(result, sharpened)
         self.assertGreaterEqual(min(result.shape[:2]), 360)
 
+    def test_tier_lanczos_keeps_denoise_in_gpu_runtime(self):
+        img_min_side = int(360 * 0.80)
+        image = np.zeros((img_min_side, img_min_side + 50, 3), dtype=np.uint8)
+        denoised = np.ones_like(image)
+        sharpened = np.full((360, 423, 3), 2, dtype=np.uint8)
+
+        with patch.object(main, "upscale_runtime", return_value="amd"), \
+             patch.object(main, "apply_denoise", return_value=denoised) as mock_denoise, \
+             patch.object(main, "upscale_with_lanczos", wraps=main.upscale_with_lanczos) as mock_lanczos, \
+             patch.object(main, "apply_sharpen", return_value=sharpened) as mock_sharpen:
+            result = main.upscale_until_min_side(image, 360)
+
+        mock_denoise.assert_called_once_with(image)
+        mock_lanczos.assert_called_once()
+        self.assertIs(mock_lanczos.call_args.args[0], denoised)
+        mock_sharpen.assert_called_once()
+        self.assertIs(result, sharpened)
+        self.assertGreaterEqual(min(result.shape[:2]), 360)
+
     def test_tier_lanczos_skips_denoise_when_filter_fails(self):
         img_min_side = int(360 * 0.80)
         image = np.zeros((img_min_side, img_min_side + 50, 3), dtype=np.uint8)
@@ -355,6 +359,21 @@ class UpscaleServiceTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         output = Image.open(io.BytesIO(response.content))
         self.assertEqual(output.size, (720, 540))
+
+    def test_endpoint_uses_configured_default_minimum_side_when_query_is_missing(self):
+        source = build_test_jpeg()
+        upscale_result = np.zeros((540, 720, 3), dtype=np.uint8)
+
+        with patch.dict(os.environ, {"IMAGE_UPSCALE_API_KEY": "", "IMAGE_UPSCALE_DEFAULT_MINIMUM_SIDE": "640"}), \
+             patch.object(main, "upscale_until_min_side", return_value=upscale_result) as mock_upscale, \
+             patch.object(main, "finalize_output", side_effect=lambda image: image):
+            response = self.client.post(
+                "/upscale",
+                files={"file": ("input.jpg", source, "image/jpeg")}
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(mock_upscale.call_args.args[1], 640)
 
 
 if __name__ == "__main__":

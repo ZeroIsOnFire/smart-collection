@@ -27,7 +27,7 @@ class AutodetectJob < ApplicationJob
         cropped_file = ImageCropperService.crop(
           autodetection.photo.path,
           data[:vertices],
-          minimum_side: ImageCropperService::DEFAULT_MINIMUM_SIDE,
+          minimum_side: ImageCropperService.default_minimum_side,
           upscale: { use_ai: autodetection.user.ai_upscaling_enabled?, local_fallback: true }
         )
 
