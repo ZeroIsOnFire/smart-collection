@@ -68,7 +68,7 @@
             <p class="text-muted small mb-0"><%= t('cars.form.upload_limits') %></p>
             <%= render "shared/ai_upscaling_notice",
                        translation_key: "cars.form.ai_upscaling_notice",
-                       minimum_side: CarService::CAR_IMAGE_MINIMUM_SIDE %>
+                       minimum_side: ImageUpscalerService.default_minimum_side %>
           </div>
  
           <!-- Preview (hidden initially, shown after photo selected or existing) -->

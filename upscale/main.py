@@ -83,7 +83,8 @@ except ImportError as ie:
     RRDBNet = None
     SRVGGNetCompact = None
 
-TARGET_MIN_SIDE = 360
+DEFAULT_TARGET_MIN_SIDE = 360
+TARGET_MIN_SIDE_ENV = "IMAGE_UPSCALE_DEFAULT_MINIMUM_SIDE"
 MAX_AI_PASSES = 5
 REAL_ESRGAN_SCALE = 4
 
@@ -120,6 +121,15 @@ def upscale_runtime():
     if runtime not in RUNTIME_ALIASES:
         raise RuntimeError(f"Unknown UPSCALE_RUNTIME: {runtime}")
     return RUNTIME_ALIASES[runtime]
+
+
+def target_min_side():
+    try:
+        value = int(os.getenv(TARGET_MIN_SIDE_ENV, "0") or 0)
+    except ValueError:
+        value = 0
+
+    return value if value > 0 else DEFAULT_TARGET_MIN_SIDE
 
 
 def gpu_runtime_name(runtime):
@@ -414,7 +424,7 @@ async def health():
         "mode": runtime,
         "model_path": model_path_for_runtime(runtime),
         "ai_denoise_enabled": False,
-        "target_min_side": TARGET_MIN_SIDE,
+        "target_min_side": target_min_side(),
         "tier_4x_threshold": TIER_4X_THRESHOLD,
         "tier_2x_threshold": TIER_2X_THRESHOLD,
         "lanczos_denoise_enabled": True,
@@ -425,7 +435,8 @@ async def health():
 
 
 @app.post("/upscale", dependencies=[Depends(verify_api_key)])
-async def upscale(file: UploadFile = File(...), minimum_side: int = TARGET_MIN_SIDE):
+async def upscale(file: UploadFile = File(...), minimum_side: int | None = None):
+    minimum_side = minimum_side or target_min_side()
     if minimum_side < 1:
         raise HTTPException(status_code=422, detail="minimum_side must be positive")
 

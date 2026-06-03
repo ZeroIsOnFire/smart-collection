@@ -15,8 +15,8 @@ Adicionar uma preferencia por usuario para controlar o uso do upscaler por IA no
    - o upscaler por IA pode gerar artefatos;
    - imagens muito pequenas podem melhorar com o recurso.
 5. Exibir aviso abaixo dos uploads de foto quando o usuario estiver com IA habilitada e o servico configurado:
-   - upload geral: imagens abaixo de 360px podem receber upscale por IA;
-   - autodeteccao: imagens abaixo de 1080px podem receber upscale por IA.
+   - upload geral: imagens abaixo de `IMAGE_UPSCALE_DEFAULT_MINIMUM_SIDE` podem receber upscale por IA;
+   - autodeteccao: imagens abaixo de `AUTODETECTION_MINIMUM_SIDE` podem receber upscale por IA.
 6. Refatorar `ImageUpscalerService` para separar:
    - upscale remoto por IA;
    - upscale simples local via MiniMagick/ImageMagick;

@@ -6,7 +6,7 @@
 #   1. Copie este arquivo para docker-compose.yml.
 #   2. Ajuste o .env a partir de .env.example.
 #   3. Escolha o Dockerfile do upscale-service:
-#        - CPU:    Dockerfile.cpu
+#        - CPU:    Dockerfile.cpu (padrao para Docker Desktop)
 #        - NVIDIA: Dockerfile.nvidia + NVIDIA Container Toolkit
 #        - AMD:    Dockerfile.amd + dispositivos ROCm
 #

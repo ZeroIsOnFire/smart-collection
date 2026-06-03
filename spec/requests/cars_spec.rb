@@ -33,7 +33,9 @@ RSpec.describe 'Cars', type: :request do
 
       get cars_path
 
-      expect(response.body).to include(I18n.t('autodetections.form.ai_upscaling_notice', minimum_side: 1080))
+      expect(response.body).to include(
+        I18n.t('autodetections.form.ai_upscaling_notice', minimum_side: AutodetectionService.autodetection_minimum_side)
+      )
     end
 
     it 'paginates the cars collection' do
@@ -96,7 +98,9 @@ RSpec.describe 'Cars', type: :request do
 
       get new_car_path
 
-      expect(response.body).to include(I18n.t('cars.form.ai_upscaling_notice', minimum_side: 360))
+      expect(response.body).to include(
+        I18n.t('cars.form.ai_upscaling_notice', minimum_side: ImageUpscalerService.default_minimum_side)
+      )
     end
 
     it 'hides the AI upscaling notice when the user disables it' do
@@ -105,7 +109,9 @@ RSpec.describe 'Cars', type: :request do
 
       get new_car_path
 
-      expect(response.body).not_to include(I18n.t('cars.form.ai_upscaling_notice', minimum_side: 360))
+      expect(response.body).not_to include(
+        I18n.t('cars.form.ai_upscaling_notice', minimum_side: ImageUpscalerService.default_minimum_side)
+      )
     end
   end
 

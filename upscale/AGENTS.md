@@ -81,6 +81,7 @@ Quando `IMAGE_UPSCALE_API_KEY` estiver configurada, as chamadas exigem o header 
 | Variavel | Padrao | Descricao |
 | --- | --- | --- |
 | `IMAGE_UPSCALE_API_KEY` | vazio | Chave do header `X-API-Key`. Sem ela, qualquer chamada e aceita. |
+| `IMAGE_UPSCALE_DEFAULT_MINIMUM_SIDE` | `360` | Lado minimo usado quando o endpoint `/upscale` recebe chamada sem `minimum_side`. |
 | `REAL_ESRGAN_MODEL_PATH` | por runtime | Caminho customizado opcional para pesos dentro do container. |
 | `TIER_4X_THRESHOLD` | `0.50` | Ratio abaixo do qual o Real-ESRGAN 4x e acionado. |
 | `TIER_2X_THRESHOLD` | `0.75` | Ratio abaixo do qual o Real-ESRGAN 2x e acionado. Acima, usa Lanczos. |

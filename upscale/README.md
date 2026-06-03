@@ -80,6 +80,7 @@ Depois de qualquer upscale por IA, a imagem e reduzida para bater exatamente o l
 ## Variaveis
 
 - `IMAGE_UPSCALE_API_KEY`: chave opcional exigida no header `X-API-Key`.
+- `IMAGE_UPSCALE_DEFAULT_MINIMUM_SIDE`: lado minimo usado quando `/upscale` recebe chamada sem `minimum_side` explicito.
 - `REAL_ESRGAN_MODEL_PATH`: caminho customizado de modelo dentro do container.
 - O upscaler por IA nao usa denoise/DNI; denoise e aplicado apenas no tier Lanczos.
 - `TIER_4X_THRESHOLD` / `TIER_2X_THRESHOLD`: limites dos tiers.

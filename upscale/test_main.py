@@ -80,6 +80,14 @@ class UpscaleServiceTests(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 main.upscale_runtime()
 
+    def test_target_min_side_uses_env_value(self):
+        with patch.dict(os.environ, {"IMAGE_UPSCALE_DEFAULT_MINIMUM_SIDE": "512"}, clear=True):
+            self.assertEqual(main.target_min_side(), 512)
+
+    def test_target_min_side_falls_back_when_env_is_invalid(self):
+        with patch.dict(os.environ, {"IMAGE_UPSCALE_DEFAULT_MINIMUM_SIDE": "nope"}, clear=True):
+            self.assertEqual(main.target_min_side(), 360)
+
     def test_cpu_runtime_uses_lightweight_model_by_default(self):
         with patch.dict(os.environ, {"REAL_ESRGAN_MODEL_PATH": ""}, clear=True):
             self.assertEqual(main.model_path_for_runtime("cpu"), "/app/models/realesr-general-x4v3.pth")
@@ -351,6 +359,21 @@ class UpscaleServiceTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         output = Image.open(io.BytesIO(response.content))
         self.assertEqual(output.size, (720, 540))
+
+    def test_endpoint_uses_configured_default_minimum_side_when_query_is_missing(self):
+        source = build_test_jpeg()
+        upscale_result = np.zeros((540, 720, 3), dtype=np.uint8)
+
+        with patch.dict(os.environ, {"IMAGE_UPSCALE_API_KEY": "", "IMAGE_UPSCALE_DEFAULT_MINIMUM_SIDE": "640"}), \
+             patch.object(main, "upscale_until_min_side", return_value=upscale_result) as mock_upscale, \
+             patch.object(main, "finalize_output", side_effect=lambda image: image):
+            response = self.client.post(
+                "/upscale",
+                files={"file": ("input.jpg", source, "image/jpeg")}
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(mock_upscale.call_args.args[1], 640)
 
 
 if __name__ == "__main__":

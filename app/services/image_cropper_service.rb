@@ -4,7 +4,9 @@ require 'mini_magick'
 require 'tempfile'
 
 class ImageCropperService
-  DEFAULT_MINIMUM_SIDE = ImageUpscalerService::DEFAULT_MINIMUM_SIDE
+  def self.default_minimum_side
+    ImageUpscalerService.default_minimum_side
+  end
 
   def self.allowed_paths
     @allowed_paths ||= [
@@ -13,7 +15,7 @@ class ImageCropperService
     ].compact.freeze
   end
 
-  def self.crop(source_path, normalized_vertices, padding: 0.05, minimum_side: DEFAULT_MINIMUM_SIDE, upscale: {})
+  def self.crop(source_path, normalized_vertices, padding: 0.05, minimum_side: default_minimum_side, upscale: {})
     return nil if normalized_vertices.blank?
 
     resolved_path = File.expand_path(source_path.to_s)
