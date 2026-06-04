@@ -98,6 +98,12 @@ spec/
 - Serviços esperados no ambiente local: `web`, `sidekiq`, `mongodb`, `redis`, `yolo-service` e `upscale-service`.
 - O Rails usa `config.active_job.queue_adapter = :sidekiq`; jobs assíncronos devem continuar compatíveis com Sidekiq e Redis.
 - Comandos Rails/RSpec/RuboCop devem ser executados dentro do container `web` (ex: `docker compose exec web bundle exec rspec`).
+- **Preservação de Dados Locais**: Nunca execute `Mongoid.purge!`, `db:drop`, limpeza em massa da base de desenvolvimento, remoção de volumes Docker (`docker volume rm`, `docker compose down -v`) ou comandos equivalentes destrutivos sem pedido explícito do usuário. Sempre tente corrigir por caminhos reversíveis e pontuais primeiro (ex: recriar usuário, ajustar senha, rodar seeds idempotentes, corrigir registros específicos).
+
+### Leitura de Arquivos no Windows
+- No ambiente Windows, se o PowerShell apresentar falhas intermitentes ao ler arquivos (ex: `windows sandbox: spawn setup refresh`), use preferencialmente o container `web`, onde o projeto fica montado em `/rails`.
+- Exemplo de leitura pelo container: `docker compose exec web sed -n '1,120p' app/javascript/controllers/car_removal_controller.js`.
+- Como fallback secundário, `wsl.exe sed -n '1,120p' caminho/do/arquivo` também costuma ler os arquivos do workspace de forma estável.
 
 ### Uploads e Processamento de Imagens
 - O projeto usa **CarrierWave**, não ActiveStorage. Uploaders vivem em `app/uploaders/` e os arquivos são armazenados em `uploads/...`.
@@ -234,6 +240,7 @@ refactor(items): extrair lógica de tags para TagService
 ## Convenções para Agentes
 
 - **PRIORIDADE MÁXIMA**: Segurança e Segregação de Dados (`current_user`).
+- **NÃO APAGAR DADOS LOCAIS SEM PEDIDO EXPLÍCITO**: Base de desenvolvimento e volumes Docker devem ser preservados. Não faça purge/drop/reset da base nem remova volumes para "resolver" problemas, salvo quando o usuário exigir diretamente essa ação.
 - **Internacionalização Obrigatória**: É proibido adicionar textos "hardcoded" em views, controllers ou javascript. Tudo deve ser traduzido utilizando a API de I18n do Rails (ex: `t('chave.da.traducao')`).
 - Ao criar ou editar views, garanta a adequação ao padrão Premium Design (usando CSS e ícones existentes).
 - Sempre execute `docker compose exec web bundle exec rspec` antes de considerar uma tarefa Rails concluída.

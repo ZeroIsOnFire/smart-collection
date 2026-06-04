@@ -205,6 +205,37 @@ pt-BR:
 
   # ── Carros ─────────────────────────────────────────────
   cars:
+    index:
+      subtitle: "Sua coleção pessoal"
+      copy_public_link: "Copiar link público"
+      search_placeholder: "Buscar por nome, marca..."
+      grid_view: "Grade"
+      list_view: "Lista"
+      empty_title: "Nenhum item na coleção"
+      empty_text: "Adicione seu primeiro carro ou use a Autodetecção por foto."
+      add_first_item: "Adicionar Primeiro Item"
+      no_results_title: "Nenhum resultado encontrado"
+      no_results_text: "Tente buscar por termos diferentes ou limpe o filtro."
+    new:
+      badge: "Novo Registro"
+      title: "Adicionar à Coleção"
+      subtitle: "Preencha os detalhes do seu novo modelo com cuidado."
+    edit:
+      badge: "Edição"
+      title: "Atualizar %{name}"
+      subtitle: "Modifique as especificações do item já existente no seu acervo."
+    modal:
+      new_title: "Novo Item"
+      edit_title: "Editar Item"
+    card:
+      view_details: "Ver Detalhes"
+      no_photo: "Sem foto"
+    show:
+      added_at: "Adicionado em %{date}"
+      collection: "Minha Coleção"
+      fallback_name: "—"
+      no_photo: "Sem foto cadastrada"
+      view_full_photo: "Ver foto completa"
     form:
       main_photo: "Foto Principal"
       upload_prompt: "Clique ou arraste a imagem aqui"
@@ -220,6 +251,11 @@ pt-BR:
       adjust_photo: "Ajustar Foto"
       save_crop: "Salvar Recorte"
       predominant_color: "Cor Predominante"
+      brand_placeholder: "Ex: Hot Wheels, Matchbox, Maisto"
+      manufacturer_placeholder: "Ex: Porsche, Ferrari, Ford"
+      name_placeholder: "Ex: 911 Carrera, Mustang GT, LaFerrari"
+      year_placeholder: "Ex: 1998"
+      observations_placeholder: "Escreva detalhes sobre o estado de conservação..."
 
   # ── Autodetecção ───────────────────────────────────────
   autodetections:

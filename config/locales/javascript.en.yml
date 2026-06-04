@@ -22,3 +22,16 @@ en:
         save_unexpected: "An unexpected error occurred while saving the adjustment: %{message}"
     poll:
       error_console: "Polling error:"
+    auth_submit:
+      loading: "Signing in..."
+    car_removal:
+      errors:
+        unexpected_console: "Error removing item:"
+        unexpected: "The item could not be removed. Try again."
+    modal:
+      loading: "Loading..."
+      submitting: "Loading..."
+      loading_error_title: "Loading error"
+      loading_error_description: "The information could not be loaded. Try again."
+      retry: "Try again"
+      close: "Close"

@@ -420,6 +420,34 @@ body {
   justify-content: center;
 }
 
+.car-card-wrapper.car-removal-pending {
+  pointer-events: none;
+}
+
+.car-card-wrapper.car-removal-pending .card {
+  filter: saturate(0.75);
+}
+
+.car-removal-loader {
+  align-items: center;
+  background: rgba(248, 250, 252, 0.62);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  display: none;
+  inset: 0;
+  justify-content: center;
+  position: absolute;
+  z-index: 20;
+}
+
+.car-removal-pending .car-removal-loader {
+  display: flex;
+}
+
+[data-theme="dark"] .car-removal-loader {
+  background: rgba(15, 23, 42, 0.68);
+}
+
 /* Premium Search Bar */
 .premium-search-container {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -526,6 +554,188 @@ body {
 
 .modal-header, .modal-footer {
   border-color: var(--border-color);
+}
+
+.turbo-car-modal .modal-content {
+  max-height: calc(100vh - 2rem);
+}
+
+@media (min-width: 1200px) {
+  .turbo-car-modal-dialog {
+    max-width: 860px;
+  }
+
+  .turbo-car-form-modal .turbo-car-modal-dialog {
+    max-width: 920px;
+  }
+}
+
+.turbo-car-modal .modal-title {
+  font-size: 1.05rem;
+}
+
+.turbo-car-modal .modal-body {
+  scrollbar-gutter: stable;
+}
+
+.turbo-modal-loading .modal-content {
+  min-height: 220px;
+}
+
+.turbo-loading-overlay {
+  align-items: center;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 1rem;
+  position: fixed;
+  z-index: 1085;
+}
+
+.turbo-loading-dialog {
+  max-width: 860px;
+  pointer-events: none;
+  width: min(100%, 860px);
+}
+
+.turbo-loading-content {
+  align-items: center;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--card-shadow);
+  color: var(--text-main);
+  display: flex;
+  justify-content: center;
+  min-height: 220px;
+  pointer-events: auto;
+}
+
+.turbo-modal-loading-body {
+  align-items: center;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 220px;
+  text-align: center;
+  width: 100%;
+}
+
+.turbo-modal-busy .modal-header .btn-close,
+.turbo-modal-busy [data-bs-dismiss="modal"] {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.turbo-modal-busy .modal-body,
+.turbo-modal-busy .modal-footer {
+  opacity: 0.68;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.turbo-modal-busy .modal-footer button[type="submit"],
+.turbo-modal-busy .modal-footer input[type="submit"],
+.turbo-modal-busy form button[type="submit"],
+.turbo-modal-busy form input[type="submit"] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.turbo-car-form-modal h5 {
+  font-size: 1rem;
+  margin-bottom: 1rem !important;
+}
+
+.turbo-car-form-modal .photo-dropzone {
+  padding: 2rem !important;
+}
+
+.turbo-car-form-modal .col-12.mb-5,
+.turbo-car-form-modal .row.mb-5 {
+  margin-bottom: 1.5rem !important;
+}
+
+.turbo-car-form-modal .row.g-4 {
+  --bs-gutter-y: 1rem;
+}
+
+.turbo-car-form-modal .form-control-lg,
+.turbo-car-form-modal .form-select-lg {
+  font-size: 1rem;
+  min-height: 46px;
+  padding-bottom: 0.65rem;
+  padding-top: 0.65rem;
+}
+
+.car-details-photo-button {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  cursor: zoom-in;
+  display: block;
+  height: 360px;
+  overflow: hidden;
+  padding: 0;
+  position: relative;
+  text-align: inherit;
+  width: 100%;
+}
+
+.car-details-card-modal .car-details-photo-button {
+  height: 260px;
+}
+
+.photo-lightbox-overlay {
+  align-items: center;
+  background: rgba(2, 6, 23, 0.92);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 1.5rem;
+  position: fixed;
+  z-index: 1090;
+}
+
+.photo-lightbox-stage {
+  max-height: 90vh;
+  max-width: min(94vw, 1200px);
+  position: relative;
+}
+
+.photo-lightbox-image {
+  background: #111827;
+  display: block;
+  max-height: 90vh;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.photo-lightbox-close {
+  height: 36px;
+  opacity: 0.9;
+  padding: 0;
+  position: absolute;
+  right: -14px;
+  top: -14px;
+  width: 36px;
+  z-index: 2;
+}
+
+.photo-lightbox-open {
+  overflow: hidden;
+}
+
+@media (max-width: 575.98px) {
+  .car-details-photo-button,
+  .car-details-card-modal .car-details-photo-button {
+    height: 220px;
+  }
+
+  .photo-lightbox-overlay {
+    padding: 0.75rem;
+  }
 }
 
 [data-theme="dark"] .modal .btn-close {

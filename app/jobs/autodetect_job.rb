@@ -11,12 +11,14 @@ class AutodetectJob < ApplicationJob
     autodetection.update!(status: 'processing')
 
     begin
+      prepared_photo_path = prepare_photo_for_detection(autodetection)
+
       # 1. Analisar a imagem usando YOLO local
       detected_items_data = []
 
       if YoloDetectionService.service_configured?
         Rails.logger.info "AutodetectJob: Attempting YOLO detection for autodetection #{autodetection_id}"
-        detected_items_data = YoloDetectionService.analyze(autodetection.photo.path)
+        detected_items_data = YoloDetectionService.analyze(prepared_photo_path)
       end
 
       Rails.logger.info "AutodetectJob: No items found for autodetection #{autodetection_id}" if detected_items_data.empty?
@@ -52,5 +54,33 @@ class AutodetectJob < ApplicationJob
       Rails.logger.error "AutodetectJob Failed: #{e.message}\n#{e.backtrace.join("\n")}"
       autodetection.update!(status: 'error', error_message: e.message)
     end
+  end
+
+  private
+
+  def prepare_photo_for_detection(autodetection)
+    upscaled_file = ImageUpscalerService.upscale_if_needed(
+      autodetection.photo.path,
+      minimum_side: AutodetectionService.autodetection_minimum_side,
+      use_ai: autodetection.user.ai_upscaling_enabled?,
+      local_fallback: true
+    )
+
+    return autodetection.photo.path unless upscaled_file
+
+    autodetection.photo = upscaled_file
+    autodetection.save!
+    autodetection.photo.path
+  ensure
+    cleanup_tempfile(upscaled_file)
+  end
+
+  def cleanup_tempfile(tempfile)
+    return unless tempfile.respond_to?(:close)
+
+    tempfile.close
+    tempfile.unlink
+  rescue StandardError
+    nil
   end
 end

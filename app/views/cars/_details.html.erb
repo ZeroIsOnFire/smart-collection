@@ -1,0 +1,147 @@
+<% modal = local_assigns.fetch(:modal, false) %>
+<% car_dom_id = car.id.to_s %>
+
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+  <% unless modal %>
+    <%= link_to cars_path, class: "btn btn-outline-secondary rounded-pill px-4 d-inline-flex align-items-center" do %>
+      <i class="bi bi-arrow-left me-2"></i> <%= t("cars.show.collection") %>
+    <% end %>
+  <% end %>
+
+  <div class="d-flex align-items-center gap-2 ms-auto">
+    <%= link_to edit_car_path(car),
+                class: "btn btn-premium rounded-pill d-inline-flex align-items-center justify-content-center",
+                style: "min-width: 112px;",
+                data: { turbo_frame: modal ? "modal" : "_top" } do %>
+      <i class="bi bi-pencil me-2"></i><%= t("actions.edit") %>
+    <% end %>
+    <%= button_to car,
+                  method: :delete,
+                  form: {
+                    class: "d-inline-flex m-0",
+                    data: {
+                      "car-removal-car-id": car_dom_id,
+                      modal_frame_skip_loading: modal ? true : nil
+                    }
+                  },
+                  data: {
+                    car_removal_trigger: true,
+                    car_removal_car_id: car_dom_id,
+                    car_removal_confirm_message: t("items.delete_confirm")
+                  },
+                  class: "btn btn-outline-danger rounded-pill d-inline-flex align-items-center justify-content-center",
+                  style: "padding: 0.65rem 1.5rem; min-width: 112px;" do %>
+      <i class="bi bi-trash3 me-2"></i><%= t("actions.delete") %>
+    <% end %>
+  </div>
+</div>
+
+<% cache [car, modal ? :modal : :page] do %>
+  <div class="card premium-card car-details-card shadow-sm border-0 rounded-4 overflow-hidden mb-3 <%= "car-details-card-modal" if modal %>"
+       data-controller="photo-lightbox">
+    <% if car.photo? %>
+      <button type="button"
+              class="car-details-photo-button"
+              data-action="click->photo-lightbox#open"
+              aria-label="<%= t("cars.show.view_full_photo") %>">
+        <%= image_tag car.photo.url, style: "width: 100%; height: 100%; object-fit: cover; display: block;" %>
+        <div class="position-absolute bottom-0 end-0 m-3">
+          <span class="badge bg-dark bg-opacity-60 rounded-pill px-3 py-2 text-white">
+            <i class="bi bi-zoom-in me-1"></i> <%= t("cars.show.view_full_photo") %>
+          </span>
+        </div>
+      </button>
+
+      <div class="photo-lightbox-overlay d-none"
+           data-photo-lightbox-target="overlay"
+           data-action="click->photo-lightbox#close keydown@window->photo-lightbox#closeWithKeyboard"
+           role="dialog"
+           aria-modal="true"
+           aria-label="<%= t("cars.show.view_full_photo") %>">
+        <div class="photo-lightbox-stage" data-action="click->photo-lightbox#keepOpen">
+          <%= image_tag car.photo.url,
+                class: "photo-lightbox-image rounded-4 shadow-lg",
+                alt: car.name.presence || t("cars.show.fallback_name") %>
+          <button type="button"
+                  class="btn btn-dark btn-sm rounded-circle shadow photo-lightbox-close"
+                  data-action="click->photo-lightbox#close"
+                  aria-label="<%= t('actions.close') %>">
+            <i class="bi bi-x-lg small"></i>
+          </button>
+        </div>
+      </div>
+    <% else %>
+      <div class="bg-light d-flex align-items-center justify-content-center text-muted" style="height: 240px;">
+        <div class="text-center">
+          <i class="bi bi-camera display-4 mb-2 opacity-30"></i>
+          <p class="small mb-0"><%= t("cars.show.no_photo") %></p>
+        </div>
+      </div>
+    <% end %>
+
+    <div class="card-body <%= modal ? "p-3 p-md-4" : "p-4 p-md-5" %>">
+      <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
+        <div>
+          <h1 class="<%= modal ? "h4" : "h2" %> fw-bold mb-1"><%= car.name.presence || t("cars.show.fallback_name") %></h1>
+          <% if car.brand? %>
+            <span class="badge bg-primary bg-opacity-10 text-primary fw-semibold fs-6 rounded-pill"><%= car.brand %></span>
+          <% end %>
+        </div>
+        <% if car.year? %>
+          <span class="badge bg-secondary rounded-pill fs-6 px-3 py-2"><i class="bi bi-calendar me-1"></i><%= car.year %></span>
+        <% end %>
+      </div>
+
+      <hr class="my-3">
+
+      <div class="row <%= modal ? "g-3" : "g-4" %> mb-3">
+        <div class="col-sm-6">
+          <div class="d-flex flex-column">
+            <small class="text-uppercase fw-semibold text-muted tracking-wide mb-1"><%= t("activerecord.attributes.car.brand") %></small>
+            <span class="fs-6 fw-medium"><%= car.brand.presence || t("cars.show.fallback_name") %></span>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="d-flex flex-column">
+            <small class="text-uppercase fw-semibold text-muted tracking-wide mb-1"><%= t("activerecord.attributes.car.manufacturer") %></small>
+            <span class="fs-6 fw-medium"><%= car.manufacturer.presence || t("cars.show.fallback_name") %></span>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="d-flex flex-column">
+            <small class="text-uppercase fw-semibold text-muted tracking-wide mb-1"><%= t("activerecord.attributes.car.size") %></small>
+            <span class="fs-6 fw-medium"><%= car.size.presence || t("cars.show.fallback_name") %></span>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="d-flex flex-column">
+            <small class="text-uppercase fw-semibold text-muted tracking-wide mb-1"><%= t("activerecord.attributes.car.year") %></small>
+            <span class="fs-6 fw-medium"><%= car.year.presence || t("cars.show.fallback_name") %></span>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="d-flex flex-column">
+            <small class="text-uppercase fw-semibold text-muted tracking-wide mb-1"><%= t("activerecord.attributes.car.color") %></small>
+            <span class="fs-6 fw-medium d-flex align-items-center gap-2">
+              <% if car.color? %>
+                <span class="d-inline-block rounded-circle shadow-sm" style="width:14px; height:14px; background-color:<%= Car::COLORS[car.color] || '#ccc' %>; border: 1px solid #dee2e6;"></span>
+              <% end %>
+              <%= car.color.presence || t("cars.show.fallback_name") %>
+            </span>
+          </div>
+        </div>
+        <div class="col-12">
+          <div class="d-flex flex-column">
+            <small class="text-uppercase fw-semibold text-muted tracking-wide mb-1"><%= t("activerecord.attributes.car.observations") %></small>
+            <p class="mb-0 text-dark" style="line-height: 1.7;"><%= car.observations.presence || t("cars.show.fallback_name") %></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-muted small">
+        <i class="bi bi-clock me-1"></i>
+        <%= t("cars.show.added_at", date: l(car.created_at.to_date)) %>
+      </div>
+    </div>
+  </div>
+<% end %>

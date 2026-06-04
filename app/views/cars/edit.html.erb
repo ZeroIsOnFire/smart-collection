@@ -3,10 +3,10 @@
     <div class="col-xl-8 col-lg-10">
 
       <div class="mb-5 text-center">
-        <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3 py-2 fw-semibold mb-3">Edição</span>
-        <h2 class="display-6 fw-bold text-dark mb-3">Atualizar <%= @car.name %></h2>
+        <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3 py-2 fw-semibold mb-3"><%= t("cars.edit.badge") %></span>
+        <h2 class="display-6 fw-bold text-dark mb-3"><%= t("cars.edit.title", name: @car.name) %></h2>
         <p class="text-secondary lead mb-0">
-          Modifique as especificações do item já existente no seu acervo.
+          <%= t("cars.edit.subtitle") %>
         </p>
       </div>
 

@@ -3,8 +3,8 @@
   <!-- Cabeçalho -->
   <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
     <div>
-      <h1 class="fw-bold mb-0 fs-3">Meus Carros</h1>
-      <p class="text-muted small mb-0">Sua coleção pessoal</p>
+      <h1 class="fw-bold mb-0 fs-3"><%= t("nav.my_cars") %></h1>
+      <p class="text-muted small mb-0"><%= t("cars.index.subtitle") %></p>
     </div>
     <div class="d-flex gap-2 flex-wrap">
       <% if current_user.sharing_enabled? %>
@@ -13,7 +13,7 @@
              data-clipboard-default-class-value="btn-outline-primary"
              data-clipboard-success-class-value="btn-primary">
           <input type="hidden" data-clipboard-target="source" value="<%= public_share_url(current_user.share_token) %>">
-          <button class="btn btn-outline-primary rounded-circle d-flex align-items-center justify-content-center p-0" style="width: 48px; height: 48px;" type="button" data-action="clipboard#copy" data-clipboard-target="button" title="Copiar link público">
+          <button class="btn btn-outline-primary rounded-circle d-flex align-items-center justify-content-center p-0" style="width: 48px; height: 48px;" type="button" data-action="clipboard#copy" data-clipboard-target="button" title="<%= t("cars.index.copy_public_link") %>">
             <i class="bi bi-share fs-5"></i>
           </button>
         </div>
@@ -27,8 +27,10 @@
       <%= render partial: "collection_exports/export_status", locals: { export: current_user.collection_exports.where(format_type: 'pdf').last, format_type: 'pdf' } %>
 
       <%= render "autodetections/form_button", autodetection: Autodetection.new %>
-      <%= link_to new_car_path, class: 'btn btn-premium rounded-pill px-4 d-flex align-items-center gap-2' do %>
-        <i class="bi bi-plus-circle"></i> Novo Item
+      <%= link_to new_car_path,
+                  class: 'btn btn-premium rounded-pill px-4 d-flex align-items-center gap-2',
+                  data: { turbo_frame: "modal" } do %>
+        <i class="bi bi-plus-circle"></i> <%= t("items.new") %>
       <% end %>
     </div>
   </div>
@@ -59,7 +61,7 @@
           </span>
           <%= f.text_field :q,
                            value: params[:q],
-                           placeholder: "Buscar por nome, marca...",
+                           placeholder: t("cars.index.search_placeholder"),
                            class: "form-control border-0 bg-transparent py-3 shadow-none",
                            autocomplete: "off",
                            data: {
@@ -80,7 +82,7 @@
           <% end %>
 
           <button type="submit" class="btn btn-premium px-4 rounded-pill m-1 d-none d-sm-block">
-            Buscar
+            <%= t("actions.search") %>
           </button>
         </div>
       <% end %>
@@ -95,10 +97,10 @@
       </div>
       <div class="btn-group shadow-sm bg-white rounded-pill p-1 border">
         <button type="button" class="btn btn-sm text-primary active rounded-pill px-3 fw-medium d-flex align-items-center gap-2" data-view-toggle-target="gridButton" data-action="click->view-toggle#setGrid">
-          <i class="bi bi-grid-fill"></i> Grade
+          <i class="bi bi-grid-fill"></i> <%= t("cars.index.grid_view") %>
         </button>
         <button type="button" class="btn btn-sm text-muted rounded-pill px-3 fw-medium d-flex align-items-center gap-2" data-view-toggle-target="listButton" data-action="click->view-toggle#setList">
-          <i class="bi bi-list-ul"></i> Lista
+          <i class="bi bi-list-ul"></i> <%= t("cars.index.list_view") %>
         </button>
       </div>
     </div>
@@ -120,14 +122,15 @@
 
         <% else %>
           <!-- Estado vazio -->
-          <div class="text-center py-5 mt-4">
+          <div id="cars_grid_inner" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4 mt-2 grid-view"></div>
+          <div id="cars_empty_state" class="text-center py-5 mt-4">
             <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light mb-4" style="width: 80px; height: 80px;">
               <i class="bi bi-collection fs-2 text-muted opacity-50"></i>
             </div>
-            <h4 class="fw-bold mb-2">Nenhum item na coleção</h4>
-            <p class="text-muted mb-4">Adicione seu primeiro carro ou use a Autodetecção por foto.</p>
-            <%= link_to new_car_path, class: 'btn btn-premium rounded-pill px-5', data: { turbo: false } do %>
-              <i class="bi bi-plus-circle me-2"></i> Adicionar Primeiro Item
+            <h4 class="fw-bold mb-2"><%= t("cars.index.empty_title") %></h4>
+            <p class="text-muted mb-4"><%= t("cars.index.empty_text") %></p>
+            <%= link_to new_car_path, class: 'btn btn-premium rounded-pill px-5', data: { turbo_frame: "modal" } do %>
+              <i class="bi bi-plus-circle me-2"></i> <%= t("cars.index.add_first_item") %>
             <% end %>
           </div>
         <% end %>

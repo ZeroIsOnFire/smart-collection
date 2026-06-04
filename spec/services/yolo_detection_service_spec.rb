@@ -75,12 +75,12 @@ RSpec.describe YoloDetectionService do
 
   describe '.service_configured?' do
     it 'returns true when env vars are present' do
-      expect(described_class.service_configured?).to be_truthy
+      expect(described_class).to be_service_configured
     end
 
     it 'returns false when env vars are missing' do
       allow(ENV).to receive(:[]).with('YOLO_SERVICE_URL').and_return(nil)
-      expect(described_class.service_configured?).to be_falsey
+      expect(described_class).not_to be_service_configured
     end
   end
 end
