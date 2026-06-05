@@ -1,4 +1,0 @@
-interface:
-  display_name: "Security Agent"
-  short_description: "Audit Smart Collection Ruby, JavaScript, and Python dependencies."
-  default_prompt: "Use $security-agent to audit Smart Collection dependencies across Ruby, JavaScript, and Python and fix vulnerabilities found."

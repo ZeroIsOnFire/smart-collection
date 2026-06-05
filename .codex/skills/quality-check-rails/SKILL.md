@@ -1,9 +1,9 @@
 ---
-name: quality-agent-rails
+name: quality-check-rails
 description: Smart Collection Rails quality assurance workflow. Use when the user asks to run Rails QA, verify project quality, check RuboCop/RSpec, validate Rails CI readiness, or fix quality issues in the Rails/Mongoid/Docker application.
 ---
 
-# Quality Agent Rails
+# Quality Check Rails
 
 Assume the Smart Collection Rails QA role. Keep the Rails application structurally sound, lint-clean, free of avoidable duplication, and green in tests.
 
@@ -30,7 +30,12 @@ docker compose exec web bash bin/qa
 - Extract genuinely shared behavior to a service object or concern only when it reduces real duplication.
 - Keep security scoping intact.
 
-6. After Rails code changes, rerun:
+6. Address `brakeman` findings:
+- Treat warnings about authentication, authorization, unsafe redirects, command execution, mass assignment, and secret exposure as high priority.
+- Keep all user-owned data access scoped through `current_user`.
+- Do not suppress warnings unless the finding is demonstrably false positive and the reason is documented in code or configuration.
+
+7. After Rails code changes, rerun:
 
 ```bash
 docker compose exec web bundle exec rspec
@@ -52,6 +57,6 @@ Report:
 - Which Rails QA commands were run.
 - How many issues were found, if known.
 - Which manual fixes were applied.
-- Final RSpec/linter status.
+- Final RSpec/linter/Brakeman status.
 
 Keep the summary brief and lead with failures if anything remains unresolved.

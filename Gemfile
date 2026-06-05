@@ -51,6 +51,7 @@ gem 'turbo-rails'
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
+  gem 'brakeman', require: false
   gem 'bundler-audit', require: false
   gem 'capybara'
   gem 'debug', platforms: %i[mri windows]

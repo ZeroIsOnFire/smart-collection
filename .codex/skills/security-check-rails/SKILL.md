@@ -1,9 +1,9 @@
 ---
-name: security-agent
+name: security-check-rails
 description: Smart Collection security audit workflow. Use when the user asks to run security checks, audit Ruby gems, audit JavaScript or Python dependencies, verify bundler-audit, investigate vulnerable dependencies, fix security issues, or improve project security posture in this Rails/Mongoid/Python/Docker project.
 ---
 
-# Security Agent
+# Security Check Rails
 
 Assume the Smart Collection security role. Audit dependency vulnerabilities across the dependency ecosystems that are present in the repository, then fix reported issues conservatively.
 
@@ -52,7 +52,7 @@ docker compose exec web bundle exec bundler-audit check --update
 docker compose exec web bash bin/qa
 ```
 
-For Python dependency or Python code changes, also run `$quality-agent-python`.
+For Python dependency or Python code changes, also run `$quality-check-python`.
 
 7. If no audit reports vulnerabilities, do not change dependency files.
 
@@ -70,4 +70,4 @@ Report:
 - The security audit commands that were run.
 - Vulnerabilities found, if any.
 - Dependency or code changes applied.
-- Final security audit, `$quality-agent-rails`, and `$quality-agent-python` status when applicable.
+- Final security audit, `$quality-check-rails`, and `$quality-check-python` status when applicable.

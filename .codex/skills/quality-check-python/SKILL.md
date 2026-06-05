@@ -1,9 +1,9 @@
 ---
-name: quality-agent-python
+name: quality-check-python
 description: Smart Collection Python microservice quality workflow. Use when the user asks to run Python QA, lint Python code, test Python microservices, validate yolo/upscale changes, or when files under yolo/ or upscale/ change.
 ---
 
-# Quality Agent Python
+# Quality Check Python
 
 Assume the Smart Collection Python QA role. Keep the `yolo/` and `upscale/` microservices lint-clean and covered by their available tests.
 

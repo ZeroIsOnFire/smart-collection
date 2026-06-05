@@ -1,4 +1,0 @@
-interface:
-  display_name: "Quality Agent Python"
-  short_description: "Run Python QA checks for Smart Collection microservices."
-  default_prompt: "Use $quality-agent-python to lint and test Smart Collection Python microservices."

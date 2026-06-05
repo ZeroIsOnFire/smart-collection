@@ -22,7 +22,11 @@ echo "👉 3. Rodando Flay (Duplicação de Código)"
 bundle exec flay app/ || true
 
 echo ""
-echo "👉 4. Rodando Testes (RSpec)"
+echo "👉 4. Rodando Brakeman (Segurança Rails)"
+bundle exec brakeman --no-pager || true
+
+echo ""
+echo "👉 5. Rodando Testes (RSpec)"
 bundle exec rspec
 
 echo ""

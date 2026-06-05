@@ -244,8 +244,8 @@ refactor(items): extrair lógica de tags para TagService
 - **Internacionalização Obrigatória**: É proibido adicionar textos "hardcoded" em views, controllers ou javascript. Tudo deve ser traduzido utilizando a API de I18n do Rails (ex: `t('chave.da.traducao')`).
 - Ao criar ou editar views, garanta a adequação ao padrão Premium Design (usando CSS e ícones existentes).
 - Sempre execute `docker compose exec web bundle exec rspec` antes de considerar uma tarefa Rails concluída.
-- Para alterações em microserviços Python, você DEVE usar a skill `$quality-agent-python`.
+- Para alterações em microserviços Python, você DEVE usar a skill `$quality-check-python`.
 - Commits devem ser atômicos e com mensagens claras em português.
-- **Verificação de Qualidade Rails (QA)**: Sempre que o usuário pedir para verificar a qualidade do projeto Rails (rodar linters/testes), você DEVE usar a skill `$quality-agent-rails`.
-- **Verificação de Qualidade Python (QA)**: Sempre que o usuário pedir para verificar qualidade, lint ou testes dos microserviços Python, você DEVE usar a skill `$quality-agent-python`.
-- **Verificação de Segurança**: Sempre que o usuário pedir auditoria de segurança, verificação de vulnerabilidades ou correção de dependências vulneráveis, você DEVE usar a skill `$security-agent`.
+- **Verificação de Qualidade Rails (QA)**: Sempre que o usuário pedir para verificar a qualidade do projeto Rails (rodar linters/testes), você DEVE usar a skill `$quality-check-rails`.
+- **Verificação de Qualidade Python (QA)**: Sempre que o usuário pedir para verificar qualidade, lint ou testes dos microserviços Python, você DEVE usar a skill `$quality-check-python`.
+- **Verificação de Segurança**: Sempre que o usuário pedir auditoria de segurança, verificação de vulnerabilidades ou correção de dependências vulneráveis, você DEVE usar a skill `$security-check-rails`.
