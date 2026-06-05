@@ -1,0 +1,8 @@
+<%= render "shared/turbo_modal",
+           title: title,
+           size: "lg",
+           modal_class: "turbo-car-modal turbo-car-form-modal",
+           dialog_class: "turbo-car-modal-dialog",
+           frame: local_assigns.fetch(:frame, true),
+           body_partial: "cars/form",
+           body_locals: { car: car, modal: true } %>

@@ -76,6 +76,20 @@ RSpec.describe 'Authentications', type: :request do
       expect(response.body).to include('-webkit-text-fill-color: #f1f5f9')
     end
 
+    it 'renders submit loading feedback hooks on the login form' do
+      get new_user_session_path
+
+      document = Nokogiri::HTML(response.body)
+      form = document.at_css("form[data-controller='auth-submit']")
+      submit_button = document.at_css('#sign_in_submit')
+
+      expect(form['data-action']).to include('submit->auth-submit#start')
+      expect(submit_button['data-auth-submit-target']).to include('submit')
+      expect(submit_button.at_css("[data-auth-submit-target='spinner']")).to be_present
+      expect(submit_button.at_css("[data-auth-submit-target='label']").text).to include(I18n.t('devise.ui.sessions.new.submit'))
+      expect(response.body).to include(I18n.t('javascript.auth_submit.loading'))
+    end
+
     it 'redirects a normal user to root' do
       post user_session_path, params: { user: { email: user.email, password: 'password123' } }
       expect(response).to redirect_to(cars_path)

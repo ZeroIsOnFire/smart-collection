@@ -22,3 +22,16 @@ pt-BR:
         save_unexpected: "Ocorreu um erro inesperado ao salvar o ajuste: %{message}"
     poll:
       error_console: "Erro no polling:"
+    auth_submit:
+      loading: "Entrando..."
+    car_removal:
+      errors:
+        unexpected_console: "Erro ao remover item:"
+        unexpected: "Não foi possível remover o item. Tente novamente."
+    modal:
+      loading: "Carregando..."
+      submitting: "Carregando..."
+      loading_error_title: "Erro de carregamento"
+      loading_error_description: "Não foi possível carregar as informações. Tente novamente."
+      retry: "Tentar novamente"
+      close: "Fechar"

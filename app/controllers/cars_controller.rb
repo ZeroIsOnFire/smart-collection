@@ -48,15 +48,20 @@ class CarsController < ApplicationController
   end
 
   # GET /cars/1
-  def show; end
+  def show
+    render partial: 'cars/details_modal', locals: { car: @car } if turbo_frame_request?
+  end
 
   # GET /cars/new
   def new
     @car = current_user.cars.build(params[:car]&.to_unsafe_h || {})
+    render_form_modal(t('cars.modal.new_title')) if turbo_frame_request?
   end
 
   # GET /cars/1/edit
-  def edit; end
+  def edit
+    render_form_modal(t('cars.modal.edit_title')) if turbo_frame_request?
+  end
 
   # POST /cars
   def create
@@ -92,12 +97,16 @@ class CarsController < ApplicationController
 
       respond_to do |format|
         format.html { redirect_to car_url(@car), notice: t('flash.created', resource: t('activerecord.models.car.one')) }
-        render_detected_item_replacement(format)
+        @detected_item ? render_detected_item_replacement(format) : format.turbo_stream { render_create_success }
       end
     else
       respond_to do |format|
         format.html { render :new, status: :unprocessable_content }
-        render_detected_item_replacement(format)
+        if @detected_item
+          render_detected_item_replacement(format)
+        else
+          format.turbo_stream { render_form_modal_stream(t('cars.modal.new_title')) }
+        end
       end
     end
   end
@@ -107,9 +116,17 @@ class CarsController < ApplicationController
     @car = car_service.update(@car.id, car_params)
 
     if @car.errors.empty?
-      redirect_to car_url(@car), notice: t('flash.updated', resource: t('activerecord.models.car.one'))
+      respond_to do |format|
+        format.html { redirect_to car_url(@car), notice: t('flash.updated', resource: t('activerecord.models.car.one')) }
+        format.turbo_stream { render_update_success }
+      end
     else
-      render :edit, status: :unprocessable_content
+      respond_to do |format|
+        format.html { render :edit, status: :unprocessable_content }
+        format.turbo_stream do
+          render_form_modal_stream(t('cars.modal.edit_title'))
+        end
+      end
     end
   end
 
@@ -119,7 +136,8 @@ class CarsController < ApplicationController
     unless car
       respond_to do |format|
         format.turbo_stream do
-          render turbo_stream: turbo_stream.remove("car_#{params[:id]}")
+          render turbo_stream: remove_car_cards_stream(params[:id]) +
+                               turbo_stream.update('modal', '')
         end
         format.html { redirect_to cars_url, notice: t('flash.deleted', resource: t('activerecord.models.car.one')) }
       end
@@ -130,7 +148,8 @@ class CarsController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream do
-        render turbo_stream: turbo_stream.remove("car_#{params[:id]}") +
+        render turbo_stream: remove_car_cards_stream(params[:id]) +
+                             turbo_stream.update('modal', '') +
                              turbo_stream.append('flash_toasts', partial: 'shared/toast',
                                                                  locals: { type: :notice, message: t('flash.deleted', resource: t('activerecord.models.car.one')) })
       end
@@ -141,11 +160,12 @@ class CarsController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream do
-        render turbo_stream: turbo_stream.append(
-          'flash_toasts',
-          partial: 'shared/toast',
-          locals: { type: :alert, message: t('flash.error') }
-        ), status: :unprocessable_content
+        render turbo_stream: turbo_stream.update('modal', '') +
+                             turbo_stream.append(
+                               'flash_toasts',
+                               partial: 'shared/toast',
+                               locals: { type: :alert, message: t('flash.error') }
+                             ), status: :unprocessable_content
       end
       format.html { redirect_to cars_url, alert: t('flash.error') }
     end
@@ -165,9 +185,48 @@ class CarsController < ApplicationController
     end
   end
 
+  def render_form_modal(title, status: :ok)
+    render partial: 'cars/form_modal',
+           locals: { car: @car, title: title },
+           formats: [:html],
+           status: status
+  end
+
+  def render_form_modal_stream(title)
+    render turbo_stream: turbo_stream.update(
+      'modal',
+      partial: 'cars/form_modal',
+      locals: { car: @car, title: title, frame: false }
+    ), status: :unprocessable_content
+  end
+
+  def render_create_success
+    render turbo_stream: turbo_stream.prepend('cars_grid_inner', partial: 'cars/car', locals: { car: @car }) +
+                         turbo_stream.remove('cars_empty_state') +
+                         turbo_stream.update('modal', '') +
+                         turbo_stream.append('flash_toasts', partial: 'shared/toast',
+                                                             locals: success_toast(:created))
+  end
+
+  def render_update_success
+    render turbo_stream: turbo_stream.replace("car_#{@car.id}", partial: 'cars/car', locals: { car: @car }) +
+                         turbo_stream.update('modal', '') +
+                         turbo_stream.append('flash_toasts', partial: 'shared/toast',
+                                                             locals: success_toast(:updated))
+  end
+
+  def remove_car_cards_stream(car_id)
+    safe_car_id = car_id.to_s.gsub(/[^a-zA-Z0-9_-]/, '')
+
+    view_context.turbo_stream_action_tag(:remove, targets: %([data-car-card-id="#{safe_car_id}"]))
+  end
+
+  def success_toast(action)
+    { type: :notice, message: t("flash.#{action}", resource: t('activerecord.models.car.one')) }
+  end
+
   def set_car
-    @car = Car.find(params[:id])
-    raise Mongoid::Errors::DocumentNotFound.new(Car, params[:id]) if @car.user_id != current_user.id
+    @car = current_user.cars.find(params[:id])
   end
 
   def car_service

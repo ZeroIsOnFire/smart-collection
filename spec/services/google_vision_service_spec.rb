@@ -39,10 +39,7 @@ RSpec.describe GoogleVisionService do
 
       before do
         allow(described_class).to receive_messages(credentials_configured?: true, simulation_mode?: false)
-        expect(ImageUpscalerService).to receive(:upscale_if_needed)
-          .with(photo_path, minimum_side: ImageUpscalerService.default_minimum_side).ordered.and_return(nil)
-        expect(ImageUpscalerService).to receive(:upscale_if_needed)
-          .with(photo_path, minimum_side: AutodetectionService.autodetection_minimum_side).ordered.and_return(nil)
+        allow(ImageUpscalerService).to receive(:upscale_if_needed).and_return(nil)
         allow(Google::Cloud::Vision).to receive(:image_annotator).and_return(mock_annotator)
         allow(mock_annotator).to receive(:object_localization_detection).and_return(mock_response)
       end
@@ -50,6 +47,10 @@ RSpec.describe GoogleVisionService do
       it 'returns an array of detected objects with label, score and vertices' do
         result = described_class.analyze(photo_path)
 
+        expect(ImageUpscalerService).to have_received(:upscale_if_needed)
+          .with(photo_path, minimum_side: ImageUpscalerService.default_minimum_side).ordered
+        expect(ImageUpscalerService).to have_received(:upscale_if_needed)
+          .with(photo_path, minimum_side: AutodetectionService.autodetection_minimum_side).ordered
         expect(result).to be_an(Array)
         expect(result.size).to eq(1)
         expect(result.first[:label]).to eq('Toy car')
@@ -61,6 +62,10 @@ RSpec.describe GoogleVisionService do
 
         result = described_class.analyze(photo_path)
 
+        expect(ImageUpscalerService).to have_received(:upscale_if_needed)
+          .with(photo_path, minimum_side: ImageUpscalerService.default_minimum_side).ordered
+        expect(ImageUpscalerService).to have_received(:upscale_if_needed)
+          .with(photo_path, minimum_side: AutodetectionService.autodetection_minimum_side).ordered
         expect(result).to be_empty
       end
     end

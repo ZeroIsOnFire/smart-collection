@@ -1,0 +1,7 @@
+<%= render "shared/turbo_modal",
+           title: car.name.presence || t("cars.show.fallback_name"),
+           size: "lg",
+           modal_class: "turbo-car-modal turbo-car-details-modal",
+           dialog_class: "turbo-car-modal-dialog",
+           body_partial: "cars/details",
+           body_locals: { car: car, modal: true } %>

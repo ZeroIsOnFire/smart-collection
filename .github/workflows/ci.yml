@@ -21,7 +21,7 @@ jobs:
 
     env:
       RAILS_ENV: test
-      MONGODB_URI: mongodb://localhost:27017/smart_collection_catalog_test
+      MONGODB_TEST_URI: mongodb://localhost:27017/smart_collection_catalog_test
       REDIS_URL: redis://localhost:6379/0
       SECRET_KEY_BASE: ci_test_secret_key_base_placeholder
 
@@ -32,17 +32,13 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.3"
+          ruby-version: "3.3.10"
           bundler-cache: true
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "yarn"
-
-      - name: Install JS dependencies
-        run: yarn install --frozen-lockfile
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y imagemagick
 
       - name: Run RSpec
         run: bundle exec rspec --format documentation

@@ -15,10 +15,16 @@ export default class extends Controller {
       })
 
       // Destruir ao fechar para evitar vazamento de memória
-      this.modalElement.addEventListener('hidden.bs.modal', () => {
+      this.modalElement.addEventListener('hidden.bs.modal', (event) => {
+        if (event.target !== this.modalElement) return
+
         if (this.cropper) {
           this.cropper.destroy()
           this.cropper = null
+        }
+
+        if (document.getElementById("turboModal")?.classList.contains("show")) {
+          document.body.classList.add("modal-open")
         }
       })
     }

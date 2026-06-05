@@ -28,6 +28,21 @@ RSpec.describe 'Cars', type: :request do
       expect(response).to be_successful
     end
 
+    it 'uses immediate local feedback for deletion actions' do
+      car
+
+      get cars_path
+
+      document = Nokogiri::HTML(response.body)
+      delete_form = document.at_css("form[data-car-removal-car-id='#{car.id}']")
+      delete_button = document.at_css("[data-car-removal-trigger][data-car-removal-car-id='#{car.id}']")
+
+      expect(response.body).to include('data-controller="theme car-removal"')
+      expect(delete_form['data-turbo-confirm']).to be_nil
+      expect(delete_button['data-car-removal-confirm-message']).to eq(I18n.t('items.delete_confirm'))
+      expect(delete_button).to be_present
+    end
+
     it 'shows the autodetection AI upscaling notice when enabled and configured' do
       allow(ImageUpscalerService).to receive(:service_configured?).and_return(true)
 
@@ -93,6 +108,14 @@ RSpec.describe 'Cars', type: :request do
       expect(response).to be_successful
     end
 
+    it 'renders the form inside the global modal frame' do
+      get new_car_path, headers: { 'Turbo-Frame' => 'modal' }
+
+      expect(response).to be_successful
+      expect(response.body).to include('id="turboModal"')
+      expect(response.body).to include('id="new_car"')
+    end
+
     it 'shows the AI upscaling notice when enabled and configured' do
       allow(ImageUpscalerService).to receive(:service_configured?).and_return(true)
 
@@ -138,6 +161,30 @@ RSpec.describe 'Cars', type: :request do
 
         expect(Car.last.photo).to be_present
       end
+
+      it 'prepends the created car and closes the modal with turbo stream' do
+        expect do
+          post cars_path, params: { car: valid_attributes }, as: :turbo_stream
+        end.to change(Car, :count).by(1)
+
+        created_car = Car.last
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include('turbo-stream action="prepend" target="cars_grid_inner"')
+        expect(response.body).to include("car_#{created_car.id}")
+        expect(response.body).to include('turbo-stream action="update" target="modal"')
+        expect(response.body).to include('flash_toasts')
+      end
+
+      it 'rerenders the modal form when turbo stream validation fails' do
+        expect do
+          post cars_path, params: { car: valid_attributes.merge(name: '') }, as: :turbo_stream
+        end.not_to change(Car, :count)
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(response.body).to include('turbo-stream action="update" target="modal"')
+        expect(response.body).to include('id="turboModal"')
+        expect(response.body).to include('new_car')
+      end
     end
   end
 
@@ -147,9 +194,44 @@ RSpec.describe 'Cars', type: :request do
       expect(response).to be_successful
     end
 
+    it 'renders the edit form inside the global modal frame' do
+      get edit_car_path(car), headers: { 'Turbo-Frame' => 'modal' }
+
+      expect(response).to be_successful
+      expect(response.body).to include('id="turboModal"')
+      expect(response.body).to include("edit_car_#{car.id}")
+      expect(response.body).to include(I18n.t('cars.modal.edit_title'))
+    end
+
     it "redirects if trying to edit another user's car" do
       other_car = create(:car, user: other_user)
       get edit_car_path(other_car)
+      expect(response).to have_http_status(:not_found)
+    end
+  end
+
+  describe 'GET /show' do
+    it 'renders the detail view inside the global modal frame' do
+      get car_path(car), headers: { 'Turbo-Frame' => 'modal' }
+
+      expect(response).to be_successful
+      expect(response.body).to include('id="turboModal"')
+      expect(response.body).to include(car.name)
+      document = Nokogiri::HTML(response.body)
+      delete_form = document.at_css("form[data-car-removal-car-id='#{car.id}']")
+      delete_button = document.at_css("[data-car-removal-trigger][data-car-removal-car-id='#{car.id}']")
+
+      expect(delete_form['data-turbo-frame']).to be_nil
+      expect(delete_form['data-turbo-confirm']).to be_nil
+      expect(delete_button['data-car-removal-confirm-message']).to eq(I18n.t('items.delete_confirm'))
+      expect(delete_button).to be_present
+    end
+
+    it "does not show another user's car" do
+      other_car = create(:car, user: other_user)
+
+      get car_path(other_car)
+
       expect(response).to have_http_status(:not_found)
     end
   end
@@ -182,6 +264,24 @@ RSpec.describe 'Cars', type: :request do
         patch car_path(car_with_photo), params: { car: { remove_photo: '1' } }
         expect(response).to redirect_to(car_url(car_with_photo))
         expect(Car.find(car_with_photo.id).photo).not_to be_present
+      end
+
+      it 'replaces the updated car and closes the modal with turbo stream' do
+        patch car_path(car), params: { car: new_attributes }, as: :turbo_stream
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include("turbo-stream action=\"replace\" target=\"car_#{car.id}\"")
+        expect(response.body).to include('turbo-stream action="update" target="modal"')
+        expect(response.body).to include('flash_toasts')
+      end
+
+      it 'rerenders the modal form when turbo stream validation fails' do
+        patch car_path(car), params: { car: { name: '' } }, as: :turbo_stream
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(response.body).to include('turbo-stream action="update" target="modal"')
+        expect(response.body).to include('id="turboModal"')
+        expect(response.body).to include("edit_car_#{car.id}")
       end
     end
   end
@@ -227,8 +327,12 @@ RSpec.describe 'Cars', type: :request do
         delete car_path(car_to_destroy), as: :turbo_stream
       end.to change(Car, :count).by(-1)
 
+      document = Nokogiri::HTML.fragment(response.body)
+      remove_stream = document.at_css('turbo-stream[action="remove"]')
+
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include("turbo-stream action=\"remove\" target=\"car_#{car_to_destroy.id}\"")
+      expect(remove_stream['targets']).to eq(%([data-car-card-id="#{car_to_destroy.id}"]))
+      expect(response.body).to include('turbo-stream action="update" target="modal"')
       expect(response.body).to include('flash_toasts')
       expect(response.body).to include(I18n.t('flash.deleted', resource: I18n.t('activerecord.models.car.one')))
     end
@@ -255,6 +359,7 @@ RSpec.describe 'Cars', type: :request do
       delete car_path(car_to_destroy), as: :turbo_stream
 
       expect(response).to have_http_status(:unprocessable_content)
+      expect(response.body).to include('turbo-stream action="update" target="modal"')
       expect(response.body).to include('flash_toasts')
       expect(response.body).to include(I18n.t('flash.error'))
     end

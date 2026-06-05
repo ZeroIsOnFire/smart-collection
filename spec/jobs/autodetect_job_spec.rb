@@ -7,8 +7,19 @@ RSpec.describe AutodetectJob do
   # O factory de autodetection já usa o test_image.png
   let(:autodetection) { create(:autodetection, user: user) }
 
+  def build_temp_image(width:, height:, filename: 'autodetection.jpg')
+    tempfile = Tempfile.new(['upscaled', '.jpg'], Rails.root.join('tmp'))
+    image = MiniMagick::Image.open(Rails.root.join('spec/fixtures/files/test_image.png'))
+    image.resize "#{width}x#{height}!"
+    image.write(tempfile.path)
+    tempfile.define_singleton_method(:original_filename) { filename }
+    tempfile.define_singleton_method(:content_type) { 'image/jpeg' }
+    tempfile
+  end
+
   describe '#perform' do
     it 'processa a imagem e cria detected items vinculados à autodetection' do
+      allow(ImageUpscalerService).to receive(:upscale_if_needed).and_return(nil)
       allow(YoloDetectionService).to receive_messages(
         service_configured?: true,
         analyze: [
@@ -48,7 +59,41 @@ RSpec.describe AutodetectJob do
       FileUtils.rm_f(mock_file_path)
     end
 
+    it 'prepares the autodetection photo for YOLO in the background job' do
+      allow(ENV).to receive(:fetch).and_call_original
+      allow(ENV).to receive(:fetch).with('AUTODETECTION_MINIMUM_SIDE', nil).and_return('1440')
+      upscaled_file = build_temp_image(width: 1440, height: 1440)
+
+      expect(ImageUpscalerService).to receive(:upscale_if_needed)
+        .with(anything, minimum_side: 1440, use_ai: true, local_fallback: true)
+        .and_return(upscaled_file)
+      expect(YoloDetectionService).to receive(:service_configured?).and_return(true)
+      expect(YoloDetectionService).to receive(:analyze).and_return([])
+
+      described_class.new.perform(autodetection.id.to_s)
+
+      saved_autodetection = Autodetection.find(autodetection.id)
+      saved_image = MiniMagick::Image.open(saved_autodetection.photo.path)
+      expect(saved_image.width).to eq(1440)
+      expect(saved_image.height).to eq(1440)
+      expect(saved_autodetection.status).to eq('to_verify')
+    end
+
+    it 'uses local fallback when the user disables AI upscaling' do
+      user.update!(ai_upscaling_enabled: false)
+      allow(YoloDetectionService).to receive_messages(service_configured?: true, analyze: [])
+
+      expect(ImageUpscalerService).to receive(:upscale_if_needed)
+        .with(anything, minimum_side: AutodetectionService.autodetection_minimum_side, use_ai: false, local_fallback: true)
+        .and_return(nil)
+
+      described_class.new.perform(autodetection.id.to_s)
+
+      expect(autodetection.reload.status).to eq('to_verify')
+    end
+
     it 'marca como erro caso o processamento falhe' do
+      allow(ImageUpscalerService).to receive(:upscale_if_needed).and_return(nil)
       allow(YoloDetectionService).to receive(:service_configured?).and_return(true)
       allow(YoloDetectionService).to receive(:analyze).and_raise('Simulated YOLO API Error')
 
@@ -57,6 +102,17 @@ RSpec.describe AutodetectJob do
       autodetection.reload
       expect(autodetection.status).to eq('error')
       expect(autodetection.error_message).to eq('Simulated YOLO API Error')
+    end
+
+    it 'marks the autodetection as error when upscaling fails' do
+      allow(ImageUpscalerService).to receive(:upscale_if_needed)
+        .and_raise(ImageUpscalerService::UpscaleError, 'Upscale indisponivel')
+
+      described_class.new.perform(autodetection.id.to_s)
+
+      autodetection.reload
+      expect(autodetection.status).to eq('error')
+      expect(autodetection.error_message).to eq('Upscale indisponivel')
     end
   end
 end

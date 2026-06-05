@@ -10,7 +10,15 @@
       <p class="auth-subtitle"><%= t('devise.ui.sessions.new.subtitle') %></p>
     </div>
 
-    <%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { data: { turbo: false } }) do |f| %>
+    <%= form_for(resource, as: resource_name, url: session_path(resource_name),
+                 html: {
+                   data: {
+                     controller: "auth-submit",
+                     action: "submit->auth-submit#start",
+                     turbo: false,
+                     auth_submit_loading_text_value: t('javascript.auth_submit.loading')
+                   }
+                 }) do |f| %>
       <div class="form-group">
         <%= f.label :email, t('devise.ui.sessions.new.email_label') %>
         <%= f.email_field :email, autofocus: true, autocomplete: "email",
@@ -33,7 +41,13 @@
       <% end %>
 
       <div class="form-actions">
-        <%= f.submit t('devise.ui.sessions.new.submit'), class: "btn-primary", id: "sign_in_submit" %>
+        <button type="submit"
+                class="btn-primary auth-submit-button"
+                id="sign_in_submit"
+                data-auth-submit-target="submit">
+          <span class="spinner-border spinner-border-sm d-none" aria-hidden="true" data-auth-submit-target="spinner"></span>
+          <span data-auth-submit-target="label"><%= t('devise.ui.sessions.new.submit') %></span>
+        </button>
       </div>
     <% end %>
 

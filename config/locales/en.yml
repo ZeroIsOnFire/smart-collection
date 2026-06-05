@@ -190,6 +190,37 @@ en:
     page_info: "Page %{page} of %{total}"
 
   cars:
+    index:
+      subtitle: "Your personal collection"
+      copy_public_link: "Copy public link"
+      search_placeholder: "Search by name, brand..."
+      grid_view: "Grid"
+      list_view: "List"
+      empty_title: "No items in the collection"
+      empty_text: "Add your first car or use photo autodetection."
+      add_first_item: "Add First Item"
+      no_results_title: "No results found"
+      no_results_text: "Try different terms or clear the filter."
+    new:
+      badge: "New Record"
+      title: "Add to Collection"
+      subtitle: "Fill in the details of your new model carefully."
+    edit:
+      badge: "Edit"
+      title: "Update %{name}"
+      subtitle: "Change the specifications of the existing item in your collection."
+    modal:
+      new_title: "New Item"
+      edit_title: "Edit Item"
+    card:
+      view_details: "View Details"
+      no_photo: "No photo"
+    show:
+      added_at: "Added on %{date}"
+      collection: "My Collection"
+      fallback_name: "—"
+      no_photo: "No photo registered"
+      view_full_photo: "View full photo"
     form:
       main_photo: "Main Photo"
       upload_prompt: "Click or drag image here"
@@ -205,6 +236,11 @@ en:
       adjust_photo: "Adjust Photo"
       save_crop: "Save Crop"
       predominant_color: "Predominant Color"
+      brand_placeholder: "Ex: Hot Wheels, Matchbox, Maisto"
+      manufacturer_placeholder: "Ex: Porsche, Ferrari, Ford"
+      name_placeholder: "Ex: 911 Carrera, Mustang GT, LaFerrari"
+      year_placeholder: "Ex: 1998"
+      observations_placeholder: "Write details about the condition..."
 
   autodetections:
     title: "Photo Autodetection"

@@ -1,5 +1,7 @@
-<div id="car_<%= car.id %>" class="col animate-fade-in">
-  <% cache [car, local_assigns[:public]] do %>
+<% car_dom_id = car.id.to_s %>
+
+<div id="car_<%= car_dom_id %>" class="col animate-fade-in car-card-wrapper" data-car-card-id="<%= car_dom_id %>">
+  <% cache [car, I18n.locale, local_assigns[:public], :card_actions_v4] do %>
     <div class="card premium-card h-100 shadow-sm border-0 position-relative rounded-4 overflow-hidden" style="transition: transform 0.2s ease, box-shadow 0.2s ease;">
       <% unless local_assigns[:public] %>
         <!-- Menu Dropdown (Hiden on public views) -->
@@ -12,19 +14,31 @@
             </button>
             <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3">
               <li>
-                <%= link_to car_path(car), class: 'dropdown-item d-flex align-items-center gap-2 py-2', data: { turbo_frame: "_top" } do %>
-                  <i class="bi bi-eye text-muted"></i> Ver Detalhes
+                <%= link_to car_path(car), class: 'dropdown-item d-flex align-items-center gap-2 py-2', data: { turbo_frame: "modal" } do %>
+                  <i class="bi bi-eye text-muted"></i> <%= t("cars.card.view_details") %>
                 <% end %>
               </li>
               <li>
-                <%= link_to edit_car_path(car), class: 'dropdown-item d-flex align-items-center gap-2 py-2', data: { turbo_frame: "_top" } do %>
-                  <i class="bi bi-pencil text-muted"></i> Editar
+                <%= link_to edit_car_path(car), class: 'dropdown-item d-flex align-items-center gap-2 py-2', data: { turbo_frame: "modal" } do %>
+                  <i class="bi bi-pencil text-muted"></i> <%= t("actions.edit") %>
                 <% end %>
               </li>
               <li><hr class="dropdown-divider"></li>
               <li>
-                <%= button_to car_path(car), method: :delete, form: { data: { turbo_confirm: 'Tem certeza que deseja deletar este item?' } }, class: 'dropdown-item text-danger d-flex align-items-center gap-2 py-2' do %>
-                  <i class="bi bi-trash3"></i> Deletar
+                <%= button_to car_path(car),
+                              method: :delete,
+                              form: {
+                                data: {
+                                  "car-removal-car-id": car_dom_id
+                                }
+                              },
+                              data: {
+                                car_removal_trigger: true,
+                                car_removal_car_id: car_dom_id,
+                                car_removal_confirm_message: t('items.delete_confirm')
+                              },
+                              class: 'dropdown-item text-danger d-flex align-items-center gap-2 py-2' do %>
+                  <i class="bi bi-trash3"></i> <%= t("actions.delete") %>
                 <% end %>
               </li>
             </ul>
@@ -34,7 +48,7 @@
 
       <%# Detalhe: se for público, usamos o path do share, senão o path normal %>
       <% target_path = local_assigns[:public] ? public_share_car_path(share_token: @user.share_token, id: car.id) : car_path(car) %>
-      <%= link_to target_path, class: "text-decoration-none", data: { turbo_frame: "_top" } do %>
+      <%= link_to target_path, class: "text-decoration-none", data: { turbo_frame: local_assigns[:public] ? "_top" : "modal" } do %>
         <!-- Foto -->
         <% if car.photo? %>
           <div class="car-photo-container" style="height: 180px; overflow: hidden;">
@@ -44,7 +58,7 @@
           <div class="car-photo-container bg-light d-flex align-items-center justify-content-center text-muted" style="height: 180px;">
             <div class="text-center">
               <i class="bi bi-camera fs-3 opacity-30 d-block mb-1"></i>
-              <small class="opacity-50">Sem foto</small>
+              <small class="opacity-50"><%= t("cars.card.no_photo") %></small>
             </div>
           </div>
         <% end %>
@@ -78,6 +92,12 @@
           <% end %>
         </div>
       <% end %>
+
+      <div class="car-removal-loader" aria-hidden="true">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden"><%= t("javascript.modal.loading") %></span>
+        </div>
+      </div>
     </div>
   <% end %>
 </div>

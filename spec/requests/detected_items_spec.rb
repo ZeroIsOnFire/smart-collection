@@ -31,7 +31,7 @@ RSpec.describe 'DetectedItems', type: :request do
           upscale: { use_ai: true, local_fallback: true }
         )
         .and_return(
-          File.open('/rails/spec/fixtures/files/car_sample.jpg')
+          File.open(Rails.root.join('spec/fixtures/files/car_sample.jpg'))
         )
 
       patch update_selection_detected_item_path(@detected_item),
@@ -56,7 +56,7 @@ RSpec.describe 'DetectedItems', type: :request do
           upscale: { use_ai: true, local_fallback: true }
         )
         .and_return(
-          File.open('/rails/spec/fixtures/files/car_sample.jpg')
+          File.open(Rails.root.join('spec/fixtures/files/car_sample.jpg'))
         )
 
       patch update_selection_detected_item_path(@detected_item),
@@ -103,7 +103,7 @@ RSpec.describe 'DetectedItems', type: :request do
           upscale: { use_ai: true, local_fallback: true }
         )
         .and_return(
-          File.open('/rails/spec/fixtures/files/car_sample.jpg')
+          File.open(Rails.root.join('spec/fixtures/files/car_sample.jpg'))
         )
 
       expect do
@@ -132,7 +132,7 @@ RSpec.describe 'DetectedItems', type: :request do
           upscale: { use_ai: true, local_fallback: true }
         )
         .and_return(
-          File.open('/rails/spec/fixtures/files/car_sample.jpg')
+          File.open(Rails.root.join('spec/fixtures/files/car_sample.jpg'))
         )
 
       post autodetection_detected_items_path(@autodetection),

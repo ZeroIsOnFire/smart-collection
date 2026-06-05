@@ -7,6 +7,6 @@ development:
 test:
   clients:
     default:
-      uri: mongodb://<%= ENV.fetch('MONGODB_USERNAME', 'scc_admin') %>:<%= ENV.fetch('MONGODB_PASSWORD', 'scc_dev') %>@mongodb:27017/smart_collection_catalog_test?authSource=admin
+      uri: <%= ENV.fetch('MONGODB_TEST_URI') { "mongodb://#{ENV.fetch('MONGODB_USERNAME', 'scc_admin')}:#{ENV.fetch('MONGODB_PASSWORD', 'scc_dev')}@mongodb:27017/smart_collection_catalog_test?authSource=admin" } %>
       options:
         server_selection_timeout: 5
