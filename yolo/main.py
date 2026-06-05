@@ -72,25 +72,37 @@ class ColorDetector:
         
         # Achromatic check (Black, White, Gray, Silver)
         if s_norm < 15:
-            if v_norm > 90: return "Branco"
-            if v_norm < 20: return "Preto"
-            if v_norm > 75: return "Prata"
-            if v_norm > 35: return "Cinza"
+            if v_norm > 90:
+                return "Branco"
+            if v_norm < 20:
+                return "Preto"
+            if v_norm > 75:
+                return "Prata"
+            if v_norm > 35:
+                return "Cinza"
             return "Preto"
         
         # Chromatic colors
-        if h_norm < 12 or h_norm > 345: return "Vermelho"
+        if h_norm < 12 or h_norm > 345:
+            return "Vermelho"
         if h_norm < 30:
-            if v_norm < 50: return "Marrom"
+            if v_norm < 50:
+                return "Marrom"
             return "Laranja"
         if h_norm < 65:
-            if s_norm < 30 and v_norm > 70: return "Bege"
-            if s_norm < 60 and v_norm < 85: return "Dourado"
+            if s_norm < 30 and v_norm > 70:
+                return "Bege"
+            if s_norm < 60 and v_norm < 85:
+                return "Dourado"
             return "Amarelo"
-        if h_norm < 165: return "Verde"
-        if h_norm < 265: return "Azul"
-        if h_norm < 300: return "Roxo"
-        if h_norm < 345: return "Rosa"
+        if h_norm < 165:
+            return "Verde"
+        if h_norm < 265:
+            return "Azul"
+        if h_norm < 300:
+            return "Roxo"
+        if h_norm < 345:
+            return "Rosa"
         
         return "Cinza"
 

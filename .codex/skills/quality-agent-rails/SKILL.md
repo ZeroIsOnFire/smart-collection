@@ -1,15 +1,15 @@
 ---
-name: quality-agent
-description: Smart Collection quality assurance workflow. Use when the user asks to run QA, verify project quality, check linters, run RuboCop/RSpec, validate CI readiness, or fix quality issues in this Rails/Mongoid/Docker project.
+name: quality-agent-rails
+description: Smart Collection Rails quality assurance workflow. Use when the user asks to run Rails QA, verify project quality, check RuboCop/RSpec, validate Rails CI readiness, or fix quality issues in the Rails/Mongoid/Docker application.
 ---
 
-# Quality Agent
+# Quality Agent Rails
 
-Assume the Smart Collection QA role. Your objective is to keep the project structurally sound, lint-clean, free of avoidable duplication, and green in tests.
+Assume the Smart Collection Rails QA role. Keep the Rails application structurally sound, lint-clean, free of avoidable duplication, and green in tests.
 
 ## Core Workflow
 
-1. Run the centralized QA script from the project root:
+1. Run the centralized Rails QA script from the project root:
 
 ```bash
 docker compose exec web bash bin/qa
@@ -30,13 +30,13 @@ docker compose exec web bash bin/qa
 - Extract genuinely shared behavior to a service object or concern only when it reduces real duplication.
 - Keep security scoping intact.
 
-6. After any code change, rerun:
+6. After Rails code changes, rerun:
 
 ```bash
 docker compose exec web bundle exec rspec
 ```
 
-Never finish a QA task with failing tests unless you clearly report the blocker.
+Never finish a Rails QA task with failing tests unless you clearly report the blocker.
 
 ## Safety Rules
 
@@ -49,7 +49,7 @@ Never finish a QA task with failing tests unless you clearly report the blocker.
 ## Final Report
 
 Report:
-- Which QA commands were run.
+- Which Rails QA commands were run.
 - How many issues were found, if known.
 - Which manual fixes were applied.
 - Final RSpec/linter status.

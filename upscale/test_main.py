@@ -3,7 +3,7 @@ import os
 import tempfile
 import unittest
 from collections import OrderedDict
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 import numpy as np
 from fastapi.testclient import TestClient
