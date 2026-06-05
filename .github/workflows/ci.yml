@@ -21,7 +21,7 @@ jobs:
 
     env:
       RAILS_ENV: test
-      MONGODB_URI: mongodb://localhost:27017/smart_collection_catalog_test
+      MONGODB_TEST_URI: mongodb://localhost:27017/smart_collection_catalog_test
       REDIS_URL: redis://localhost:6379/0
       SECRET_KEY_BASE: ci_test_secret_key_base_placeholder
 
