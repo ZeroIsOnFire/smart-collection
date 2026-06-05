@@ -35,6 +35,11 @@ jobs:
           ruby-version: "3.3.10"
           bundler-cache: true
 
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y imagemagick
+
       - name: Run RSpec
         run: bundle exec rspec --format documentation
 
