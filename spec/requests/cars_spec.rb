@@ -50,6 +50,17 @@ RSpec.describe 'Cars', type: :request do
       expect(response.body).to include(signed_stream)
     end
 
+    it 'marks the processing text so list view can show only the loading icon' do
+      processing_car = create(:car, user: user, photo_processing_status: 'pending')
+      processing_car.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+      processing_car.save!
+
+      get cars_path
+
+      expect(response.body).to include('car-photo-processing-label')
+      expect(response.body).to include(I18n.t('cars.card.photo_processing'))
+    end
+
     it 'shows the autodetection AI upscaling notice when enabled and configured' do
       allow(ImageUpscalerService).to receive(:service_configured?).and_return(true)
 

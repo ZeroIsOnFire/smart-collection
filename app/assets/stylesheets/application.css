@@ -891,6 +891,14 @@ body {
   flex-shrink: 0;
 }
 
+.view-list .car-photo-container .spinner-border {
+  margin-right: 0 !important;
+}
+
+.view-list .car-photo-processing-label {
+  display: none;
+}
+
 .view-list .card-body {
   display: flex;
   flex-direction: row !important;
