@@ -224,7 +224,8 @@ RSpec.describe 'Cars', type: :request do
     it "redirects if trying to edit another user's car" do
       other_car = create(:car, user: other_user)
       get edit_car_path(other_car)
-      expect(response).to have_http_status(:not_found)
+      expect(response).to redirect_to(cars_path)
+      expect(flash[:alert]).to eq(I18n.t('errors.messages.page_not_found', default: 'Página ou item não encontrado.'))
     end
   end
 
@@ -250,7 +251,8 @@ RSpec.describe 'Cars', type: :request do
 
       get car_path(other_car)
 
-      expect(response).to have_http_status(:not_found)
+      expect(response).to redirect_to(cars_path)
+      expect(flash[:alert]).to eq(I18n.t('errors.messages.page_not_found', default: 'Página ou item não encontrado.'))
     end
   end
 

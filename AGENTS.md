@@ -223,20 +223,6 @@ refactor(items): extrair lógica de tags para TagService
 
 ---
 
-## Etapas de Desenvolvimento (Ordem Atualizada)
-
-1. [x] Login e Autenticação
-2. [x] Cadastro de Usuários e Configurações de Perfil Seguras
-3. [x] Cadastro e Gestão de Coleções (Premium Grid/List)
-4. [x] Captura/Indexação via YOLO local e Recorte Interativo
-5. [x] Link público e Visão Showcase Privada (Share Token Segregado)
-6. [x] Exportação de Coleção para PDF (Prawn)
-7. [x] Exportação de Coleção para CSV
-8. [x] Pesquisa Global / Full Text Search Integrada (Múltiplas Coleções)
-9. **TODO**: Avaliar modelos de monetização e deploy da versão cloud/self-hosted.
-
----
-
 ## Convenções para Agentes
 
 - **PRIORIDADE MÁXIMA**: Segurança e Segregação de Dados (`current_user`).
