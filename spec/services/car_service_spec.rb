@@ -31,6 +31,28 @@ RSpec.describe CarService do
     ActiveJob::Base.queue_adapter = :test
   end
 
+  describe '.ensure_text_search_index!' do
+    before do
+      described_class.remove_instance_variable(:@text_search_index_checked) if described_class.instance_variable_defined?(:@text_search_index_checked)
+    end
+
+    it 'creates indexes when the text search index is missing' do
+      allow(described_class).to receive(:text_search_index_exists?).and_return(false)
+
+      expect(Car).to receive(:create_indexes)
+
+      described_class.ensure_text_search_index!
+    end
+
+    it 'does not recreate indexes when the text search index already exists' do
+      allow(described_class).to receive(:text_search_index_exists?).and_return(true)
+
+      expect(Car).not_to receive(:create_indexes)
+
+      described_class.ensure_text_search_index!
+    end
+  end
+
   describe '#create' do
     it 'creates a car for the user' do
       expect do

@@ -1,7 +1,28 @@
 # frozen_string_literal: true
 
 class CarService
+  SEARCH_INDEX_MUTEX = Mutex.new
+
   attr_reader :user
+
+  def self.ensure_text_search_index!
+    return if @text_search_index_checked
+
+    SEARCH_INDEX_MUTEX.synchronize do
+      return if @text_search_index_checked
+
+      Car.create_indexes unless text_search_index_exists?
+      @text_search_index_checked = true
+    end
+  end
+
+  def self.text_search_index_exists?
+    Car.collection.indexes.to_a.any? { |index| index['name'] == 'CarTextIndex' }
+  rescue Mongo::Error::OperationFailure => e
+    return false if e.code == 26
+
+    raise
+  end
 
   def initialize(user)
     @user = user
@@ -51,6 +72,7 @@ class CarService
     words = query.to_s.strip
     return user.cars if words.empty?
 
+    self.class.ensure_text_search_index!
     user.cars.where('$text' => { '$search' => words })
   end
 
