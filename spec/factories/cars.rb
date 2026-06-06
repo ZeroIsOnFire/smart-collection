@@ -2,9 +2,8 @@
 
 FactoryBot.define do
   factory :car do
-    name { 'Fusca' }
+    name { 'Volkswagen Fusca' }
     brand { 'Hot Wheels' }
-    manufacturer { 'Volkswagen' }
     tags { %w[classic vintage] }
     observations { 'Carro de colecionador, pintura original.' }
     size { 'Small' }

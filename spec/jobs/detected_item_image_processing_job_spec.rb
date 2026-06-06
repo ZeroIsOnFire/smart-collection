@@ -50,7 +50,6 @@ RSpec.describe DetectedItemImageProcessingJob do
         name: 'User name',
         color: 'Verde',
         brand: 'Hot Wheels',
-        manufacturer: 'Porsche',
         year: '1998',
         size: '1:64'
       )
@@ -59,7 +58,6 @@ RSpec.describe DetectedItemImageProcessingJob do
       expect(processed_item.label).to eq('User name')
       expect(processed_item.color).to eq('Verde')
       expect(processed_item.brand).to eq('Hot Wheels')
-      expect(processed_item.manufacturer).to eq('Porsche')
       expect(processed_item.year).to eq(1998)
       expect(processed_item.size).to eq('1:64')
     end

@@ -6,13 +6,12 @@ RSpec.describe CarService do
   let(:user) { create(:user) }
   let(:valid_params) do
     {
-      name: 'Corolla',
+      name: 'Toyota Corolla',
       brand: 'Toyota',
       tags: ['sedan'],
       observations: 'Em bom estado',
       size: 'Medium',
       year: 2021,
-      manufacturer: 'Toyota',
       photo: Rack::Test::UploadedFile.new(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
     }
   end
@@ -36,18 +35,18 @@ RSpec.describe CarService do
       described_class.remove_instance_variable(:@text_search_index_checked) if described_class.instance_variable_defined?(:@text_search_index_checked)
     end
 
-    it 'creates indexes when the text search index is missing' do
-      allow(described_class).to receive(:text_search_index_exists?).and_return(false)
+    it 'refreshes indexes when the text search index is missing' do
+      allow(described_class).to receive(:text_search_index_current?).and_return(false)
 
-      expect(Car).to receive(:create_indexes)
+      expect(described_class).to receive(:refresh_text_search_index!)
 
       described_class.ensure_text_search_index!
     end
 
-    it 'does not recreate indexes when the text search index already exists' do
-      allow(described_class).to receive(:text_search_index_exists?).and_return(true)
+    it 'does not refresh indexes when the text search index is current' do
+      allow(described_class).to receive(:text_search_index_current?).and_return(true)
 
-      expect(Car).not_to receive(:create_indexes)
+      expect(described_class).not_to receive(:refresh_text_search_index!)
 
       described_class.ensure_text_search_index!
     end
@@ -164,10 +163,10 @@ RSpec.describe CarService do
     end
 
     let!(:car1) do
-      create(:car, user: user, name: 'Ferrari F40', brand: 'Ferrari', manufacturer: 'Burago', tags: %w[italy fast])
+      create(:car, user: user, name: 'Burago Ferrari F40', brand: 'Ferrari', tags: %w[italy fast])
     end
     let!(:car2) do
-      create(:car, user: user, name: 'Porsche 911', brand: 'Porsche', manufacturer: 'Hot Wheels',
+      create(:car, user: user, name: 'Hot Wheels Porsche 911', brand: 'Porsche',
                    tags: %w[germany classic])
     end
     let!(:other_user_car) { create(:car, name: 'Ferrari Enzo') }
@@ -183,7 +182,7 @@ RSpec.describe CarService do
       expect(results).to include(car2)
     end
 
-    it 'returns cars matching the query in manufacturer' do
+    it 'returns cars matching the vehicle manufacturer included in the name' do
       results = described_class.new(user).search('Burago')
       expect(results).to include(car1)
     end

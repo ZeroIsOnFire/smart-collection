@@ -47,7 +47,7 @@ O **Smart Collection Catalog** é um serviço web premium para registro e gerenc
 ## 🧠 Funcionalidades Principais
 
 - **Autodetecção via IA**: Faça o upload de uma foto com várias miniaturas; a IA irá detectá-las, recortá-las e gerar uma fila de verificação para você catalogar tudo em segundos.
-- **Gestão de Acervo**: Controle marca, fabricante, nome, ano, escala e cor de cada item.
+- **Gestão de Acervo**: Controle marca, nome, ano, escala e cor de cada item.
 - **Sincronização em Tempo Real**: Status de processamento e atualizações de interface via Turbo Streams.
 - **Página de Exibição Pública**: Compartilhe sua coleção através de um link público elegante com busca integrada e rolagem infinita.
 - **Design Premium**: Interface moderna com modo lista/grade, animações suaves e foco na usabilidade.

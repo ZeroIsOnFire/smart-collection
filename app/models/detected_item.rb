@@ -13,7 +13,6 @@ class DetectedItem
   field :year, type: Integer
   field :size, type: String
   field :brand, type: String
-  field :manufacturer, type: String
   field :image_processing_status, type: String
   field :image_processing_error, type: String
 

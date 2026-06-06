@@ -11,15 +11,25 @@ class CarService
     SEARCH_INDEX_MUTEX.synchronize do
       return if @text_search_index_checked
 
-      Car.create_indexes unless text_search_index_exists?
+      refresh_text_search_index! unless text_search_index_current?
       @text_search_index_checked = true
     end
   end
 
-  def self.text_search_index_exists?
-    Car.collection.indexes.to_a.any? { |index| index['name'] == 'CarTextIndex' }
+  def self.text_search_index_current?
+    index = text_search_index
+    index.present? && !index.fetch('weights', {}).key?('manufacturer')
+  end
+
+  def self.refresh_text_search_index!
+    Car.collection.indexes.drop_one('CarTextIndex') if text_search_index
+    Car.create_indexes
+  end
+
+  def self.text_search_index
+    Car.collection.indexes.to_a.find { |index| index['name'] == 'CarTextIndex' }
   rescue Mongo::Error::OperationFailure => e
-    return false if e.code == 26
+    return nil if e.code == 26
 
     raise
   end

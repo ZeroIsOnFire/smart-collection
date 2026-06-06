@@ -9,9 +9,8 @@ RSpec.describe 'Cars', type: :request do
 
   let(:valid_attributes) do
     {
-      name: 'Civic',
+      name: 'Honda Civic',
       brand: 'Hot Wheels',
-      manufacturer: 'Honda',
       year: 2020
     }
   end
@@ -106,10 +105,11 @@ RSpec.describe 'Cars', type: :request do
         expect(response.body).to include('Searchable Car')
       end
 
-      it 'filters cars by manufacturer' do
-        car_matching.update!(manufacturer: 'Burago')
+      it 'filters cars by vehicle manufacturer included in the name' do
+        car_matching.update!(name: 'Burago Ferrari F40')
         get cars_path, params: { q: 'Burago' }
-        expect(response.body).to include('Searchable Car')
+        expect(response.body).to include('Burago Ferrari F40')
+        expect(response.body).not_to include('Other Car')
       end
 
       it 'filters cars by tags' do

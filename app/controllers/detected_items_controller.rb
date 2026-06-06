@@ -83,7 +83,6 @@ class DetectedItemsController < ApplicationController
       label: params[:name].presence || @detected_item.label,
       color: params[:color].presence || @detected_item.color,
       brand: params[:brand],
-      manufacturer: params[:manufacturer],
       year: params[:year],
       size: params[:size],
       image_processing_status: 'pending',
@@ -149,7 +148,7 @@ class DetectedItemsController < ApplicationController
   end
 
   def selection_attributes
-    params.permit(:brand, :manufacturer, :name, :color, :year, :size).to_h
+    params.permit(:brand, :name, :color, :year, :size).to_h
   end
 
   def enqueue_image_processing(detected_item, attributes = {})

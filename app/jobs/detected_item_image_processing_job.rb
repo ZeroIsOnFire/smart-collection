@@ -51,7 +51,6 @@ class DetectedItemImageProcessingJob < ApplicationJob
     detected_item.label = attributes[:name].presence || classification[:label].presence || detected_item.label
     detected_item.color = resolved_color(detected_item, classification, attributes)
     detected_item.brand = attributes[:brand] if attributes.key?(:brand)
-    detected_item.manufacturer = attributes[:manufacturer] if attributes.key?(:manufacturer)
     detected_item.year = attributes[:year] if attributes.key?(:year)
     detected_item.size = attributes[:size] if attributes.key?(:size)
     detected_item.image_processing_status = 'completed'

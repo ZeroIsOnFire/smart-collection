@@ -73,13 +73,10 @@
         <div class="card-body px-3 pb-3 pt-2">
           <h5 class="card-title mb-0 fw-bold text-dark text-truncate fs-6"><%= car.name.presence || '—' %></h5>
 
-          <!-- Marca + Fabricante -->
+          <!-- Marca -->
           <div class="d-flex flex-wrap gap-1 mt-1 mb-2">
             <% if car.brand? %>
               <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary small fw-normal"><%= car.brand %></span>
-            <% end %>
-            <% if car.manufacturer? %>
-              <span class="badge rounded-pill bg-secondary bg-opacity-10 text-secondary small fw-normal"><%= car.manufacturer %></span>
             <% end %>
           </div>
 

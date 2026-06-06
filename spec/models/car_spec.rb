@@ -11,11 +11,6 @@ RSpec.describe Car, type: :model do
       expect(car).to be_valid
     end
 
-    it 'is valid without a manufacturer' do
-      car.manufacturer = nil
-      expect(car).to be_valid
-    end
-
     it 'is not valid without a name' do
       car.name = nil
       expect(car).not_to be_valid

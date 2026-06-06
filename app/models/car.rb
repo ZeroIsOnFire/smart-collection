@@ -7,7 +7,6 @@ class Car
 
   field :name, type: String
   field :brand, type: String
-  field :manufacturer, type: String
   field :observations, type: String
   field :size, type: String
   field :year, type: Integer
@@ -68,7 +67,6 @@ class Car
   index({
           name: 'text',
           brand: 'text',
-          manufacturer: 'text',
           observations: 'text',
           size: 'text',
           tags: 'text'
@@ -76,7 +74,6 @@ class Car
           weights: {
             name: 10,
             brand: 5,
-            manufacturer: 2,
             observations: 1,
             size: 1,
             tags: 1

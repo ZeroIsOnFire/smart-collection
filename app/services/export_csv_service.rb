@@ -9,13 +9,12 @@ class ExportCsvService
 
   def generate
     CSV.generate(headers: true) do |csv|
-      csv << ['Nome', 'Marca', 'Fabricante', 'Escala', 'Ano', 'Cor', 'Observações', 'Data de Adição']
+      csv << ['Nome', 'Marca', 'Escala', 'Ano', 'Cor', 'Observações', 'Data de Adição']
 
       @cars.each do |car|
         csv << [
           car.name,
           car.brand,
-          car.manufacturer,
           car.size,
           car.year,
           car.color,

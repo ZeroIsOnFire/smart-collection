@@ -42,6 +42,8 @@ Use o checklist para marcar cada item quando for concluido.
 
 - [ ] 6.1 Verificar formas de facilitar ou simplificar cadastros.
 - [ ] 6.2 Avaliar reducao de campos obrigatorios, preenchimento progressivo, atalhos, reaproveitamento de dados e sugestoes automaticas.
+- [ ] 6.3 Deixar comportamento de atualizações de autodetecção mais consistente, cada processo trata a tela de um jeito.
+- [x] 6.4 Remover o campo de fabricante do veiculo, mantendo marca e usando o nome para registrar fabricante + modelo.
 
 ## 7. Melhorias de login
 

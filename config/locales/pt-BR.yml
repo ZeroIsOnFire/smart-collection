@@ -141,8 +141,7 @@ pt-BR:
         tags: "Tags"
       car:
         name: "Nome / Modelo do Veículo"
-        brand: "Marca (Item)"
-        manufacturer: "Fabricante (Veículo)"
+        brand: "Marca"
         year: "Ano de Fabricação"
         size: "Escala / Tamanho"
         color: "Cor"
@@ -159,8 +158,7 @@ pt-BR:
     attributes:
       car:
         name: "Nome / Modelo do Veículo"
-        brand: "Marca (Item)"
-        manufacturer: "Fabricante (Veículo)"
+        brand: "Marca"
         year: "Ano de Fabricação"
         size: "Escala / Tamanho"
         color: "Cor"
@@ -253,8 +251,7 @@ pt-BR:
       save_crop: "Salvar Recorte"
       predominant_color: "Cor Predominante"
       brand_placeholder: "Ex: Hot Wheels, Matchbox, Maisto"
-      manufacturer_placeholder: "Ex: Porsche, Ferrari, Ford"
-      name_placeholder: "Ex: 911 Carrera, Mustang GT, LaFerrari"
+      name_placeholder: "Ex: Porsche 911 Carrera, Ford Mustang GT, Ferrari LaFerrari"
       year_placeholder: "Ex: 1998"
       observations_placeholder: "Escreva detalhes sobre o estado de conservação..."
 
@@ -289,7 +286,6 @@ pt-BR:
       new_item: "Novo Item"
       model_name: "Modelo/Nome"
       brand_optional: "Marca (opcional)"
-      manufacturer_optional: "Fabricante (opcional)"
       model_required: "Nome / Modelo (Obrigatório)"
       color: "Cor"
       year: "Ano"

@@ -114,7 +114,6 @@ export default class extends Controller {
       const frameId = this.element.closest("turbo-frame").id
       const itemId = frameId.replace("detected_item_", "")
       const brand = document.getElementById(`brand_${itemId}`)?.value
-      const manufacturer = document.getElementById(`manufacturer_${itemId}`)?.value
       const name = document.getElementById(`name_${itemId}`)?.value
       const color = document.getElementById(`color_${itemId}`)?.value
       const year = document.getElementById(`year_${itemId}`)?.value
@@ -123,7 +122,6 @@ export default class extends Controller {
       const payload = {
         ...normalized,
         brand,
-        manufacturer,
         name,
         color,
         year,

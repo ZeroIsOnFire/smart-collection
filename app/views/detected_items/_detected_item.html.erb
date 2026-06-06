@@ -79,18 +79,11 @@
             <%= simple_form_for(Car.new, url: cars_path, html: { id: "form_detected_item_#{detected_item.id}", class: "row g-3 detected-item-form" }) do |f| %>
               <%= hidden_field_tag :detected_item_id, detected_item.id %>
 
-              <div class="col-md-6">
+              <div class="col-12">
                 <%= f.input :brand,
                             label: t('autodetections.detected_item.brand_optional'),
                             input_html: { value: detected_item.brand, id: "brand_#{detected_item.id}", class: "bg-light border-0" },
                             label_html: { class: "text-secondary small text-uppercase tracking-wide", for: "brand_#{detected_item.id}" } %>
-              </div>
-
-              <div class="col-md-6">
-                <%= f.input :manufacturer,
-                            label: t('autodetections.detected_item.manufacturer_optional'),
-                            input_html: { value: detected_item.manufacturer, id: "manufacturer_#{detected_item.id}", class: "bg-light border-0" },
-                            label_html: { class: "text-secondary small text-uppercase tracking-wide", for: "manufacturer_#{detected_item.id}" } %>
               </div>
 
               <div class="col-12">
