@@ -57,3 +57,6 @@ __pycache__/
 # O docker-compose.yml local não é versionado.
 # Use docker-compose.example.yml como template e copie para docker-compose.yml.
 /docker-compose.yml
+
+# Documentos locais de planejamento/PR gerados por agentes.
+/docs/

@@ -47,12 +47,18 @@
       <% end %>
 
       <%# Detalhe: se for público, usamos o path do share, senão o path normal %>
-      <% target_path = local_assigns[:public] ? public_share_car_path(share_token: @user.share_token, id: car.id) : car_path(car) %>
+      <% target_path = local_assigns[:public] ? public_share_car_path(share_token: local_assigns[:user].share_token, id: car.id) : car_path(car) %>
       <%= link_to target_path, class: "text-decoration-none", data: { turbo_frame: local_assigns[:public] ? "_top" : "modal" } do %>
         <!-- Foto -->
         <% if car.photo? %>
-          <div class="car-photo-container" style="height: 180px; overflow: hidden;">
-            <%= image_tag car.photo.url, loading: "lazy", style: "width: 100%; height: 100%; object-fit: cover; display: block;" %>
+          <div class="car-photo-container position-relative" style="height: 180px; overflow: hidden;">
+            <%= image_tag car.photo.url, loading: "lazy", style: car_card_photo_style(car) %>
+            <% if car.photo_processing? %>
+              <div class="position-absolute top-0 start-0 end-0 bottom-0 d-flex align-items-center justify-content-center bg-dark bg-opacity-50 text-white small fw-semibold">
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                <span class="car-photo-processing-label"><%= t("cars.card.photo_processing") %></span>
+              </div>
+            <% end %>
           </div>
         <% else %>
           <div class="car-photo-container bg-light d-flex align-items-center justify-content-center text-muted" style="height: 180px;">
@@ -67,13 +73,10 @@
         <div class="card-body px-3 pb-3 pt-2">
           <h5 class="card-title mb-0 fw-bold text-dark text-truncate fs-6"><%= car.name.presence || '—' %></h5>
 
-          <!-- Marca + Fabricante -->
+          <!-- Marca -->
           <div class="d-flex flex-wrap gap-1 mt-1 mb-2">
             <% if car.brand? %>
               <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary small fw-normal"><%= car.brand %></span>
-            <% end %>
-            <% if car.manufacturer? %>
-              <span class="badge rounded-pill bg-secondary bg-opacity-10 text-secondary small fw-normal"><%= car.manufacturer %></span>
             <% end %>
           </div>
 

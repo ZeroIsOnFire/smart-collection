@@ -9,9 +9,8 @@ RSpec.describe 'Cars', type: :request do
 
   let(:valid_attributes) do
     {
-      name: 'Civic',
+      name: 'Honda Civic',
       brand: 'Hot Wheels',
-      manufacturer: 'Honda',
       year: 2020
     }
   end
@@ -41,6 +40,24 @@ RSpec.describe 'Cars', type: :request do
       expect(delete_form['data-turbo-confirm']).to be_nil
       expect(delete_button['data-car-removal-confirm-message']).to eq(I18n.t('items.delete_confirm'))
       expect(delete_button).to be_present
+    end
+
+    it 'subscribes to car card updates for background photo processing' do
+      get cars_path
+
+      signed_stream = Turbo::StreamsChannel.signed_stream_name("cars_#{user.id}")
+      expect(response.body).to include(signed_stream)
+    end
+
+    it 'marks the processing text so list view can show only the loading icon' do
+      processing_car = create(:car, user: user, photo_processing_status: 'pending')
+      processing_car.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+      processing_car.save!
+
+      get cars_path
+
+      expect(response.body).to include('car-photo-processing-label')
+      expect(response.body).to include(I18n.t('cars.card.photo_processing'))
     end
 
     it 'shows the autodetection AI upscaling notice when enabled and configured' do
@@ -88,10 +105,11 @@ RSpec.describe 'Cars', type: :request do
         expect(response.body).to include('Searchable Car')
       end
 
-      it 'filters cars by manufacturer' do
-        car_matching.update!(manufacturer: 'Burago')
+      it 'filters cars by vehicle manufacturer included in the name' do
+        car_matching.update!(name: 'Burago Ferrari F40')
         get cars_path, params: { q: 'Burago' }
-        expect(response.body).to include('Searchable Car')
+        expect(response.body).to include('Burago Ferrari F40')
+        expect(response.body).not_to include('Other Car')
       end
 
       it 'filters cars by tags' do
@@ -206,7 +224,8 @@ RSpec.describe 'Cars', type: :request do
     it "redirects if trying to edit another user's car" do
       other_car = create(:car, user: other_user)
       get edit_car_path(other_car)
-      expect(response).to have_http_status(:not_found)
+      expect(response).to redirect_to(cars_path)
+      expect(flash[:alert]).to eq(I18n.t('errors.messages.page_not_found', default: 'Página ou item não encontrado.'))
     end
   end
 
@@ -232,7 +251,8 @@ RSpec.describe 'Cars', type: :request do
 
       get car_path(other_car)
 
-      expect(response).to have_http_status(:not_found)
+      expect(response).to redirect_to(cars_path)
+      expect(flash[:alert]).to eq(I18n.t('errors.messages.page_not_found', default: 'Página ou item não encontrado.'))
     end
   end
 

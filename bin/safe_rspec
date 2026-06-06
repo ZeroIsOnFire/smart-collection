@@ -1,0 +1,16 @@
+#!/bin/bash
+
+set -euo pipefail
+
+export RAILS_ENV=test
+
+bundle exec rails runner - <<'RUBY'
+database_name = Mongoid.default_client.database.name
+test_database_pattern = /(?:^|[_-])test(?:$|[_-])/i
+
+unless Rails.env.test? && database_name.match?(test_database_pattern)
+  abort "Refusing to run RSpec against MongoDB database '#{database_name}' while Rails.env is '#{Rails.env}'."
+end
+RUBY
+
+exec bundle exec rspec "$@"

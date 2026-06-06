@@ -16,6 +16,9 @@ class Autodetection
   index({ status: 1, updated_at: 1 })
   index({ user_id: 1, created_at: -1 })
 
+  scope :active, -> { where(:status.ne => 'completed') }
+  scope :active_recent, -> { active.desc(:created_at) }
+
   validates :photo, presence: true
 
   # Constants for status

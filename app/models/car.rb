@@ -7,7 +7,6 @@ class Car
 
   field :name, type: String
   field :brand, type: String
-  field :manufacturer, type: String
   field :observations, type: String
   field :size, type: String
   field :year, type: Integer
@@ -17,9 +16,17 @@ class Car
 
   # Atributo para persistência do CarrierWave entre falhas de validação
   field :photo_cache, type: String
+  field :photo_processing_status, type: String
+  field :photo_processing_error, type: String
+  field :photo_processing_crop_x, type: Float
+  field :photo_processing_crop_y, type: Float
+  field :photo_processing_crop_w, type: Float
+  field :photo_processing_crop_h, type: Float
 
   # Virtual attributes for image cropping
   attr_accessor :crop_x, :crop_y, :crop_w, :crop_h
+
+  PHOTO_PROCESSING_STATUSES = %w[pending processing completed error].freeze
 
   COLORS = {
     'Branco' => '#FFFFFF',
@@ -60,7 +67,6 @@ class Car
   index({
           name: 'text',
           brand: 'text',
-          manufacturer: 'text',
           observations: 'text',
           size: 'text',
           tags: 'text'
@@ -68,7 +74,6 @@ class Car
           weights: {
             name: 10,
             brand: 5,
-            manufacturer: 2,
             observations: 1,
             size: 1,
             tags: 1
@@ -77,6 +82,7 @@ class Car
         })
   index({ user_id: 1, created_at: -1 })
   index({ user_id: 1, name: 1 })
+  index({ user_id: 1, photo_processing_status: 1 }, { background: true })
   index({ detected_via_ai: 1 }, { background: true })
 
   belongs_to :user, touch: true
@@ -86,4 +92,16 @@ class Car
   # include Mongoid::ActiveStorage if configured.
 
   validates :name, presence: true
+  validates :photo_processing_status, inclusion: { in: PHOTO_PROCESSING_STATUSES }, allow_blank: true
+
+  def photo_processing?
+    photo_processing_status.in?(%w[pending processing])
+  end
+
+  def photo_processing_crop?
+    photo_processing? &&
+      [photo_processing_crop_x, photo_processing_crop_y, photo_processing_crop_w, photo_processing_crop_h].all?(&:present?) &&
+      photo_processing_crop_w.positive? &&
+      photo_processing_crop_h.positive?
+  end
 end

@@ -29,15 +29,17 @@ RSpec.describe 'Public Collections', type: :request do
       expect(response.body).to include('turbo-stream action="remove" target="cars_sentinel"')
     end
 
-    it 'returns 404 if sharing is disabled' do
+    it 'redirects to landing page if sharing is disabled' do
       user.update(sharing_enabled: false)
       get public_share_path(user.share_token)
-      expect(response).to have_http_status(:not_found)
+      expect(response).to redirect_to(root_path)
+      expect(flash[:alert]).to eq(I18n.t('errors.messages.page_not_found', default: 'Página ou item não encontrado.'))
     end
 
-    it 'returns 404 for invalid token' do
+    it 'redirects to landing page for invalid token' do
       get public_share_path('invalid-token')
-      expect(response).to have_http_status(:not_found)
+      expect(response).to redirect_to(root_path)
+      expect(flash[:alert]).to eq(I18n.t('errors.messages.page_not_found', default: 'Página ou item não encontrado.'))
     end
   end
 

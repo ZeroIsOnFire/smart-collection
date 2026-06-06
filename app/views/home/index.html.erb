@@ -1,7 +1,7 @@
 <% cache 'landing_hero_intro' do %>
 <section class="hero-section">
   <%= image_tag "hero_car_collection_1775696111841.png", class: "hero-bg-image", alt: "Premium Car Collection Showcase" %>
-  
+
   <div class="container hero-content">
     <div class="row align-items-center min-vh-75">
       <div class="col-lg-7 animate-fade-up">
@@ -34,7 +34,7 @@
           <% end %>
         </div>
       </div>
-      
+
 <% cache 'landing_hero_feature_box' do %>
       <div class="col-lg-5 d-none d-lg-block animate-fade-up" style="animation-delay: 0.2s;">
         <div class="glass-card p-4 text-center">
@@ -42,7 +42,7 @@
              <i class="bi bi-upc-scan display-1 text-white opacity-50"></i>
           </div>
           <h4 class="fw-bold mb-2">Escaneamento Inteligente</h4>
-          <p class="text-white text-opacity-50 small mb-0">Identificação instantânea de modelos, marcas e fabricantes via Google Vision API.</p>
+          <p class="text-white text-opacity-50 small mb-0">Detecção local via IA para localizar e preparar itens a partir das fotos.</p>
         </div>
       </div>
     </div>
@@ -70,7 +70,7 @@
           </div>
           <h4 class="fw-bold mb-3">Indexação via IA</h4>
           <p class="text-muted mb-0">
-            Chega de digitar. Tire uma foto da sua prateleira e deixe nossa IA identificar e catalogar cada item individualmente.
+            Tire uma foto da sua prateleira e deixe nossa IA localizar e preparar os itens para você catalogar muito mais rápido.
           </p>
         </div>
       </div>
@@ -83,7 +83,7 @@
           </div>
           <h4 class="fw-bold mb-3">Galeria Infinita</h4>
           <p class="text-muted mb-0">
-            Visualize sua coleção em uma galeria premium com filtros inteligentes por marca, ano ou fabricante.
+            Visualize sua coleção em uma galeria premium com filtros inteligentes por marca, ano ou nome.
           </p>
         </div>
       </div>
@@ -125,19 +125,25 @@
       <div class="col-lg-6">
         <div class="p-4 shadow-lg rounded-4 border" style="background-color: var(--card-bg);">
           <div class="d-flex align-items-center mb-3">
-             <div class="rounded-circle bg-success bg-opacity-10 p-2 me-3">
+             <div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center me-3" style="width: 32px; height: 32px;">
                <i class="bi bi-check-lg text-success"></i>
              </div>
-             <span class="fw-semibold">Google Vision API Integrada</span>
+             <span class="fw-semibold">Detecção local integrada por IA</span>
           </div>
           <div class="d-flex align-items-center mb-3">
-             <div class="rounded-circle bg-success bg-opacity-10 p-2 me-3">
+             <div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center me-3" style="width: 32px; height: 32px;">
                <i class="bi bi-check-lg text-success"></i>
              </div>
-             <span class="fw-semibold">Exportação Prawn PDF de alta fidelidade</span>
+             <span class="fw-semibold">Upscale por IA para melhorar fotos</span>
+          </div>
+          <div class="d-flex align-items-center mb-3">
+             <div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center me-3" style="width: 32px; height: 32px;">
+               <i class="bi bi-check-lg text-success"></i>
+             </div>
+             <span class="fw-semibold">Exportação em PDF de alta fidelidade</span>
           </div>
           <div class="d-flex align-items-center">
-             <div class="rounded-circle bg-success bg-opacity-10 p-2 me-3">
+             <div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center me-3" style="width: 32px; height: 32px;">
                <i class="bi bi-check-lg text-success"></i>
              </div>
              <span class="fw-semibold">Segurança e Privacidade de Dados</span>
@@ -153,7 +159,7 @@
 <footer class="py-5 border-top" style="background-color: var(--card-bg);">
   <div class="container text-center">
     <div class="navbar-brand d-flex align-items-center justify-content-center mb-4 text-dark">
-      <%= image_tag "/logo/logo.png", alt: "Smart Collection", height: 32, class: "me-2 theme-logo" %>
+      <%= image_tag "/logo/logo.png", alt: "Smart Collection", height: 32, class: "me-2 theme-logo", data: { theme_target: "logo" } %>
       <span class="fw-bold tracking-tight">Smart<span class="text-primary">Collection</span></span>
     </div>
     <p class="text-muted small">© <%= Time.now.year %> Smart Collection Catalog. Todos os direitos reservados.</p>

@@ -56,7 +56,7 @@ jobs:
         run: npm run build
 
       - name: Run RSpec
-        run: bundle exec rspec --format documentation
+        run: bin/safe_rspec --format documentation
 
       - name: Run RuboCop
         run: bundle exec rubocop --parallel

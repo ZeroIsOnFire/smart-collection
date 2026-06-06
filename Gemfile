@@ -34,7 +34,6 @@ gem 'bootsnap', require: false
 gem 'carrierwave', '~> 3.0'
 gem 'carrierwave-mongoid'
 gem 'devise'
-gem 'google-cloud-vision'
 gem 'jsbundling-rails'
 gem 'kaminari-actionview'
 gem 'kaminari-mongoid'

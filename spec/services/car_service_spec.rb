@@ -6,13 +6,12 @@ RSpec.describe CarService do
   let(:user) { create(:user) }
   let(:valid_params) do
     {
-      name: 'Corolla',
+      name: 'Toyota Corolla',
       brand: 'Toyota',
       tags: ['sedan'],
       observations: 'Em bom estado',
       size: 'Medium',
       year: 2021,
-      manufacturer: 'Toyota',
       photo: Rack::Test::UploadedFile.new(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
     }
   end
@@ -27,50 +26,86 @@ RSpec.describe CarService do
     tempfile
   end
 
+  before do
+    ActiveJob::Base.queue_adapter = :test
+  end
+
+  describe '.ensure_text_search_index!' do
+    before do
+      described_class.remove_instance_variable(:@text_search_index_checked) if described_class.instance_variable_defined?(:@text_search_index_checked)
+    end
+
+    it 'refreshes indexes when the text search index is missing' do
+      allow(described_class).to receive(:text_search_index_current?).and_return(false)
+
+      expect(described_class).to receive(:refresh_text_search_index!)
+
+      described_class.ensure_text_search_index!
+    end
+
+    it 'does not refresh indexes when the text search index is current' do
+      allow(described_class).to receive(:text_search_index_current?).and_return(true)
+
+      expect(described_class).not_to receive(:refresh_text_search_index!)
+
+      described_class.ensure_text_search_index!
+    end
+  end
+
   describe '#create' do
     it 'creates a car for the user' do
-      allow(ImageUpscalerService).to receive(:upscale_if_needed).and_return(nil)
-
       expect do
         described_class.new(user).create(valid_params)
       end.to change { user.reload.cars.count }.by(1)
     end
 
-    it 'passes the photo through the upscaler before persistence' do
-      expect(ImageUpscalerService).to receive(:upscale_if_needed)
-        .with(valid_params[:photo], minimum_side: ImageUpscalerService.default_minimum_side, use_ai: true, local_fallback: false)
-        .and_return(nil)
+    it 'enqueues photo processing instead of running heavy image services in the request' do
+      expect(ImageUpscalerService).not_to receive(:upscale_if_needed)
+      expect(ImageCropperService).not_to receive(:crop)
+      expect(YoloDetectionService).not_to receive(:classify_color)
 
-      described_class.new(user).create(valid_params)
+      expect do
+        car = described_class.new(user).create(valid_params)
+        expect(car.photo_processing_status).to eq('pending')
+      end.to enqueue_job(CarImageProcessingJob)
     end
 
-    it 'does not use AI or local fallback for regular photos when the user disables AI upscaling' do
-      user.update!(ai_upscaling_enabled: false)
+    it 'passes crop values to the background job' do
+      params = valid_params.merge(crop_x: '0.1', crop_y: '0.2', crop_w: '0.3', crop_h: '0.4')
 
-      expect(ImageUpscalerService).to receive(:upscale_if_needed)
-        .with(valid_params[:photo], minimum_side: ImageUpscalerService.default_minimum_side, use_ai: false, local_fallback: false)
-        .and_return(nil)
-
-      described_class.new(user).create(valid_params)
+      expect do
+        described_class.new(user).create(params)
+      end.to enqueue_job(CarImageProcessingJob).with(
+        user.id.to_s,
+        kind_of(String),
+        crop_x: '0.1',
+        crop_y: '0.2',
+        crop_w: '0.3',
+        crop_h: '0.4'
+      )
     end
 
-    it 'persists the upscaled photo when the source image is small' do
-      upscaled_file = build_temp_image(width: 420, height: 280)
-      allow(ImageUpscalerService).to receive(:upscale_if_needed).and_return(upscaled_file)
+    it 'keeps crop values for the processing thumbnail' do
+      params = valid_params.merge(crop_x: '0.1', crop_y: '0.2', crop_w: '0.3', crop_h: '0.4')
 
-      car = described_class.new(user).create(valid_params)
+      car = described_class.new(user).create(params)
 
-      saved_image = MiniMagick::Image.open(car.photo.path)
-      expect(saved_image.width).to eq(420)
-      expect(saved_image.height).to eq(280)
-    ensure
-      upscaled_file&.close
-      upscaled_file&.unlink
+      expect(car.photo_processing_crop_x).to eq(0.1)
+      expect(car.photo_processing_crop_y).to eq(0.2)
+      expect(car.photo_processing_crop_w).to eq(0.3)
+      expect(car.photo_processing_crop_h).to eq(0.4)
+    end
+
+    it 'does not enqueue photo processing when no photo or crop is provided' do
+      params = valid_params.merge(photo: nil)
+
+      expect do
+        described_class.new(user).create(params)
+      end.not_to enqueue_job(CarImageProcessingJob)
     end
 
     it 'creates a car even with an empty year string' do
       params = valid_params.merge(year: '', photo: nil)
-      allow(ImageUpscalerService).to receive(:upscale_if_needed).and_return(nil)
 
       expect do
         described_class.new(user).create(params)
@@ -78,7 +113,6 @@ RSpec.describe CarService do
     end
 
     it 'attaches the photo to the car' do
-      allow(ImageUpscalerService).to receive(:upscale_if_needed).and_return(nil)
       car = described_class.new(user).create(valid_params)
 
       expect(car.photo).to be_present
@@ -86,31 +120,16 @@ RSpec.describe CarService do
     end
   end
 
-  describe 'upscale errors' do
-    it 'returns a car with an error when the upscaler fails during create' do
-      allow(ImageUpscalerService).to receive(:upscale_if_needed)
-        .and_raise(ImageUpscalerService::UpscaleError, 'upscaler failed')
-
-      car = described_class.new(user).create(valid_params)
-
-      expect(car).not_to be_persisted
-      expect(car.errors[:photo]).to include('upscaler failed')
-    end
-  end
-
   describe '#update' do
     let!(:car) { create(:car, user: user, name: 'Old Name') }
 
     it 'updates the car for the user' do
-      allow(ImageUpscalerService).to receive(:upscale_if_needed).and_return(nil)
-
       described_class.new(user).update(car.id, { name: 'New Name' })
 
       expect(car.reload.name).to eq('New Name')
     end
 
     it 'removes the photo when remove_photo is set to "1"' do
-      allow(ImageUpscalerService).to receive(:upscale_if_needed).and_return(nil)
       car_with_photo = described_class.new(user).create(valid_params)
 
       found_car = user.cars.find(car_with_photo.id)
@@ -120,13 +139,11 @@ RSpec.describe CarService do
       expect(found_car.reload.photo).not_to be_present
     end
 
-    it 'returns a car with an error when the upscaler fails during update' do
-      allow(ImageUpscalerService).to receive(:upscale_if_needed)
-        .and_raise(ImageUpscalerService::UpscaleError, 'upscaler failed')
-
-      updated_car = described_class.new(user).update(car.id, { photo: valid_params[:photo] })
-
-      expect(updated_car.errors[:photo]).to include('upscaler failed')
+    it 'enqueues photo processing when the photo changes' do
+      expect do
+        updated_car = described_class.new(user).update(car.id, { photo: valid_params[:photo] })
+        expect(updated_car.photo_processing_status).to eq('pending')
+      end.to enqueue_job(CarImageProcessingJob)
     end
   end
 
@@ -146,10 +163,10 @@ RSpec.describe CarService do
     end
 
     let!(:car1) do
-      create(:car, user: user, name: 'Ferrari F40', brand: 'Ferrari', manufacturer: 'Burago', tags: %w[italy fast])
+      create(:car, user: user, name: 'Burago Ferrari F40', brand: 'Ferrari', tags: %w[italy fast])
     end
     let!(:car2) do
-      create(:car, user: user, name: 'Porsche 911', brand: 'Porsche', manufacturer: 'Hot Wheels',
+      create(:car, user: user, name: 'Hot Wheels Porsche 911', brand: 'Porsche',
                    tags: %w[germany classic])
     end
     let!(:other_user_car) { create(:car, name: 'Ferrari Enzo') }
@@ -165,7 +182,7 @@ RSpec.describe CarService do
       expect(results).to include(car2)
     end
 
-    it 'returns cars matching the query in manufacturer' do
+    it 'returns cars matching the vehicle manufacturer included in the name' do
       results = described_class.new(user).search('Burago')
       expect(results).to include(car1)
     end

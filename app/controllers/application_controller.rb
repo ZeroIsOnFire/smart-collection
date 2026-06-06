@@ -5,6 +5,8 @@ class ApplicationController < ActionController::Base
   layout :set_layout
   before_action :configure_permitted_parameters, if: :devise_controller?
 
+  rescue_from Mongoid::Errors::DocumentNotFound, with: :record_not_found
+
   protected
 
   def configure_permitted_parameters
@@ -24,6 +26,20 @@ class ApplicationController < ActionController::Base
   end
 
   private
+
+  def record_not_found
+    respond_to do |format|
+      format.html do
+        flash[:alert] = t('errors.messages.page_not_found', default: 'Página ou item não encontrado.')
+        if user_signed_in?
+          redirect_to cars_path
+        else
+          redirect_to root_path
+        end
+      end
+      format.any { head :not_found }
+    end
+  end
 
   def set_layout
     if self.class.name.start_with?('Admin::')

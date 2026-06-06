@@ -99,7 +99,7 @@
       <div id="cars_list_container" class="position-relative mt-2">
         <% if @cars.any? %>
           <div id="cars_grid_inner" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4 pt-2 grid-view is-public">
-            <%= render partial: "cars/car", collection: @cars, locals: { public: true } %>
+            <%= render partial: "cars/car", collection: @cars, locals: { public: true, user: @user } %>
           </div>
 
           <!-- Sentinela de infinite scroll para o share -->

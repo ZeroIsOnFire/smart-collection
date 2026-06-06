@@ -38,7 +38,7 @@ docker compose exec web bash bin/qa
 7. After Rails code changes, rerun:
 
 ```bash
-docker compose exec web bundle exec rspec
+docker compose exec web bin/safe_rspec
 ```
 
 Never finish a Rails QA task with failing tests unless you clearly report the blocker.

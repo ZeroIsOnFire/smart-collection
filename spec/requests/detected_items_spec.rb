@@ -8,6 +8,7 @@ RSpec.describe 'DetectedItems', type: :request do
     @autodetection = create(:autodetection, user: @user)
     @detected_item = create(:detected_item, autodetection: @autodetection)
     sign_in @user
+    ActiveJob::Base.queue_adapter = :test
   end
 
   describe 'PATCH /update_selection' do
@@ -20,23 +21,14 @@ RSpec.describe 'DetectedItems', type: :request do
       }
     end
 
-    it 'updates the detected item position data and photo' do
-      # Mock do ImageCropperService para evitar processamento real de imagem nos testes
-      expect(ImageCropperService).to receive(:crop)
-        .with(
-          anything,
-          anything,
-          padding: 0,
-          minimum_side: ImageCropperService.default_minimum_side,
-          upscale: { use_ai: true, local_fallback: true }
-        )
-        .and_return(
-          File.open(Rails.root.join('spec/fixtures/files/car_sample.jpg'))
-        )
+    it 'updates the detected item position data and enqueues image processing' do
+      expect(ImageCropperService).not_to receive(:crop)
 
-      patch update_selection_detected_item_path(@detected_item),
-            params: crop_params,
-            headers: { 'Accept' => 'text/vnd.turbo-stream.html' }
+      expect do
+        patch update_selection_detected_item_path(@detected_item),
+              params: crop_params,
+              headers: { 'Accept' => 'text/vnd.turbo-stream.html' }
+      end.to enqueue_job(DetectedItemImageProcessingJob)
 
       expect(response).to have_http_status(:ok)
       @detected_item.reload
@@ -44,21 +36,10 @@ RSpec.describe 'DetectedItems', type: :request do
       vertices = @detected_item.position_data['vertices']
       expect(vertices.first['x']).to eq(0.2)
       expect(vertices.last['y']).to eq(0.7) # y + height
+      expect(@detected_item.image_processing_status).to eq('pending')
     end
 
     it 'returns turbo stream response' do
-      expect(ImageCropperService).to receive(:crop)
-        .with(
-          anything,
-          anything,
-          padding: 0,
-          minimum_side: ImageCropperService.default_minimum_side,
-          upscale: { use_ai: true, local_fallback: true }
-        )
-        .and_return(
-          File.open(Rails.root.join('spec/fixtures/files/car_sample.jpg'))
-        )
-
       patch update_selection_detected_item_path(@detected_item),
             params: crop_params,
             headers: { 'Accept' => 'text/vnd.turbo-stream.html' }
@@ -67,19 +48,6 @@ RSpec.describe 'DetectedItems', type: :request do
       expect(response.body).to include('turbo-stream')
       expect(response.body).to include('replace')
       expect(response.body).to include("detected_item_#{@detected_item.id}")
-    end
-
-    it 'shows an error toast when the upscaler fails' do
-      allow(ImageCropperService).to receive(:crop)
-        .and_raise(ImageUpscalerService::UpscaleError, 'upscaler failed')
-
-      patch update_selection_detected_item_path(@detected_item),
-            params: crop_params,
-            headers: { 'Accept' => 'text/vnd.turbo-stream.html' }
-
-      expect(response).to have_http_status(:unprocessable_content)
-      expect(response.body).to include('upscaler failed')
-      expect(response.body).to include('flash_toasts')
     end
   end
 
@@ -94,23 +62,14 @@ RSpec.describe 'DetectedItems', type: :request do
     end
 
     it 'creates a new detected item manually' do
-      expect(ImageCropperService).to receive(:crop)
-        .with(
-          anything,
-          anything,
-          padding: 0,
-          minimum_side: ImageCropperService.default_minimum_side,
-          upscale: { use_ai: true, local_fallback: true }
-        )
-        .and_return(
-          File.open(Rails.root.join('spec/fixtures/files/car_sample.jpg'))
-        )
+      expect(ImageCropperService).not_to receive(:crop)
 
       expect do
         post autodetection_detected_items_path(@autodetection),
              params: create_params,
              headers: { 'Accept' => 'text/vnd.turbo-stream.html' }
       end.to change(DetectedItem, :count).by(1)
+      expect(DetectedItemImageProcessingJob).to have_been_enqueued
 
       expect(response).to have_http_status(:ok)
       expect(response.body).to include('turbo-stream')
@@ -120,21 +79,10 @@ RSpec.describe 'DetectedItems', type: :request do
       new_item = DetectedItem.order_by(created_at: :desc).first
       expect(new_item.status).to eq('pending')
       expect(new_item.position_data['score']).to eq(1.0)
+      expect(new_item.image_processing_status).to eq('pending')
     end
 
     it 'does not append a local toast on turbo stream success' do
-      expect(ImageCropperService).to receive(:crop)
-        .with(
-          anything,
-          anything,
-          padding: 0,
-          minimum_side: ImageCropperService.default_minimum_side,
-          upscale: { use_ai: true, local_fallback: true }
-        )
-        .and_return(
-          File.open(Rails.root.join('spec/fixtures/files/car_sample.jpg'))
-        )
-
       post autodetection_detected_items_path(@autodetection),
            params: create_params,
            headers: { 'Accept' => 'text/vnd.turbo-stream.html' }
@@ -143,19 +91,6 @@ RSpec.describe 'DetectedItems', type: :request do
       expect(response.body).to include("detected_items_list_#{@autodetection.id}")
       expect(response.body).not_to include('local_toast_container')
       expect(response.body).not_to include('Item adicionado com sucesso!')
-    end
-
-    it 'shows an error toast when the upscaler fails' do
-      allow(ImageCropperService).to receive(:crop)
-        .and_raise(ImageUpscalerService::UpscaleError, 'upscaler failed')
-
-      post autodetection_detected_items_path(@autodetection),
-           params: create_params,
-           headers: { 'Accept' => 'text/vnd.turbo-stream.html' }
-
-      expect(response).to have_http_status(:unprocessable_content)
-      expect(response.body).to include('upscaler failed')
-      expect(response.body).to include('flash_toasts')
     end
   end
 
