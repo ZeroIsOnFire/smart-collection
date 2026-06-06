@@ -1,7 +1,7 @@
 <% if @page > 1 %>
   <%# Se for paginação (infinite scroll), apenas anexamos os novos carros %>
   <%= turbo_stream.append "cars_grid_inner" do %>
-    <%= render partial: "cars/car", collection: @cars, locals: { public: true } %>
+    <%= render partial: "cars/car", collection: @cars, locals: { public: true, user: @user } %>
   <% end %>
 
   <% if @has_more %>
@@ -17,7 +17,7 @@
   <%= turbo_stream.update "cars_list_container" do %>
     <% if @cars.any? %>
       <div id="cars_grid_inner" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4 mt-2">
-        <%= render partial: "cars/car", collection: @cars, locals: { public: true } %>
+        <%= render partial: "cars/car", collection: @cars, locals: { public: true, user: @user } %>
       </div>
       <% if @has_more %>
         <div id="cars_sentinel" class="row mt-4">

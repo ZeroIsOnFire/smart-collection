@@ -171,14 +171,14 @@
            data-selection-adjustment-loading-text-value="<%= t('autodetections.messages.saving') %>"
            data-selection-adjustment-save-error-text-value="<%= t('autodetections.messages.item_error') %>"
            data-selection-adjustment-unexpected-error-text-value="<%= t('flash.error') %>">
-        
+
         <div class="modal-header border-0 pb-0">
           <h5 class="modal-title fw-bold"><i class="bi bi-crop me-2 text-primary"></i> <%= t('autodetections.detected_item.adjust_selection') %></h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        
+
         <div class="modal-body p-0">
-          <div class="cropper-container-wrapper" 
+          <div class="cropper-container-wrapper"
                style="height: 450px; max-height: 70vh; background-color: #0f172a; position: relative;">
             <img src="<%= detected_item.autodetection.photo.url %>"
                  data-selection-adjustment-target="image"

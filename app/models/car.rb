@@ -17,9 +17,13 @@ class Car
 
   # Atributo para persistência do CarrierWave entre falhas de validação
   field :photo_cache, type: String
+  field :photo_processing_status, type: String
+  field :photo_processing_error, type: String
 
   # Virtual attributes for image cropping
   attr_accessor :crop_x, :crop_y, :crop_w, :crop_h
+
+  PHOTO_PROCESSING_STATUSES = %w[pending processing completed error].freeze
 
   COLORS = {
     'Branco' => '#FFFFFF',
@@ -77,6 +81,7 @@ class Car
         })
   index({ user_id: 1, created_at: -1 })
   index({ user_id: 1, name: 1 })
+  index({ user_id: 1, photo_processing_status: 1 }, { background: true })
   index({ detected_via_ai: 1 }, { background: true })
 
   belongs_to :user, touch: true
@@ -86,4 +91,9 @@ class Car
   # include Mongoid::ActiveStorage if configured.
 
   validates :name, presence: true
+  validates :photo_processing_status, inclusion: { in: PHOTO_PROCESSING_STATUSES }, allow_blank: true
+
+  def photo_processing?
+    photo_processing_status.in?(%w[pending processing])
+  end
 end

@@ -8,7 +8,7 @@ class CarsController < ApplicationController
 
   # GET /cars
   def index
-    @autodetections = current_user.autodetections.where(:status.ne => 'completed').order(created_at: :desc)
+    @autodetections = current_user.autodetections.active_recent
     @cars = car_service.all(params.merge(per_page: PER_PAGE))
     @page = @cars.current_page
     @has_more = @cars.next_page.present?
@@ -76,7 +76,7 @@ class CarsController < ApplicationController
     params_to_save = car_params
     if @detected_item
       params_to_save[:photo] = @detected_item.cropped_photo.file.to_file if @detected_item.cropped_photo.present?
-      params_to_save[:color] = @detected_item.color if @detected_item.color.present? && params_to_save[:color].blank?
+      params_to_save[:color] = @detected_item.color if @detected_item.color? && params_to_save[:color].blank?
       params_to_save[:detected_via_ai] = true
     end
 

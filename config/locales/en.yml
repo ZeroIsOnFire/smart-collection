@@ -215,6 +215,7 @@ en:
     card:
       view_details: "View Details"
       no_photo: "No photo"
+      photo_processing: "Processing photo..."
     show:
       added_at: "Added on %{date}"
       collection: "My Collection"

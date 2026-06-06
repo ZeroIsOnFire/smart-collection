@@ -6,8 +6,8 @@ Use o checklist para marcar cada item quando for concluido.
 ## 1. Otimizacoes de desempenho
 
 - [ ] 1.1 Avaliar processamento por IA sempre em background via Sidekiq, exibindo estados como "processando" enquanto a tarefa roda.
-- [ ] 1.2 Aplicar o fluxo assincrono tanto na pagina de autodeteccao quanto na pagina de carros.
-- [ ] 1.3 Evitar processamentos pesados no request principal, especialmente ao salvar carro, subir fotos, fazer upscale ou chamar servicos de IA.
+- [x] 1.2 Aplicar o fluxo assincrono tanto na pagina de autodeteccao quanto na pagina de carros.
+- [x] 1.3 Evitar processamentos pesados no request principal, especialmente ao salvar carro, subir fotos, fazer upscale ou chamar servicos de IA.
 - [ ] 1.4 Avaliar outras melhorias gerais de performance.
 
 ## 2. Upscale e processamento de imagens

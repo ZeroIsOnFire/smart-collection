@@ -230,6 +230,7 @@ pt-BR:
     card:
       view_details: "Ver Detalhes"
       no_photo: "Sem foto"
+      photo_processing: "Processando foto..."
     show:
       added_at: "Adicionado em %{date}"
       collection: "Minha Coleção"
