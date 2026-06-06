@@ -42,3 +42,7 @@ Use o checklist para marcar cada item quando for concluido.
 
 - [ ] 6.1 Verificar formas de facilitar ou simplificar cadastros.
 - [ ] 6.2 Avaliar reducao de campos obrigatorios, preenchimento progressivo, atalhos, reaproveitamento de dados e sugestoes automaticas.
+
+## 7. Melhorias de login
+
+- [ ] 7.1 Adicionar visualizacao de senha nos formularios de login e cadastro.
