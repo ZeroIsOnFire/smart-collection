@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-Serviço web premium para registro e gerenciamento de coleções variadas. Permite cadastro de coleções e seus itens, compartilhamento público seguro, indexação automática via fotos (YOLO Local / Google Vision API), recorte interativo de imagens e exportação em PDF/CSV. O design é focado em alta fidelidade ("Premium Vibe"), utilizando Glassmorphism e layouts responsivos avançados (Grid/List views).
+Serviço web premium para registro e gerenciamento de coleções variadas. Permite cadastro de coleções e seus itens, compartilhamento público seguro, indexação automática via fotos (YOLO Local), recorte interativo de imagens e exportação em PDF/CSV. O design é focado em alta fidelidade ("Premium Vibe"), utilizando Glassmorphism e layouts responsivos avançados (Grid/List views).
 
 ---
 
@@ -13,8 +13,8 @@ A segurança e privacidade dos dados do usuário são a principal prioridade des
 - **Segregação Rigorosa de Dados**: Nenhum usuário pode ver, editar ou excluir itens de outro usuário. Toda query e ação de controller deve ser escopada via `current_user` (ex: `current_user.cars.find(params[:id])`).
 - **Autenticação**: O acesso é protegido via Devise. Ações sensíveis como alteração de senha e e-mail exigem confirmação da senha atual do usuário.
 - **Autorização de Compartilhamento**: Coleções são privadas por padrão. A funcionalidade de "Visão Pública" deve ser explicitamente ativada no Dashboard de Configurações, gerando um `share_token` único (UUID) impossível de ser adivinhado.
-- **Proteção de Credenciais**: As chaves da Google Vision API **devem ser fornecidas pelo próprio usuário**. O sistema não deve expor logs, parâmetros HTTP ou views que contenham chaves de API, senhas ou tokens sem ofuscação.
-- **Sanitização**: Todo input e parâmetro vindo de requests externas, formulários ou da Vision API deve ser higienizado contra XSS e injeções, utilizando o padrão Strong Parameters do Rails.
+- **Proteção de Credenciais**: O sistema não deve expor logs, parâmetros HTTP ou views que contenham chaves de API, senhas ou tokens sem ofuscação.
+- **Sanitização**: Todo input e parâmetro vindo de requests externas, formulários ou serviços de IA deve ser higienizado contra XSS e injeções, utilizando o padrão Strong Parameters do Rails.
 
 ---
 
@@ -31,7 +31,7 @@ A segurança e privacidade dos dados do usuário são a principal prioridade des
 | Storage        | CarrierWave + MiniMagick            |
 | Background     | Sidekiq                             |
 | Cache/Fila     | Redis                               |
-| OCR/Visão      | YOLO11s (Local) + Google Cloud Vision API |
+| OCR/Visão      | YOLO11s (Local) |
 | Upscale IA     | Real-ESRGAN / Lanczos via FastAPI |
 | Exportação     | Prawn (PDF), CSV (Ruby stdlib)            |
 | i18n           | rails-i18n (pt-BR / en)                   |
@@ -87,7 +87,7 @@ spec/
 1. **Escreva o teste antes da implementação** — nenhum código de produção sem teste correspondente.
 2. Use `RSpec` como framework de testes.
 3. Factories com `FactoryBot`; matchers com `Shoulda Matchers`.
-4. Usar `VCR` para gravar/reproduzir requisições HTTP externas (ex: Google Vision API), evitando chamadas reais nos testes.
+4. Usar `VCR` para gravar/reproduzir requisições HTTP externas, evitando chamadas reais nos testes.
 5. Cobertura mínima esperada: models, services, controllers (request specs).
 6. Mudanças no microserviço `upscale/` devem incluir/ajustar testes em `upscale/test_main.py` e ser verificadas com `python -m unittest upscale/test_main.py` (ou equivalente dentro do container).
 
@@ -117,7 +117,6 @@ spec/
 
 ### Autodetecção e Visão
 - **Local (YOLO)**: A aplicação utiliza o `SCC YOLO Service` (YOLO11s) rodando localmente para detecção rápida de carros e localização. Esta é a opção preferencial.
-- **Cloud (Vision API)**: As credenciais da Vision API podem ser fornecidas pelo usuário para OCR avançado ou como fallback. Atualmente, o foco de detecção foi migrado para o YOLO local.
 - A autodetecção deve criar registros rapidamente a partir de múltiplos veículos na foto, mas não deve preencher nome/modelo a partir do label retornado pelo YOLO; use o label genérico traduzido para novos itens detectados.
 - O fluxo conta com *fallback* manual caso o recorte falhe ou seja impreciso, e a interface deve atualizar via WebSockets/Turbo Streams em tempo real.
 - **⚠️ Gotchas do Microserviço YOLO**:
@@ -228,7 +227,7 @@ refactor(items): extrair lógica de tags para TagService
 1. [x] Login e Autenticação
 2. [x] Cadastro de Usuários e Configurações de Perfil Seguras
 3. [x] Cadastro e Gestão de Coleções (Premium Grid/List)
-4. [x] Captura/Indexação via Google Vision API e Recorte Interativo
+4. [x] Captura/Indexação via YOLO local e Recorte Interativo
 5. [x] Link público e Visão Showcase Privada (Share Token Segregado)
 6. [x] Exportação de Coleção para PDF (Prawn)
 7. [x] Exportação de Coleção para CSV

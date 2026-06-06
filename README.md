@@ -1,6 +1,6 @@
 # Smart Collection Catalog (Serviço de Registro de Coleções)
 
-O **Smart Collection Catalog** é um serviço web premium para registro e gerenciamento de coleções variadas (focado inicialmente em miniaturas de carros). O sistema permite o cadastro manual ou automatizado através de inteligência artificial (Google Cloud Vision API).
+O **Smart Collection Catalog** é um serviço web premium para registro e gerenciamento de coleções variadas (focado inicialmente em miniaturas de carros). O sistema permite o cadastro manual ou automatizado através de inteligência artificial local com YOLO.
 
 ## 🚀 Tecnologias
 
@@ -9,7 +9,7 @@ O **Smart Collection Catalog** é um serviço web premium para registro e gerenc
 - **Frontend**: Hotwire (Turbo + Stimulus) + Bootstrap 5
 - **Real-time**: ActionCable (via Redis)
 - **Mensageria**: Sidekiq
-- **IA/Visão**: Google Cloud Vision API
+- **IA/Visão**: YOLO11s local
 - **Infraestrutura**: Docker + Docker Compose
 
 ## 🛠️ Configuração e Instalação
@@ -28,8 +28,6 @@ O **Smart Collection Catalog** é um serviço web premium para registro e gerenc
 2. **Configuração de Ambiente**:
    Crie um arquivo `.env` na raiz do projeto (use o `.env.example` como base):
    ```bash
-   GOOGLE_CLOUD_PROJECT_ID=seu-projeto
-   GOOGLE_CLOUD_CREDENTIALS_PATH=/app/config/google_credentials.json
    REDIS_URL=redis://redis:6379/1
    ```
 

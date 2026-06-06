@@ -30,8 +30,6 @@ RSpec.describe AutodetectJob do
           }
         ]
       )
-      allow(GoogleVisionService).to receive(:credentials_configured?).and_return(false)
-
       # Mock do arquivo retornado pelo cropper
       mock_file_path = Rails.root.join('tmp/mock_crop.jpg')
       File.write(mock_file_path, 'fake content')
