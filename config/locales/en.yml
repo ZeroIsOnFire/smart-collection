@@ -285,6 +285,10 @@ en:
       save_item: "Save Item"
       undo: "Undo"
       statuses:
+        processing_title: "Processing..."
+        processing_text: "We are preparing the crop and classification in the background."
+        processing_error_title: "Processing error"
+        processing_error_text: "Try adjusting the crop again."
         saved_title: "Added Successfully!"
         saved_text: "This item is now part of your collection."
         rejected_title: "Item Rejected"

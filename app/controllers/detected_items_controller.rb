@@ -10,31 +10,19 @@ class DetectedItemsController < ApplicationController
   def create
     normalized_vertices = normalized_vertices_from_params
 
-    # Recortar imagem
-    cropped_file = ImageCropperService.crop(
-      @autodetection.photo.path,
-      normalized_vertices,
-      padding: 0,
-      minimum_side: ImageCropperService.default_minimum_side,
-      upscale: { use_ai: current_user.ai_upscaling_enabled?, local_fallback: true }
-    )
-
-    # Autodetecção completa baseada no recorte manual
-    classification = YoloDetectionService.classify(cropped_file.path) if cropped_file
-
     @detected_item = @autodetection.detected_items.new(
       status: 'pending',
-      label: classification[:label].presence || t('autodetections.detected_item.new_item'),
-      color: classification[:color],
+      label: t('autodetections.detected_item.new_item'),
+      image_processing_status: 'pending',
       position_data: {
         'score' => 1.0, # Manual
         'vertices' => normalized_vertices
-      },
-      cropped_photo: cropped_file
+      }
     )
 
     if @detected_item.save
       @autodetection.update(status: 'to_verify') if @autodetection.status == 'completed'
+      enqueue_image_processing(@detected_item)
 
       respond_to do |format|
         format.turbo_stream do
@@ -87,40 +75,22 @@ class DetectedItemsController < ApplicationController
   def update_selection
     normalized_vertices = normalized_vertices_from_params
 
-    # Recortar novamente sem padding extra
-    cropped_file = ImageCropperService.crop(
-      @detected_item.autodetection.photo.path,
-      normalized_vertices,
-      padding: 0,
-      minimum_side: ImageCropperService.default_minimum_side,
-      upscale: { use_ai: current_user.ai_upscaling_enabled?, local_fallback: true }
+    new_position_data = @detected_item.position_data.to_h
+    new_position_data['vertices'] = normalized_vertices
+
+    @detected_item.update(
+      position_data: new_position_data,
+      label: params[:name].presence || @detected_item.label,
+      color: params[:color].presence || @detected_item.color,
+      brand: params[:brand],
+      manufacturer: params[:manufacturer],
+      year: params[:year],
+      size: params[:size],
+      image_processing_status: 'pending',
+      image_processing_error: nil
     )
 
-    if cropped_file
-      # Atualiza position_data e a foto recortada
-      new_position_data = @detected_item.position_data.dup
-      new_position_data['vertices'] = normalized_vertices
-
-      # Autodetecção completa baseada no novo recorte
-      classification = YoloDetectionService.classify(cropped_file.path)
-
-      # Lógica de atualização de cor:
-      # Se a cor no formulário for igual à cor atual do item, significa que o usuário não a alterou manualmente.
-      # Nesse caso, priorizamos a nova detecção da IA baseada no novo recorte.
-      new_color = params[:color]
-      new_color = classification[:color] if new_color == @detected_item.color && classification[:color].present?
-
-      @detected_item.update(
-        position_data: new_position_data,
-        cropped_photo: cropped_file,
-        label: params[:name].presence || classification[:label].presence || @detected_item.label,
-        color: new_color.presence || @detected_item.color,
-        brand: params[:brand],
-        manufacturer: params[:manufacturer],
-        year: params[:year],
-        size: params[:size]
-      )
-    end
+    enqueue_image_processing(@detected_item, selection_attributes)
 
     respond_to do |format|
       format.turbo_stream do
@@ -176,6 +146,14 @@ class DetectedItemsController < ApplicationController
       { 'x' => x + w, 'y' => y + h },
       { 'x' => x,     'y' => y + h }
     ]
+  end
+
+  def selection_attributes
+    params.permit(:brand, :manufacturer, :name, :color, :year, :size).to_h
+  end
+
+  def enqueue_image_processing(detected_item, attributes = {})
+    DetectedItemImageProcessingJob.perform_later(current_user.id.to_s, detected_item.id.to_s, attributes)
   end
 
   def handle_upscale_error(exception)

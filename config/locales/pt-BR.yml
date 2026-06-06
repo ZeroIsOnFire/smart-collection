@@ -301,6 +301,10 @@ pt-BR:
       save_item: "Salvar Item"
       undo: "Desfazer"
       statuses:
+        processing_title: "Processando..."
+        processing_text: "Estamos preparando o recorte e a classificacao em segundo plano."
+        processing_error_title: "Erro no processamento"
+        processing_error_text: "Tente ajustar o recorte novamente."
         saved_title: "Adicionado com Sucesso!"
         saved_text: "Este item já faz parte da sua coleção."
         rejected_title: "Item Rejeitado"

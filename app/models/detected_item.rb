@@ -14,6 +14,8 @@ class DetectedItem
   field :size, type: String
   field :brand, type: String
   field :manufacturer, type: String
+  field :image_processing_status, type: String
+  field :image_processing_error, type: String
 
   mount_uploader :cropped_photo, CroppedPhotoUploader
 
@@ -21,12 +23,18 @@ class DetectedItem
   index({ autodetection_id: 1 }, { background: true })
 
   STATUSES = %w[pending saved rejected].freeze
+  IMAGE_PROCESSING_STATUSES = %w[pending processing completed error].freeze
   validates :status, inclusion: { in: STATUSES }
+  validates :image_processing_status, inclusion: { in: IMAGE_PROCESSING_STATUSES }, allow_blank: true
   validates :label, presence: true
 
   # Real-time broadcast to the autodetection page
   after_create_commit :broadcast_new_item
   after_destroy_commit :broadcast_remove_item
+
+  def image_processing?
+    image_processing_status.in?(%w[pending processing])
+  end
 
   private
 

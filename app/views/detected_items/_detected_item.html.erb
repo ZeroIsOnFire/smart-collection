@@ -6,6 +6,7 @@
     is_saved = detected_item.status == 'saved'
     is_rejected = detected_item.status == 'rejected'
     is_processed = is_saved || is_rejected
+    is_image_processing = detected_item.image_processing?
   %>
 
   <div class="card shadow-sm rounded-4 border-0 overflow-hidden position-relative detected-item-card <%= 'is-processed' if is_processed %>">
@@ -34,7 +35,27 @@
 
         <!-- Centro: Formulário ou Status (50%) -->
         <div class="col-md-6 p-4 d-flex flex-column justify-content-center">
-          <% if is_saved %>
+          <% if is_image_processing %>
+            <div class="animate-fade-in">
+              <div class="d-flex align-items-center mb-2">
+                <div class="icon-box bg-primary bg-opacity-10 rounded-circle me-3 text-primary" style="width: 45px; height: 45px; margin-bottom: 0;">
+                  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                </div>
+                <h5 class="fw-bold mb-0 text-primary"><%= t('autodetections.detected_item.statuses.processing_title') %></h5>
+              </div>
+              <p class="mb-0 text-muted ps-5"><%= t('autodetections.detected_item.statuses.processing_text') %></p>
+            </div>
+          <% elsif detected_item.image_processing_status == 'error' %>
+            <div class="animate-fade-in">
+              <div class="d-flex align-items-center mb-2">
+                <div class="icon-box bg-soft-danger rounded-circle me-3" style="width: 45px; height: 45px; margin-bottom: 0;">
+                  <i class="bi bi-exclamation-triangle"></i>
+                </div>
+                <h5 class="fw-bold mb-0 text-danger"><%= t('autodetections.detected_item.statuses.processing_error_title') %></h5>
+              </div>
+              <p class="mb-0 text-muted ps-5"><%= t('autodetections.detected_item.statuses.processing_error_text') %></p>
+            </div>
+          <% elsif is_saved %>
             <div class="animate-fade-in">
               <div class="d-flex align-items-center mb-2">
                 <div class="icon-box bg-emerald-light rounded-circle me-3" style="width: 45px; height: 45px; margin-bottom: 0;">
@@ -114,7 +135,13 @@
 
         <!-- Direita: Ações (25%) -->
         <div class="col-md-3 detected-item-actions-col">
-          <% if is_saved || is_rejected %>
+          <% if is_image_processing %>
+            <div class="d-grid gap-3 w-100">
+              <button type="button" class="btn btn-soft-secondary w-100 rounded-pill py-3" disabled>
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span><%= t('autodetections.detected_item.statuses.processing_title') %>
+              </button>
+            </div>
+          <% elsif is_saved || is_rejected %>
              <%= button_to undo_detected_item_path(detected_item),
                   method: :patch,
                   class: "btn btn-soft-secondary w-100 rounded-pill py-2 border-0 shadow-sm",
