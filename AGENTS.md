@@ -65,8 +65,9 @@ Servico Rails premium para registro e gerenciamento de colecoes: itens, fotos, a
 
 ## Windows
 
-- Se PowerShell falhar ao ler arquivos com `windows sandbox: spawn setup refresh`, leia pelo container: `docker compose exec web sed -n '1,120p' caminho`.
-- Fallback secundario: `wsl.exe sed -n '1,120p' caminho`.
+- Se PowerShell falhar com `windows sandbox: spawn setup refresh`, a falha costuma estar na camada de sandbox; repita o mesmo comando com `sandbox_permissions: "require_escalated"` quando for necessario usar PowerShell.
+- Para leitura simples de arquivos, prefira evitar nova aprovacao usando o container: `docker compose exec web sed -n '1,120p' caminho`.
+- Fallback secundario para leitura: `wsl.exe sed -n '1,120p' caminho`.
 
 ## Branches, PR e CI
 
