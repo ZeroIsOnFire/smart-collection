@@ -28,6 +28,7 @@ RSpec.describe CarImageProcessingJob do
       attach_photo!(car)
       upscaled_file = build_temp_image(width: 420, height: 280)
 
+      allow(Turbo::StreamsChannel).to receive(:broadcast_replace_to)
       expect(ImageUpscalerService).to receive(:upscale_if_needed)
         .with(anything, minimum_side: ImageUpscalerService.default_minimum_side, use_ai: true, local_fallback: false)
         .and_return(upscaled_file)
@@ -42,6 +43,12 @@ RSpec.describe CarImageProcessingJob do
       expect(processed_car.color).to eq('Azul')
       expect(processed_car.photo_processing_status).to eq('completed')
       expect(processed_car.photo_processing_error).to be_nil
+      expect(Turbo::StreamsChannel).to have_received(:broadcast_replace_to).with(
+        "cars_#{user.id}",
+        target: "car_#{car.id}",
+        partial: 'cars/car',
+        locals: { car: processed_car }
+      ).at_least(:once)
     end
 
     it 'uses crop parameters when they are present' do
@@ -88,6 +95,7 @@ RSpec.describe CarImageProcessingJob do
     it 'marks the car as error when image processing fails' do
       attach_photo!(car)
 
+      allow(Turbo::StreamsChannel).to receive(:broadcast_replace_to)
       expect(ImageUpscalerService).to receive(:upscale_if_needed)
         .and_raise(StandardError, 'upscaler failed')
 
@@ -95,6 +103,12 @@ RSpec.describe CarImageProcessingJob do
 
       failed_car = Car.find(car.id)
       expect(failed_car.photo_processing_status).to eq('error')
+      expect(Turbo::StreamsChannel).to have_received(:broadcast_replace_to).with(
+        "cars_#{user.id}",
+        target: "car_#{car.id}",
+        partial: 'cars/car',
+        locals: { car: failed_car }
+      ).at_least(:once)
     end
   end
 end

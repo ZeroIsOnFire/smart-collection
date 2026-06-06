@@ -43,6 +43,13 @@ RSpec.describe 'Cars', type: :request do
       expect(delete_button).to be_present
     end
 
+    it 'subscribes to car card updates for background photo processing' do
+      get cars_path
+
+      signed_stream = Turbo::StreamsChannel.signed_stream_name("cars_#{user.id}")
+      expect(response.body).to include(signed_stream)
+    end
+
     it 'shows the autodetection AI upscaling notice when enabled and configured' do
       allow(ImageUpscalerService).to receive(:service_configured?).and_return(true)
 

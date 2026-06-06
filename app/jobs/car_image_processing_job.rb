@@ -8,7 +8,7 @@ class CarImageProcessingJob < ApplicationJob
     car = user.cars.find(car_id)
     return clear_processing_state(car) if car.photo.blank?
 
-    car.update!(photo_processing_status: 'processing', photo_processing_error: nil)
+    update_processing_state(car, status: 'processing')
 
     processed_file = process_photo(car, crop_params.to_h.deep_symbolize_keys)
     classify_color(car)
@@ -16,6 +16,7 @@ class CarImageProcessingJob < ApplicationJob
     car.photo_processing_status = 'completed'
     car.photo_processing_error = nil
     car.save!
+    broadcast_car(car)
   rescue Mongoid::Errors::DocumentNotFound
     nil
   rescue StandardError => e
@@ -94,14 +95,30 @@ class CarImageProcessingJob < ApplicationJob
 
   def clear_processing_state(car)
     car.update!(photo_processing_status: nil, photo_processing_error: nil)
+    broadcast_car(car)
   end
 
   def mark_as_failed(user_id, car_id, message)
     user = User.find(user_id)
     car = user.cars.find(car_id)
     car.update!(photo_processing_status: 'error', photo_processing_error: message)
+    broadcast_car(car)
   rescue Mongoid::Errors::DocumentNotFound
     nil
+  end
+
+  def update_processing_state(car, status:)
+    car.update!(photo_processing_status: status, photo_processing_error: nil)
+    broadcast_car(car)
+  end
+
+  def broadcast_car(car)
+    Turbo::StreamsChannel.broadcast_replace_to(
+      "cars_#{car.user_id}",
+      target: "car_#{car.id}",
+      partial: 'cars/car',
+      locals: { car: car }
+    )
   end
 
   def cleanup_tempfile(tempfile)
