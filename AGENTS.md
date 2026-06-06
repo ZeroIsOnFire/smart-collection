@@ -135,7 +135,7 @@ spec/
 - Consulte `upscale/AGENTS.md` antes de alterar qualquer código do microserviço.
 
 ### Frontend e i18n
-- JavaScript usa Stimulus via importmap; novos controllers devem seguir o padrão em `app/javascript/controllers/`.
+- JavaScript usa Stimulus empacotado com esbuild via `jsbundling-rails`; novos controllers devem seguir o padrão em `app/javascript/controllers/` e ser registrados em `app/javascript/controllers/index.js`.
 - Textos usados em JavaScript devem vir dos arquivos `config/locales/javascript.*.yml` e da infraestrutura de i18n carregada pela partial `shared/_javascript_i18n.html.erb`.
 - Evite texto hardcoded também em Turbo Streams, toasts, botões, labels e mensagens de erro.
 
@@ -244,6 +244,10 @@ refactor(items): extrair lógica de tags para TagService
 - **Internacionalização Obrigatória**: É proibido adicionar textos "hardcoded" em views, controllers ou javascript. Tudo deve ser traduzido utilizando a API de I18n do Rails (ex: `t('chave.da.traducao')`).
 - Ao criar ou editar views, garanta a adequação ao padrão Premium Design (usando CSS e ícones existentes).
 - Sempre execute `docker compose exec web bundle exec rspec` antes de considerar uma tarefa Rails concluída.
-- Para alterações em microserviços Python, execute também os testes do respectivo diretório (`upscale/test_main.py` ou testes do `yolo/`, quando existirem).
+- Para alterações em JavaScript, dependências npm, layouts que carregam JS ou configuração de esbuild, você DEVE usar a skill `$quality-check-javascript`.
+- Para alterações em microserviços Python, você DEVE usar a skill `$quality-check-python`.
 - Commits devem ser atômicos e com mensagens claras em português.
-- **Verificação de Qualidade (QA)**: Sempre que o usuário pedir para verificar a qualidade do projeto (rodar linters/testes), você DEVE usar a skill `$quality-agent`.
+- **Verificação de Qualidade Rails (QA)**: Sempre que o usuário pedir para verificar a qualidade do projeto Rails (rodar linters/testes), você DEVE usar a skill `$quality-check-rails`.
+- **Verificação de Qualidade JavaScript (QA)**: Sempre que o usuário pedir para verificar qualidade, build, audit ou dependências JavaScript, você DEVE usar a skill `$quality-check-javascript`.
+- **Verificação de Qualidade Python (QA)**: Sempre que o usuário pedir para verificar qualidade, lint ou testes dos microserviços Python, você DEVE usar a skill `$quality-check-python`.
+- **Verificação de Segurança**: Sempre que o usuário pedir auditoria de segurança, verificação de vulnerabilidades ou correção de dependências vulneráveis, você DEVE usar a skill `$security-check-rails`.

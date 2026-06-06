@@ -1,6 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import { Turbo } from "@hotwired/turbo-rails"
-import { t } from "i18n"
+import { t } from "../i18n"
 
 export default class extends Controller {
   connect() {

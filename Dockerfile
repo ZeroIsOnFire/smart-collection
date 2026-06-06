@@ -17,7 +17,7 @@ FROM base as build
 
 # Install packages needed to build gems
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential git pkg-config libyaml-dev imagemagick
+    apt-get install --no-install-recommends -y build-essential git pkg-config libssl-dev libyaml-dev imagemagick nodejs npm
 
 # Install application gems
 COPY Gemfile Gemfile.lock ./
@@ -25,8 +25,15 @@ RUN bundle install && \
     rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
     bundle exec bootsnap precompile --gemfile
 
+# Install JavaScript packages
+COPY package.json package-lock.json ./
+RUN npm ci
+
 # Copy application code
 COPY . .
+
+# Build JavaScript assets
+RUN npm run build
 
 # Precompile bootsnap code for faster boot times
 RUN bundle exec bootsnap precompile app/ lib/
@@ -37,7 +44,7 @@ FROM base
 
 # Install packages needed for deployment
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y curl git imagemagick && \
+    apt-get install --no-install-recommends -y curl git imagemagick nodejs npm && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Copy built artifacts: gems, application

@@ -3,6 +3,19 @@
 # Ensure permissions for file uploads
 mkdir -p public/uploads storage
 
+# Build JavaScript bundles when running from a mounted development workspace.
+if [ -f package.json ] && command -v npm >/dev/null 2>&1; then
+  if [ ! -d node_modules ]; then
+    if [ -f package-lock.json ]; then
+      npm ci
+    else
+      npm install
+    fi
+  fi
+
+  npm run build
+fi
+
 # Remove a potentially pre-existing server.pid for Rails.
 if [ -f tmp/pids/server.pid ]; then
   rm tmp/pids/server.pid

@@ -5,10 +5,10 @@ source 'https://rubygems.org'
 ruby '3.3.10'
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-gem 'rails', '~> 7.1.3'
+gem 'rails', '~> 7.2.3', '>= 7.2.3.1'
 
 # Use the Puma web server [https://github.com/puma/puma]
-gem 'puma', '>= 5.0'
+gem 'puma', '>= 8.0.2'
 
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 # gem "jbuilder"
@@ -35,7 +35,7 @@ gem 'carrierwave', '~> 3.0'
 gem 'carrierwave-mongoid'
 gem 'devise'
 gem 'google-cloud-vision'
-gem 'importmap-rails'
+gem 'jsbundling-rails'
 gem 'kaminari-actionview'
 gem 'kaminari-mongoid'
 gem 'mini_magick'
@@ -51,6 +51,7 @@ gem 'turbo-rails'
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
+  gem 'brakeman', require: false
   gem 'bundler-audit', require: false
   gem 'capybara'
   gem 'debug', platforms: %i[mri windows]

@@ -39,7 +39,13 @@
 # Ignore Google Cloud Credential JSON keys
 /*.json
 !/package.json
+!/package-lock.json
 !/composer.json
+
+# Ignore JavaScript dependencies and generated bundles.
+/node_modules
+/app/assets/builds/*
+!/app/assets/builds/.keep
 
 # Ignore additional log/debug artifacts
 /*.log

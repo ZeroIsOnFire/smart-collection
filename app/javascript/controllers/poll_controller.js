@@ -1,5 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
-import { t } from "i18n"
+import { t } from "../i18n"
 
 export default class extends Controller {
   static values = { interval: Number }

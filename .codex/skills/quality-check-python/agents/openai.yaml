@@ -1,0 +1,4 @@
+interface:
+  display_name: "Quality Check Python"
+  short_description: "Run Python QA checks for Smart Collection microservices."
+  default_prompt: "Use $quality-check-python to lint and test Smart Collection Python microservices."

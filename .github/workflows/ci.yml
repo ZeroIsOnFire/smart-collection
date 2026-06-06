@@ -40,6 +40,21 @@ jobs:
           sudo apt-get update
           sudo apt-get install --no-install-recommends -y imagemagick
 
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install JavaScript dependencies
+        run: npm ci
+
+      - name: Run JavaScript lint
+        run: npm run lint
+
+      - name: Build JavaScript
+        run: npm run build
+
       - name: Run RSpec
         run: bundle exec rspec --format documentation
 
@@ -48,6 +63,9 @@ jobs:
 
       - name: Audit gems for vulnerabilities
         run: bundle exec bundler-audit check --update
+
+      - name: Run Brakeman
+        run: bundle exec brakeman --no-pager
 
       - name: Rails Best Practices
         run: bundle exec rails_best_practices .
