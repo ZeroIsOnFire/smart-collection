@@ -27,7 +27,7 @@ bundle exec brakeman --no-pager || true
 
 echo ""
 echo "👉 5. Rodando Testes (RSpec)"
-bundle exec rspec
+bin/safe_rspec
 
 echo ""
 echo "✅ Processo finalizado."

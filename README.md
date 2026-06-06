@@ -65,7 +65,7 @@ Image preparation thresholds are configured in `.env` with `IMAGE_UPSCALE_DEFAUL
 
 Para rodar a suite de testes (RSpec):
 ```bash
-docker-compose exec web bundle exec rspec
+docker-compose exec web bin/safe_rspec
 ```
 
 ## ⚖️ Licença

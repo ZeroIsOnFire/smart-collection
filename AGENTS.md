@@ -97,8 +97,9 @@ spec/
 - Variáveis de ambiente via arquivo `.env` (template em `.env.example`).
 - Serviços esperados no ambiente local: `web`, `sidekiq`, `mongodb`, `redis`, `yolo-service` e `upscale-service`.
 - O Rails usa `config.active_job.queue_adapter = :sidekiq`; jobs assíncronos devem continuar compatíveis com Sidekiq e Redis.
-- Comandos Rails/RSpec/RuboCop devem ser executados dentro do container `web` (ex: `docker compose exec web bundle exec rspec`).
+- Comandos Rails/RSpec/RuboCop devem ser executados dentro do container `web`. RSpec deve ser executado apenas via `docker compose exec web bin/safe_rspec`, nunca por `bundle exec rspec` direto.
 - **Preservação de Dados Locais**: Nunca execute `Mongoid.purge!`, `db:drop`, limpeza em massa da base de desenvolvimento, remoção de volumes Docker (`docker volume rm`, `docker compose down -v`) ou comandos equivalentes destrutivos sem pedido explícito do usuário. Sempre tente corrigir por caminhos reversíveis e pontuais primeiro (ex: recriar usuário, ajustar senha, rodar seeds idempotentes, corrigir registros específicos).
+- **Segurança dos Testes**: Antes de rodar qualquer RSpec, garanta que `Rails.env` seja `test` e que o banco Mongoid real tenha `test` no nome. Se houver qualquer indício de uso do banco `development`, pare imediatamente e corrija a configuração; nunca rode specs contra o banco de desenvolvimento.
 
 ### Leitura de Arquivos no Windows
 - No ambiente Windows, se o PowerShell apresentar falhas intermitentes ao ler arquivos (ex: `windows sandbox: spawn setup refresh`), use preferencialmente o container `web`, onde o projeto fica montado em `/rails`.
@@ -242,7 +243,7 @@ refactor(items): extrair lógica de tags para TagService
 - **NÃO APAGAR DADOS LOCAIS SEM PEDIDO EXPLÍCITO**: Base de desenvolvimento e volumes Docker devem ser preservados. Não faça purge/drop/reset da base nem remova volumes para "resolver" problemas, salvo quando o usuário exigir diretamente essa ação.
 - **Internacionalização Obrigatória**: É proibido adicionar textos "hardcoded" em views, controllers ou javascript. Tudo deve ser traduzido utilizando a API de I18n do Rails (ex: `t('chave.da.traducao')`).
 - Ao criar ou editar views, garanta a adequação ao padrão Premium Design (usando CSS e ícones existentes).
-- Sempre execute `docker compose exec web bundle exec rspec` antes de considerar uma tarefa Rails concluída.
+- Sempre execute `docker compose exec web bin/safe_rspec` antes de considerar uma tarefa Rails concluída. Nunca execute `bundle exec rspec` direto, pois o wrapper valida que o MongoDB real é de teste antes da limpeza do banco.
 - Para alterações em JavaScript, dependências npm, layouts que carregam JS ou configuração de esbuild, você DEVE usar a skill `$quality-check-javascript`.
 - Para alterações em microserviços Python, você DEVE usar a skill `$quality-check-python`.
 - Commits devem ser atômicos e com mensagens claras em português.
