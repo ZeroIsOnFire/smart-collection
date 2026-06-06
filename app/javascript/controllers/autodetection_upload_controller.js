@@ -1,6 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import * as bootstrap from "bootstrap"
-import { t } from "i18n"
+import { t } from "../i18n"
 
 export default class extends Controller {
   static targets = ["video", "canvas", "preview", "previewContainer", "input", "form", "dropzone", "captureBtn", "cameraInterface", "uploadInterface"]

@@ -33,7 +33,7 @@ export default class extends Controller {
     this.dropzoneTarget.classList.add("drag-over")
   }
 
-  dragLeave(event) {
+  dragLeave() {
     this.dropzoneTarget.classList.remove("drag-over")
   }
 

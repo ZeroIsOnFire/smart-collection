@@ -9,7 +9,7 @@ export default class extends Controller {
     this.initialValue = this.inputTarget.value.trim()
     
     // Ouvinte para reverter o estado de loading quando a requisição terminar
-    this.element.addEventListener("turbo:submit-end", (event) => {
+    this.element.addEventListener("turbo:submit-end", () => {
       this.hideSearchingState()
     })
   }

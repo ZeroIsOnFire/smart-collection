@@ -1,0 +1,22 @@
+{
+  "name": "smart-collection",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "esbuild app/javascript/application.js --bundle --sourcemap --format=esm --outdir=app/assets/builds --public-path=/assets",
+    "lint": "eslint \"app/javascript/**/*.js\"",
+    "lint:fix": "eslint \"app/javascript/**/*.js\" --fix"
+  },
+  "dependencies": {
+    "@hotwired/stimulus": "^3.2.2",
+    "@hotwired/turbo-rails": "^8.0.18",
+    "@popperjs/core": "^2.11.8",
+    "bootstrap": "^5.3.3",
+    "esbuild": "^0.27.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.4.1",
+    "globals": "^17.6.0"
+  }
+}
