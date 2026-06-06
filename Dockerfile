@@ -17,7 +17,7 @@ FROM base as build
 
 # Install packages needed to build gems
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential git pkg-config libyaml-dev imagemagick nodejs npm
+    apt-get install --no-install-recommends -y build-essential git pkg-config libssl-dev libyaml-dev imagemagick nodejs npm
 
 # Install application gems
 COPY Gemfile Gemfile.lock ./
