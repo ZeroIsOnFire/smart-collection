@@ -19,6 +19,10 @@ class Car
   field :photo_cache, type: String
   field :photo_processing_status, type: String
   field :photo_processing_error, type: String
+  field :photo_processing_crop_x, type: Float
+  field :photo_processing_crop_y, type: Float
+  field :photo_processing_crop_w, type: Float
+  field :photo_processing_crop_h, type: Float
 
   # Virtual attributes for image cropping
   attr_accessor :crop_x, :crop_y, :crop_w, :crop_h
@@ -95,5 +99,12 @@ class Car
 
   def photo_processing?
     photo_processing_status.in?(%w[pending processing])
+  end
+
+  def photo_processing_crop?
+    photo_processing? &&
+      [photo_processing_crop_x, photo_processing_crop_y, photo_processing_crop_w, photo_processing_crop_h].all?(&:present?) &&
+      photo_processing_crop_w.positive? &&
+      photo_processing_crop_h.positive?
   end
 end

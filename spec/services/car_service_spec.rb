@@ -64,6 +64,17 @@ RSpec.describe CarService do
       )
     end
 
+    it 'keeps crop values for the processing thumbnail' do
+      params = valid_params.merge(crop_x: '0.1', crop_y: '0.2', crop_w: '0.3', crop_h: '0.4')
+
+      car = described_class.new(user).create(params)
+
+      expect(car.photo_processing_crop_x).to eq(0.1)
+      expect(car.photo_processing_crop_y).to eq(0.2)
+      expect(car.photo_processing_crop_w).to eq(0.3)
+      expect(car.photo_processing_crop_h).to eq(0.4)
+    end
+
     it 'does not enqueue photo processing when no photo or crop is provided' do
       params = valid_params.merge(photo: nil)
 

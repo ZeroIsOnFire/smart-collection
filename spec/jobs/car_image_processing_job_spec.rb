@@ -43,6 +43,7 @@ RSpec.describe CarImageProcessingJob do
       expect(processed_car.color).to eq('Azul')
       expect(processed_car.photo_processing_status).to eq('completed')
       expect(processed_car.photo_processing_error).to be_nil
+      expect(processed_car.photo_processing_crop?).to be false
       expect(Turbo::StreamsChannel).to have_received(:broadcast_replace_to).with(
         "cars_#{user.id}",
         target: "car_#{car.id}",
@@ -103,6 +104,7 @@ RSpec.describe CarImageProcessingJob do
 
       failed_car = Car.find(car.id)
       expect(failed_car.photo_processing_status).to eq('error')
+      expect(failed_car.photo_processing_crop?).to be false
       expect(Turbo::StreamsChannel).to have_received(:broadcast_replace_to).with(
         "cars_#{user.id}",
         target: "car_#{car.id}",

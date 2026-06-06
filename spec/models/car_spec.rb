@@ -33,4 +33,26 @@ RSpec.describe Car, type: :model do
       expect(car.user).to eq(user)
     end
   end
+
+  describe '#photo_processing_crop?' do
+    it 'returns true only when the car is processing and has complete crop data' do
+      car.photo_processing_status = 'pending'
+      car.photo_processing_crop_x = 0.1
+      car.photo_processing_crop_y = 0.2
+      car.photo_processing_crop_w = 0.3
+      car.photo_processing_crop_h = 0.4
+
+      expect(car.photo_processing_crop?).to be true
+    end
+
+    it 'returns false after processing finishes' do
+      car.photo_processing_status = 'completed'
+      car.photo_processing_crop_x = 0.1
+      car.photo_processing_crop_y = 0.2
+      car.photo_processing_crop_w = 0.3
+      car.photo_processing_crop_h = 0.4
+
+      expect(car.photo_processing_crop?).to be false
+    end
+  end
 end

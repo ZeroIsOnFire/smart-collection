@@ -15,6 +15,7 @@ class CarImageProcessingJob < ApplicationJob
 
     car.photo_processing_status = 'completed'
     car.photo_processing_error = nil
+    clear_processing_crop(car)
     car.save!
     broadcast_car(car)
   rescue Mongoid::Errors::DocumentNotFound
@@ -94,17 +95,38 @@ class CarImageProcessingJob < ApplicationJob
   end
 
   def clear_processing_state(car)
-    car.update!(photo_processing_status: nil, photo_processing_error: nil)
+    car.update!(
+      photo_processing_status: nil,
+      photo_processing_error: nil,
+      photo_processing_crop_x: nil,
+      photo_processing_crop_y: nil,
+      photo_processing_crop_w: nil,
+      photo_processing_crop_h: nil
+    )
     broadcast_car(car)
   end
 
   def mark_as_failed(user_id, car_id, message)
     user = User.find(user_id)
     car = user.cars.find(car_id)
-    car.update!(photo_processing_status: 'error', photo_processing_error: message)
+    car.update!(
+      photo_processing_status: 'error',
+      photo_processing_error: message,
+      photo_processing_crop_x: nil,
+      photo_processing_crop_y: nil,
+      photo_processing_crop_w: nil,
+      photo_processing_crop_h: nil
+    )
     broadcast_car(car)
   rescue Mongoid::Errors::DocumentNotFound
     nil
+  end
+
+  def clear_processing_crop(car)
+    car.photo_processing_crop_x = nil
+    car.photo_processing_crop_y = nil
+    car.photo_processing_crop_w = nil
+    car.photo_processing_crop_h = nil
   end
 
   def update_processing_state(car, status:)
