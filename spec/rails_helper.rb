@@ -32,6 +32,6 @@ RSpec.configure do |config|
   config.include Devise::Test::IntegrationHelpers, type: :request
 
   config.before do
-    Mongoid.purge!
+    ProtectedMongoidPurge.call
   end
 end
