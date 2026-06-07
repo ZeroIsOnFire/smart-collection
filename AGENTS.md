@@ -32,6 +32,10 @@ Servico Rails premium para registro e gerenciamento de colecoes: itens, fotos, a
 - Rode o projeto via Docker Compose. O `docker-compose.yml` local nao e versionado; use `docker-compose.example.yml` como template.
 - Comandos Rails, RSpec e RuboCop devem rodar no container `web`.
 - RSpec deve usar `docker compose exec web bin/safe_rspec`; nunca rode `bundle exec rspec` direto. O wrapper valida `Rails.env=test` e banco Mongoid com `test` no nome.
+- Se `bin/safe_rspec` ou `bin/qa` falhar no container com mensagens como `$'\r': command not found` ou `cannot execute: required file not found`, o problema costuma ser CRLF nos scripts. Use o workaround sem alterar arquivos: `docker compose exec web sh -lc "tr -d '\r' < bin/safe_rspec | bash -s -- spec/caminho_spec.rb"` para specs focados, `docker compose exec web sh -lc "tr -d '\r' < bin/safe_rspec | bash"` para a suite completa e `docker compose exec web sh -lc "tr -d '\r' < bin/qa | bash"` para QA amplo.
+- O `bin/qa` com CRLF removido em memoria pode ainda falhar na etapa final porque chama `bin/safe_rspec` diretamente. Quando isso acontecer, registre o resultado parcial do QA e rode a suite separadamente com o workaround acima.
+- Se um lote grande de specs estourar timeout da ferramenta, divida em lotes menores por area alterada antes de repetir a suite completa.
+- O RuboCop amplo pode reportar `Layout/EndOfLine` em arquivos preexistentes com CRLF. Corrija line endings apenas nos arquivos realmente tocados pela tarefa, salvo pedido explicito para normalizacao global.
 - Durante a implementacao, rode specs focados no que foi alterado. No fechamento de tarefa Rails relevante, rode a suite suficiente para dar confianca; QA amplo/lint/audit fica para o final do processo ou quando o usuario pedir.
 - TDD e esperado: teste antes da implementacao quando houver mudanca de comportamento. Use RSpec, FactoryBot, Shoulda e VCR para HTTP externo.
 
@@ -68,6 +72,7 @@ Servico Rails premium para registro e gerenciamento de colecoes: itens, fotos, a
 - Se PowerShell falhar com `windows sandbox: spawn setup refresh`, a falha costuma estar na camada de sandbox; repita o mesmo comando com `sandbox_permissions: "require_escalated"` quando for necessario usar PowerShell.
 - Para leitura simples de arquivos, prefira evitar nova aprovacao usando o container: `docker compose exec web sed -n '1,120p' caminho`.
 - Fallback secundario para leitura: `wsl.exe sed -n '1,120p' caminho`.
+- Nem toda imagem Docker do projeto possui utilitarios basicos como `ps`. Para diagnostico de containers, prefira `docker compose ps`, `docker compose logs --tail=N servico` ou comandos especificos disponiveis no container em vez de `docker compose exec web ps ...`.
 
 ## Branches, PR e CI
 
