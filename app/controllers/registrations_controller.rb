@@ -3,12 +3,14 @@
 class RegistrationsController < Devise::RegistrationsController
   protected
 
-  def after_sign_up_path_for(_resource)
-    cars_path
+  def after_sign_up_path_for(resource)
+    resource.update(initial_setup_completed: false)
+    initial_setup_path
   end
 
-  def after_inactive_sign_up_path_for(_resource)
-    cars_path
+  def after_inactive_sign_up_path_for(resource)
+    resource.update(initial_setup_completed: false)
+    initial_setup_path
   end
 
   private

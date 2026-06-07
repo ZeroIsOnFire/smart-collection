@@ -18,11 +18,10 @@ class ApplicationController < ActionController::Base
     # Limpa qualquer localização armazenada (como a Home) para garantir o redirecionamento correto
     stored_location_for(resource)
 
-    if resource.admin?
-      admin_dashboard_path
-    else
-      cars_path
-    end
+    return admin_dashboard_path if resource.admin?
+    return initial_setup_path if resource.initial_setup_pending?
+
+    cars_path
   end
 
   private

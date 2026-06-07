@@ -1,0 +1,59 @@
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-8 col-xl-7">
+      <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="card-body p-4 p-md-5">
+          <div class="mb-4">
+            <span class="badge rounded-pill bg-primary-subtle text-primary mb-3">
+              <%= t('initial_setup.badge') %>
+            </span>
+            <h1 class="fw-bold mb-2 fs-3"><%= t('initial_setup.title') %></h1>
+            <p class="text-muted mb-0"><%= t('initial_setup.subtitle') %></p>
+          </div>
+
+          <%= form_with model: current_user, url: initial_setup_path, method: :patch do |f| %>
+            <div class="vstack gap-3 mb-4">
+              <div class="border rounded-4 p-4 bg-light">
+                <div class="form-check form-switch d-flex gap-3 align-items-start p-0">
+                  <%= f.check_box :sharing_enabled,
+                                  class: "form-check-input flex-shrink-0 ms-0 mt-1",
+                                  role: "switch" %>
+                  <div>
+                    <%= f.label :sharing_enabled,
+                                t('initial_setup.public_sharing.title'),
+                                class: "form-check-label fw-bold text-dark" %>
+                    <p class="text-muted small mb-0 mt-1">
+                      <%= t('initial_setup.public_sharing.description') %>
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="border rounded-4 p-4 bg-light">
+                <div class="form-check form-switch d-flex gap-3 align-items-start p-0">
+                  <%= f.check_box :ai_upscaling_enabled,
+                                  disabled: !ImageUpscalerService.service_configured?,
+                                  class: "form-check-input flex-shrink-0 ms-0 mt-1",
+                                  role: "switch" %>
+                  <div>
+                    <%= f.label :ai_upscaling_enabled,
+                                t('initial_setup.ai_upscaling.title'),
+                                class: "form-check-label fw-bold text-dark" %>
+                    <p class="text-muted small mb-0 mt-1">
+                      <%= ImageUpscalerService.service_configured? ? t('initial_setup.ai_upscaling.description') : t('initial_setup.ai_upscaling.unavailable') %>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-end">
+              <%= f.submit t('initial_setup.actions.finish'),
+                           class: "btn btn-premium rounded-pill px-4 fw-bold shadow-sm" %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

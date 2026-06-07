@@ -24,6 +24,7 @@ class User
   field :share_token, type: String
   field :sharing_enabled, type: Boolean, default: false
   field :ai_upscaling_enabled, type: Boolean, default: true
+  field :initial_setup_completed, type: Boolean, default: true
 
   index({ sharing_enabled: 1 }, { background: true })
   index({ name: 'text', email: 'text' }, { name: 'UserTextIndex', background: true })
@@ -37,6 +38,10 @@ class User
 
   before_save :ensure_share_token, if: :sharing_enabled?
   after_create :track_creation
+
+  def initial_setup_pending?
+    !admin? && initial_setup_completed == false
+  end
 
   private
 

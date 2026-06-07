@@ -55,6 +55,28 @@ pt-BR:
     not_found: "%{resource} não encontrado(a)."
     unauthorized: "Você não tem permissão para realizar esta ação."
 
+  sharing_settings:
+    public_link: "Seu link público"
+    copied: "Copiado!"
+    enable: "Ativar Link Público"
+    disable: "Desativar Compartilhamento"
+
+  initial_setup:
+    badge: "Configuração inicial"
+    title: "Antes de começar"
+    subtitle: "Escolha como sua coleção deve se comportar nos primeiros cadastros."
+    public_sharing:
+      title: "Exibição pública"
+      description: "Crie um link exclusivo para mostrar sua coleção quando quiser compartilhar."
+    ai_upscaling:
+      title: "Upscale por IA"
+      description: "Melhora imagens pequenas adicionadas daqui em diante, quando o serviço estiver disponível."
+      unavailable: "O serviço de upscale por IA não está configurado neste ambiente."
+    actions:
+      finish: "Salvar e ir para a coleção"
+    messages:
+      completed: "Configuração inicial salva com sucesso."
+
   # ── Coleções ───────────────────────────────────────────
   collections:
     title: "Coleções"
@@ -282,6 +304,17 @@ pt-BR:
       delete_confirm: "Excluir esta autodetecção e todos os seus itens?"
       cancel_confirm: "Cancelar e remover este erro?"
       stop_confirm: "Cancelar e remover esta autodetecção?"
+      discard_and_exit: "Descartar e Sair"
+      discard_confirm: "Cancelar e excluir todas as imagens extraídas permanentemente?"
+    show:
+      title: "Verificação de Autodetecção"
+      subtitle: "Revise as informações e adicione cada item à sua coleção."
+      original_photo: "Foto Original de Referência"
+      add_manually: "Adicionar Manualmente"
+      waiting_items: "Aguardando processamento dos itens... eles aparecerão aqui automaticamente."
+      manual_modal_title: "Adicionar itens da foto"
+      manual_modal_help: "Selecione o carro na foto original abaixo clicando e arrastando. Ao clicar em adicionar, o item aparecerá na lista e você poderá selecionar outro item sem fechar esta tela."
+      add_selected_item: "Adicionar Item selecionado"
     detected_item:
       new_item: "Novo Item"
       model_name: "Modelo/Nome"

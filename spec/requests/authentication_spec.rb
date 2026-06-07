@@ -37,7 +37,7 @@ RSpec.describe 'Authentications', type: :request do
 
   describe 'POST /users' do
     context 'with valid params' do
-      it 'creates a new user with name and redirects' do
+      it 'creates a new user with name and redirects to initial setup' do
         expect do
           post user_registration_path, params: {
             user: {
@@ -48,7 +48,8 @@ RSpec.describe 'Authentications', type: :request do
             }
           }
         end.to change(User, :count).by(1)
-        expect(response).to redirect_to(cars_path)
+        expect(response).to redirect_to(initial_setup_path)
+        expect(User.last.initial_setup_completed).to be false
       end
     end
 
@@ -116,9 +117,17 @@ RSpec.describe 'Authentications', type: :request do
       expect(toggle_button['aria-label']).to eq(I18n.t('devise.ui.password_visibility.show'))
     end
 
-    it 'redirects a normal user to root' do
+    it 'redirects a normal user to the collection' do
       post user_session_path, params: { user: { email: user.email, password: 'password123' } }
       expect(response).to redirect_to(cars_path)
+    end
+
+    it 'redirects a user with pending setup to initial setup' do
+      user.update!(initial_setup_completed: false)
+
+      post user_session_path, params: { user: { email: user.email, password: 'password123' } }
+
+      expect(response).to redirect_to(initial_setup_path)
     end
 
     it 'redirects an admin user to admin dashboard' do
