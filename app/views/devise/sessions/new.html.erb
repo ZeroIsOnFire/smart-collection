@@ -28,9 +28,15 @@
 
       <div class="form-group">
         <%= f.label :password, t('devise.ui.sessions.new.password_label') %>
-        <%= f.password_field :password, autocomplete: "current-password",
-            placeholder: t('devise.ui.sessions.new.password_placeholder'), class: "form-input",
-            id: "user_password_login" %>
+        <%= render "devise/shared/password_visibility_field",
+                   form: f,
+                   field: :password,
+                   input_options: {
+                     autocomplete: "current-password",
+                     placeholder: t('devise.ui.sessions.new.password_placeholder'),
+                     class: "form-input",
+                     id: "user_password_login"
+                   } %>
       </div>
 
       <% if devise_mapping.rememberable? %>

@@ -1,6 +1,9 @@
 pt-BR:
   devise:
     ui:
+      password_visibility:
+        show: "Mostrar senha"
+        hide: "Ocultar senha"
       sessions:
         new:
           title: "Entrar"

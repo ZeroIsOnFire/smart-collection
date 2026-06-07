@@ -1,6 +1,9 @@
 en:
   devise:
     ui:
+      password_visibility:
+        show: "Show password"
+        hide: "Hide password"
       sessions:
         new:
           title: "Sign in"

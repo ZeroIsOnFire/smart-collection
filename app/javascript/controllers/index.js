@@ -13,6 +13,7 @@ import ManualSelectionController from "./manual_selection_controller"
 import ModalFrameController from "./modal_frame_controller"
 import PhotoLightboxController from "./photo_lightbox_controller"
 import PhotoUploadController from "./photo_upload_controller"
+import PasswordVisibilityController from "./password_visibility_controller"
 import PollController from "./poll_controller"
 import SearchFormController from "./search_form_controller"
 import SelectionAdjustmentController from "./selection_adjustment_controller"
@@ -34,6 +35,7 @@ application.register("manual-selection", ManualSelectionController)
 application.register("modal-frame", ModalFrameController)
 application.register("photo-lightbox", PhotoLightboxController)
 application.register("photo-upload", PhotoUploadController)
+application.register("password-visibility", PasswordVisibilityController)
 application.register("poll", PollController)
 application.register("search-form", SearchFormController)
 application.register("selection-adjustment", SelectionAdjustmentController)
