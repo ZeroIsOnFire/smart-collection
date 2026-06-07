@@ -13,13 +13,14 @@ RSpec.describe CarImageProcessingJob do
     record
   end
 
-  def build_temp_image(width:, height:, filename: 'processed.jpg')
+  def build_temp_image(width:, height:, filename: 'processed.jpg', upscale_strategy: nil)
     tempfile = Tempfile.new(['processed', '.jpg'], Rails.root.join('tmp'))
     image = MiniMagick::Image.open(Rails.root.join('spec/fixtures/files/test_image.png'))
     image.resize "#{width}x#{height}!"
     image.write(tempfile.path)
     tempfile.define_singleton_method(:original_filename) { filename }
     tempfile.define_singleton_method(:content_type) { 'image/jpeg' }
+    tempfile.define_singleton_method(:upscale_strategy) { upscale_strategy } if upscale_strategy
     tempfile
   end
 
@@ -50,6 +51,18 @@ RSpec.describe CarImageProcessingJob do
         partial: 'cars/car',
         locals: { car: processed_car }
       ).at_least(:once)
+    end
+
+    it 'tracks upscaled photos in the historical counters' do
+      attach_photo!(car)
+      upscaled_file = build_temp_image(width: 420, height: 280, upscale_strategy: :ai)
+
+      allow(ImageUpscalerService).to receive(:upscale_if_needed).and_return(upscaled_file)
+      allow(YoloDetectionService).to receive(:classify_color).and_return(nil)
+
+      expect do
+        described_class.new.perform(user.id.to_s, car.id.to_s)
+      end.to change { UsageMetric.values_for(['photos_upscaled_ai']).fetch('photos_upscaled_ai') }.from(0).to(1)
     end
 
     it 'uses crop parameters when they are present' do

@@ -57,6 +57,11 @@
               <% end %>
             </li>
             <li class="nav-item">
+              <%= link_to admin_statistics_path, class: "nav-link text-white #{'active' if controller_name == 'statistics'}" do %>
+                <i class="bi bi-graph-up-arrow me-2"></i> <%= t('admin.nav.statistics') %>
+              <% end %>
+            </li>
+            <li class="nav-item">
               <%= link_to admin_maintenance_path, class: "nav-link text-white #{'active' if controller_name == 'maintenance'}" do %>
                 <i class="bi bi-tools me-2"></i> Manutenção
               <% end %>

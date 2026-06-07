@@ -58,6 +58,7 @@ class ImageCropperService
     output.binmode
     image.write(output.path)
     output.rewind
+    copy_upscale_metadata(upscaled_file, output)
 
     if [image.width, image.height].min < minimum_side
       upscaled_output = ImageUpscalerService.upscale_if_needed(
@@ -95,4 +96,12 @@ class ImageCropperService
     nil
   end
   private_class_method :cleanup_tempfile
+
+  def self.copy_upscale_metadata(source, target)
+    return unless source.respond_to?(:upscale_strategy)
+
+    strategy = source.upscale_strategy
+    target.define_singleton_method(:upscale_strategy) { strategy }
+  end
+  private_class_method :copy_upscale_metadata
 end

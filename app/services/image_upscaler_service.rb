@@ -72,7 +72,7 @@ class ImageUpscalerService
 
     Rails.logger.info "ImageUpscalerService: upscale request succeeded with response body size #{response.body.bytesize} bytes"
 
-    tempfile = build_tempfile_from_bytes(source_path, response.body)
+    tempfile = build_tempfile_from_bytes(source_path, response.body, strategy: :ai)
     return tempfile if meets_minimum_side?(tempfile.path, minimum_side)
 
     cleanup_tempfile(tempfile)
@@ -97,7 +97,7 @@ class ImageUpscalerService
     tempfile.binmode
     image.write(tempfile.path)
     tempfile.rewind
-    attach_metadata(tempfile, source_path)
+    attach_metadata(tempfile, source_path, strategy: :local)
   rescue StandardError => e
     Rails.logger.error "ImageUpscalerService local upscale failed: #{e.message}"
     raise UpscaleError, e.message
@@ -116,20 +116,21 @@ class ImageUpscalerService
     image
   end
 
-  def self.build_tempfile_from_bytes(source_path, bytes)
+  def self.build_tempfile_from_bytes(source_path, bytes, strategy:)
     tempfile = Tempfile.new(["upscale_#{File.basename(source_path, File.extname(source_path))}_", '.jpg'], Rails.root.join('tmp'))
     tempfile.binmode
     tempfile.write(bytes)
     tempfile.rewind
-    attach_metadata(tempfile, source_path)
+    attach_metadata(tempfile, source_path, strategy: strategy)
   end
   private_class_method :build_tempfile_from_bytes
 
-  def self.attach_metadata(tempfile, source_path)
+  def self.attach_metadata(tempfile, source_path, strategy:)
     original_name = "#{File.basename(source_path, File.extname(source_path))}.jpg"
 
     tempfile.define_singleton_method(:original_filename) { original_name }
     tempfile.define_singleton_method(:content_type) { 'image/jpeg' }
+    tempfile.define_singleton_method(:upscale_strategy) { strategy }
     tempfile
   end
   private_class_method :attach_metadata

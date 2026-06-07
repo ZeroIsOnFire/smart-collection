@@ -178,6 +178,13 @@
             <div class="small"><%= @stats[:users_count] %> cadastrados no sistema</div>
           </div>
         <% end %>
+        <%= link_to admin_statistics_path, class: "btn btn-soft-secondary text-start p-3 d-flex align-items-center gap-3 rounded-3" do %>
+          <i class="bi bi-graph-up-arrow fs-4 text-success"></i>
+          <div>
+            <div class="fw-bold"><%= t('admin.statistics.quick_link.title') %></div>
+            <div class="small"><%= t('admin.statistics.quick_link.description') %></div>
+          </div>
+        <% end %>
         <%= link_to admin_maintenance_path, class: "btn btn-soft-secondary text-start p-3 d-flex align-items-center gap-3 rounded-3" do %>
           <i class="bi bi-tools fs-4 text-warning"></i>
           <div>

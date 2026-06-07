@@ -86,6 +86,8 @@ class Car
   index({ detected_via_ai: 1 }, { background: true })
 
   belongs_to :user, touch: true
+  after_create :track_creation
+  after_destroy :track_removal
 
   # Assume standard ActiveStorage with mongoid wrapper setup later or skip if unsupported natively without gem.
   # For now just basic fields to fulfill the crud.
@@ -103,5 +105,15 @@ class Car
       [photo_processing_crop_x, photo_processing_crop_y, photo_processing_crop_w, photo_processing_crop_h].all?(&:present?) &&
       photo_processing_crop_w.positive? &&
       photo_processing_crop_h.positive?
+  end
+
+  private
+
+  def track_creation
+    UsageMetric.record!('cars_created')
+  end
+
+  def track_removal
+    UsageMetric.record!('cars_removed')
   end
 end

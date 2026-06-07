@@ -1,11 +1,9 @@
 <div class="mb-5">
-  <h2 class="fw-bold mb-1 text-dark">Manutenção do Sistema</h2>
-  <p class="text-muted mb-0">Monitore a saúde do sistema e gerencie arquivos temporários.</p>
+  <h2 class="fw-bold mb-1 text-dark"><%= t('admin.maintenance.title') %></h2>
+  <p class="text-muted mb-0"><%= t('admin.maintenance.subtitle') %></p>
 </div>
 
-
 <div class="row g-4 mb-4">
-  <!-- Status de Armazenamento -->
   <div class="col-md-6 col-lg-4">
     <div class="card premium-card border-0 rounded-4 p-4 h-100">
       <div class="d-flex align-items-center gap-3 mb-4">
@@ -13,15 +11,14 @@
           <i class="bi bi-hdd fs-3"></i>
         </div>
         <div>
-          <div class="text-secondary small fw-bold text-uppercase tracking-wider">Armazenamento</div>
+          <div class="text-secondary small fw-bold text-uppercase tracking-wider"><%= t('admin.maintenance.storage.title') %></div>
           <div class="fs-4 fw-bold text-dark"><%= @uploads_size %></div>
         </div>
       </div>
-      <p class="small text-muted mb-0">Total ocupado pela pasta <code>public/uploads</code>.</p>
+      <p class="small text-muted mb-0"><%= t('admin.maintenance.storage.description_html') %></p>
     </div>
   </div>
 
-  <!-- Itens para Limpeza -->
   <div class="col-md-6 col-lg-4">
     <div class="card premium-card border-0 rounded-4 p-4 h-100">
       <div class="d-flex align-items-center gap-3 mb-4">
@@ -29,7 +26,7 @@
           <i class="bi bi-trash fs-3"></i>
         </div>
         <div>
-          <div class="text-secondary small fw-bold text-uppercase tracking-wider">Itens Expirados</div>
+          <div class="text-secondary small fw-bold text-uppercase tracking-wider"><%= t('admin.maintenance.cleanup.title') %></div>
           <div class="fs-4 fw-bold text-dark"><%= @old_records_count %></div>
         </div>
       </div>
@@ -38,26 +35,8 @@
                       method: :post,
                       class: "btn btn-outline-warning rounded-pill py-2 fw-bold d-flex align-items-center justify-content-center gap-2",
                       disabled: @old_records_count == 0,
-                      data: { turbo_frame: "_top", turbo_confirm: "Isso removerá permanentemente os registros e fotos de autodetecções concluídas há mais de 24 horas. Deseja continuar?" } do %>
-          <i class="bi bi-stars"></i> Limpar Agora
-        <% end %>
-      </div>
-    </div>
-  </div>
-
-  <!-- Status Geral -->
-  <div class="col-md-12 col-lg-4">
-    <div class="card premium-card border-0 rounded-4 p-4 h-100">
-      <h6 class="fw-bold mb-3">Status por Tipo (Autodetecção)</h6>
-      <div class="d-flex flex-column gap-2">
-        <% @autodetections_by_status.each do |stat| %>
-          <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded-3">
-            <span class="small fw-medium text-capitalize"><%= stat[:_id] %></span>
-            <span class="badge bg-white text-dark border shadow-sm rounded-pill"><%= stat[:count] %></span>
-          </div>
-        <% end %>
-        <% if @autodetections_by_status.empty? %>
-          <div class="text-center py-3 text-muted small italic">Nenhum dado disponível</div>
+                      data: { turbo_frame: "_top", turbo_confirm: t('admin.maintenance.cleanup.confirm') } do %>
+          <i class="bi bi-stars"></i> <%= t('admin.maintenance.cleanup.button') %>
         <% end %>
       </div>
     </div>
@@ -70,41 +49,41 @@
     <div class="card premium-card border-0 rounded-4 overflow-hidden">
       <div class="card-header bg-white border-bottom p-4">
         <div class="d-flex justify-content-between align-items-center">
-          <h5 class="mb-0 fw-bold">Processos de Fundo (Background Jobs)</h5>
-          <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3">Ativo</span>
+          <h5 class="mb-0 fw-bold"><%= t('admin.maintenance.background_jobs.title') %></h5>
+          <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3"><%= t('admin.maintenance.background_jobs.active') %></span>
         </div>
       </div>
       <div class="card-body p-4">
         <div class="alert alert-primary border-0 rounded-4 d-flex align-items-center gap-3 mb-4">
           <i class="bi bi-cpu-fill fs-3"></i>
           <div>
-            <div class="fw-bold">Motor de Processamento: Sidekiq</div>
-            <div class="small">Sistema assíncrono que processa IA (Autodetecção) e gera Exportações sem travar o usuário. Esta seção atualiza automaticamente a cada 10 segundos.</div>
+            <div class="fw-bold"><%= t('admin.maintenance.background_jobs.engine') %></div>
+            <div class="small"><%= t('admin.maintenance.background_jobs.description') %></div>
           </div>
         </div>
 
         <div class="row g-3">
           <div class="col-6 col-md-3">
             <div class="p-3 bg-light rounded-3 text-center border">
-              <div class="text-secondary small fw-bold text-uppercase mb-1">Processados</div>
+              <div class="text-secondary small fw-bold text-uppercase mb-1"><%= t('admin.maintenance.background_jobs.processed') %></div>
               <div class="fs-4 fw-bold text-dark"><%= number_with_delimiter(@sidekiq_stats.processed) %></div>
             </div>
           </div>
           <div class="col-6 col-md-3">
             <div class="p-3 bg-light rounded-3 text-center border">
-              <div class="text-secondary small fw-bold text-uppercase mb-1">Na Fila (Aguardando)</div>
+              <div class="text-secondary small fw-bold text-uppercase mb-1"><%= t('admin.maintenance.background_jobs.enqueued') %></div>
               <div class="fs-4 fw-bold text-dark"><%= number_with_delimiter(@sidekiq_stats.enqueued) %></div>
             </div>
           </div>
           <div class="col-6 col-md-3">
             <div class="p-3 bg-light rounded-3 text-center border">
-              <div class="text-secondary small fw-bold text-uppercase mb-1">Workers Ativos</div>
+              <div class="text-secondary small fw-bold text-uppercase mb-1"><%= t('admin.maintenance.background_jobs.workers') %></div>
               <div class="fs-4 fw-bold text-success"><%= @sidekiq_workers %></div>
             </div>
           </div>
           <div class="col-6 col-md-3">
             <div class="p-3 bg-danger-subtle rounded-3 text-center border border-danger-subtle">
-              <div class="text-danger small fw-bold text-uppercase mb-1">Falhas (Histórico)</div>
+              <div class="text-danger small fw-bold text-uppercase mb-1"><%= t('admin.maintenance.background_jobs.failed') %></div>
               <div class="fs-4 fw-bold text-danger"><%= number_with_delimiter(@sidekiq_stats.failed) %></div>
             </div>
           </div>

@@ -36,11 +36,16 @@ class User
   validates :name, presence: true
 
   before_save :ensure_share_token, if: :sharing_enabled?
+  after_create :track_creation
 
   private
 
   def ensure_share_token
     self.share_token ||= SecureRandom.uuid
+  end
+
+  def track_creation
+    UsageMetric.record!('users_created')
   end
 
   has_many :cars, class_name: 'Car', dependent: :destroy
