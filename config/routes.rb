@@ -3,7 +3,7 @@
 Rails.application.routes.draw do
   devise_for :users, controllers: { registrations: 'registrations' }
 
-  resource :initial_setup, only: %i[show update], path: 'setup-inicial'
+  resource :initial_setup, only: %i[show update], path: 'initial-setup'
 
   # Removendo o redirecionamento automático para cars#index para que a landing page seja sempre a home
   # authenticated :user do

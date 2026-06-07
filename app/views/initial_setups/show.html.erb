@@ -13,36 +13,38 @@
 
           <%= form_with model: current_user, url: initial_setup_path, method: :patch do |f| %>
             <div class="vstack gap-3 mb-4">
-              <div class="border rounded-4 p-4 bg-light">
-                <div class="form-check form-switch d-flex gap-3 align-items-start p-0">
+              <div class="initial-setup-option">
+                <div class="d-flex gap-3 align-items-start">
                   <%= f.check_box :sharing_enabled,
-                                  class: "form-check-input flex-shrink-0 ms-0 mt-1",
+                                  class: "initial-setup-switch-input",
                                   role: "switch" %>
-                  <div>
-                    <%= f.label :sharing_enabled,
-                                t('initial_setup.public_sharing.title'),
-                                class: "form-check-label fw-bold text-dark" %>
-                    <p class="text-muted small mb-0 mt-1">
-                      <%= t('initial_setup.public_sharing.description') %>
-                    </p>
-                  </div>
+                  <%= f.label :sharing_enabled, class: "initial-setup-switch-label" do %>
+                    <span class="initial-setup-switch" aria-hidden="true"></span>
+                    <span class="min-w-0">
+                      <span class="d-block fw-bold text-dark"><%= t('initial_setup.public_sharing.title') %></span>
+                      <span class="d-block text-muted small mt-1">
+                        <%= t('initial_setup.public_sharing.description') %>
+                      </span>
+                    </span>
+                  <% end %>
                 </div>
               </div>
 
-              <div class="border rounded-4 p-4 bg-light">
-                <div class="form-check form-switch d-flex gap-3 align-items-start p-0">
+              <div class="initial-setup-option">
+                <div class="d-flex gap-3 align-items-start">
                   <%= f.check_box :ai_upscaling_enabled,
                                   disabled: !ImageUpscalerService.service_configured?,
-                                  class: "form-check-input flex-shrink-0 ms-0 mt-1",
+                                  class: "initial-setup-switch-input",
                                   role: "switch" %>
-                  <div>
-                    <%= f.label :ai_upscaling_enabled,
-                                t('initial_setup.ai_upscaling.title'),
-                                class: "form-check-label fw-bold text-dark" %>
-                    <p class="text-muted small mb-0 mt-1">
-                      <%= ImageUpscalerService.service_configured? ? t('initial_setup.ai_upscaling.description') : t('initial_setup.ai_upscaling.unavailable') %>
-                    </p>
-                  </div>
+                  <%= f.label :ai_upscaling_enabled, class: "initial-setup-switch-label" do %>
+                    <span class="initial-setup-switch" aria-hidden="true"></span>
+                    <span class="min-w-0">
+                      <span class="d-block fw-bold text-dark"><%= t('initial_setup.ai_upscaling.title') %></span>
+                      <span class="d-block text-muted small mt-1">
+                        <%= ImageUpscalerService.service_configured? ? t('initial_setup.ai_upscaling.description') : t('initial_setup.ai_upscaling.unavailable') %>
+                      </span>
+                    </span>
+                  <% end %>
                 </div>
               </div>
             </div>

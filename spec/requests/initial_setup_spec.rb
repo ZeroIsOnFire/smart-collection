@@ -9,7 +9,11 @@ RSpec.describe 'Initial setup', type: :request do
     sign_in user
   end
 
-  describe 'GET /setup-inicial' do
+  describe 'GET /initial-setup' do
+    it 'keeps the setup route in English' do
+      expect(initial_setup_path).to eq('/initial-setup')
+    end
+
     it 'renders the initial setup form for a user pending setup' do
       get initial_setup_path
 
@@ -17,6 +21,7 @@ RSpec.describe 'Initial setup', type: :request do
       expect(response.body).to include(I18n.t('initial_setup.title'))
       expect(response.body).to include('user_sharing_enabled')
       expect(response.body).to include('user_ai_upscaling_enabled')
+      expect(response.body).to include('initial-setup-switch')
     end
 
     it 'redirects users who already completed setup' do
@@ -37,7 +42,7 @@ RSpec.describe 'Initial setup', type: :request do
     end
   end
 
-  describe 'PATCH /setup-inicial' do
+  describe 'PATCH /initial-setup' do
     it 'saves public sharing and AI preferences and completes setup' do
       allow(ImageUpscalerService).to receive(:service_configured?).and_return(true)
 
