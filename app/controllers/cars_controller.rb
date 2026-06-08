@@ -54,7 +54,7 @@ class CarsController < ApplicationController
 
   # GET /cars/new
   def new
-    @car = current_user.cars.build(default_new_car_attributes.merge(new_car_params))
+    @car = current_user.cars.build(new_car_params)
     render_form_modal(t('cars.modal.new_title')) if turbo_frame_request?
   end
 

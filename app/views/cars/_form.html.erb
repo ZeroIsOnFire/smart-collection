@@ -223,11 +223,12 @@
 
       <div class="d-flex flex-column flex-sm-row gap-2">
         <% unless car.persisted? %>
-          <%= f.button :submit,
-                       t('cars.form.create_another'),
-                       name: :commit_action,
-                       value: :create_another,
-                       class: modal ? "btn-outline-primary rounded-pill px-4 fw-bold" : "btn-outline-primary btn-lg rounded-pill px-4 fw-bold" %>
+          <%= button_tag t('cars.form.create_another'),
+                         type: :submit,
+                         name: :commit_action,
+                         value: :create_another,
+                         class: modal ? "btn btn-outline-primary rounded-pill px-4 fw-bold" : "btn btn-outline-primary btn-lg rounded-pill px-4 fw-bold",
+                         data: { disable_with: t('cars.form.create_another') } %>
         <% end %>
 
         <%= f.button :submit,

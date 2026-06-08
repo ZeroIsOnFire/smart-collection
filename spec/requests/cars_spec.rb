@@ -134,7 +134,7 @@ RSpec.describe 'Cars', type: :request do
       expect(response.body).to include('id="new_car"')
     end
 
-    it 'reuses the latest brand and scale as suggestions for a new item' do
+    it 'does not reuse the latest brand and scale when opening a new item directly' do
       create(:car, user: user, brand: 'Hot Wheels', size: '1:64')
 
       get new_car_path
@@ -143,22 +143,23 @@ RSpec.describe 'Cars', type: :request do
       brand_field = document.at_css('#car_brand')
       selected_scale = document.at_css('#car_size option[selected]')
 
-      expect(brand_field['value']).to eq('Hot Wheels')
-      expect(selected_scale['value']).to eq('1:64')
+      expect(brand_field['value']).to be_blank
+      expect(selected_scale).to be_nil
     end
 
     it 'renders a quick action to keep adding items' do
       get new_car_path
 
       document = Nokogiri::HTML(response.body)
-      create_another_button = document.at_css("input[name='commit_action'][value='create_another']")
+      create_another_button = document.at_css("button[name='commit_action'][value='create_another']")
 
       expect(create_another_button).to be_present
       expect(create_another_button['value']).to eq('create_another')
+      expect(create_another_button.text).to include(I18n.t('cars.form.create_another'))
       expect(create_another_button['data-disable-with']).to include(I18n.t('cars.form.create_another'))
     end
 
-    it 'lets explicit new item params override suggestions' do
+    it 'uses explicit new item params when they are present' do
       create(:car, user: user, brand: 'Hot Wheels', size: '1:64')
 
       get new_car_path, params: { car: { brand: 'Matchbox', size: '1:43' } }
@@ -231,9 +232,11 @@ RSpec.describe 'Cars', type: :request do
       end
 
       it 'prepends the created car and keeps the modal ready for another item' do
+        attributes = valid_attributes.merge(size: '1:64')
+
         expect do
           post cars_path,
-               params: { car: valid_attributes, commit_action: 'create_another' },
+               params: { car: attributes, commit_action: 'create_another' },
                as: :turbo_stream
         end.to change(Car, :count).by(1)
 
@@ -246,7 +249,8 @@ RSpec.describe 'Cars', type: :request do
         expect(response.body).to include('turbo-stream action="update" target="modal"')
         expect(response.body).to include('id="new_car"')
         expect(response.body).to include('flash_toasts')
-        expect(document.at_css('#car_brand')['value']).to eq(valid_attributes[:brand])
+        expect(document.at_css('#car_brand')['value']).to eq(attributes[:brand])
+        expect(document.at_css('#car_size option[selected]')['value']).to eq(attributes[:size])
       end
 
       it 'rerenders the modal form when turbo stream validation fails' do
