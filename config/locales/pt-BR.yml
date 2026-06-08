@@ -55,6 +55,28 @@ pt-BR:
     not_found: "%{resource} não encontrado(a)."
     unauthorized: "Você não tem permissão para realizar esta ação."
 
+  sharing_settings:
+    public_link: "Seu link público"
+    copied: "Copiado!"
+    enable: "Ativar Link Público"
+    disable: "Desativar Compartilhamento"
+
+  initial_setup:
+    badge: "Configuração inicial"
+    title: "Antes de começar"
+    subtitle: "Escolha como sua coleção deve se comportar nos primeiros cadastros."
+    public_sharing:
+      title: "Exibição pública"
+      description: "Crie um link exclusivo para mostrar sua coleção quando quiser compartilhar."
+    ai_upscaling:
+      title: "Upscale por IA"
+      description: "Melhora imagens pequenas adicionadas daqui em diante, quando o serviço estiver disponível."
+      unavailable: "O serviço de upscale por IA não está configurado neste ambiente."
+    actions:
+      finish: "Salvar e ir para a coleção"
+    messages:
+      completed: "Configuração inicial salva com sucesso."
+
   # ── Coleções ───────────────────────────────────────────
   collections:
     title: "Coleções"
@@ -282,6 +304,17 @@ pt-BR:
       delete_confirm: "Excluir esta autodetecção e todos os seus itens?"
       cancel_confirm: "Cancelar e remover este erro?"
       stop_confirm: "Cancelar e remover esta autodetecção?"
+      discard_and_exit: "Descartar e Sair"
+      discard_confirm: "Cancelar e excluir todas as imagens extraídas permanentemente?"
+    show:
+      title: "Verificação de Autodetecção"
+      subtitle: "Revise as informações e adicione cada item à sua coleção."
+      original_photo: "Foto Original de Referência"
+      add_manually: "Adicionar Manualmente"
+      waiting_items: "Aguardando processamento dos itens... eles aparecerão aqui automaticamente."
+      manual_modal_title: "Adicionar itens da foto"
+      manual_modal_help: "Selecione o carro na foto original abaixo clicando e arrastando. Ao clicar em adicionar, o item aparecerá na lista e você poderá selecionar outro item sem fechar esta tela."
+      add_selected_item: "Adicionar Item selecionado"
     detected_item:
       new_item: "Novo Item"
       model_name: "Modelo/Nome"
@@ -337,3 +370,66 @@ pt-BR:
   # ── Escalas ────────────────────────────────────────────
   scales:
     other: "Outra"
+
+  admin:
+    nav:
+      statistics: "Estatisticas"
+    statistics:
+      title: "Estatisticas de uso e IA"
+      subtitle: "Acompanhe o uso atual do sistema e os contadores historicos preservados mesmo apos exclusoes ou alteracoes."
+      quick_link:
+        title: "Estatisticas de Uso"
+        description: "Uso geral, YOLO e upscaler"
+      sections:
+        historical_usage: "Uso historico"
+        autodetections: "Autodeteccoes por status"
+      cards:
+        users_count:
+          title: "Usuarios atuais"
+          description: "Total de contas cadastradas neste momento."
+        cars_count:
+          title: "Carros atuais"
+          description: "Itens ativos no acervo dos usuarios."
+        ai_cars_count:
+          title: "Carros via IA"
+          description: "Carros ativos criados a partir de itens detectados."
+        detected_items_count:
+          title: "Itens detectados atuais"
+          description: "Recortes de autodeteccao ainda presentes no sistema."
+        shared_collections_count:
+          title: "Colecoes publicas"
+          description: "Usuarios com compartilhamento publico ativo."
+        active_autodetections_count:
+          title: "Autodeteccoes ativas"
+          description: "Processos pendentes, em processamento ou aguardando verificacao."
+        yolo_detected_items:
+          title: "Itens detectados por YOLO"
+      counters:
+        users_created: "Usuarios criados"
+        cars_created: "Carros cadastrados"
+        cars_removed: "Carros removidos"
+        yolo_detected_items: "Itens detectados por YOLO"
+        detected_items_removed: "Itens detectados removidos"
+        photos_upscaled_ai: "Fotos com upscaler por IA"
+        photos_upscaled_local: "Fotos com upscaler local"
+    maintenance:
+      title: "Manutencao do Sistema"
+      subtitle: "Monitore a saude do sistema e gerencie arquivos temporarios."
+      storage:
+        title: "Armazenamento"
+        description_html: "Total ocupado pela pasta <code>public/uploads</code>."
+        size_error: "Erro ao calcular"
+      cleanup:
+        title: "Itens Expirados"
+        button: "Limpar Agora"
+        confirm: "Isso removera permanentemente os registros e fotos de autodeteccoes concluidas ha mais de 24 horas. Deseja continuar?"
+        notice: "Limpeza de arquivos temporarios disparada com sucesso."
+      background_jobs:
+        title: "Processos de Fundo (Background Jobs)"
+        active: "Ativo"
+        engine: "Motor de Processamento: Sidekiq"
+        description: "Sistema assincrono que processa IA (Autodeteccao) e gera Exportacoes sem travar o usuario. Esta secao atualiza automaticamente a cada 10 segundos."
+        processed: "Processados"
+        enqueued: "Na Fila (Aguardando)"
+        workers: "Workers Ativos"
+        failed: "Falhas (Historico)"

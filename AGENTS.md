@@ -19,6 +19,7 @@ Servico Rails premium para registro e gerenciamento de colecoes: itens, fotos, a
 - Models ficam com validacoes, associacoes, indices/scopes simples e callbacks essenciais.
 - Evite dependencias novas. Gems, libs npm ou pacotes Python exigem autorizacao explicita.
 - Preserve compatibilidade com Sidekiq/Redis para jobs assincronos.
+- Em rotas Rails com `resource :nome_singular`, o controller ainda segue pluralizacao Rails por padrao. Exemplo: `resource :initial_setup` roteia para `InitialSetupsController` e views em `app/views/initial_setups/`. Confirme com `docker compose exec web bin/rails routes -g termo` antes de criar controller/view singular.
 
 ## UI, Frontend e i18n
 
@@ -32,6 +33,12 @@ Servico Rails premium para registro e gerenciamento de colecoes: itens, fotos, a
 - Rode o projeto via Docker Compose. O `docker-compose.yml` local nao e versionado; use `docker-compose.example.yml` como template.
 - Comandos Rails, RSpec e RuboCop devem rodar no container `web`.
 - RSpec deve usar `docker compose exec web bin/safe_rspec`; nunca rode `bundle exec rspec` direto. O wrapper valida `Rails.env=test` e banco Mongoid com `test` no nome.
+- Se `bin/safe_rspec` ou `bin/qa` falhar no container com mensagens como `$'\r': command not found` ou `cannot execute: required file not found`, o problema costuma ser CRLF nos scripts. Use o workaround sem alterar arquivos: `docker compose exec web sh -lc "tr -d '\r' < bin/safe_rspec | bash -s -- spec/caminho_spec.rb"` para specs focados, `docker compose exec web sh -lc "tr -d '\r' < bin/safe_rspec | bash"` para a suite completa e `docker compose exec web sh -lc "tr -d '\r' < bin/qa | bash"` para QA amplo.
+- O `bin/qa` com CRLF removido em memoria pode ainda falhar na etapa final porque chama `bin/safe_rspec` diretamente. Quando isso acontecer, registre o resultado parcial do QA e rode a suite separadamente com o workaround acima.
+- O `bin/qa` com CRLF removido em memoria tambem pode estourar timeout da ferramenta antes de devolver saida util. Nesse caso, divida o QA em etapas: RuboCop focado nos arquivos alterados, specs focados, `rails_best_practices`, `flay app/`, suite completa via `bin/safe_rspec` com workaround, e registre qualquer etapa que ficou com timeout.
+- Se um lote grande de specs estourar timeout da ferramenta, divida em lotes menores por area alterada antes de repetir a suite completa.
+- O RuboCop amplo pode reportar `Layout/EndOfLine` em arquivos preexistentes com CRLF. Corrija line endings apenas nos arquivos realmente tocados pela tarefa, salvo pedido explicito para normalizacao global.
+- Quando RuboCop focado acusar `Layout/EndOfLine` em arquivos tocados no Windows, normalize somente esses arquivos dentro do container com `docker compose exec web perl -pi -e 's/\r$//' caminho1 caminho2` e rode RuboCop focado novamente.
 - Durante a implementacao, rode specs focados no que foi alterado. No fechamento de tarefa Rails relevante, rode a suite suficiente para dar confianca; QA amplo/lint/audit fica para o final do processo ou quando o usuario pedir.
 - TDD e esperado: teste antes da implementacao quando houver mudanca de comportamento. Use RSpec, FactoryBot, Shoulda e VCR para HTTP externo.
 
@@ -42,6 +49,7 @@ Servico Rails premium para registro e gerenciamento de colecoes: itens, fotos, a
 - JavaScript: use `$quality-check-javascript` para mudancas em `app/javascript`, npm, esbuild/jsbundling ou layouts que carregam JS.
 - Python: use `$quality-check-python` para mudancas em `yolo/` ou `upscale/`.
 - Seguranca: use `$security-check-rails` para auditoria, vulnerabilidades ou correcoes de dependencias vulneraveis.
+- Se `brakeman --no-pager` estourar timeout sem retornar resultado, registre o timeout no documento de PR e nao invente status de seguranca verde. Reexecute com timeout maior ou em ambiente externo quando o usuario pedir fechamento de auditoria completo.
 - Commits devem ser atomicos, em portugues, no formato Conventional Commits.
 - Ao criar commit, gere ou atualize um arquivo em `docs/` com dados do PR dos commits atuais. A pasta `docs/` e ignorada pelo Git; mantenha os arquivos locais, mas fora do versionamento.
 
@@ -68,6 +76,8 @@ Servico Rails premium para registro e gerenciamento de colecoes: itens, fotos, a
 - Se PowerShell falhar com `windows sandbox: spawn setup refresh`, a falha costuma estar na camada de sandbox; repita o mesmo comando com `sandbox_permissions: "require_escalated"` quando for necessario usar PowerShell.
 - Para leitura simples de arquivos, prefira evitar nova aprovacao usando o container: `docker compose exec web sed -n '1,120p' caminho`.
 - Fallback secundario para leitura: `wsl.exe sed -n '1,120p' caminho`.
+- Evite pipes do PowerShell ao combinar `docker compose exec` com comandos Unix (`| sed`, `| grep`, etc.), porque o pipe pode ser interpretado no host e falhar. Prefira colocar a pipeline inteira dentro de `sh -lc` no container ou use `wsl.exe sed -n ...` para leituras simples.
+- Nem toda imagem Docker do projeto possui utilitarios basicos como `ps`. Para diagnostico de containers, prefira `docker compose ps`, `docker compose logs --tail=N servico` ou comandos especificos disponiveis no container em vez de `docker compose exec web ps ...`.
 
 ## Branches, PR e CI
 

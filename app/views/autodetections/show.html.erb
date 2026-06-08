@@ -4,18 +4,18 @@
 
       <div class="d-flex justify-content-between align-items-center mb-5">
         <div>
-          <h2 class="fw-bold mb-1 text-dark">Verificação de Autodetecção</h2>
+          <h2 class="fw-bold mb-1 text-dark"><%= t('autodetections.show.title') %></h2>
           <p class="text-muted mb-0 lead">
-            Revise as informações e adicione cada item à sua coleção.
+            <%= t('autodetections.show.subtitle') %>
           </p>
         </div>
         <div class="d-flex flex-wrap gap-2 justify-content-end">
           <%= link_to cars_path, class: "btn btn-outline-secondary rounded-pill px-4 shadow-sm" do %>
-            <i class="bi bi-arrow-left me-2"></i> Voltar
+            <i class="bi bi-arrow-left me-2"></i> <%= t('actions.back') %>
           <% end %>
 
-          <%= button_to autodetection_path(@autodetection), method: :delete, params: { redirect_to_cars: true }, class: "btn btn-outline-danger rounded-pill px-4 shadow-sm", form: { data: { turbo_confirm: "Cancelar e excluir todas as imagens extraídas permanentemente?" } } do %>
-            <i class="bi bi-x-lg me-1"></i> Descartar e Sair
+          <%= button_to autodetection_path(@autodetection), method: :delete, params: { redirect_to_cars: true }, class: "btn btn-outline-danger rounded-pill px-4 shadow-sm", form: { data: { turbo_confirm: t('autodetections.actions.discard_confirm') } } do %>
+            <i class="bi bi-x-lg me-1"></i> <%= t('autodetections.actions.discard_and_exit') %>
           <% end %>
         </div>
       </div>
@@ -25,7 +25,7 @@
         <div class="col-lg-12">
           <div class="card border-0 shadow-sm overflow-hidden mb-4 rounded-4">
              <div class="card-header bg-white py-3">
-               <h6 class="mb-0 fw-bold"><i class="bi bi-image me-2 text-primary"></i> Foto Original de Referência</h6>
+               <h6 class="mb-0 fw-bold"><i class="bi bi-image me-2 text-primary"></i> <%= t('autodetections.show.original_photo') %></h6>
              </div>
              <div class="position-relative bg-light">
                <%= image_tag @autodetection.photo.url, class: "img-fluid mx-auto d-block", style: "max-height: 500px; object-fit: contain;" if @autodetection.photo? %>
@@ -34,7 +34,7 @@
                        class="btn btn-premium rounded-pill px-4 shadow position-absolute bottom-0 end-0 m-3"
                        data-bs-toggle="modal"
                        data-bs-target="#manualAddModal">
-                 <i class="bi bi-camera me-2"></i> Adicionar Manualmente
+                 <i class="bi bi-camera me-2"></i> <%= t('autodetections.show.add_manually') %>
                </button>
              </div>
           </div>
@@ -52,7 +52,7 @@
             <% else %>
               <div class="col-12 text-center py-5">
                 <div class="spinner-border text-primary mb-3" role="status"></div>
-                <p class="text-muted">Aguardando processamento dos itens... eles aparecerão aqui automaticamente.</p>
+                <p class="text-muted"><%= t('autodetections.show.waiting_items') %></p>
               </div>
             <% end %>
           </div>
@@ -70,13 +70,12 @@
          data-controller="manual-selection"
          data-manual-selection-create-url-value="<%= autodetection_detected_items_path(@autodetection) %>">
       <div class="modal-header border-0 pb-0">
-        <h5 class="modal-title fw-bold"><i class="bi bi-camera me-2 text-primary"></i> Adicionar itens da foto</h5>
+        <h5 class="modal-title fw-bold"><i class="bi bi-camera me-2 text-primary"></i> <%= t('autodetections.show.manual_modal_title') %></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body p-4">
         <p class="text-muted small mb-4">
-          Selecione o carro na foto original abaixo clicando e arrastando.
-          Ao clicar em adicionar, o item aparecerá na lista e você poderá selecionar outro item sem fechar esta tela.
+          <%= t('autodetections.show.manual_modal_help') %>
         </p>
 
         <div class="bg-light rounded-3 overflow-hidden position-relative"
@@ -89,11 +88,11 @@
       </div>
 
       <div class="modal-footer border-0 p-4 pt-0">
-        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Fechar</button>
+        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal"><%= t('actions.close') %></button>
         <button type="button"
                 class="btn btn-premium rounded-pill px-4"
                 data-action="click->manual-selection#save">
-          <i class="bi bi-plus-circle me-1"></i> Adicionar Item selecionado
+          <i class="bi bi-plus-circle me-1"></i> <%= t('autodetections.show.add_selected_item') %>
         </button>
       </div>
     </div>

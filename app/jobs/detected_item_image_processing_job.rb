@@ -12,6 +12,7 @@ class DetectedItemImageProcessingJob < ApplicationJob
     processed_file = crop_item_photo(detected_item)
     classification = classify(processed_file)
 
+    track_upscaled_photo(processed_file)
     apply_processing_result(detected_item, processed_file, classification, attributes.to_h.deep_symbolize_keys)
     broadcast_detected_item(detected_item)
   rescue StandardError => e
@@ -44,6 +45,12 @@ class DetectedItemImageProcessingJob < ApplicationJob
     return {} unless processed_file
 
     YoloDetectionService.classify(processed_file.path)
+  end
+
+  def track_upscaled_photo(file)
+    return unless file.respond_to?(:upscale_strategy)
+
+    UsageMetric.record!("photos_upscaled_#{file.upscale_strategy}")
   end
 
   def apply_processing_result(detected_item, processed_file, classification, attributes)

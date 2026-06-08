@@ -18,6 +18,22 @@ RSpec.describe User, type: :model do
     expect(user.ai_upscaling_enabled).to be true
   end
 
+  it 'treats existing users as setup-completed by default' do
+    user = described_class.new(name: 'Test', email: 'test@example.com', password: 'password123')
+    expect(user.initial_setup_completed).to be true
+    expect(user.initial_setup_pending?).to be false
+  end
+
+  it 'detects pending setup for non-admin users only' do
+    user = described_class.new(name: 'Test', email: 'test@example.com', password: 'password123',
+                               initial_setup_completed: false)
+    admin = described_class.new(name: 'Admin', email: 'admin@example.com', password: 'password123',
+                                admin: true, initial_setup_completed: false)
+
+    expect(user.initial_setup_pending?).to be true
+    expect(admin.initial_setup_pending?).to be false
+  end
+
   it 'can be an admin' do
     user = described_class.new(name: 'Admin', email: 'admin@example.com', password: 'password123', admin: true)
     expect(user.admin).to be true

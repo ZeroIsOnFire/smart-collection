@@ -134,6 +134,32 @@ RSpec.describe 'Cars', type: :request do
       expect(response.body).to include('id="new_car"')
     end
 
+    it 'reuses the latest brand and scale as suggestions for a new item' do
+      create(:car, user: user, brand: 'Hot Wheels', size: '1:64')
+
+      get new_car_path
+
+      document = Nokogiri::HTML(response.body)
+      brand_field = document.at_css('#car_brand')
+      selected_scale = document.at_css('#car_size option[selected]')
+
+      expect(brand_field['value']).to eq('Hot Wheels')
+      expect(selected_scale['value']).to eq('1:64')
+    end
+
+    it 'lets explicit new item params override suggestions' do
+      create(:car, user: user, brand: 'Hot Wheels', size: '1:64')
+
+      get new_car_path, params: { car: { brand: 'Matchbox', size: '1:43' } }
+
+      document = Nokogiri::HTML(response.body)
+      brand_field = document.at_css('#car_brand')
+      selected_scale = document.at_css('#car_size option[selected]')
+
+      expect(brand_field['value']).to eq('Matchbox')
+      expect(selected_scale['value']).to eq('1:43')
+    end
+
     it 'shows the AI upscaling notice when enabled and configured' do
       allow(ImageUpscalerService).to receive(:service_configured?).and_return(true)
 

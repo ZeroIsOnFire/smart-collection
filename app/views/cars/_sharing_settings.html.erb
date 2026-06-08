@@ -1,7 +1,7 @@
 <% if current_user.sharing_enabled? %>
   <div class="mb-4">
-    <label class="form-label fw-medium small">Seu link público</label>
-    <div class="input-group" data-controller="clipboard" data-clipboard-success-content-value="Copiado!">
+    <label class="form-label fw-medium small"><%= t('sharing_settings.public_link') %></label>
+    <div class="input-group" data-controller="clipboard" data-clipboard-success-content-value="<%= t('sharing_settings.copied') %>">
       <input type="text" class="form-control bg-light border-0 rounded-start-pill ps-3 small" readonly
              value="<%= public_share_url(current_user.share_token) %>"
              data-clipboard-target="source">
@@ -17,8 +17,8 @@
               form: { class: "d-block" },
               class: "btn #{current_user.sharing_enabled? ? 'btn-light text-danger' : 'btn-premium'} rounded-pill w-100 py-2 d-flex align-items-center justify-content-center gap-2" do %>
   <% if current_user.sharing_enabled? %>
-    <i class="bi bi-x-circle"></i> <span>Desativar Compartilhamento</span>
+    <i class="bi bi-x-circle"></i> <span><%= t('sharing_settings.disable') %></span>
   <% else %>
-    <i class="bi bi-check-circle"></i> <span>Ativar Link Público</span>
+    <i class="bi bi-check-circle"></i> <span><%= t('sharing_settings.enable') %></span>
   <% end %>
 <% end %>

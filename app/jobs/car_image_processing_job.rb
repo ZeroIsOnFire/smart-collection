@@ -41,6 +41,7 @@ class CarImageProcessingJob < ApplicationJob
       local_fallback: false
     )
 
+    track_upscaled_photo(upscaled_file)
     store_processed_photo(car, upscaled_file) if upscaled_file
     upscaled_file
   end
@@ -54,8 +55,15 @@ class CarImageProcessingJob < ApplicationJob
       upscale: { use_ai: car.user.ai_upscaling_enabled?, local_fallback: false }
     )
 
+    track_upscaled_photo(cropped_file)
     store_processed_photo(car, cropped_file) if cropped_file
     cropped_file
+  end
+
+  def track_upscaled_photo(file)
+    return unless file.respond_to?(:upscale_strategy)
+
+    UsageMetric.record!("photos_upscaled_#{file.upscale_strategy}")
   end
 
   def store_processed_photo(car, file)

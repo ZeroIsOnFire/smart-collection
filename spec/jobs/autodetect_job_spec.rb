@@ -7,13 +7,14 @@ RSpec.describe AutodetectJob do
   # O factory de autodetection já usa o test_image.png
   let(:autodetection) { create(:autodetection, user: user) }
 
-  def build_temp_image(width:, height:, filename: 'autodetection.jpg')
+  def build_temp_image(width:, height:, filename: 'autodetection.jpg', upscale_strategy: nil)
     tempfile = Tempfile.new(['upscaled', '.jpg'], Rails.root.join('tmp'))
     image = MiniMagick::Image.open(Rails.root.join('spec/fixtures/files/test_image.png'))
     image.resize "#{width}x#{height}!"
     image.write(tempfile.path)
     tempfile.define_singleton_method(:original_filename) { filename }
     tempfile.define_singleton_method(:content_type) { 'image/jpeg' }
+    tempfile.define_singleton_method(:upscale_strategy) { upscale_strategy } if upscale_strategy
     tempfile
   end
 
@@ -52,6 +53,7 @@ RSpec.describe AutodetectJob do
         expect(autodetection.status).to eq('to_verify')
         expect(autodetection.detected_items.first.label).to eq(I18n.t('autodetections.detected_item.new_item'))
         expect(autodetection.detected_items.first.cropped_photo).to be_present
+        expect(UsageMetric.values_for(['yolo_detected_items']).fetch('yolo_detected_items')).to eq(1)
       end
 
       FileUtils.rm_f(mock_file_path)
@@ -75,6 +77,17 @@ RSpec.describe AutodetectJob do
       expect(saved_image.width).to eq(1440)
       expect(saved_image.height).to eq(1440)
       expect(saved_autodetection.status).to eq('to_verify')
+    end
+
+    it 'tracks upscaled autodetection photos in the historical counters' do
+      upscaled_file = build_temp_image(width: 1440, height: 1440, upscale_strategy: :local)
+
+      allow(ImageUpscalerService).to receive(:upscale_if_needed).and_return(upscaled_file)
+      allow(YoloDetectionService).to receive_messages(service_configured?: true, analyze: [])
+
+      expect do
+        described_class.new.perform(autodetection.id.to_s)
+      end.to change { UsageMetric.values_for(['photos_upscaled_local']).fetch('photos_upscaled_local') }.from(0).to(1)
     end
 
     it 'uses local fallback when the user disables AI upscaling' do

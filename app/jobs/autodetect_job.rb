@@ -44,6 +44,8 @@ class AutodetectJob < ApplicationJob
           },
           cropped_photo: cropped_file
         )
+        UsageMetric.record!('yolo_detected_items')
+        track_upscaled_photo(cropped_file)
         # O arquivo temporário será limpo pelo Rails/CarrierWave se necessário
       end
 
@@ -68,6 +70,7 @@ class AutodetectJob < ApplicationJob
 
     return autodetection.photo.path unless upscaled_file
 
+    track_upscaled_photo(upscaled_file)
     autodetection.photo = upscaled_file
     autodetection.save!
     autodetection.photo.path
@@ -82,5 +85,11 @@ class AutodetectJob < ApplicationJob
     tempfile.unlink
   rescue StandardError
     nil
+  end
+
+  def track_upscaled_photo(file)
+    return unless file.respond_to?(:upscale_strategy)
+
+    UsageMetric.record!("photos_upscaled_#{file.upscale_strategy}")
   end
 end

@@ -54,7 +54,7 @@ class CarsController < ApplicationController
 
   # GET /cars/new
   def new
-    @car = current_user.cars.build(params[:car]&.to_unsafe_h || {})
+    @car = current_user.cars.build(default_new_car_attributes.merge(new_car_params))
     render_form_modal(t('cars.modal.new_title')) if turbo_frame_request?
   end
 
@@ -236,5 +236,19 @@ class CarsController < ApplicationController
   def car_params
     params.require(:car).permit(:name, :brand, :observations, :size, :year, :photo, :remove_photo,
                                 :remote_photo_url, :color, :crop_x, :crop_y, :crop_w, :crop_h, :photo_cache)
+  end
+
+  def new_car_params
+    params.fetch(:car, {}).permit(:name, :brand, :observations, :size, :year, :color)
+  end
+
+  def default_new_car_attributes
+    latest_car = current_user.cars.desc(:created_at).first
+    return {} unless latest_car
+
+    {
+      brand: latest_car.brand,
+      size: latest_car.size
+    }.compact_blank
   end
 end

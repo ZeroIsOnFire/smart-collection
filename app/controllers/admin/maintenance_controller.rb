@@ -3,23 +3,14 @@
 module Admin
   class MaintenanceController < DashboardController
     def index
-      @autodetections_by_status = Rails.cache.fetch('admin_maintenance_autodetections_by_status', expires_in: 10.minutes) do
-        Autodetection.collection.aggregate([
-                                             { '$group' => { _id: '$status',
-                                                             count: { '$sum' => 1 } } }
-                                           ]).to_a
-      end
-
       @old_records_count = Rails.cache.fetch('admin_maintenance_old_records', expires_in: 10.minutes) do
         Autodetection.where(:status.in => %w[completed error], :updated_at.lt => 24.hours.ago).count
       end
 
-      # Tenta obter o tamanho da pasta de uploads de forma simplificada
       @uploads_size = Rails.cache.fetch('admin_maintenance_uploads_size', expires_in: 1.hour) do
         get_dir_size('public/uploads')
       end
 
-      # Carrega métricas do Sidekiq
       require 'sidekiq/api'
       @sidekiq_stats = Sidekiq::Stats.new
       @sidekiq_workers = Sidekiq::Workers.new.size
@@ -27,7 +18,7 @@ module Admin
 
     def cleanup
       CleanupAutodetectionsJob.perform_later
-      redirect_to admin_maintenance_path, notice: 'Limpeza de arquivos temporários disparada com sucesso.'
+      redirect_to admin_maintenance_path, notice: t('.notice')
     end
 
     private
@@ -36,13 +27,13 @@ module Admin
       return 'N/A' unless File.directory?(path)
 
       size = 0
-      Dir.glob(File.join(path, '**', '*')).each do |f|
-        size += File.size(f) if File.file?(f)
+      Dir.glob(File.join(path, '**', '*')).each do |file|
+        size += File.size(file) if File.file?(file)
       end
 
       format_size(size)
     rescue StandardError
-      'Erro ao calcular'
+      t('admin.maintenance.storage.size_error')
     end
 
     def format_size(size)

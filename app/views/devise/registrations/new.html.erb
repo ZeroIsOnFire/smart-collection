@@ -32,10 +32,16 @@
         <% if @minimum_password_length %>
           <span class="form-hint"><%= t('devise.ui.registrations.new.password_hint', count: @minimum_password_length) %></span>
         <% end %>
-        <%= f.password_field :password, autocomplete: "new-password",
-            placeholder: t('devise.ui.registrations.new.password_placeholder'), class: "form-input",
-            id: "user_password_signup",
-            data: { action: "input->password-strength#evaluate" } %>
+        <%= render "devise/shared/password_visibility_field",
+                   form: f,
+                   field: :password,
+                   input_options: {
+                     autocomplete: "new-password",
+                     placeholder: t('devise.ui.registrations.new.password_placeholder'),
+                     class: "form-input",
+                     id: "user_password_signup",
+                     data: { action: "input->password-strength#evaluate" }
+                   } %>
         <div class="password-strength" id="password_strength_bar">
           <div class="password-strength-bar" id="password_strength_fill"></div>
         </div>
@@ -43,9 +49,15 @@
 
       <div class="form-group">
         <%= f.label :password_confirmation, t('devise.ui.registrations.new.password_confirmation_label') %>
-        <%= f.password_field :password_confirmation, autocomplete: "new-password",
-            placeholder: t('devise.ui.registrations.new.password_confirmation_placeholder'), class: "form-input",
-            id: "user_password_confirmation" %>
+        <%= render "devise/shared/password_visibility_field",
+                   form: f,
+                   field: :password_confirmation,
+                   input_options: {
+                     autocomplete: "new-password",
+                     placeholder: t('devise.ui.registrations.new.password_confirmation_placeholder'),
+                     class: "form-input",
+                     id: "user_password_confirmation"
+                   } %>
       </div>
 
       <div class="form-actions">

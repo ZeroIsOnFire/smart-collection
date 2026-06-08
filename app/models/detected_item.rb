@@ -30,12 +30,17 @@ class DetectedItem
   # Real-time broadcast to the autodetection page
   after_create_commit :broadcast_new_item
   after_destroy_commit :broadcast_remove_item
+  after_destroy :track_removal
 
   def image_processing?
     image_processing_status.in?(%w[pending processing])
   end
 
   private
+
+  def track_removal
+    UsageMetric.record!('detected_items_removed')
+  end
 
   def broadcast_new_item
     Turbo::StreamsChannel.broadcast_append_to(

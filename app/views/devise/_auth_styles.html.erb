@@ -84,6 +84,44 @@
     color: #c4c9d4;
   }
 
+  .password-visibility {
+    position: relative;
+    width: 100%;
+  }
+
+  .password-visibility-input {
+    padding-right: 3rem;
+  }
+
+  .password-visibility-toggle {
+    position: absolute;
+    top: 50%;
+    right: 0.35rem;
+    width: 2.35rem;
+    height: 2.35rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: #6b7280;
+    cursor: pointer;
+    transition: color 0.15s, background-color 0.15s;
+    transform: translateY(-50%);
+  }
+
+  .password-visibility-toggle:hover,
+  .password-visibility-toggle:focus {
+    color: #667eea;
+    background: rgba(102, 126, 234, 0.1);
+  }
+
+  .password-visibility-toggle:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+  }
+
   /* Password strength bar */
   .password-strength {
     margin-top: 4px;
@@ -258,6 +296,16 @@
     -webkit-box-shadow: 0 0 0 1000px #1e293b inset;
     box-shadow: 0 0 0 1000px #1e293b inset;
     transition: background-color 5000s ease-in-out 0s;
+  }
+
+  [data-theme="dark"] .password-visibility-toggle {
+    color: #cbd5e1;
+  }
+
+  [data-theme="dark"] .password-visibility-toggle:hover,
+  [data-theme="dark"] .password-visibility-toggle:focus {
+    color: #818cf8;
+    background: rgba(129, 140, 248, 0.14);
   }
 
   [data-theme="dark"] .form-remember {

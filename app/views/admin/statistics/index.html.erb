@@ -1,0 +1,98 @@
+<div class="mb-5">
+  <h2 class="fw-bold mb-1 text-dark"><%= t('admin.statistics.title') %></h2>
+  <p class="text-muted mb-0"><%= t('admin.statistics.subtitle') %></p>
+</div>
+
+<div class="row g-4 mb-5">
+  <% [
+       [:users_count, 'bi-people', 'bg-indigo-light'],
+       [:cars_count, 'bi-car-front', 'bg-purple-light'],
+       [:ai_cars_count, 'bi-robot', 'bg-emerald-light'],
+       [:detected_items_count, 'bi-bounding-box-circles', 'bg-warning-light']
+     ].each do |key, icon, color_class| %>
+    <div class="col-md-6 col-xl-3">
+      <div class="card premium-card border-0 rounded-3 p-3 h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-center gap-3">
+            <div class="icon-box <%= color_class %> mb-0 rounded-3" style="width: 48px; height: 48px;">
+              <i class="bi <%= icon %> fs-4"></i>
+            </div>
+            <div>
+              <div class="text-secondary small fw-bold text-uppercase tracking-wider" style="font-size: 0.7rem;">
+                <%= t("admin.statistics.cards.#{key}.title") %>
+              </div>
+              <div class="fs-3 fw-bold text-dark"><%= number_with_delimiter(@stats[:current][key]) %></div>
+            </div>
+          </div>
+          <p class="small text-muted mb-0 mt-3"><%= t("admin.statistics.cards.#{key}.description") %></p>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<div class="row g-4 mb-5">
+  <div class="col-lg-8">
+    <div class="card premium-card border-0 rounded-3 overflow-hidden h-100">
+      <div class="card-header bg-white border-bottom p-4">
+        <h5 class="mb-0 fw-bold"><%= t('admin.statistics.sections.historical_usage') %></h5>
+      </div>
+      <div class="card-body p-4">
+        <div class="row g-3">
+          <% @stats[:historical].each_key do |key| %>
+            <div class="col-md-6">
+              <div class="p-3 bg-light rounded-3 border h-100">
+                <div class="text-secondary small fw-bold text-uppercase mb-1"><%= t("admin.statistics.counters.#{key}") %></div>
+                <div class="fs-4 fw-bold text-dark"><%= number_with_delimiter(@stats[:historical][key]) %></div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card premium-card border-0 rounded-3 overflow-hidden h-100">
+      <div class="card-header bg-white border-bottom p-4">
+        <h5 class="mb-0 fw-bold"><%= t('admin.statistics.sections.autodetections') %></h5>
+      </div>
+      <div class="card-body p-4 d-flex flex-column gap-2">
+        <% @stats[:autodetections_by_status].each do |status, count| %>
+          <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded-3">
+            <span class="small fw-medium"><%= t("autodetections.status.#{status}") %></span>
+            <span class="badge bg-white text-dark border shadow-sm rounded-pill"><%= number_with_delimiter(count) %></span>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-6">
+    <div class="card premium-card border-0 rounded-3 p-4 h-100">
+      <div class="d-flex justify-content-between align-items-center gap-3">
+        <div>
+          <div class="text-secondary small fw-bold text-uppercase tracking-wider"><%= t('admin.statistics.cards.shared_collections_count.title') %></div>
+          <div class="fs-4 fw-bold text-dark"><%= number_with_delimiter(@stats[:current][:shared_collections_count]) %></div>
+        </div>
+        <i class="bi bi-share fs-2 text-primary"></i>
+      </div>
+      <p class="small text-muted mb-0 mt-3"><%= t('admin.statistics.cards.shared_collections_count.description') %></p>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card premium-card border-0 rounded-3 p-4 h-100">
+      <div class="d-flex justify-content-between align-items-center gap-3">
+        <div>
+          <div class="text-secondary small fw-bold text-uppercase tracking-wider"><%= t('admin.statistics.cards.active_autodetections_count.title') %></div>
+          <div class="fs-4 fw-bold text-dark"><%= number_with_delimiter(@stats[:current][:active_autodetections_count]) %></div>
+        </div>
+        <i class="bi bi-clock-history fs-2 text-warning"></i>
+      </div>
+      <p class="small text-muted mb-0 mt-3"><%= t('admin.statistics.cards.active_autodetections_count.description') %></p>
+    </div>
+  </div>
+</div>

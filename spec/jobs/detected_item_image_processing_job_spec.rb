@@ -11,6 +11,12 @@ RSpec.describe DetectedItemImageProcessingJob do
     Rails.root.join('spec/fixtures/files/car_sample.jpg').open
   end
 
+  def upscaled_cropped_file(strategy)
+    file = cropped_file
+    file.define_singleton_method(:upscale_strategy) { strategy }
+    file
+  end
+
   describe '#perform' do
     it 'crops and classifies the detected item in the background' do
       file = cropped_file
@@ -90,6 +96,17 @@ RSpec.describe DetectedItemImageProcessingJob do
       failed_item = DetectedItem.find(detected_item.id)
       expect(failed_item.image_processing_status).to eq('error')
       expect(failed_item.image_processing_error).to eq('upscaler failed')
+    end
+
+    it 'tracks upscaled adjusted selections in the historical counters' do
+      file = upscaled_cropped_file(:ai)
+
+      allow(ImageCropperService).to receive(:crop).and_return(file)
+      allow(YoloDetectionService).to receive(:classify).and_return({})
+
+      expect do
+        described_class.new.perform(user.id.to_s, detected_item.id.to_s)
+      end.to change { UsageMetric.values_for(['photos_upscaled_ai']).fetch('photos_upscaled_ai') }.from(0).to(1)
     end
 
     it 'does not process detected items from another user' do

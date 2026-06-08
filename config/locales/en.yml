@@ -49,6 +49,28 @@ en:
     not_found: "%{resource} was not found."
     unauthorized: "You do not have permission to perform this action."
 
+  sharing_settings:
+    public_link: "Your public link"
+    copied: "Copied!"
+    enable: "Enable Public Link"
+    disable: "Disable Sharing"
+
+  initial_setup:
+    badge: "Initial setup"
+    title: "Before you start"
+    subtitle: "Choose how your collection should behave for the first registrations."
+    public_sharing:
+      title: "Public display"
+      description: "Create a private link to show your collection when you want to share it."
+    ai_upscaling:
+      title: "AI upscaling"
+      description: "Improves small images added from now on when the service is available."
+      unavailable: "The AI upscaling service is not configured in this environment."
+    actions:
+      finish: "Save and go to collection"
+    messages:
+      completed: "Initial setup saved successfully."
+
   collections:
     title: "Collections"
     new: "New Collection"
@@ -266,6 +288,17 @@ en:
       delete_confirm: "Delete this autodetection and all its items?"
       cancel_confirm: "Cancel and remove this error?"
       stop_confirm: "Cancel and remove this autodetection?"
+      discard_and_exit: "Discard and Exit"
+      discard_confirm: "Cancel and permanently delete all extracted images?"
+    show:
+      title: "Autodetection Review"
+      subtitle: "Review the information and add each item to your collection."
+      original_photo: "Original Reference Photo"
+      add_manually: "Add Manually"
+      waiting_items: "Waiting for item processing... they will appear here automatically."
+      manual_modal_title: "Add items from photo"
+      manual_modal_help: "Select the car in the original photo below by clicking and dragging. When you click add, the item will appear in the list and you can select another item without closing this screen."
+      add_selected_item: "Add selected item"
     detected_item:
       new_item: "New Item"
       model_name: "Model/Name"
@@ -319,3 +352,66 @@ en:
 
   scales:
     other: "Other"
+
+  admin:
+    nav:
+      statistics: "Statistics"
+    statistics:
+      title: "Usage and AI Statistics"
+      subtitle: "Track current system usage and historical counters preserved after deletions or edits."
+      quick_link:
+        title: "Usage Statistics"
+        description: "General usage, YOLO and upscaler"
+      sections:
+        historical_usage: "Historical usage"
+        autodetections: "Autodetections by status"
+      cards:
+        users_count:
+          title: "Current users"
+          description: "Total accounts registered right now."
+        cars_count:
+          title: "Current cars"
+          description: "Active items in user collections."
+        ai_cars_count:
+          title: "AI cars"
+          description: "Active cars created from detected items."
+        detected_items_count:
+          title: "Current detected items"
+          description: "Autodetection crops still present in the system."
+        shared_collections_count:
+          title: "Public collections"
+          description: "Users with public sharing enabled."
+        active_autodetections_count:
+          title: "Active autodetections"
+          description: "Pending, processing or waiting for verification."
+        yolo_detected_items:
+          title: "YOLO detected items"
+      counters:
+        users_created: "Users created"
+        cars_created: "Cars registered"
+        cars_removed: "Cars removed"
+        yolo_detected_items: "YOLO detected items"
+        detected_items_removed: "Detected items removed"
+        photos_upscaled_ai: "Photos upscaled by AI"
+        photos_upscaled_local: "Photos upscaled locally"
+    maintenance:
+      title: "System Maintenance"
+      subtitle: "Monitor system health and manage temporary files."
+      storage:
+        title: "Storage"
+        description_html: "Total used by the <code>public/uploads</code> folder."
+        size_error: "Error calculating"
+      cleanup:
+        title: "Expired Items"
+        button: "Clean Now"
+        confirm: "This will permanently remove completed autodetection records and photos older than 24 hours. Continue?"
+        notice: "Temporary file cleanup was queued successfully."
+      background_jobs:
+        title: "Background Jobs"
+        active: "Active"
+        engine: "Processing Engine: Sidekiq"
+        description: "Asynchronous system that processes AI and generates exports without blocking users. This section refreshes every 10 seconds."
+        processed: "Processed"
+        enqueued: "Queued"
+        workers: "Active Workers"
+        failed: "Failures"

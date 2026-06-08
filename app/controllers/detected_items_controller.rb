@@ -30,7 +30,7 @@ class DetectedItemsController < ApplicationController
             "detected_items_list_#{@autodetection.id}",
             partial: 'detected_items/detected_item',
             locals: { detected_item: @detected_item }
-          )
+          ) + local_toast_stream(:notice, t('autodetections.messages.item_added'))
         end
         format.html { redirect_to @autodetection, notice: t('autodetections.messages.item_added') }
       end
@@ -50,7 +50,8 @@ class DetectedItemsController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream do
-        render turbo_stream: turbo_stream.remove("detected_item_#{params[:id]}")
+        render turbo_stream: turbo_stream.remove("detected_item_#{params[:id]}") +
+                             local_toast_stream(:notice, t('autodetections.messages.item_removed'))
       end
       format.html { redirect_back_or_to(root_path, notice: t('autodetections.messages.item_removed')) }
     end
@@ -93,11 +94,7 @@ class DetectedItemsController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream do
-        render turbo_stream: turbo_stream.replace(
-          "detected_item_#{@detected_item.id}",
-          partial: 'detected_items/detected_item',
-          locals: { detected_item: @detected_item }
-        )
+        render turbo_stream: detected_item_replace_stream(@detected_item)
       end
       format.html { redirect_back_or_to(root_path) }
     end
@@ -109,13 +106,25 @@ class DetectedItemsController < ApplicationController
     respond_to do |format|
       format.html { redirect_back_or_to(root_path) }
       format.turbo_stream do
-        render turbo_stream: turbo_stream.replace(
-          "detected_item_#{@detected_item.id}",
-          partial: 'detected_items/detected_item',
-          locals: { detected_item: @detected_item }
-        )
+        render turbo_stream: detected_item_replace_stream(@detected_item)
       end
     end
+  end
+
+  def detected_item_replace_stream(detected_item)
+    turbo_stream.replace(
+      "detected_item_#{detected_item.id}",
+      partial: 'detected_items/detected_item',
+      locals: { detected_item: detected_item }
+    )
+  end
+
+  def local_toast_stream(type, message)
+    turbo_stream.append(
+      'local_toast_container',
+      partial: 'shared/toast',
+      locals: { type: type, message: message }
+    )
   end
 
   def set_autodetection

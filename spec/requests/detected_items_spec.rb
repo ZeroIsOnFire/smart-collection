@@ -82,15 +82,15 @@ RSpec.describe 'DetectedItems', type: :request do
       expect(new_item.image_processing_status).to eq('pending')
     end
 
-    it 'does not append a local toast on turbo stream success' do
+    it 'appends a local toast on turbo stream success' do
       post autodetection_detected_items_path(@autodetection),
            params: create_params,
            headers: { 'Accept' => 'text/vnd.turbo-stream.html' }
 
       expect(response).to have_http_status(:ok)
       expect(response.body).to include("detected_items_list_#{@autodetection.id}")
-      expect(response.body).not_to include('local_toast_container')
-      expect(response.body).not_to include('Item adicionado com sucesso!')
+      expect(response.body).to include('local_toast_container')
+      expect(response.body).to include(I18n.t('autodetections.messages.item_added'))
     end
   end
 
@@ -105,6 +105,8 @@ RSpec.describe 'DetectedItems', type: :request do
       expect(response.body).to include('turbo-stream')
       expect(response.body).to include('remove')
       expect(response.body).to include("detected_item_#{@detected_item.id}")
+      expect(response.body).to include('local_toast_container')
+      expect(response.body).to include(I18n.t('autodetections.messages.item_removed'))
     end
   end
 end

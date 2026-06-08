@@ -19,11 +19,25 @@ RSpec.describe 'Authentications', type: :request do
       expect(response.body).to include('user_email_signup')
       expect(response.body).to include('user_password_signup')
     end
+
+    it 'renders password visibility controls for password fields' do
+      get new_user_registration_path
+
+      document = Nokogiri::HTML(response.body)
+      password_field = document.at_css('#user_password_signup')
+      confirmation_field = document.at_css('#user_password_confirmation')
+
+      expect(password_field['data-password-visibility-target']).to eq('input')
+      expect(confirmation_field['data-password-visibility-target']).to eq('input')
+      expect(document.css("[data-controller='password-visibility']").size).to eq(2)
+      expect(document.css("[data-action='password-visibility#toggle']").size).to eq(2)
+      expect(response.body).to include(I18n.t('devise.ui.password_visibility.show'))
+    end
   end
 
   describe 'POST /users' do
     context 'with valid params' do
-      it 'creates a new user with name and redirects' do
+      it 'creates a new user with name and redirects to initial setup' do
         expect do
           post user_registration_path, params: {
             user: {
@@ -34,7 +48,8 @@ RSpec.describe 'Authentications', type: :request do
             }
           }
         end.to change(User, :count).by(1)
-        expect(response).to redirect_to(cars_path)
+        expect(response).to redirect_to(initial_setup_path)
+        expect(User.last.initial_setup_completed).to be false
       end
     end
 
@@ -90,9 +105,29 @@ RSpec.describe 'Authentications', type: :request do
       expect(response.body).to include(I18n.t('javascript.auth_submit.loading'))
     end
 
-    it 'redirects a normal user to root' do
+    it 'renders a password visibility control' do
+      get new_user_session_path
+
+      document = Nokogiri::HTML(response.body)
+      password_field = document.at_css('#user_password_login')
+      toggle_button = document.at_css("[data-action='password-visibility#toggle']")
+
+      expect(password_field['data-password-visibility-target']).to eq('input')
+      expect(toggle_button['aria-controls']).to eq('user_password_login')
+      expect(toggle_button['aria-label']).to eq(I18n.t('devise.ui.password_visibility.show'))
+    end
+
+    it 'redirects a normal user to the collection' do
       post user_session_path, params: { user: { email: user.email, password: 'password123' } }
       expect(response).to redirect_to(cars_path)
+    end
+
+    it 'redirects a user with pending setup to initial setup' do
+      user.update!(initial_setup_completed: false)
+
+      post user_session_path, params: { user: { email: user.email, password: 'password123' } }
+
+      expect(response).to redirect_to(initial_setup_path)
     end
 
     it 'redirects an admin user to admin dashboard' do

@@ -3,6 +3,8 @@
 Rails.application.routes.draw do
   devise_for :users, controllers: { registrations: 'registrations' }
 
+  resource :initial_setup, only: %i[show update]
+
   # Removendo o redirecionamento automático para cars#index para que a landing page seja sempre a home
   # authenticated :user do
   #   root 'cars#index', as: :authenticated_root
@@ -49,6 +51,7 @@ Rails.application.routes.draw do
   namespace :admin do
     get '/', to: 'dashboard#index', as: :dashboard
     resources :users, except: %i[new create]
+    get 'statistics', to: 'statistics#index'
     get 'maintenance', to: 'maintenance#index'
     post 'maintenance/cleanup', to: 'maintenance#cleanup'
   end

@@ -25,6 +25,7 @@ RSpec.describe 'Admin::Dashboard', type: :request do
         get admin_dashboard_path
 
         expect(response.body).to include(admin_users_path)
+        expect(response.body).to include(admin_statistics_path)
         expect(response.body).to include(admin_maintenance_path)
       end
     end
