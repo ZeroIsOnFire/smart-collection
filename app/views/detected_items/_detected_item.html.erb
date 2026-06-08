@@ -1,6 +1,7 @@
 <turbo-frame id="detected_item_<%= detected_item.id %>"
              class="col-12 mb-4 d-block"
-             data-controller="detected-item">
+             data-controller="detected-item"
+             data-detected-item-loading-label-value="<%= t('autodetections.messages.saving') %>">
   <% cache detected_item do %>
   <%
     is_saved = detected_item.status == 'saved'
@@ -12,8 +13,11 @@
   <div class="card shadow-sm rounded-4 border-0 overflow-hidden position-relative detected-item-card <%= 'is-processed' if is_processed %>">
     <!-- Loading Overlay -->
     <div class="detected-item-loader">
-      <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Enviando...</span>
+      <div class="detected-item-loader-content">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden"><%= t('autodetections.messages.saving') %></span>
+        </div>
+        <span class="detected-item-loader-label"><%= t('autodetections.messages.saving') %></span>
       </div>
     </div>
     <div class="card-body p-0">
@@ -143,8 +147,12 @@
              <% end %>
           <% else %>
             <div class="d-grid gap-3 w-100">
-              <button type="submit" form="form_detected_item_<%= detected_item.id %>" class="btn btn-premium w-100 rounded-pill py-3">
-                <i class="bi bi-check2-circle fs-5 me-2"></i><%= t('autodetections.detected_item.save_item') %>
+              <button type="submit"
+                      form="form_detected_item_<%= detected_item.id %>"
+                      class="btn btn-premium w-100 rounded-pill py-3"
+                      data-detected-item-target="submit"
+                      data-loading-html="<span class='spinner-border spinner-border-sm me-2' role='status' aria-hidden='true'></span><%= t('autodetections.messages.saving') %>">
+                <i class="bi bi-check2-circle fs-5 me-2"></i><span><%= t('autodetections.detected_item.save_item') %></span>
               </button>
 
               <button type="button"
@@ -156,7 +164,7 @@
               <%= button_to reject_detected_item_path(detected_item),
                     method: :patch,
                     class: "btn btn-soft-danger w-100 rounded-pill py-2",
-                    data: { turbo_frame: "detected_item_#{detected_item.id}", action: "click->detected-item#showLoading" } do %>
+                    data: { turbo_frame: "detected_item_#{detected_item.id}" } do %>
                 <i class="bi bi-trash3 me-2"></i><%= t('autodetections.detected_item.discard') %>
               <% end %>
             </div>

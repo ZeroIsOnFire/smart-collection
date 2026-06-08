@@ -399,7 +399,7 @@ body {
 .is-loading {
   position: relative;
   pointer-events: none;
-  opacity: 0.7;
+  opacity: 0.92;
 }
 
 .detected-item-loader {
@@ -409,15 +409,44 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.76);
   z-index: 10;
   border-radius: inherit;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 
 .is-loading .detected-item-loader {
   display: flex !important;
   align-items: center;
   justify-content: center;
+}
+
+.detected-item-loader-content {
+  align-items: center;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  box-shadow: 0 16px 30px rgba(15, 23, 42, 0.12);
+  color: var(--text-main);
+  display: inline-flex;
+  font-weight: 700;
+  gap: 0.75rem;
+  padding: 0.85rem 1.2rem;
+}
+
+.detected-item-loader-label {
+  font-size: 0.9rem;
+}
+
+[data-theme="dark"] .detected-item-loader {
+  background: rgba(15, 23, 42, 0.54);
+}
+
+[data-theme="dark"] .detected-item-loader-content {
+  background: rgba(15, 23, 42, 0.92);
+  border-color: rgba(148, 163, 184, 0.22);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.3);
 }
 
 .car-card-wrapper.car-removal-pending {

@@ -271,6 +271,7 @@ pt-BR:
       select_color: "Selecione a cor..."
       adjust_photo: "Ajustar Foto"
       save_crop: "Salvar Recorte"
+      create_another: "Salvar e adicionar outro"
       predominant_color: "Cor Predominante"
       brand_placeholder: "Ex: Hot Wheels, Matchbox, Maisto"
       name_placeholder: "Ex: Porsche 911 Carrera, Ford Mustang GT, Ferrari LaFerrari"
