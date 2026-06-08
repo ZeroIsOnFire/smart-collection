@@ -214,6 +214,20 @@ pt-BR:
       less_than_or_equal_to: "deve ser menor ou igual a %{count}"
       other_than: "deve ser diferente de %{count}"
       odd: "deve ser ímpar"
+
+  collection_exports:
+    actions:
+      generate: "Gerar %{file_format}"
+      download: "Baixar %{file_format}"
+      regenerate: "Gerar novamente"
+      retry: "Tentar novamente"
+    status:
+      processing: "Gerando %{file_format}..."
+      failed: "Falhou"
+    messages:
+      started: "Exportação iniciada."
+      removed: "Exportação removida."
+
   # ── Exportação PDF ─────────────────────────────────────
   export_pdf:
     title: "CATÁLOGO DE COLEÇÃO"
@@ -222,6 +236,31 @@ pt-BR:
     no_image: "Sem Imagem"
     no_photo: "Sem Foto"
     page_info: "Página %{page} de %{total}"
+
+  public_collections:
+    layout:
+      title: "Coleção de %{name}"
+      toggle_theme: "Alternar tema"
+      footer_text: "Organize, exiba e compartilhe seu acervo de forma elegante."
+      create_collection: "Criar minha coleção grátis"
+    index:
+      title: "Coleção de %{name}"
+      subtitle: "Explore uma cuidadosa curadoria de veículos exclusivos."
+      cataloged_count: "Veículos catalogados"
+      search_placeholder: "Buscar na coleção de %{name}..."
+      loading: "Carregando..."
+      grid_view: "Grade"
+      list_view: "Lista"
+      carousel_view: "Carousel"
+      carousel_label: "Carousel da coleção pública"
+      carousel_kicker: "%{current} de %{total}"
+      slide_label: "Item %{number}"
+      previous_slide: "Item anterior"
+      next_slide: "Próximo item"
+      empty_title: "Nenhum veículo encontrado"
+      empty_text: "Tente buscar por outro termo ou limpe a pesquisa."
+    show:
+      back_to_collection: "Voltar para a coleção"
 
   # ── Carros ─────────────────────────────────────────────
   cars:

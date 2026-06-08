@@ -49,6 +49,17 @@ RSpec.describe 'Cars', type: :request do
       expect(response.body).to include(signed_stream)
     end
 
+    it 'renders active export actions before the first export' do
+      get cars_path
+
+      document = Nokogiri::HTML(response.body)
+      export_buttons = document.css('.btn-export-action')
+
+      expect(export_buttons.size).to eq(2)
+      expect(response.body).to include(I18n.t('collection_exports.actions.generate', file_format: 'CSV'))
+      expect(response.body).to include(I18n.t('collection_exports.actions.generate', file_format: 'PDF'))
+    end
+
     it 'marks the processing text so list view can show only the loading icon' do
       processing_car = create(:car, user: user, photo_processing_status: 'pending')
       processing_car.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')

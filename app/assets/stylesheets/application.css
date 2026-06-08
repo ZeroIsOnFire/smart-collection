@@ -291,6 +291,35 @@ body {
   border-color: var(--border-color);
 }
 
+.btn-export-action,
+.btn-export-processing,
+.export-button-group .btn {
+  min-height: 48px;
+}
+
+.btn-export-action {
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.26);
+  color: var(--premium-indigo);
+  font-weight: 700;
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.12);
+}
+
+.btn-export-action:hover,
+.btn-export-action:focus {
+  background: var(--primary-gradient);
+  border-color: transparent;
+  color: #fff;
+}
+
+.btn-export-processing {
+  background: var(--soft-secondary-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  font-weight: 600;
+  opacity: 1;
+}
+
 .btn-soft-danger {
   background-color: var(--soft-danger-bg);
   color: #ef4444;
@@ -489,6 +518,11 @@ body {
   transform: translateY(-1px);
 }
 
+[data-theme="dark"] .premium-search-container {
+  background-color: var(--input-bg) !important;
+  border-color: rgba(148, 163, 184, 0.24) !important;
+}
+
 .premium-search-container .form-control:focus {
   box-shadow: none !important;
 }
@@ -536,6 +570,20 @@ body {
 [data-theme="dark"] .bg-light.form-select {
   background-color: var(--input-bg) !important;
   color: var(--text-main) !important;
+}
+
+[data-theme="dark"] input:-webkit-autofill,
+[data-theme="dark"] input:-webkit-autofill:hover,
+[data-theme="dark"] input:-webkit-autofill:focus,
+[data-theme="dark"] textarea:-webkit-autofill,
+[data-theme="dark"] textarea:-webkit-autofill:hover,
+[data-theme="dark"] textarea:-webkit-autofill:focus,
+[data-theme="dark"] select:-webkit-autofill,
+[data-theme="dark"] select:-webkit-autofill:hover,
+[data-theme="dark"] select:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--text-main);
+  box-shadow: 0 0 0 1000px var(--input-bg) inset;
+  caret-color: var(--text-main);
 }
 
 /* Global Component Fixes for Dark Mode */
@@ -716,6 +764,31 @@ body {
   height: 260px;
 }
 
+.car-details-card {
+  border: 1px solid rgba(148, 163, 184, 0.24) !important;
+}
+
+[data-theme="dark"] .car-details-card {
+  border-color: rgba(226, 232, 240, 0.2) !important;
+}
+
+.car-details-empty-photo {
+  min-height: 240px;
+}
+
+.car-details-stat,
+.car-details-notes {
+  background: rgba(148, 163, 184, 0.08);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 1rem;
+  height: 100%;
+  padding: 1rem;
+}
+
+.car-details-notes p {
+  line-height: 1.7;
+}
+
 .photo-lightbox-overlay {
   align-items: center;
   background: rgba(2, 6, 23, 0.92);
@@ -869,6 +942,235 @@ body {
 }
 
 /* Showcase Styles */
+.hero-gradient {
+  background: linear-gradient(135deg, var(--public-primary-dark) 0%, var(--public-primary) 100%);
+  overflow: hidden;
+  position: relative;
+}
+
+.hero-gradient::after {
+  background: rgba(255, 255, 255, 0.06);
+  bottom: 0;
+  content: '';
+  left: 0;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.hero-gradient .tracking-tight {
+  letter-spacing: 0;
+}
+
+.search-wrapper {
+  position: relative;
+  transform: translateY(-50%);
+  z-index: 10;
+}
+
+.public-empty-icon {
+  height: 100px;
+  width: 100px;
+}
+
+.public-view-toggle {
+  max-width: 100%;
+}
+
+.public-carousel-viewport {
+  display: none;
+  min-height: 100vh;
+  position: relative;
+}
+
+.view-carousel .public-carousel-viewport {
+  display: block;
+}
+
+.view-carousel #cars_grid_inner,
+.view-carousel #cars_sentinel {
+  display: none;
+}
+
+.public-full-carousel {
+  background: radial-gradient(circle at 18% 18%, rgba(99, 102, 241, 0.26), transparent 32%), #070b16;
+  border-radius: 1.5rem;
+  box-shadow: 0 24px 60px rgba(2, 6, 23, 0.25);
+  color: #fff;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.public-carousel-slide {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.65fr);
+  min-height: 100vh;
+  padding: clamp(1rem, 3vw, 3rem);
+}
+
+.public-carousel-photo {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 1.25rem;
+  display: flex;
+  justify-content: center;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.public-carousel-photo img {
+  height: 100%;
+  max-height: calc(100vh - 6rem);
+  object-fit: contain;
+  width: 100%;
+}
+
+.public-carousel-empty-photo {
+  align-items: center;
+  color: rgba(255, 255, 255, 0.72);
+  display: flex;
+  flex-direction: column;
+  font-weight: 600;
+  gap: 0.75rem;
+}
+
+.public-carousel-empty-photo .bi {
+  font-size: 4rem;
+}
+
+.public-carousel-info {
+  align-self: center;
+  padding: 1rem 3.25rem 1rem 0;
+}
+
+.public-carousel-kicker {
+  color: rgba(255, 255, 255, 0.68);
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+}
+
+.public-carousel-info h2 {
+  font-size: clamp(2rem, 5vw, 4.5rem);
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 1.5rem;
+}
+
+.public-carousel-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.public-carousel-meta span {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  display: inline-flex;
+  gap: 0.45rem;
+  padding: 0.55rem 0.8rem;
+}
+
+.public-full-carousel .carousel-control-prev,
+.public-full-carousel .carousel-control-next {
+  width: clamp(3rem, 7vw, 5rem);
+}
+
+.hero-gradient-subtle {
+  background: linear-gradient(180deg, var(--public-primary) 0%, var(--public-bg) 100%);
+  height: 300px;
+  left: 0;
+  opacity: 0.05;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 0;
+}
+
+.car-detail-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.car-detail-card:hover {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+}
+
+.public-detail-photo {
+  cursor: zoom-in;
+}
+
+.public-detail-photo img {
+  background: #fff;
+  max-height: 600px;
+  object-fit: contain;
+}
+
+.public-detail-empty-photo {
+  min-height: 400px;
+}
+
+.public-brand-badge {
+  background-color: var(--public-primary);
+  color: #fff;
+}
+
+.public-detail-notes {
+  line-height: 1.7;
+}
+
+.public-signature {
+  color: var(--public-primary);
+}
+
+.public-lightbox-image {
+  background: #111;
+  max-height: 85vh;
+  max-width: 90vw;
+  min-height: 320px;
+  min-width: 320px;
+  object-fit: contain;
+}
+
+.public-lightbox-close {
+  height: 34px;
+  opacity: 0.85;
+  padding: 0;
+  right: -14px;
+  top: -14px;
+  width: 34px;
+  z-index: 10;
+}
+
+@media (max-width: 991.98px) {
+  .public-carousel-slide {
+    grid-template-columns: 1fr;
+  }
+
+  .public-carousel-info {
+    padding: 0 1rem 4rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .search-wrapper {
+    transform: translateY(-30%);
+  }
+
+  .public-view-toggle {
+    overflow-x: auto;
+  }
+}
+
 .public-showcase-hero {
   background: var(--primary-gradient);
   position: relative;

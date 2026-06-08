@@ -1,0 +1,62 @@
+<section class="public-carousel-viewport mb-4" data-view-toggle-target="carouselPanel" aria-label="<%= t("public_collections.index.carousel_label") %>">
+  <div id="publicCollectionCarousel" class="carousel slide public-full-carousel h-100" data-bs-interval="false" data-bs-keyboard="true">
+    <div class="carousel-indicators">
+      <% cars.each_with_index do |_car, index| %>
+        <button type="button"
+                data-bs-target="#publicCollectionCarousel"
+                data-bs-slide-to="<%= index %>"
+                class="<%= "active" if index.zero? %>"
+                aria-current="<%= "true" if index.zero? %>"
+                aria-label="<%= t("public_collections.index.slide_label", number: index + 1) %>"></button>
+      <% end %>
+    </div>
+
+    <div class="carousel-inner h-100">
+      <% cars.each_with_index do |car, index| %>
+        <div class="carousel-item h-100 <%= "active" if index.zero? %>">
+          <div class="public-carousel-slide">
+            <div class="public-carousel-photo">
+              <% if car.photo? %>
+                <%= image_tag car.photo.url, loading: "lazy", alt: car.name.presence || t("cars.show.fallback_name") %>
+              <% else %>
+                <div class="public-carousel-empty-photo">
+                  <i class="bi bi-camera"></i>
+                  <span><%= t("cars.card.no_photo") %></span>
+                </div>
+              <% end %>
+            </div>
+
+            <div class="public-carousel-info">
+              <span class="public-carousel-kicker"><%= t("public_collections.index.carousel_kicker", current: index + 1, total: cars.size) %></span>
+              <h2><%= car.name.presence || t("cars.show.fallback_name") %></h2>
+              <div class="public-carousel-meta">
+                <% if car.brand? %>
+                  <span><i class="bi bi-tag"></i><%= car.brand %></span>
+                <% end %>
+                <% if car.year? %>
+                  <span><i class="bi bi-calendar"></i><%= car.year %></span>
+                <% end %>
+                <% if car.size? %>
+                  <span><i class="bi bi-arrows-fullscreen"></i><%= car.size %></span>
+                <% end %>
+              </div>
+              <%= link_to public_share_car_path(user.share_token, car),
+                          class: "btn btn-light rounded-pill px-4 d-inline-flex align-items-center gap-2",
+                          data: { turbo_action: "advance" } do %>
+                <i class="bi bi-eye"></i>
+                <%= t("cars.card.view_details") %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <button class="carousel-control-prev" type="button" data-bs-target="#publicCollectionCarousel" data-bs-slide="prev" aria-label="<%= t("public_collections.index.previous_slide") %>">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#publicCollectionCarousel" data-bs-slide="next" aria-label="<%= t("public_collections.index.next_slide") %>">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    </button>
+  </div>
+</section>

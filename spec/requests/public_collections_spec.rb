@@ -10,8 +10,23 @@ RSpec.describe 'Public Collections', type: :request do
     it 'allows access without login' do
       get public_share_path(user.share_token)
       expect(response).to have_http_status(:success)
-      expect(response.body).to include('Coleção de')
+      expect(response.body).to include(I18n.t('public_collections.index.title', name: user.name))
       expect(response.body).to include('Public Car')
+    end
+
+    it 'renders the public carousel mode as a viewport showcase' do
+      get public_share_path(user.share_token)
+
+      document = Nokogiri::HTML(response.body)
+      view_toggle = document.at_css('[data-view-toggle-carousel-enabled-value="true"]')
+      carousel = document.at_css('#publicCollectionCarousel')
+      carousel_button = document.at_css('[data-action="click->view-toggle#setCarousel"]')
+
+      expect(view_toggle['data-view-toggle-storage-key-value']).to eq('public_collection_view_preference')
+      expect(carousel['class']).to include('public-full-carousel')
+      expect(carousel_button.text).to include(I18n.t('public_collections.index.carousel_view'))
+      expect(response.body).to include('public-carousel-viewport')
+      expect(response.body).to include('data-search-form-target="spinner"')
     end
 
     it 'paginates the public collection' do

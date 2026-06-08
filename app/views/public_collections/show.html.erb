@@ -1,129 +1,104 @@
-<style>
-  .hero-gradient-subtle {
-    background: linear-gradient(180deg, var(--public-primary) 0%, var(--public-bg) 100%);
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 300px;
-    opacity: 0.05;
-    z-index: 0;
-    pointer-events: none;
-  }
-  .car-detail-card {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-  .car-detail-card:hover {
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
-  }
-</style>
-
 <div class="hero-gradient-subtle"></div>
 
 <div class="container py-5 position-relative" style="z-index: 1;">
   <div class="mb-4">
     <%= link_to public_share_path(@user.share_token), class: "btn text-muted hover-lift d-inline-flex align-items-center gap-2 text-decoration-none border-0 bg-transparent px-0 fw-medium", data: { turbo_action: "advance" } do %>
-      <i class="bi bi-arrow-left"></i> Voltar para a coleção
+      <i class="bi bi-arrow-left"></i> <%= t("public_collections.show.back_to_collection") %>
     <% end %>
   </div>
 
   <div class="row g-5">
-    <% cache ['public', @car] do %>
-    <!-- Coluna da Foto -->
-    <div class="col-lg-7 mb-4 mb-lg-0">
-      <div class="card car-detail-card border-0 shadow-sm rounded-4 overflow-hidden bg-white h-100">
-        <% if @car.photo? %>
-          <div class="p-4 d-flex align-items-center justify-content-center h-100 bg-light bg-opacity-50 position-relative" style="cursor: zoom-in;" data-bs-toggle="modal" data-bs-target="#photoLightboxPublic">
-            <%= image_tag @car.photo.url, class: "img-fluid w-100 rounded-3 shadow-sm", style: "max-height: 600px; object-fit: contain; background: white;" %>
-            <div class="position-absolute bottom-0 end-0 m-4">
-              <span class="badge bg-dark bg-opacity-75 rounded-pill px-3 py-2 text-white shadow-sm" style="backdrop-filter: blur(4px);">
-                <i class="bi bi-zoom-in me-1"></i> Ver foto completa
-              </span>
-            </div>
-          </div>
-        <% else %>
-          <div class="bg-light d-flex align-items-center justify-content-center text-muted h-100" style="min-height: 400px;">
-            <div class="text-center">
-              <i class="bi bi-camera display-1 opacity-20 d-block mb-3"></i>
-              <span class="fs-5 fw-medium text-muted opacity-75">Nenhuma foto disponível</span>
-            </div>
-          </div>
-        <% end %>
-      </div>
-    </div>
-
-    <!-- Coluna das Informações -->
-    <div class="col-lg-5">
-      <div class="card car-detail-card border-0 shadow-sm rounded-4 bg-white h-100">
-        <div class="card-body p-4 p-xl-5 d-flex flex-column">
-          <div class="mb-4">
-            <h1 class="display-5 fw-bold mb-3 tracking-tight text-dark"><%= @car.name %></h1>
-            <div class="d-flex flex-wrap gap-2">
-              <% if @car.brand? %>
-                <span class="badge rounded-pill px-3 py-2 fw-medium fs-6" style="background-color: var(--public-primary); color: white;"><%= @car.brand %></span>
-              <% end %>
-            </div>
-          </div>
-
-          <div class="row g-4 mb-4">
-            <% if @car.year? %>
-              <div class="col-6">
-                <div class="p-3 bg-light bg-opacity-50 rounded-4 border border-light">
-                  <div class="text-muted small mb-1 fw-medium text-uppercase tracking-wider" style="font-size: 0.75rem;">Ano</div>
-                  <div class="fs-4 fw-bold text-dark"><%= @car.year %></div>
-                </div>
+    <% cache ['public', @car, I18n.locale] do %>
+      <div class="col-lg-7 mb-4 mb-lg-0">
+        <div class="card car-detail-card border-0 shadow-sm rounded-4 overflow-hidden bg-white h-100">
+          <% if @car.photo? %>
+            <div class="public-detail-photo p-4 d-flex align-items-center justify-content-center h-100 bg-light bg-opacity-50 position-relative" data-bs-toggle="modal" data-bs-target="#photoLightboxPublic">
+              <%= image_tag @car.photo.url, class: "img-fluid w-100 rounded-3 shadow-sm", alt: @car.name.presence || t("cars.show.fallback_name") %>
+              <div class="position-absolute bottom-0 end-0 m-4">
+                <span class="badge bg-dark bg-opacity-75 rounded-pill px-3 py-2 text-white shadow-sm backdrop-blur">
+                  <i class="bi bi-zoom-in me-1"></i> <%= t("cars.show.view_full_photo") %>
+                </span>
               </div>
-            <% end %>
-            <% if @car.size? %>
-              <div class="col-6">
-                <div class="p-3 bg-light bg-opacity-50 rounded-4 border border-light">
-                  <div class="text-muted small mb-1 fw-medium text-uppercase tracking-wider" style="font-size: 0.75rem;">Escala</div>
-                  <div class="fs-4 fw-bold text-dark text-uppercase"><%= @car.size %></div>
-                </div>
-              </div>
-            <% end %>
-          </div>
-
-
-
-          <% if @car.observations? %>
-            <div class="mb-4 flex-grow-1">
-              <div class="text-muted small mb-2 fw-medium text-uppercase tracking-wider" style="font-size: 0.75rem;">Observações / História</div>
-              <div class="text-dark bg-light bg-opacity-50 p-4 rounded-4 border border-light shadow-sm" style="line-height: 1.7;">
-                <%= simple_format @car.observations %>
+            </div>
+          <% else %>
+            <div class="public-detail-empty-photo bg-light d-flex align-items-center justify-content-center text-muted h-100">
+              <div class="text-center">
+                <i class="bi bi-camera display-1 opacity-20 d-block mb-3"></i>
+                <span class="fs-5 fw-medium text-muted opacity-75"><%= t("cars.show.no_photo") %></span>
               </div>
             </div>
           <% end %>
+        </div>
+      </div>
 
-          <div class="mt-auto pt-4 border-top">
-            <div class="d-flex align-items-center justify-content-between text-muted small">
-              <div class="d-flex align-items-center gap-2">
-                <i class="bi bi-info-circle opacity-50"></i>
-                <span>Adicionado em <%= l @car.created_at.to_date, format: :long %></span>
+      <div class="col-lg-5">
+        <div class="card car-detail-card border-0 shadow-sm rounded-4 bg-white h-100">
+          <div class="card-body p-4 p-xl-5 d-flex flex-column">
+            <div class="mb-4">
+              <h1 class="display-5 fw-bold mb-3 text-dark"><%= @car.name.presence || t("cars.show.fallback_name") %></h1>
+              <div class="d-flex flex-wrap gap-2">
+                <% if @car.brand? %>
+                  <span class="badge rounded-pill px-3 py-2 fw-medium fs-6 public-brand-badge"><%= @car.brand %></span>
+                <% end %>
               </div>
-              <div class="fw-medium" style="color: var(--public-primary);">
-                SmartCollection
+            </div>
+
+            <div class="row g-4 mb-4">
+              <% if @car.year? %>
+                <div class="col-6">
+                  <div class="public-detail-stat p-3 bg-light bg-opacity-50 rounded-4 border border-light">
+                    <div class="text-muted small mb-1 fw-medium text-uppercase"><%= t("activerecord.attributes.car.year") %></div>
+                    <div class="fs-4 fw-bold text-dark"><%= @car.year %></div>
+                  </div>
+                </div>
+              <% end %>
+              <% if @car.size? %>
+                <div class="col-6">
+                  <div class="public-detail-stat p-3 bg-light bg-opacity-50 rounded-4 border border-light">
+                    <div class="text-muted small mb-1 fw-medium text-uppercase"><%= t("activerecord.attributes.car.size") %></div>
+                    <div class="fs-4 fw-bold text-dark text-uppercase"><%= @car.size %></div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+
+            <% if @car.observations? %>
+              <div class="mb-4 flex-grow-1">
+                <div class="text-muted small mb-2 fw-medium text-uppercase"><%= t("activerecord.attributes.car.observations") %></div>
+                <div class="text-dark bg-light bg-opacity-50 p-4 rounded-4 border border-light shadow-sm public-detail-notes">
+                  <%= simple_format @car.observations %>
+                </div>
+              </div>
+            <% end %>
+
+            <div class="mt-auto pt-4 border-top">
+              <div class="d-flex align-items-center justify-content-between text-muted small flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-2">
+                  <i class="bi bi-info-circle opacity-50"></i>
+                  <span><%= t("cars.show.added_at", date: l(@car.created_at.to_date, format: :long)) %></span>
+                </div>
+                <div class="fw-medium public-signature">SmartCollection</div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
     <% end %>
   </div>
 </div>
 
 <% if @car.photo? %>
-  <!-- Modal Lightbox -->
   <div class="modal fade" id="photoLightboxPublic" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered">
       <div class="modal-content bg-transparent border-0 shadow-none">
         <div class="modal-body p-0 text-center position-relative d-inline-block w-auto mx-auto">
           <%= image_tag @car.photo.url,
-                class: "rounded-4 shadow-lg d-block",
-                style: "max-height: 85vh; max-width: 90vw; min-height: 320px; min-width: 320px; object-fit: contain; background: #111;" %>
+                class: "rounded-4 shadow-lg d-block public-lightbox-image",
+                alt: @car.name.presence || t("cars.show.fallback_name") %>
           <button type="button"
-                  class="btn btn-dark btn-sm rounded-circle shadow position-absolute"
+                  class="btn btn-dark btn-sm rounded-circle shadow position-absolute public-lightbox-close"
                   data-bs-dismiss="modal"
-                  style="top: -14px; right: -14px; width: 34px; height: 34px; padding: 0; opacity: 0.85; z-index: 10;">
+                  aria-label="<%= t("actions.close") %>">
             <i class="bi bi-x-lg small"></i>
           </button>
         </div>
