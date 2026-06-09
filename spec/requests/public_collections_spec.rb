@@ -73,6 +73,8 @@ RSpec.describe 'Public Collections', type: :request do
         size: '1:64',
         observations: 'Versão especial com pintura azul e caixa preservada.'
       )
+      car.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+      car.save!
 
       get public_share_car_path(user.share_token, car.id), headers: { 'Turbo-Frame' => 'modal' }
 
@@ -83,7 +85,10 @@ RSpec.describe 'Public Collections', type: :request do
       expect(response.body).to include('turbo-public-car-modal')
       expect(response.body).to include('Public Car')
       expect(document.at_css('#turboModalLabel')).to be_nil
-      expect(document.at_css('.public-detail-photo, .public-detail-empty-photo')).to be_present
+      expect(document.at_css('[data-controller="photo-lightbox"]')).to be_present
+      expect(document.at_css('.public-detail-photo[data-action="click->photo-lightbox#open"]')).to be_present
+      expect(document.at_css('.photo-lightbox-overlay[data-photo-lightbox-target="overlay"]')).to be_present
+      expect(response.body).not_to include('data-bs-target="#photoLightbox')
       expect(document.at_css("a[href='#{edit_car_path(car)}']")).to be_nil
       expect(document.at_css("[data-car-removal-trigger][data-car-removal-car-id='#{car.id}']")).to be_nil
       expect(response.body).to include(I18n.t('activerecord.attributes.car.color'))

@@ -587,15 +587,43 @@ body {
 [data-theme="dark"] input:-webkit-autofill,
 [data-theme="dark"] input:-webkit-autofill:hover,
 [data-theme="dark"] input:-webkit-autofill:focus,
+[data-theme="dark"] input:-webkit-autofill:active,
 [data-theme="dark"] textarea:-webkit-autofill,
 [data-theme="dark"] textarea:-webkit-autofill:hover,
 [data-theme="dark"] textarea:-webkit-autofill:focus,
+[data-theme="dark"] textarea:-webkit-autofill:active,
 [data-theme="dark"] select:-webkit-autofill,
 [data-theme="dark"] select:-webkit-autofill:hover,
-[data-theme="dark"] select:-webkit-autofill:focus {
-  -webkit-text-fill-color: var(--text-main);
-  box-shadow: 0 0 0 1000px var(--input-bg) inset;
-  caret-color: var(--text-main);
+[data-theme="dark"] select:-webkit-autofill:focus,
+[data-theme="dark"] select:-webkit-autofill:active,
+[data-theme="dark"] .form-control:-webkit-autofill,
+[data-theme="dark"] .form-control:-webkit-autofill:hover,
+[data-theme="dark"] .form-control:-webkit-autofill:focus,
+[data-theme="dark"] .form-control:-webkit-autofill:active,
+[data-theme="dark"] .form-select:-webkit-autofill,
+[data-theme="dark"] .form-select:-webkit-autofill:hover,
+[data-theme="dark"] .form-select:-webkit-autofill:focus,
+[data-theme="dark"] .form-select:-webkit-autofill:active,
+[data-theme="dark"] .bg-light:-webkit-autofill,
+[data-theme="dark"] .bg-light:-webkit-autofill:hover,
+[data-theme="dark"] .bg-light:-webkit-autofill:focus,
+[data-theme="dark"] .bg-light:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px var(--input-bg) inset !important;
+  -webkit-text-fill-color: var(--text-main) !important;
+  box-shadow: 0 0 0 1000px var(--input-bg) inset !important;
+  caret-color: var(--text-main) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+[data-theme="dark"] input:-webkit-autofill:focus,
+[data-theme="dark"] textarea:-webkit-autofill:focus,
+[data-theme="dark"] select:-webkit-autofill:focus,
+[data-theme="dark"] .form-control:-webkit-autofill:focus,
+[data-theme="dark"] .form-select:-webkit-autofill:focus,
+[data-theme="dark"] .bg-light:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px var(--input-bg) inset, 0 0 0 0.2rem rgba(99, 102, 241, 0.25) !important;
+  border-color: var(--premium-indigo) !important;
+  box-shadow: 0 0 0 1000px var(--input-bg) inset, 0 0 0 0.2rem rgba(99, 102, 241, 0.25) !important;
 }
 
 /* Global Component Fixes for Dark Mode */

@@ -303,6 +303,8 @@ RSpec.describe 'Cars', type: :request do
   describe 'GET /show' do
     it 'renders the detail view inside the global modal frame' do
       car.update!(color: 'Azul', size: '1:64')
+      car.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+      car.save!
 
       get car_path(car), headers: { 'Turbo-Frame' => 'modal' }
 
@@ -315,7 +317,10 @@ RSpec.describe 'Cars', type: :request do
       edit_link = document.at_css("a[href='#{edit_car_path(car)}']")
 
       expect(document.at_css('#turboModalLabel')).to be_nil
-      expect(document.at_css('.public-detail-photo, .public-detail-empty-photo')).to be_present
+      expect(document.at_css('[data-controller="photo-lightbox"]')).to be_present
+      expect(document.at_css('.public-detail-photo[data-action="click->photo-lightbox#open"]')).to be_present
+      expect(document.at_css('.photo-lightbox-overlay[data-photo-lightbox-target="overlay"]')).to be_present
+      expect(response.body).not_to include('data-bs-target="#photoLightbox')
       expect(edit_link).to be_present
       expect(delete_form['data-turbo-frame']).to be_nil
       expect(delete_form['data-turbo-confirm']).to be_nil

@@ -1,20 +1,22 @@
 <% modal = local_assigns.fetch(:modal, false) %>
-<% lightbox_id = local_assigns.fetch(:lightbox_id, modal ? "photoLightboxCarModal" : "photoLightboxCar") %>
 <% show_actions = local_assigns.fetch(:show_actions, false) %>
 <% car_dom_id = car.id.to_s %>
 
-<div class="row car-showcase-row <%= modal ? "g-3" : "g-5" %>">
+<div class="row car-showcase-row <%= modal ? "g-3" : "g-5" %>" data-controller="photo-lightbox">
   <div class="col-lg-7 mb-2 mb-lg-0">
     <div class="card car-detail-card shadow-sm rounded-4 overflow-hidden bg-white h-100">
       <% if car.photo? %>
-        <div class="public-detail-photo p-4 d-flex align-items-center justify-content-center h-100 bg-light bg-opacity-50 position-relative" data-bs-toggle="modal" data-bs-target="#<%= lightbox_id %>">
+        <button type="button"
+                class="public-detail-photo p-4 d-flex align-items-center justify-content-center h-100 w-100 border-0 bg-light bg-opacity-50 position-relative"
+                data-action="click->photo-lightbox#open"
+                aria-label="<%= t("cars.show.view_full_photo") %>">
           <%= image_tag car.photo.url, class: "img-fluid w-100 rounded-3 shadow-sm", alt: car.name.presence || t("cars.show.fallback_name") %>
           <div class="position-absolute bottom-0 end-0 m-4">
             <span class="badge bg-dark bg-opacity-75 rounded-pill px-3 py-2 text-white shadow-sm backdrop-blur">
               <i class="bi bi-zoom-in me-1"></i> <%= t("cars.show.view_full_photo") %>
             </span>
           </div>
-        </div>
+        </button>
       <% else %>
         <div class="public-detail-empty-photo bg-light d-flex align-items-center justify-content-center text-muted h-100">
           <div class="text-center">
@@ -109,24 +111,24 @@
       </div>
     </div>
   </div>
-</div>
-
-<% if car.photo? %>
-  <div class="modal fade" id="<%= lightbox_id %>" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
-      <div class="modal-content bg-transparent border-0 shadow-none">
-        <div class="modal-body p-0 text-center position-relative d-inline-block w-auto mx-auto">
-          <%= image_tag car.photo.url,
-                class: "rounded-4 shadow-lg d-block public-lightbox-image",
-                alt: car.name.presence || t("cars.show.fallback_name") %>
-          <button type="button"
-                  class="btn btn-dark btn-sm rounded-circle shadow position-absolute public-lightbox-close"
-                  data-bs-dismiss="modal"
-                  aria-label="<%= t("actions.close") %>">
-            <i class="bi bi-x-lg small"></i>
-          </button>
-        </div>
+  <% if car.photo? %>
+    <div class="photo-lightbox-overlay d-none"
+         data-photo-lightbox-target="overlay"
+         data-action="click->photo-lightbox#close keydown@window->photo-lightbox#closeWithKeyboard"
+         role="dialog"
+         aria-modal="true"
+         aria-label="<%= t("cars.show.view_full_photo") %>">
+      <div class="photo-lightbox-stage" data-action="click->photo-lightbox#keepOpen">
+        <%= image_tag car.photo.url,
+              class: "photo-lightbox-image rounded-4 shadow-lg",
+              alt: car.name.presence || t("cars.show.fallback_name") %>
+        <button type="button"
+                class="btn btn-dark btn-sm rounded-circle shadow photo-lightbox-close"
+                data-action="click->photo-lightbox#close"
+                aria-label="<%= t('actions.close') %>">
+          <i class="bi bi-x-lg small"></i>
+        </button>
       </div>
     </div>
-  </div>
-<% end %>
+  <% end %>
+</div>

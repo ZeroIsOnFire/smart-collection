@@ -86,9 +86,13 @@ RSpec.describe 'Authentications', type: :request do
   describe 'POST /users/sign_in' do
     it 'renders dark autofill overrides for the email field' do
       get new_user_session_path
+      global_css = Rails.root.join('app/assets/stylesheets/application.css').read
 
       expect(response.body).to include(':-webkit-autofill')
+      expect(response.body).to include(':-webkit-autofill:active')
       expect(response.body).to include('-webkit-text-fill-color: #f1f5f9')
+      expect(global_css).to include('[data-theme="dark"] .form-control:-webkit-autofill:active')
+      expect(global_css).to include('-webkit-box-shadow: 0 0 0 1000px var(--input-bg) inset !important')
     end
 
     it 'renders submit loading feedback hooks on the login form' do
