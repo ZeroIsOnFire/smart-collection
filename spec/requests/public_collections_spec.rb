@@ -84,9 +84,12 @@ RSpec.describe 'Public Collections', type: :request do
       expect(response.body).to include('Public Car')
       expect(document.at_css('#turboModalLabel')).to be_nil
       expect(document.at_css('.public-detail-photo, .public-detail-empty-photo')).to be_present
+      expect(document.at_css("a[href='#{edit_car_path(car)}']")).to be_nil
+      expect(document.at_css("[data-car-removal-trigger][data-car-removal-car-id='#{car.id}']")).to be_nil
       expect(response.body).to include(I18n.t('activerecord.attributes.car.color'))
       expect(response.body).to include('Azul')
       expect(response.body).to include('1:64')
+      expect(response.body).to include(I18n.l(car.created_at.to_date, format: :numeric))
       expect(document.at_css('.public-detail-notes')).to be_present
     end
   end
