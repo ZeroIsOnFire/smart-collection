@@ -26,6 +26,7 @@ class PublicCollectionsController < ApplicationController
 
     if @user
       @car = @user.cars.find(params[:id])
+      render partial: 'public_collections/details_modal', locals: { car: @car, user: @user } if turbo_frame_request?
     else
       render_not_found
     end

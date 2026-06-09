@@ -21,10 +21,12 @@ RSpec.describe 'Public Collections', type: :request do
       view_toggle = document.at_css('[data-view-toggle-carousel-enabled-value="true"]')
       carousel = document.at_css('#publicCollectionCarousel')
       carousel_button = document.at_css('[data-action="click->view-toggle#setCarousel"]')
+      public_card_link = document.at_css("#cars_grid_inner a[href='#{public_share_car_path(user.share_token, car)}']")
 
       expect(view_toggle['data-view-toggle-storage-key-value']).to eq('public_collection_view_preference')
       expect(carousel['class']).to include('public-full-carousel')
       expect(carousel_button.text).to include(I18n.t('public_collections.index.carousel_view'))
+      expect(public_card_link['data-turbo-frame']).to eq('modal')
       expect(response.body).to include('public-carousel-viewport')
       expect(response.body).to include('data-search-form-target="spinner"')
     end
@@ -62,6 +64,15 @@ RSpec.describe 'Public Collections', type: :request do
     it 'allows access to car details without login' do
       get public_share_car_path(user.share_token, car.id)
       expect(response).to have_http_status(:success)
+      expect(response.body).to include('Public Car')
+    end
+
+    it 'renders public car details inside the global modal frame' do
+      get public_share_car_path(user.share_token, car.id), headers: { 'Turbo-Frame' => 'modal' }
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include('id="turboModal"')
+      expect(response.body).to include('turbo-public-car-modal')
       expect(response.body).to include('Public Car')
     end
   end

@@ -96,25 +96,13 @@
 
       <div class="row <%= modal ? "g-3" : "g-4" %> mb-3 car-details-stats">
         <div class="col-sm-6">
-          <div class="car-details-stat d-flex flex-column">
-            <small class="text-uppercase fw-semibold text-muted tracking-wide mb-1"><%= t("activerecord.attributes.car.brand") %></small>
-            <span class="fs-6 fw-medium"><%= car.brand.presence || t("cars.show.fallback_name") %></span>
-          </div>
-        </div>
-        <div class="col-sm-6">
-          <div class="car-details-stat d-flex flex-column">
+          <div class="d-flex flex-column">
             <small class="text-uppercase fw-semibold text-muted tracking-wide mb-1"><%= t("activerecord.attributes.car.size") %></small>
             <span class="fs-6 fw-medium"><%= car.size.presence || t("cars.show.fallback_name") %></span>
           </div>
         </div>
         <div class="col-sm-6">
-          <div class="car-details-stat d-flex flex-column">
-            <small class="text-uppercase fw-semibold text-muted tracking-wide mb-1"><%= t("activerecord.attributes.car.year") %></small>
-            <span class="fs-6 fw-medium"><%= car.year.presence || t("cars.show.fallback_name") %></span>
-          </div>
-        </div>
-        <div class="col-sm-6">
-          <div class="car-details-stat d-flex flex-column">
+          <div class="d-flex flex-column">
             <small class="text-uppercase fw-semibold text-muted tracking-wide mb-1"><%= t("activerecord.attributes.car.color") %></small>
             <span class="fs-6 fw-medium d-flex align-items-center gap-2">
               <% if car.color? %>
@@ -125,9 +113,9 @@
           </div>
         </div>
         <div class="col-12">
-          <div class="car-details-notes d-flex flex-column">
+          <div class="d-flex flex-column">
             <small class="text-uppercase fw-semibold text-muted tracking-wide mb-1"><%= t("activerecord.attributes.car.observations") %></small>
-            <p class="mb-0 text-dark"><%= car.observations.presence || t("cars.show.fallback_name") %></p>
+            <p class="mb-0 text-dark car-details-observations"><%= car.observations.presence || t("cars.show.fallback_name") %></p>
           </div>
         </div>
       </div>

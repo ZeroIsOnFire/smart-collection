@@ -103,6 +103,8 @@
       <%= yield %>
     </main>
 
+    <%= turbo_frame_tag "modal", data: { controller: "modal-frame" } %>
+
     <footer class="py-5 footer-glass mt-5">
       <div class="container-fluid app-container public-container text-center">
         <div class="d-flex align-items-center justify-content-center mb-3">

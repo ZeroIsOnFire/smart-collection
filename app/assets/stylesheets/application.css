@@ -320,6 +320,22 @@ body {
   opacity: 1;
 }
 
+.autodetection-card {
+  background: var(--card-bg);
+}
+
+.autodetection-thumb {
+  flex: 0 0 auto;
+  height: 60px;
+  width: 60px;
+}
+
+.autodetection-icon-button {
+  height: 38px;
+  padding: 0;
+  width: 38px;
+}
+
 .btn-soft-danger {
   background-color: var(--soft-danger-bg);
   color: #ef4444;
@@ -776,16 +792,7 @@ body {
   min-height: 240px;
 }
 
-.car-details-stat,
-.car-details-notes {
-  background: rgba(148, 163, 184, 0.08);
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  border-radius: 1rem;
-  height: 100%;
-  padding: 1rem;
-}
-
-.car-details-notes p {
+.car-details-observations {
   line-height: 1.7;
 }
 
