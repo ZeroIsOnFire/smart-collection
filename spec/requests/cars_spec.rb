@@ -302,19 +302,23 @@ RSpec.describe 'Cars', type: :request do
 
   describe 'GET /show' do
     it 'renders the detail view inside the global modal frame' do
+      car.update!(color: 'Azul', size: '1:64')
+
       get car_path(car), headers: { 'Turbo-Frame' => 'modal' }
 
       expect(response).to be_successful
       expect(response.body).to include('id="turboModal"')
       expect(response.body).to include(car.name)
       document = Nokogiri::HTML(response.body)
-      delete_form = document.at_css("form[data-car-removal-car-id='#{car.id}']")
-      delete_button = document.at_css("[data-car-removal-trigger][data-car-removal-car-id='#{car.id}']")
 
-      expect(delete_form['data-turbo-frame']).to be_nil
-      expect(delete_form['data-turbo-confirm']).to be_nil
-      expect(delete_button['data-car-removal-confirm-message']).to eq(I18n.t('items.delete_confirm'))
-      expect(delete_button).to be_present
+      expect(document.at_css('#turboModalLabel')).to be_nil
+      expect(document.at_css('.public-detail-photo, .public-detail-empty-photo')).to be_present
+      expect(response.body).to include(I18n.t('activerecord.attributes.car.size'))
+      expect(response.body).to include(I18n.t('activerecord.attributes.car.color'))
+      expect(response.body).to include(I18n.t('activerecord.attributes.car.observations'))
+      expect(response.body).to include('Azul')
+      expect(response.body).to include('1:64')
+      expect(document.at_css('.public-detail-notes')).to be_present
     end
 
     it "does not show another user's car" do

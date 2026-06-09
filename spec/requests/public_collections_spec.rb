@@ -82,6 +82,8 @@ RSpec.describe 'Public Collections', type: :request do
       expect(response.body).to include('id="turboModal"')
       expect(response.body).to include('turbo-public-car-modal')
       expect(response.body).to include('Public Car')
+      expect(document.at_css('#turboModalLabel')).to be_nil
+      expect(document.at_css('.public-detail-photo, .public-detail-empty-photo')).to be_present
       expect(response.body).to include(I18n.t('activerecord.attributes.car.color'))
       expect(response.body).to include('Azul')
       expect(response.body).to include('1:64')
