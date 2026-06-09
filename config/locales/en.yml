@@ -238,12 +238,6 @@ en:
       loading: "Loading..."
       grid_view: "Grid"
       list_view: "List"
-      carousel_view: "Carousel"
-      carousel_label: "Public collection carousel"
-      carousel_kicker: "%{current} of %{total}"
-      slide_label: "Item %{number}"
-      previous_slide: "Previous item"
-      next_slide: "Next item"
       empty_title: "No vehicles found"
       empty_text: "Try searching for another term or clear the search."
     show:

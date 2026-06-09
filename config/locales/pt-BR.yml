@@ -251,12 +251,6 @@ pt-BR:
       loading: "Carregando..."
       grid_view: "Grade"
       list_view: "Lista"
-      carousel_view: "Carousel"
-      carousel_label: "Carousel da coleção pública"
-      carousel_kicker: "%{current} de %{total}"
-      slide_label: "Item %{number}"
-      previous_slide: "Item anterior"
-      next_slide: "Próximo item"
       empty_title: "Nenhum veículo encontrado"
       empty_text: "Tente buscar por outro termo ou limpe a pesquisa."
     show:
