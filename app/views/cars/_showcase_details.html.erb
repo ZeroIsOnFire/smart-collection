@@ -32,7 +32,7 @@
         <% if show_actions %>
           <div class="car-showcase-actions d-flex align-items-center justify-content-end gap-2 mb-4">
             <%= link_to edit_car_path(car),
-                        class: "btn btn-premium rounded-pill d-inline-flex align-items-center justify-content-center flex-shrink-0",
+                        class: "btn btn-premium rounded-pill d-inline-flex align-items-center justify-content-center",
                         style: "min-width: 112px;",
                         data: { turbo_frame: modal ? "modal" : "_top" } do %>
               <i class="bi bi-pencil me-2"></i><%= t("actions.edit") %>
@@ -40,7 +40,7 @@
             <%= button_to car,
                           method: :delete,
                           form: {
-                            class: "d-inline-flex m-0 flex-shrink-0",
+                            class: "d-inline-flex m-0",
                             data: {
                               "car-removal-car-id": car_dom_id,
                               modal_frame_skip_loading: modal ? true : nil
@@ -51,7 +51,7 @@
                             car_removal_car_id: car_dom_id,
                             car_removal_confirm_message: t("items.delete_confirm")
                           },
-                          class: "btn btn-outline-danger rounded-pill d-inline-flex align-items-center justify-content-center flex-shrink-0",
+                          class: "btn btn-outline-danger rounded-pill d-inline-flex align-items-center justify-content-center",
                           style: "padding: 0.65rem 1.5rem; min-width: 112px;" do %>
               <i class="bi bi-trash3 me-2"></i><%= t("actions.delete") %>
             <% end %>
