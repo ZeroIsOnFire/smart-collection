@@ -994,6 +994,7 @@ body {
 }
 
 .car-detail-card {
+  border: 1px solid rgba(148, 163, 184, 0.32) !important;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -1003,6 +1004,18 @@ body {
 
 .public-detail-photo {
   cursor: zoom-in;
+}
+
+.car-showcase-actions {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 0.15rem;
+  white-space: nowrap;
+}
+
+.car-showcase-actions form {
+  flex: 0 0 auto;
 }
 
 .public-detail-photo img {
@@ -1082,6 +1095,12 @@ body {
 
   .public-view-toggle {
     overflow-x: auto;
+  }
+}
+
+@media (max-width: 991.98px) {
+  .car-showcase-row {
+    --bs-gutter-y: 0.75rem;
   }
 }
 
