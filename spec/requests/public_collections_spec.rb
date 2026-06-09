@@ -68,12 +68,24 @@ RSpec.describe 'Public Collections', type: :request do
     end
 
     it 'renders public car details inside the global modal frame' do
+      car.update!(
+        color: 'Azul',
+        size: '1:64',
+        observations: 'Versão especial com pintura azul e caixa preservada.'
+      )
+
       get public_share_car_path(user.share_token, car.id), headers: { 'Turbo-Frame' => 'modal' }
+
+      document = Nokogiri::HTML(response.body)
 
       expect(response).to have_http_status(:success)
       expect(response.body).to include('id="turboModal"')
       expect(response.body).to include('turbo-public-car-modal')
       expect(response.body).to include('Public Car')
+      expect(response.body).to include(I18n.t('activerecord.attributes.car.color'))
+      expect(response.body).to include('Azul')
+      expect(response.body).to include('1:64')
+      expect(document.at_css('.public-detail-notes')).to be_present
     end
   end
 end

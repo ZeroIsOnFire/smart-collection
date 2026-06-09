@@ -1044,8 +1044,16 @@ body {
   font-size: 1.25rem;
 }
 
+.public-detail-color-dot {
+  border: 1px solid #dee2e6;
+  height: 14px;
+  width: 14px;
+}
+
 .public-detail-notes {
   line-height: 1.7;
+  max-height: 12rem;
+  overflow: auto;
 }
 
 .public-lightbox-image {

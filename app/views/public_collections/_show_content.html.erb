@@ -48,16 +48,23 @@
               <strong class="public-detail-meta-value text-uppercase"><%= car.size %></strong>
             </div>
           <% end %>
+          <div class="public-detail-meta-item">
+            <span class="public-detail-meta-label"><%= t("activerecord.attributes.car.color") %></span>
+            <strong class="public-detail-meta-value d-flex align-items-center gap-2">
+              <% if car.color? %>
+                <span class="d-inline-block rounded-circle shadow-sm public-detail-color-dot" style="background-color:<%= Car::COLORS[car.color] || '#ccc' %>;"></span>
+              <% end %>
+              <%= car.color.presence || t("cars.show.fallback_name") %>
+            </strong>
+          </div>
         </div>
 
-        <% if car.observations? %>
-          <div class="mb-4 flex-grow-1">
-            <div class="text-muted small mb-2 fw-medium text-uppercase"><%= t("activerecord.attributes.car.observations") %></div>
-            <div class="text-dark bg-light bg-opacity-50 p-4 rounded-4 border border-light shadow-sm public-detail-notes">
-              <%= simple_format car.observations %>
-            </div>
+        <div class="mb-4 flex-grow-1">
+          <div class="text-muted small mb-2 fw-medium text-uppercase"><%= t("activerecord.attributes.car.observations") %></div>
+          <div class="text-dark bg-light bg-opacity-50 p-4 rounded-4 border border-light shadow-sm public-detail-notes">
+            <%= simple_format(car.observations.presence || t("cars.show.fallback_name")) %>
           </div>
-        <% end %>
+        </div>
 
         <div class="public-detail-footer mt-auto pt-4 border-top text-muted small">
           <div class="d-flex align-items-start gap-2">
