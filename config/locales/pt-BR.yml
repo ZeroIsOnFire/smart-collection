@@ -290,6 +290,7 @@ pt-BR:
       photo_processing: "Processando foto..."
     show:
       added_at: "Adicionado em %{date}"
+      updated_at: "Atualizado em %{date}"
       collection: "Minha Coleção"
       fallback_name: "—"
       no_photo: "Sem foto cadastrada"

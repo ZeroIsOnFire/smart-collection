@@ -1,5 +1,6 @@
 <% modal = local_assigns.fetch(:modal, false) %>
 <% show_actions = local_assigns.fetch(:show_actions, false) %>
+<% show_timestamps = local_assigns.fetch(:show_timestamps, false) %>
 <% car_dom_id = car.id.to_s %>
 
 <div class="row car-showcase-row <%= modal ? "g-3" : "g-5" %>" data-controller="photo-lightbox">
@@ -102,11 +103,17 @@
           </div>
         </div>
 
-        <div class="public-detail-footer mt-auto pt-4 border-top text-muted small">
-          <div class="d-flex align-items-start gap-2">
-            <i class="bi bi-clock opacity-50 mt-1"></i>
+        <div class="public-detail-footer car-details-timestamps mt-auto pt-4 border-top text-muted small">
+          <div class="car-details-timestamp">
+            <i class="bi bi-clock"></i>
             <span><%= t("cars.show.added_at", date: l(car.created_at.to_date, format: :numeric)) %></span>
           </div>
+          <% if show_timestamps %>
+            <div class="car-details-timestamp">
+              <i class="bi bi-arrow-repeat"></i>
+              <span><%= t("cars.show.updated_at", date: l(car.updated_at, format: :short)) %></span>
+            </div>
+          <% end %>
         </div>
       </div>
     </div>

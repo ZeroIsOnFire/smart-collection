@@ -120,9 +120,15 @@
         </div>
       </div>
 
-      <div class="text-muted small">
-        <i class="bi bi-clock me-1"></i>
-        <%= t("cars.show.added_at", date: l(car.created_at.to_date)) %>
+      <div class="car-details-timestamps text-muted small border-top pt-3 mt-4">
+        <div class="car-details-timestamp">
+          <i class="bi bi-clock"></i>
+          <span><%= t("cars.show.added_at", date: l(car.created_at.to_date, format: :numeric)) %></span>
+        </div>
+        <div class="car-details-timestamp">
+          <i class="bi bi-arrow-repeat"></i>
+          <span><%= t("cars.show.updated_at", date: l(car.updated_at, format: :short)) %></span>
+        </div>
       </div>
     </div>
   </div>

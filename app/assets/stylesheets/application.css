@@ -845,6 +845,25 @@ body {
   line-height: 1.7;
 }
 
+.car-details-timestamps {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.car-details-timestamp {
+  align-items: center;
+  display: flex;
+  gap: 0.5rem;
+  line-height: 1.35;
+}
+
+.car-details-timestamp .bi {
+  flex: 0 0 1rem;
+  font-size: 0.95rem;
+  opacity: 0.55;
+  text-align: center;
+}
+
 .photo-lightbox-overlay {
   align-items: center;
   background: rgba(2, 6, 23, 0.92);

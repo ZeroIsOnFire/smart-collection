@@ -95,7 +95,9 @@ RSpec.describe 'Public Collections', type: :request do
       expect(response.body).to include('Azul')
       expect(response.body).to include('1:64')
       expect(response.body).to include(I18n.l(car.created_at.to_date, format: :numeric))
+      expect(response.body).not_to include(I18n.t('cars.show.updated_at', date: I18n.l(car.updated_at, format: :short)))
       expect(document.at_css('.public-detail-notes')).to be_present
+      expect(document.css('.car-details-timestamp').size).to eq(1)
     end
   end
 end

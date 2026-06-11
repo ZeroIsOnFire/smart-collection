@@ -276,6 +276,7 @@ en:
       photo_processing: "Processing photo..."
     show:
       added_at: "Added on %{date}"
+      updated_at: "Updated on %{date}"
       collection: "My Collection"
       fallback_name: "—"
       no_photo: "No photo registered"
