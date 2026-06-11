@@ -321,23 +321,28 @@ body {
 }
 
 .export-download-button {
+  min-height: 48px !important;
   min-width: 136px;
+  padding-bottom: 0.35rem;
+  padding-top: 0.35rem;
 }
 
 .export-download-label {
   font-weight: 700;
+  line-height: 1.05;
 }
 
 .export-download-meta {
   color: rgba(255, 255, 255, 0.78);
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 600;
-  margin-top: 0.1rem;
+  line-height: 1;
+  margin-top: 0.02rem;
   white-space: nowrap;
 }
 
 .export-button-group .btn-outline-success {
-  min-height: 58px;
+  min-height: 48px;
 }
 
 .autodetection-thumb {

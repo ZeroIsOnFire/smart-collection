@@ -18,7 +18,7 @@
   <% elsif export.status == 'completed' %>
     <div class="btn-group shadow-sm rounded-pill export-button-group">
       <%= link_to export.file.url,
-                  class: "btn btn-success rounded-start-pill px-3 py-2 d-flex align-items-center gap-2 export-download-button",
+                  class: "btn btn-success rounded-start-pill px-3 d-flex align-items-center gap-2 export-download-button",
                   target: "_blank",
                   data: { turbo: false } do %>
         <i class="bi bi-download"></i>
