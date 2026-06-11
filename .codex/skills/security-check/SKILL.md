@@ -1,9 +1,9 @@
 ---
-name: security-check-rails
+name: security-check
 description: Smart Collection security audit workflow. Use when the user asks to run security checks, audit Ruby gems, audit JavaScript or Python dependencies, verify bundler-audit, run OWASP ZAP against the Rails app, investigate vulnerable dependencies, fix security issues, or improve project security posture in this Rails/Mongoid/Python/Docker project.
 ---
 
-# Security Check Rails
+# Security Check
 
 Assume the Smart Collection security role. Audit dependency vulnerabilities across the dependency ecosystems that are present in the repository, run OWASP ZAP against the main Rails application when no equivalent ZAP/OWASP dynamic scan is already covered by the active QA workflow, then fix reported issues conservatively.
 

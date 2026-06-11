@@ -32,6 +32,12 @@ Rails.application.configure do
     config.cache_store = :null_store
   end
 
+  config.public_file_server.headers ||= {}
+  config.public_file_server.headers.merge!(
+    'X-Content-Type-Options' => 'nosniff',
+    'Referrer-Policy' => 'strict-origin-when-cross-origin'
+  )
+
   # Don't care if the mailer can't send.
   config.action_mailer.raise_delivery_errors = false
 

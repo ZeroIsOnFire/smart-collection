@@ -48,7 +48,7 @@ Servico Rails premium para registro e gerenciamento de colecoes: itens, fotos, a
 - Rails: use `$quality-check-rails` para QA amplo, lint/testes gerais ou preparacao de CI.
 - JavaScript: use `$quality-check-javascript` para mudancas em `app/javascript`, npm, esbuild/jsbundling ou layouts que carregam JS.
 - Python: use `$quality-check-python` para mudancas em `yolo/` ou `upscale/`.
-- Seguranca: use `$security-check-rails` para auditoria, vulnerabilidades ou correcoes de dependencias vulneraveis.
+- Seguranca: use `$security-check` para auditoria, vulnerabilidades ou correcoes de dependencias vulneraveis.
 - Se `brakeman --no-pager` estourar timeout sem retornar resultado, registre o timeout no documento de PR e nao invente status de seguranca verde. Reexecute com timeout maior ou em ambiente externo quando o usuario pedir fechamento de auditoria completo.
 - Commits devem ser atomicos, em portugues, no formato Conventional Commits.
 - Ao criar commit, gere ou atualize um arquivo em `docs/` com dados do PR dos commits atuais. A pasta `docs/` e ignorada pelo Git; mantenha os arquivos locais, mas fora do versionamento.

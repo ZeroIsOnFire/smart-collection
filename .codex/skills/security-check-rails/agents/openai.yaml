@@ -1,4 +1,0 @@
-interface:
-  display_name: "Security Check Rails"
-  short_description: "Audit Smart Collection dependencies and run OWASP ZAP on the Rails app."
-  default_prompt: "Use $security-check-rails to audit Smart Collection dependencies across Ruby, JavaScript, and Python, run OWASP ZAP against the Rails app when not already covered by an equivalent QA scan, and fix vulnerabilities found."
