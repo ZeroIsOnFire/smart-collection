@@ -18,10 +18,37 @@ O runtime e definido pelo Dockerfile usado pelo servico `upscale-service`.
 | `Dockerfile.cpu` | CPU | `realesr-general-x4v3.pth` |
 | `Dockerfile.nvidia` | NVIDIA/CUDA | `4x_NMKD-Siax_200k.pth` |
 | `Dockerfile.amd` | AMD/ROCm | `4x_NMKD-Siax_200k.pth` |
+| `Dockerfile.vulkan` | Vulkan/ncnn experimental | modelo ncnn montado pelo usuario |
 
 O `Dockerfile.amd` esta fixado em `rocm/pytorch:rocm6.4.2_ubuntu24.04_py3.12_pytorch_release_2.6.0`, que foi a combinacao validada no WSL2 com AMD.
 
 > **Aviso de tamanho no Windows/WSL2:** o caminho AMD/ROCm usa uma imagem base muito grande. Em ambientes Windows com WSL2, o build/pull e as camadas intermediarias podem consumir perto de **90 GB**. Planeje espaco em disco antes de testar esse runtime e prefira `Dockerfile.cpu` em maquinas com armazenamento limitado.
+
+Nao ha divisao entre `Dockerfile.amd` para Linux e Windows porque ambos continuam dependendo da imagem ROCm/PyTorch validada. Para AMD, as melhores alternativas sao:
+
+- Rodar em Linux nativo com ROCm quando houver GPU AMD compativel e espaco em disco suficiente.
+- Usar `Dockerfile.cpu` quando simplicidade, tamanho menor e compatibilidade forem mais importantes que desempenho.
+- Manter Windows/WSL2 apenas quando a GPU/ROCm estiver validada localmente e o custo de armazenamento for aceitavel.
+
+### Runtime Vulkan experimental
+
+`Dockerfile.vulkan` oferece uma alternativa experimental baseada em `Real-ESRGAN-ncnn-vulkan`. Ela usa `UPSCALE_RUNTIME=vulkan`, chama o binario ncnn por arquivos temporarios e preserva o fallback Lanczos se a execucao falhar.
+
+Esse caminho pode ser uma opcao cross-vendor para AMD, NVIDIA e Intel em hosts Linux com Vulkan funcional, mas nao substitui os runtimes PyTorch atuais. As releases Linux upstream do binario nao incluem modelos; monte ou copie arquivos ncnn `.param` e `.bin` compativeis em `VULKAN_MODEL_DIR` e defina `VULKAN_MODEL_NAME`.
+
+Exemplo de montagem local:
+
+```yaml
+upscale-service:
+  volumes:
+    - ./upscale/models/realesrgan-ncnn-vulkan:/app/models/realesrgan-ncnn-vulkan:ro
+  environment:
+    - VULKAN_MODEL_NAME=realesrgan-x4plus
+```
+
+A saida pode diferir do modelo `4x_NMKD-Siax_200k.pth` usado nos runtimes NVIDIA/AMD.
+
+No Windows, o binario upstream nativo pode ser avaliado fora do Docker. Docker com GPU/Vulkan em Windows/WSL2 nao e um caminho validado neste projeto; para container, prefira Linux com `/dev/dri`.
 
 ## Modelos compativeis
 
@@ -84,6 +111,9 @@ Depois de qualquer upscale por IA, a imagem e reduzida para bater exatamente o l
 - `IMAGE_UPSCALE_API_KEY`: chave opcional exigida no header `X-API-Key`.
 - `IMAGE_UPSCALE_DEFAULT_MINIMUM_SIDE`: lado minimo usado quando `/upscale` recebe chamada sem `minimum_side` explicito.
 - `REAL_ESRGAN_MODEL_PATH`: caminho customizado de modelo dentro do container.
+- `VULKAN_BINARY_PATH`: caminho do binario `realesrgan-ncnn-vulkan` no runtime Vulkan.
+- `VULKAN_MODEL_DIR`: diretorio dos modelos ncnn no runtime Vulkan.
+- `VULKAN_MODEL_NAME`: nome do modelo ncnn usado pelo runtime Vulkan.
 - O upscaler por IA nao usa denoise/DNI; denoise e aplicado apenas no tier Lanczos.
 - `TIER_4X_THRESHOLD` / `TIER_2X_THRESHOLD`: limites dos tiers.
 - `DENOISE_H`, `DENOISE_TEMPLATE_WINDOW`, `DENOISE_SEARCH_WINDOW`: parametros do denoise Lanczos.
@@ -128,6 +158,8 @@ upscale-service:
 ```
 
 Para Linux AMD nativo, use o padrao ROCm com `/dev/kfd` e `/dev/dri` em vez de `/dev/dxg`.
+
+Se o objetivo for evitar a imagem ROCm/PyTorch grande, use `Dockerfile.cpu`. O runtime Vulkan experimental pode ser avaliado em Linux com Vulkan funcional, mas deve ser tratado como opt-in ate haver validacao visual e de desempenho com fotos reais do projeto.
 
 ### Subir pelo WSL
 

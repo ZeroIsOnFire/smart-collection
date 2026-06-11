@@ -46,6 +46,10 @@ class UpscaleServiceTests(unittest.TestCase):
         with patch.dict(os.environ, {"UPSCALE_RUNTIME": "rocm"}, clear=True):
             self.assertEqual(main.upscale_runtime(), "amd")
 
+    def test_runtime_accepts_vulkan_alias(self):
+        with patch.dict(os.environ, {"UPSCALE_RUNTIME": "ncnn"}, clear=True):
+            self.assertEqual(main.upscale_runtime(), "vulkan")
+
     def test_torch_load_normalizes_realesrgan_params_ema_key(self):
         with tempfile.NamedTemporaryFile(suffix=".pth") as checkpoint:
             main.torch.save({"params_ema": {"weight": 1}}, checkpoint.name)
@@ -95,6 +99,44 @@ class UpscaleServiceTests(unittest.TestCase):
     def test_gpu_runtime_uses_nmkd_siax_model_by_default(self):
         with patch.dict(os.environ, {"REAL_ESRGAN_MODEL_PATH": ""}, clear=True):
             self.assertEqual(main.model_path_for_runtime("amd"), "/app/models/4x_NMKD-Siax_200k.pth")
+
+    def test_vulkan_runtime_uses_model_directory_by_default(self):
+        with patch.dict(os.environ, {"REAL_ESRGAN_MODEL_PATH": "", "VULKAN_MODEL_DIR": ""}, clear=True):
+            self.assertEqual(main.model_path_for_runtime("vulkan"), "/app/models/realesrgan-ncnn-vulkan")
+
+    def test_vulkan_upscaler_requires_binary(self):
+        with patch.object(main, "vulkan_binary_path", return_value="/missing/realesrgan-ncnn-vulkan"):
+            with self.assertRaises(RuntimeError):
+                main.get_vulkan_upscaler()
+
+    def test_vulkan_upscale_invokes_ncnn_binary(self):
+        image = np.zeros((32, 48, 3), dtype=np.uint8)
+        upscaled = np.full((64, 96, 3), 120, dtype=np.uint8)
+
+        def fake_run(command, check, capture_output, text):
+            self.assertTrue(check)
+            self.assertTrue(capture_output)
+            self.assertTrue(text)
+            output_path = command[command.index("-o") + 1]
+            cv2 = main.cv2
+            cv2.imwrite(output_path, upscaled)
+
+        with patch.object(
+            main,
+            "get_upscaler",
+            return_value={
+                "binary_path": "/app/bin/realesrgan-ncnn-vulkan",
+                "model_dir": "/app/models/realesrgan-ncnn-vulkan",
+                "model_name": "realesrgan-x4plus",
+            },
+        ), patch.object(main.subprocess, "run", side_effect=fake_run) as mock_run:
+            result = main.upscale_with_vulkan(image, outscale=2)
+
+        mock_run.assert_called_once()
+        command = mock_run.call_args.args[0]
+        self.assertIn("-s", command)
+        self.assertEqual(command[command.index("-s") + 1], "2")
+        self.assertEqual(result.shape, upscaled.shape)
 
     def test_gpu_upscaler_uses_rrdb_model(self):
         main.get_upscaler.cache_clear()

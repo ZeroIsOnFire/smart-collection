@@ -7,6 +7,7 @@ Microservico local para upscale inteligente de imagens com Real-ESRGAN e fallbac
 - **CPU**: `python:3.11-slim` em `Dockerfile.cpu`
 - **NVIDIA/CUDA**: `pytorch/pytorch:*-cuda*-runtime` em `Dockerfile.nvidia`
 - **AMD/ROCm**: `rocm/pytorch:latest` em `Dockerfile.amd`
+- **Vulkan/ncnn experimental**: `python:3.11-slim` em `Dockerfile.vulkan`
 - **API**: FastAPI + Uvicorn
 - **Inferencia**: Real-ESRGAN via PyTorch/torchvision
 - **Fallbacks**: `cv2.INTER_LANCZOS4`
@@ -14,6 +15,7 @@ Microservico local para upscale inteligente de imagens com Real-ESRGAN e fallbac
   - CPU baixa `realesr-general-x4v3.pth`
   - NVIDIA baixa somente `4x_NMKD-Siax_200k.pth`
   - AMD baixa somente `4x_NMKD-Siax_200k.pth`
+  - Vulkan exige modelos ncnn `.param` e `.bin` montados ou copiados para `VULKAN_MODEL_DIR`
 
 ## Contrato HTTP
 - `GET /health`: retorna status, runtime ativo, modelo ativo e parametros de tier/denoise.
@@ -31,8 +33,11 @@ O runtime e definido pela imagem Docker.
 | `Dockerfile.cpu` | `cpu` | `realesr-general-x4v3.pth` |
 | `Dockerfile.nvidia` | `nvidia` | `4x_NMKD-Siax_200k.pth` |
 | `Dockerfile.amd` | `amd` | `4x_NMKD-Siax_200k.pth` |
+| `Dockerfile.vulkan` | `vulkan` | modelo ncnn montado pelo usuario |
 
 Nao reintroduza modelos antigos nem baixe pesos que nao pertencam ao Dockerfile escolhido.
+Nao divida `Dockerfile.amd` entre Windows e Linux sem uma alternativa ROCm comprovadamente mais leve; o caminho validado continua sendo a imagem ROCm/PyTorch. Para AMD, prefira Linux nativo com ROCm quando possivel ou `Dockerfile.cpu` quando o tamanho/compatibilidade forem prioridade.
+O runtime Vulkan e experimental, opt-in, e deve manter fallback Lanczos em qualquer falha do binario ncnn. As releases Linux upstream do binario nao incluem modelos; documente montagem/copia dos `.param` e `.bin` em vez de assumir modelo embutido.
 
 ### Modelos Customizados
 Os runtimes GPU usam `RRDBNet(num_feat=64, num_block=23, num_grow_ch=32, scale=4)`.
@@ -83,6 +88,9 @@ Quando `IMAGE_UPSCALE_API_KEY` estiver configurada, as chamadas exigem o header 
 | `IMAGE_UPSCALE_API_KEY` | vazio | Chave do header `X-API-Key`. Sem ela, qualquer chamada e aceita. |
 | `IMAGE_UPSCALE_DEFAULT_MINIMUM_SIDE` | `360` | Lado minimo usado quando o endpoint `/upscale` recebe chamada sem `minimum_side`. |
 | `REAL_ESRGAN_MODEL_PATH` | por runtime | Caminho customizado opcional para pesos dentro do container. |
+| `VULKAN_BINARY_PATH` | `/app/bin/realesrgan-ncnn-vulkan` | Caminho do binario ncnn no runtime Vulkan. |
+| `VULKAN_MODEL_DIR` | `/app/models/realesrgan-ncnn-vulkan` | Diretorio de modelos ncnn no runtime Vulkan. |
+| `VULKAN_MODEL_NAME` | `realesrgan-x4plus` | Modelo ncnn usado no runtime Vulkan. |
 | `TIER_4X_THRESHOLD` | `0.50` | Ratio abaixo do qual o Real-ESRGAN 4x e acionado. |
 | `TIER_2X_THRESHOLD` | `0.75` | Ratio abaixo do qual o Real-ESRGAN 2x e acionado. Acima, usa Lanczos. |
 ## Gotchas
