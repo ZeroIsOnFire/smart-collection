@@ -60,6 +60,21 @@ RSpec.describe 'Cars', type: :request do
       expect(response.body).to include(I18n.t('collection_exports.actions.generate', file_format: 'PDF'))
     end
 
+    it 'shows the last generation date for completed exports' do
+      generated_at = Time.zone.local(2026, 1, 15, 10, 30)
+      allow(Turbo::StreamsChannel).to receive(:broadcast_replace_to)
+      create_completed_export('csv', generated_at)
+      create_completed_export('pdf', generated_at)
+
+      get cars_path
+
+      expected_text = I18n.t('collection_exports.status.last_generated',
+                             date: I18n.l(generated_at, format: :short))
+
+      expect(response.body).to include(expected_text)
+      expect(response.body.scan(expected_text).size).to eq(2)
+    end
+
     it 'marks the processing text so list view can show only the loading icon' do
       processing_car = create(:car, user: user, photo_processing_status: 'pending')
       processing_car.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
@@ -202,6 +217,21 @@ RSpec.describe 'Cars', type: :request do
       expect(response.body).not_to include(
         I18n.t('cars.form.ai_upscaling_notice', minimum_side: ImageUpscalerService.default_minimum_side)
       )
+    end
+  end
+
+  def create_completed_export(format_type, generated_at)
+    Tempfile.create(['export', ".#{format_type}"]) do |file|
+      file.write(format_type == 'csv' ? 'Nome' : '%PDF-1.4')
+      file.rewind
+
+      export = CollectionExport.create!(
+        user: user,
+        format_type: format_type,
+        status: 'completed',
+        file: Rack::Test::UploadedFile.new(file.path, "application/#{format_type}")
+      )
+      export.set(updated_at: generated_at)
     end
   end
 

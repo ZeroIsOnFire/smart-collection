@@ -213,6 +213,7 @@ en:
     status:
       processing: "Generating %{file_format}..."
       failed: "Failed"
+      last_generated: "Last generated: %{date}"
     messages:
       started: "Export started."
       removed: "Export removed."

@@ -225,6 +225,7 @@ pt-BR:
     status:
       processing: "Gerando %{file_format}..."
       failed: "Falhou"
+      last_generated: "Ultima geracao: %{date}"
     messages:
       started: "Exportação iniciada."
       removed: "Exportação removida."

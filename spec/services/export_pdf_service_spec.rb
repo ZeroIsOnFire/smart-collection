@@ -19,5 +19,14 @@ RSpec.describe ExportPdfService do
       pdf_content = service.generate
       expect(pdf_content).to be_a(String)
     end
+
+    it 'uses the provided generation date in the report metadata' do
+      generated_at = Time.zone.local(2026, 1, 15, 10, 30)
+      allow(I18n).to receive(:l).and_call_original
+
+      described_class.new(user, cars, generated_at: generated_at).generate
+
+      expect(I18n).to have_received(:l).with(generated_at, format: :short)
+    end
   end
 end

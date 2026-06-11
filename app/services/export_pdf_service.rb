@@ -3,9 +3,10 @@
 require 'prawn'
 
 class ExportPdfService
-  def initialize(user, cars)
+  def initialize(user, cars, generated_at: Time.current)
     @user = user
     @cars = cars
+    @generated_at = generated_at
     @temp_files = []
   end
 
@@ -41,7 +42,7 @@ class ExportPdfService
 
       pdf.move_down 3
       pdf.fill_color '94A3B8'
-      meta_info = I18n.t('export_pdf.meta_info', date: Time.current.strftime('%d/%m/%Y %H:%M'), count: @cars.count)
+      meta_info = I18n.t('export_pdf.meta_info', date: I18n.l(@generated_at, format: :short), count: @cars.count)
       pdf.text meta_info, size: 8, align: :center
 
       pdf.move_down 40
