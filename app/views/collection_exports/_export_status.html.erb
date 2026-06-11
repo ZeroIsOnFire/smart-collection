@@ -16,26 +16,29 @@
       <%= t("collection_exports.status.processing", file_format: format_type.upcase) %>
     </button>
   <% elsif export.status == 'completed' %>
-    <div class="d-inline-flex flex-column align-items-start gap-1">
-      <div class="btn-group shadow-sm rounded-pill export-button-group">
-        <%= link_to export.file.url,
-                    class: "btn btn-success rounded-start-pill px-3 d-flex align-items-center gap-2",
-                    target: "_blank",
-                    data: { turbo: false } do %>
-          <i class="bi bi-download"></i>
-          <%= t("collection_exports.actions.download", file_format: format_type.upcase) %>
-        <% end %>
-        <%= button_to collection_exports_path(format_type: format_type),
-                      method: :post,
-                      class: "btn btn-outline-success rounded-end-pill px-3 d-flex align-items-center border-start-0",
-                      data: { turbo_stream: true },
-                      title: t("collection_exports.actions.regenerate") do %>
-          <i class="bi bi-arrow-clockwise"></i>
-        <% end %>
-      </div>
-      <span class="small text-muted export-generated-at">
-        <%= t("collection_exports.status.last_generated", date: I18n.l(export.updated_at, format: :short)) %>
-      </span>
+    <div class="btn-group shadow-sm rounded-pill export-button-group">
+      <%= link_to export.file.url,
+                  class: "btn btn-success rounded-start-pill px-3 py-2 d-flex align-items-center gap-2 export-download-button",
+                  target: "_blank",
+                  data: { turbo: false } do %>
+        <i class="bi bi-download"></i>
+        <span class="d-flex flex-column align-items-start lh-sm">
+          <span class="export-download-label">
+            <%= t("collection_exports.actions.download", file_format: format_type.upcase) %>
+          </span>
+          <span class="export-download-meta">
+            <%= t("collection_exports.status.generated_at",
+                  date: I18n.l(export.updated_at, format: :export_timestamp)) %>
+          </span>
+        </span>
+      <% end %>
+      <%= button_to collection_exports_path(format_type: format_type),
+                    method: :post,
+                    class: "btn btn-outline-success rounded-end-pill px-3 d-flex align-items-center border-start-0",
+                    data: { turbo_stream: true },
+                    title: t("collection_exports.actions.regenerate") do %>
+        <i class="bi bi-arrow-clockwise"></i>
+      <% end %>
     </div>
   <% elsif export.status == 'failed' %>
     <div class="btn-group shadow-sm rounded-pill export-button-group">

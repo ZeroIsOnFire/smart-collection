@@ -68,8 +68,8 @@ RSpec.describe 'Cars', type: :request do
 
       get cars_path
 
-      expected_text = I18n.t('collection_exports.status.last_generated',
-                             date: I18n.l(generated_at, format: :short))
+      expected_text = I18n.t('collection_exports.status.generated_at',
+                             date: I18n.l(generated_at, format: :export_timestamp))
 
       expect(response.body).to include(expected_text)
       expect(response.body.scan(expected_text).size).to eq(2)

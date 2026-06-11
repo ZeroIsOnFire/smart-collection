@@ -11,6 +11,7 @@ en:
     formats:
       default: "%a, %d %b %Y %H:%M:%S %z"
       short: "%m/%d/%Y %H:%M"
+      export_timestamp: "%m/%d/%Y %H:%M"
       long: "%B %d, %Y %H:%M"
     am: "am"
     pm: "pm"
@@ -213,6 +214,7 @@ en:
     status:
       processing: "Generating %{file_format}..."
       failed: "Failed"
+      generated_at: "Generated at: %{date}"
       last_generated: "Last generated: %{date}"
     messages:
       started: "Export started."

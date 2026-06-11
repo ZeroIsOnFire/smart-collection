@@ -12,6 +12,7 @@ pt-BR:
     formats:
       default: "%a, %d de %b de %Y, %H:%M:%S %z"
       short: "%d/%m/%Y às %H:%M"
+      export_timestamp: "%d/%m/%Y %H:%M"
       long: "%d de %B de %Y às %H:%M"
     am: "am"
     pm: "pm"
@@ -225,7 +226,8 @@ pt-BR:
     status:
       processing: "Gerando %{file_format}..."
       failed: "Falhou"
-      last_generated: "Ultima geracao: %{date}"
+      generated_at: "Gerado em: %{date}"
+      last_generated: "Última geração: %{date}"
     messages:
       started: "Exportação iniciada."
       removed: "Exportação removida."

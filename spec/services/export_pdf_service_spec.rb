@@ -26,7 +26,7 @@ RSpec.describe ExportPdfService do
 
       described_class.new(user, cars, generated_at: generated_at).generate
 
-      expect(I18n).to have_received(:l).with(generated_at, format: :short)
+      expect(I18n).to have_received(:l).with(generated_at, format: :export_timestamp)
     end
   end
 end

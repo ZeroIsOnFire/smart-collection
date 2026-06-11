@@ -42,7 +42,9 @@ class ExportPdfService
 
       pdf.move_down 3
       pdf.fill_color '94A3B8'
-      meta_info = I18n.t('export_pdf.meta_info', date: I18n.l(@generated_at, format: :short), count: @cars.count)
+      meta_info = I18n.t('export_pdf.meta_info',
+                         date: I18n.l(@generated_at, format: :export_timestamp),
+                         count: @cars.count)
       pdf.text meta_info, size: 8, align: :center
 
       pdf.move_down 40
