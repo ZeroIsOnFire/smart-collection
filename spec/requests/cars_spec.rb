@@ -49,6 +49,32 @@ RSpec.describe 'Cars', type: :request do
       expect(response.body).to include(signed_stream)
     end
 
+    it 'renders active export actions before the first export' do
+      get cars_path
+
+      document = Nokogiri::HTML(response.body)
+      export_buttons = document.css('.btn-export-action')
+
+      expect(export_buttons.size).to eq(2)
+      expect(response.body).to include(I18n.t('collection_exports.actions.generate', file_format: 'CSV'))
+      expect(response.body).to include(I18n.t('collection_exports.actions.generate', file_format: 'PDF'))
+    end
+
+    it 'shows the last generation date for completed exports' do
+      generated_at = Time.zone.local(2026, 1, 15, 10, 30)
+      allow(Turbo::StreamsChannel).to receive(:broadcast_replace_to)
+      create_completed_export('csv', generated_at)
+      create_completed_export('pdf', generated_at)
+
+      get cars_path
+
+      expected_text = I18n.t('collection_exports.status.generated_at',
+                             date: I18n.l(generated_at, format: :export_timestamp))
+
+      expect(response.body).to include(expected_text)
+      expect(response.body.scan(expected_text).size).to eq(2)
+    end
+
     it 'marks the processing text so list view can show only the loading icon' do
       processing_car = create(:car, user: user, photo_processing_status: 'pending')
       processing_car.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
@@ -134,7 +160,7 @@ RSpec.describe 'Cars', type: :request do
       expect(response.body).to include('id="new_car"')
     end
 
-    it 'reuses the latest brand and scale as suggestions for a new item' do
+    it 'does not reuse the latest brand and scale when opening a new item directly' do
       create(:car, user: user, brand: 'Hot Wheels', size: '1:64')
 
       get new_car_path
@@ -143,11 +169,23 @@ RSpec.describe 'Cars', type: :request do
       brand_field = document.at_css('#car_brand')
       selected_scale = document.at_css('#car_size option[selected]')
 
-      expect(brand_field['value']).to eq('Hot Wheels')
-      expect(selected_scale['value']).to eq('1:64')
+      expect(brand_field['value']).to be_blank
+      expect(selected_scale).to be_nil
     end
 
-    it 'lets explicit new item params override suggestions' do
+    it 'renders a quick action to keep adding items' do
+      get new_car_path
+
+      document = Nokogiri::HTML(response.body)
+      create_another_button = document.at_css("button[name='commit_action'][value='create_another']")
+
+      expect(create_another_button).to be_present
+      expect(create_another_button['value']).to eq('create_another')
+      expect(create_another_button.text).to include(I18n.t('cars.form.create_another'))
+      expect(create_another_button['data-disable-with']).to include(I18n.t('cars.form.create_another'))
+    end
+
+    it 'uses explicit new item params when they are present' do
       create(:car, user: user, brand: 'Hot Wheels', size: '1:64')
 
       get new_car_path, params: { car: { brand: 'Matchbox', size: '1:43' } }
@@ -179,6 +217,21 @@ RSpec.describe 'Cars', type: :request do
       expect(response.body).not_to include(
         I18n.t('cars.form.ai_upscaling_notice', minimum_side: ImageUpscalerService.default_minimum_side)
       )
+    end
+  end
+
+  def create_completed_export(format_type, generated_at)
+    Tempfile.create(['export', ".#{format_type}"]) do |file|
+      file.write(format_type == 'csv' ? 'Nome' : '%PDF-1.4')
+      file.rewind
+
+      export = CollectionExport.create!(
+        user: user,
+        format_type: format_type,
+        status: 'completed',
+        file: Rack::Test::UploadedFile.new(file.path, "application/#{format_type}")
+      )
+      export.set(updated_at: generated_at)
     end
   end
 
@@ -219,6 +272,28 @@ RSpec.describe 'Cars', type: :request do
         expect(response.body).to include('flash_toasts')
       end
 
+      it 'prepends the created car and keeps the modal ready for another item' do
+        attributes = valid_attributes.merge(size: '1:64')
+
+        expect do
+          post cars_path,
+               params: { car: attributes, commit_action: 'create_another' },
+               as: :turbo_stream
+        end.to change(Car, :count).by(1)
+
+        created_car = Car.last
+        document = Nokogiri::HTML.fragment(response.body)
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include('turbo-stream action="prepend" target="cars_grid_inner"')
+        expect(response.body).to include("car_#{created_car.id}")
+        expect(response.body).to include('turbo-stream action="update" target="modal"')
+        expect(response.body).to include('id="new_car"')
+        expect(response.body).to include('flash_toasts')
+        expect(document.at_css('#car_brand')['value']).to eq(attributes[:brand])
+        expect(document.at_css('#car_size option[selected]')['value']).to eq(attributes[:size])
+      end
+
       it 'rerenders the modal form when turbo stream validation fails' do
         expect do
           post cars_path, params: { car: valid_attributes.merge(name: '') }, as: :turbo_stream
@@ -257,6 +332,13 @@ RSpec.describe 'Cars', type: :request do
 
   describe 'GET /show' do
     it 'renders the detail view inside the global modal frame' do
+      updated_at = Time.zone.local(2026, 6, 11, 2, 22)
+      car.update!(color: 'Azul', size: '1:64')
+      car.set(updated_at: updated_at)
+      car.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+      car.save!
+      car.set(updated_at: updated_at)
+
       get car_path(car), headers: { 'Turbo-Frame' => 'modal' }
 
       expect(response).to be_successful
@@ -265,11 +347,41 @@ RSpec.describe 'Cars', type: :request do
       document = Nokogiri::HTML(response.body)
       delete_form = document.at_css("form[data-car-removal-car-id='#{car.id}']")
       delete_button = document.at_css("[data-car-removal-trigger][data-car-removal-car-id='#{car.id}']")
+      edit_link = document.at_css("a[href='#{edit_car_path(car)}']")
 
+      expect(document.at_css('#turboModalLabel')).to be_nil
+      expect(document.at_css('[data-controller="photo-lightbox"]')).to be_present
+      expect(document.at_css('.public-detail-photo[data-action="click->photo-lightbox#open"]')).to be_present
+      expect(document.at_css('.photo-lightbox-overlay[data-photo-lightbox-target="overlay"]')).to be_present
+      expect(response.body).not_to include('data-bs-target="#photoLightbox')
+      expect(edit_link).to be_present
       expect(delete_form['data-turbo-frame']).to be_nil
       expect(delete_form['data-turbo-confirm']).to be_nil
       expect(delete_button['data-car-removal-confirm-message']).to eq(I18n.t('items.delete_confirm'))
       expect(delete_button).to be_present
+      expect(response.body).to include(I18n.t('activerecord.attributes.car.size'))
+      expect(response.body).to include(I18n.t('activerecord.attributes.car.color'))
+      expect(response.body).to include(I18n.t('activerecord.attributes.car.observations'))
+      expect(response.body).to include('Azul')
+      expect(response.body).to include('1:64')
+      expect(response.body).to include(I18n.l(car.created_at.to_date, format: :numeric))
+      expect(response.body).to include(I18n.t('cars.show.updated_at', date: I18n.l(updated_at, format: :short)))
+      expect(document.at_css('.public-detail-notes')).to be_present
+      expect(document.css('.car-details-timestamp').size).to eq(2)
+    end
+
+    it 'shows aligned creation and update timestamps on the private detail page' do
+      updated_at = Time.zone.local(2026, 6, 11, 2, 22)
+      car.set(updated_at: updated_at)
+
+      get car_path(car)
+
+      expect(response).to be_successful
+      expect(response.body).to include(I18n.t('cars.show.added_at', date: I18n.l(car.created_at.to_date, format: :numeric)))
+      expect(response.body).to include(I18n.t('cars.show.updated_at', date: I18n.l(updated_at, format: :short)))
+
+      document = Nokogiri::HTML(response.body)
+      expect(document.css('.car-details-timestamp').size).to eq(2)
     end
 
     it "does not show another user's car" do

@@ -18,7 +18,7 @@ class CollectionExportsController < ApplicationController
           locals: { export: @export, format_type: format_type }
         )
       end
-      format.html { redirect_to cars_path, notice: 'Exportação iniciada.' }
+      format.html { redirect_to cars_path, notice: t('collection_exports.messages.started') }
     end
   end
 
@@ -35,7 +35,7 @@ class CollectionExportsController < ApplicationController
           locals: { export: nil, format_type: format_type }
         )
       end
-      format.html { redirect_to cars_path, notice: 'Exportação removida.' }
+      format.html { redirect_to cars_path, notice: t('collection_exports.messages.removed') }
     end
   end
 

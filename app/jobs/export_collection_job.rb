@@ -10,13 +10,19 @@ class ExportCollectionJob < ApplicationJob
     export.update(status: 'processing')
 
     begin
+      generated_at = Time.current
+
       if export.format_type == 'csv'
         data = ExportCsvService.new(export.user.cars.order(created_at: :asc)).generate
 
         temp_file = Tempfile.new(["export_#{export.id}", '.csv'])
         temp_file.write("\xEF\xBB\xBF") # BOM para UTF-8 no Excel
       else
-        data = ExportPdfService.new(export.user, export.user.cars.order(created_at: :asc)).generate
+        data = ExportPdfService.new(
+          export.user,
+          export.user.cars.order(created_at: :asc),
+          generated_at: generated_at
+        ).generate
 
         temp_file = Tempfile.new(["export_#{export.id}", '.pdf'])
         temp_file.binmode

@@ -3,29 +3,54 @@
      data-export-refresh-format-value="<%= format_type %>"
      data-export-refresh-status-value="<%= export&.status %>">
   <% if export.nil? %>
-    <%= button_to collection_exports_path(format_type: format_type), method: :post, class: "btn btn-outline-secondary rounded-pill px-3 d-flex align-items-center gap-2", style: "height: 48px;", data: { turbo_stream: true } do %>
-      <i class="bi <%= format_type == 'csv' ? 'bi-filetype-csv' : 'bi-file-earmark-pdf' %>"></i> Gerar <%= format_type.upcase %>
+    <%= button_to collection_exports_path(format_type: format_type),
+                  method: :post,
+                  class: "btn btn-export-action rounded-pill px-3 d-flex align-items-center gap-2",
+                  data: { turbo_stream: true } do %>
+      <i class="bi <%= format_type == 'csv' ? 'bi-filetype-csv' : 'bi-file-earmark-pdf' %>"></i>
+      <%= t("collection_exports.actions.generate", file_format: format_type.upcase) %>
     <% end %>
   <% elsif export.status == 'pending' || export.status == 'processing' %>
-    <button class="btn btn-outline-secondary rounded-pill px-3 d-flex align-items-center gap-2" style="height: 48px;" disabled>
+    <button class="btn btn-export-processing rounded-pill px-3 d-flex align-items-center gap-2" disabled>
       <span class="spinner-border spinner-border-sm text-secondary" role="status" aria-hidden="true"></span>
-      Gerando <%= format_type.upcase %>...
+      <%= t("collection_exports.status.processing", file_format: format_type.upcase) %>
     </button>
   <% elsif export.status == 'completed' %>
-    <div class="btn-group shadow-sm rounded-pill" style="height: 48px;">
-      <%= link_to export.file.url, class: "btn btn-success rounded-start-pill px-3 d-flex align-items-center gap-2", style: "height: 48px;", target: "_blank", data: { turbo: false } do %>
-        <i class="bi bi-download"></i> Baixar <%= format_type.upcase %>
+    <div class="btn-group shadow-sm rounded-pill export-button-group">
+      <%= link_to export.file.url,
+                  class: "btn btn-success rounded-start-pill px-3 d-flex align-items-center gap-2 export-download-button",
+                  target: "_blank",
+                  data: { turbo: false } do %>
+        <i class="bi bi-download"></i>
+        <span class="d-flex flex-column align-items-start lh-sm">
+          <span class="export-download-label">
+            <%= t("collection_exports.actions.download", file_format: format_type.upcase) %>
+          </span>
+          <span class="export-download-meta">
+            <%= t("collection_exports.status.generated_at",
+                  date: I18n.l(export.updated_at, format: :export_timestamp)) %>
+          </span>
+        </span>
       <% end %>
-      <%= button_to collection_exports_path(format_type: format_type), method: :post, class: "btn btn-outline-success rounded-end-pill px-3 d-flex align-items-center border-start-0", style: "height: 48px;", data: { turbo_stream: true }, title: "Gerar Novamente" do %>
+      <%= button_to collection_exports_path(format_type: format_type),
+                    method: :post,
+                    class: "btn btn-outline-success rounded-end-pill px-3 d-flex align-items-center border-start-0",
+                    data: { turbo_stream: true },
+                    title: t("collection_exports.actions.regenerate") do %>
         <i class="bi bi-arrow-clockwise"></i>
       <% end %>
     </div>
   <% elsif export.status == 'failed' %>
-    <div class="btn-group shadow-sm rounded-pill" style="height: 48px;">
-      <button class="btn btn-outline-danger rounded-start-pill px-3 d-flex align-items-center gap-2" style="height: 48px;" disabled title="<%= export.error_message %>">
-        <i class="bi bi-exclamation-triangle"></i> Falhou
+    <div class="btn-group shadow-sm rounded-pill export-button-group">
+      <button class="btn btn-outline-danger rounded-start-pill px-3 d-flex align-items-center gap-2" disabled title="<%= export.error_message %>">
+        <i class="bi bi-exclamation-triangle"></i>
+        <%= t("collection_exports.status.failed") %>
       </button>
-      <%= button_to collection_exports_path(format_type: format_type), method: :post, class: "btn btn-outline-danger rounded-end-pill px-3 d-flex align-items-center border-start-0", style: "height: 48px;", data: { turbo_stream: true }, title: "Tentar Novamente" do %>
+      <%= button_to collection_exports_path(format_type: format_type),
+                    method: :post,
+                    class: "btn btn-outline-danger rounded-end-pill px-3 d-flex align-items-center border-start-0",
+                    data: { turbo_stream: true },
+                    title: t("collection_exports.actions.retry") do %>
         <i class="bi bi-arrow-clockwise"></i>
       <% end %>
     </div>

@@ -1,11 +1,14 @@
+<% modal_title = local_assigns[:title].presence %>
 <% modal_markup = capture do %>
-  <div class="modal fade <%= local_assigns[:modal_class] %>" id="turboModal" tabindex="-1" aria-labelledby="turboModalLabel" aria-hidden="true">
+  <div class="modal fade <%= local_assigns[:modal_class] %>" id="turboModal" tabindex="-1" <%= %(aria-labelledby="turboModalLabel").html_safe if modal_title %> aria-hidden="true">
     <div class="modal-dialog modal-<%= local_assigns.fetch(:size, "lg") %> modal-dialog-centered modal-dialog-scrollable <%= local_assigns[:dialog_class] %>">
       <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-        <div class="modal-header border-0 pb-0 px-3 px-md-4 pt-3 pt-md-4">
-          <h5 class="modal-title fw-bold" id="turboModalLabel">
-            <%= title %>
-          </h5>
+        <div class="modal-header border-0 pb-0 px-3 px-md-4 pt-3 pt-md-4 <%= "justify-content-end" unless modal_title %>">
+          <% if modal_title %>
+            <h5 class="modal-title fw-bold" id="turboModalLabel">
+              <%= modal_title %>
+            </h5>
+          <% end %>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="<%= t('actions.close') %>"></button>
         </div>
         <div class="modal-body <%= local_assigns.fetch(:body_class, "p-3 p-md-4") %>">

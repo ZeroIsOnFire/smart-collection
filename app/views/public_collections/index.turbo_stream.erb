@@ -16,7 +16,7 @@
   <%# Se for uma busca (primeira página) ou limpar busca, substituímos toda a grade %>
   <%= turbo_stream.update "cars_list_container" do %>
     <% if @cars.any? %>
-      <div id="cars_grid_inner" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4 mt-2">
+      <div id="cars_grid_inner" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4 mt-2 grid-view is-public">
         <%= render partial: "cars/car", collection: @cars, locals: { public: true, user: @user } %>
       </div>
       <% if @has_more %>
@@ -25,11 +25,11 @@
         </div>
       <% end %>
     <% else %>
-      <div class="text-center py-5">
-        <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-white shadow-sm mb-4" style="width: 80px; height: 80px;">
+      <div class="text-center py-5 public-empty-state">
+        <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-white shadow-sm mb-4 public-empty-icon">
           <i class="bi bi-search fs-2 text-muted opacity-50"></i>
         </div>
-        <h4 class="fw-bold mb-2">Nenhum veículo encontrado</h4>
+        <h4 class="fw-bold mb-2"><%= t("public_collections.index.empty_title") %></h4>
       </div>
     <% end %>
   <% end %>

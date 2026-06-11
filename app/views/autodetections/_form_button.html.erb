@@ -48,15 +48,15 @@
 
               <div class="row g-3">
                 <div class="col-6">
-                  <button type="button" class="btn btn-outline-primary w-100 py-3" data-action="click->autodetection-upload#openCamera">
+                  <button type="button" class="btn btn-premium rounded-pill w-100 py-3 d-flex align-items-center justify-content-center gap-2" data-action="click->autodetection-upload#openCamera">
                     <i class="bi bi-camera-fill d-block fs-4 mb-1"></i>
-                    <%= t('autodetections.form.camera') %>
+                    <span><%= t('autodetections.form.camera') %></span>
                   </button>
                 </div>
                 <div class="col-6">
-                  <button type="button" class="btn btn-outline-secondary w-100 py-3" data-action="click->autodetection-upload#selectFile">
+                  <button type="button" class="btn btn-soft-secondary rounded-pill w-100 py-3 d-flex align-items-center justify-content-center gap-2" data-action="click->autodetection-upload#selectFile">
                     <i class="bi bi-images d-block fs-4 mb-1"></i>
-                    <%= t('autodetections.form.gallery') %>
+                    <span><%= t('autodetections.form.gallery') %></span>
                   </button>
                 </div>
               </div>
@@ -71,8 +71,9 @@
                   </button>
                 </div>
               </div>
-              <button type="button" class="btn btn-sm btn-link text-muted w-100" data-action="click->autodetection-upload#closeCamera">
-                <%= t('autodetections.form.back_to_upload') %>
+              <button type="button" class="btn btn-sm btn-soft-secondary rounded-pill w-100 d-inline-flex align-items-center justify-content-center gap-2" data-action="click->autodetection-upload#closeCamera">
+                <i class="bi bi-arrow-left"></i>
+                <span><%= t('autodetections.form.back_to_upload') %></span>
               </button>
             </div>
 

@@ -6,10 +6,12 @@ en:
       default: "%Y-%m-%d"
       short: "%b %d"
       long: "%B %d, %Y"
+      numeric: "%m/%d/%Y"
   time:
     formats:
       default: "%a, %d %b %Y %H:%M:%S %z"
       short: "%m/%d/%Y %H:%M"
+      export_timestamp: "%m/%d/%Y %H:%M"
       long: "%B %d, %Y %H:%M"
     am: "am"
     pm: "pm"
@@ -156,6 +158,7 @@ en:
         brand: "Brand"
         year: "Manufacture Year"
         size: "Scale / Size"
+        color: "Color"
         tags: "Tags"
         observations: "Item Notes"
         photo: "Main Photo"
@@ -171,6 +174,7 @@ en:
         brand: "Brand"
         year: "Manufacture Year"
         size: "Scale / Size"
+        color: "Color"
         tags: "Tags"
         observations: "Item Notes"
         photo: "Main Photo"
@@ -201,6 +205,21 @@ en:
       other_than: "must be other than %{count}"
       odd: "must be odd"
 
+  collection_exports:
+    actions:
+      generate: "Generate %{file_format}"
+      download: "Download %{file_format}"
+      regenerate: "Generate again"
+      retry: "Try again"
+    status:
+      processing: "Generating %{file_format}..."
+      failed: "Failed"
+      generated_at: "Generated at: %{date}"
+      last_generated: "Last generated: %{date}"
+    messages:
+      started: "Export started."
+      removed: "Export removed."
+
   export_pdf:
     title: "COLLECTION CATALOG"
     user_placeholder: "User"
@@ -208,6 +227,25 @@ en:
     no_image: "No Image"
     no_photo: "No Photo"
     page_info: "Page %{page} of %{total}"
+
+  public_collections:
+    layout:
+      title: "%{name}'s Collection"
+      toggle_theme: "Toggle theme"
+      footer_text: "Organize, display and share your collection elegantly."
+      create_collection: "Create my free collection"
+    index:
+      title: "%{name}'s Collection"
+      subtitle: "Explore a careful curation of exclusive vehicles."
+      cataloged_count: "Cataloged vehicles"
+      search_placeholder: "Search %{name}'s collection..."
+      loading: "Loading..."
+      grid_view: "Grid"
+      list_view: "List"
+      empty_title: "No vehicles found"
+      empty_text: "Try searching for another term or clear the search."
+    show:
+      back_to_collection: "Back to collection"
 
   cars:
     index:
@@ -238,6 +276,7 @@ en:
       photo_processing: "Processing photo..."
     show:
       added_at: "Added on %{date}"
+      updated_at: "Updated on %{date}"
       collection: "My Collection"
       fallback_name: "—"
       no_photo: "No photo registered"
@@ -256,6 +295,7 @@ en:
       select_color: "Select color..."
       adjust_photo: "Adjust Photo"
       save_crop: "Save Crop"
+      create_another: "Save and add another"
       predominant_color: "Predominant Color"
       brand_placeholder: "Ex: Hot Wheels, Matchbox, Maisto"
       name_placeholder: "Ex: Porsche 911 Carrera, Ford Mustang GT, Ferrari LaFerrari"

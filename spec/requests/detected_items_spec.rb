@@ -11,6 +11,23 @@ RSpec.describe 'DetectedItems', type: :request do
     ActiveJob::Base.queue_adapter = :test
   end
 
+  describe 'GET /autodetections/:id' do
+    it 'renders consistent loading hooks for detected item submissions' do
+      @autodetection.update!(status: 'to_verify')
+
+      get autodetection_path(@autodetection)
+
+      document = Nokogiri::HTML(response.body)
+      frame = document.at_css("#detected_item_#{@detected_item.id}")
+      submit_button = document.at_css("button[data-detected-item-target='submit']")
+
+      expect(response).to have_http_status(:ok)
+      expect(frame['data-detected-item-loading-label-value']).to eq(I18n.t('autodetections.messages.saving'))
+      expect(response.body).to include('detected-item-loader-content')
+      expect(submit_button['data-loading-html']).to include(I18n.t('autodetections.messages.saving'))
+    end
+  end
+
   describe 'PATCH /update_selection' do
     let(:crop_params) do
       {

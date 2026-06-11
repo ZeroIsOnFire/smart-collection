@@ -48,7 +48,7 @@
 
       <%# Detalhe: se for público, usamos o path do share, senão o path normal %>
       <% target_path = local_assigns[:public] ? public_share_car_path(share_token: local_assigns[:user].share_token, id: car.id) : car_path(car) %>
-      <%= link_to target_path, class: "text-decoration-none", data: { turbo_frame: local_assigns[:public] ? "_top" : "modal" } do %>
+      <%= link_to target_path, class: "text-decoration-none", data: { turbo_frame: "modal" } do %>
         <!-- Foto -->
         <% if car.photo? %>
           <div class="car-photo-container position-relative" style="height: 180px; overflow: hidden;">

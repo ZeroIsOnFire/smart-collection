@@ -54,7 +54,7 @@ class CarsController < ApplicationController
 
   # GET /cars/new
   def new
-    @car = current_user.cars.build(default_new_car_attributes.merge(new_car_params))
+    @car = current_user.cars.build(new_car_params)
     render_form_modal(t('cars.modal.new_title')) if turbo_frame_request?
   end
 
@@ -97,7 +97,13 @@ class CarsController < ApplicationController
 
       respond_to do |format|
         format.html { redirect_to car_url(@car), notice: t('flash.created', resource: t('activerecord.models.car.one')) }
-        @detected_item ? render_detected_item_replacement(format) : format.turbo_stream { render_create_success }
+        if @detected_item
+          render_detected_item_replacement(format)
+        elsif create_another?
+          format.turbo_stream { render_create_another_success }
+        else
+          format.turbo_stream { render_create_success }
+        end
       end
     else
       respond_to do |format|
@@ -208,6 +214,21 @@ class CarsController < ApplicationController
                                                              locals: success_toast(:created))
   end
 
+  def render_create_another_success
+    created_car = @car
+    @car = current_user.cars.build(default_new_car_attributes)
+
+    render turbo_stream: turbo_stream.prepend('cars_grid_inner', partial: 'cars/car', locals: { car: created_car }) +
+                         turbo_stream.remove('cars_empty_state') +
+                         turbo_stream.update(
+                           'modal',
+                           partial: 'cars/form_modal',
+                           locals: { car: @car, title: t('cars.modal.new_title'), frame: false }
+                         ) +
+                         turbo_stream.append('flash_toasts', partial: 'shared/toast',
+                                                             locals: success_toast(:created))
+  end
+
   def render_update_success
     render turbo_stream: turbo_stream.replace("car_#{@car.id}", partial: 'cars/car', locals: { car: @car }) +
                          turbo_stream.update('modal', '') +
@@ -223,6 +244,10 @@ class CarsController < ApplicationController
 
   def success_toast(action)
     { type: :notice, message: t("flash.#{action}", resource: t('activerecord.models.car.one')) }
+  end
+
+  def create_another?
+    params[:commit_action] == 'create_another'
   end
 
   def set_car

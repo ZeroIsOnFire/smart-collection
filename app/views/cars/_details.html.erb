@@ -37,7 +37,7 @@
 </div>
 
 <% cache [car, modal ? :modal : :page] do %>
-  <div class="card premium-card car-details-card shadow-sm border-0 rounded-4 overflow-hidden mb-3 <%= "car-details-card-modal" if modal %>"
+  <div class="card premium-card car-details-card shadow-sm rounded-4 overflow-hidden mb-3 <%= "car-details-card-modal" if modal %>"
        data-controller="photo-lightbox">
     <% if car.photo? %>
       <button type="button"
@@ -71,7 +71,7 @@
         </div>
       </div>
     <% else %>
-      <div class="bg-light d-flex align-items-center justify-content-center text-muted" style="height: 240px;">
+      <div class="car-details-empty-photo bg-light d-flex align-items-center justify-content-center text-muted">
         <div class="text-center">
           <i class="bi bi-camera display-4 mb-2 opacity-30"></i>
           <p class="small mb-0"><%= t("cars.show.no_photo") %></p>
@@ -94,23 +94,11 @@
 
       <hr class="my-3">
 
-      <div class="row <%= modal ? "g-3" : "g-4" %> mb-3">
-        <div class="col-sm-6">
-          <div class="d-flex flex-column">
-            <small class="text-uppercase fw-semibold text-muted tracking-wide mb-1"><%= t("activerecord.attributes.car.brand") %></small>
-            <span class="fs-6 fw-medium"><%= car.brand.presence || t("cars.show.fallback_name") %></span>
-          </div>
-        </div>
+      <div class="row <%= modal ? "g-3" : "g-4" %> mb-3 car-details-stats">
         <div class="col-sm-6">
           <div class="d-flex flex-column">
             <small class="text-uppercase fw-semibold text-muted tracking-wide mb-1"><%= t("activerecord.attributes.car.size") %></small>
             <span class="fs-6 fw-medium"><%= car.size.presence || t("cars.show.fallback_name") %></span>
-          </div>
-        </div>
-        <div class="col-sm-6">
-          <div class="d-flex flex-column">
-            <small class="text-uppercase fw-semibold text-muted tracking-wide mb-1"><%= t("activerecord.attributes.car.year") %></small>
-            <span class="fs-6 fw-medium"><%= car.year.presence || t("cars.show.fallback_name") %></span>
           </div>
         </div>
         <div class="col-sm-6">
@@ -127,14 +115,20 @@
         <div class="col-12">
           <div class="d-flex flex-column">
             <small class="text-uppercase fw-semibold text-muted tracking-wide mb-1"><%= t("activerecord.attributes.car.observations") %></small>
-            <p class="mb-0 text-dark" style="line-height: 1.7;"><%= car.observations.presence || t("cars.show.fallback_name") %></p>
+            <p class="mb-0 text-dark car-details-observations"><%= car.observations.presence || t("cars.show.fallback_name") %></p>
           </div>
         </div>
       </div>
 
-      <div class="text-muted small">
-        <i class="bi bi-clock me-1"></i>
-        <%= t("cars.show.added_at", date: l(car.created_at.to_date)) %>
+      <div class="car-details-timestamps text-muted small border-top pt-3 mt-4">
+        <div class="car-details-timestamp">
+          <i class="bi bi-clock"></i>
+          <span><%= t("cars.show.added_at", date: l(car.created_at.to_date, format: :numeric)) %></span>
+        </div>
+        <div class="car-details-timestamp">
+          <i class="bi bi-arrow-repeat"></i>
+          <span><%= t("cars.show.updated_at", date: l(car.updated_at, format: :short)) %></span>
+        </div>
       </div>
     </div>
   </div>

@@ -7,10 +7,12 @@ pt-BR:
       default: "%d/%m/%Y"
       short: "%d %b"
       long: "%d de %B de %Y"
+      numeric: "%d/%m/%Y"
   time:
     formats:
       default: "%a, %d de %b de %Y, %H:%M:%S %z"
       short: "%d/%m/%Y às %H:%M"
+      export_timestamp: "%d/%m/%Y %H:%M"
       long: "%d de %B de %Y às %H:%M"
     am: "am"
     pm: "pm"
@@ -214,6 +216,22 @@ pt-BR:
       less_than_or_equal_to: "deve ser menor ou igual a %{count}"
       other_than: "deve ser diferente de %{count}"
       odd: "deve ser ímpar"
+
+  collection_exports:
+    actions:
+      generate: "Gerar %{file_format}"
+      download: "Baixar %{file_format}"
+      regenerate: "Gerar novamente"
+      retry: "Tentar novamente"
+    status:
+      processing: "Gerando %{file_format}..."
+      failed: "Falhou"
+      generated_at: "Gerado em: %{date}"
+      last_generated: "Última geração: %{date}"
+    messages:
+      started: "Exportação iniciada."
+      removed: "Exportação removida."
+
   # ── Exportação PDF ─────────────────────────────────────
   export_pdf:
     title: "CATÁLOGO DE COLEÇÃO"
@@ -222,6 +240,25 @@ pt-BR:
     no_image: "Sem Imagem"
     no_photo: "Sem Foto"
     page_info: "Página %{page} de %{total}"
+
+  public_collections:
+    layout:
+      title: "Coleção de %{name}"
+      toggle_theme: "Alternar tema"
+      footer_text: "Organize, exiba e compartilhe seu acervo de forma elegante."
+      create_collection: "Criar minha coleção grátis"
+    index:
+      title: "Coleção de %{name}"
+      subtitle: "Explore uma cuidadosa curadoria de veículos exclusivos."
+      cataloged_count: "Veículos catalogados"
+      search_placeholder: "Buscar na coleção de %{name}..."
+      loading: "Carregando..."
+      grid_view: "Grade"
+      list_view: "Lista"
+      empty_title: "Nenhum veículo encontrado"
+      empty_text: "Tente buscar por outro termo ou limpe a pesquisa."
+    show:
+      back_to_collection: "Voltar para a coleção"
 
   # ── Carros ─────────────────────────────────────────────
   cars:
@@ -253,6 +290,7 @@ pt-BR:
       photo_processing: "Processando foto..."
     show:
       added_at: "Adicionado em %{date}"
+      updated_at: "Atualizado em %{date}"
       collection: "Minha Coleção"
       fallback_name: "—"
       no_photo: "Sem foto cadastrada"
@@ -271,6 +309,7 @@ pt-BR:
       select_color: "Selecione a cor..."
       adjust_photo: "Ajustar Foto"
       save_crop: "Salvar Recorte"
+      create_another: "Salvar e adicionar outro"
       predominant_color: "Cor Predominante"
       brand_placeholder: "Ex: Hot Wheels, Matchbox, Maisto"
       name_placeholder: "Ex: Porsche 911 Carrera, Ford Mustang GT, Ferrari LaFerrari"
