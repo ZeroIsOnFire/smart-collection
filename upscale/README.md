@@ -21,6 +21,8 @@ O runtime e definido pelo Dockerfile usado pelo servico `upscale-service`.
 
 O `Dockerfile.amd` esta fixado em `rocm/pytorch:rocm6.4.2_ubuntu24.04_py3.12_pytorch_release_2.6.0`, que foi a combinacao validada no WSL2 com AMD.
 
+> **Aviso de tamanho no Windows/WSL2:** o caminho AMD/ROCm usa uma imagem base muito grande. Em ambientes Windows com WSL2, o build/pull e as camadas intermediarias podem consumir perto de **90 GB**. Planeje espaco em disco antes de testar esse runtime e prefira `Dockerfile.cpu` em maquinas com armazenamento limitado.
+
 ## Modelos compativeis
 
 Os runtimes GPU (`Dockerfile.amd` e `Dockerfile.nvidia`) usam a arquitetura `RRDBNet` 4x do Real-ESRGAN:
