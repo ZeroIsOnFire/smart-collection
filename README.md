@@ -1,56 +1,74 @@
-# Smart Collection Catalog (Serviço de Registro de Coleções)
+# Smart Collection Catalog
 
-O **Smart Collection Catalog** é um serviço web premium para registro e gerenciamento de coleções variadas (focado inicialmente em miniaturas de carros). O sistema permite o cadastro manual ou automatizado através de inteligência artificial local com YOLO.
+[Leia em portugues](README.pt-BR.md)
 
-## 🚀 Tecnologias
+Smart Collection Catalog is a premium Rails service for registering and managing private collections, initially focused on die-cast and miniature cars. It supports manual item registration, local AI-assisted photo preparation, YOLO-based autodetection, secure public sharing, and PDF/CSV exports.
+
+## Technologies
 
 - **Backend**: Ruby on Rails 7.1+
-- **Banco de Dados**: MongoDB 7 (via Mongoid)
-- **Frontend**: Hotwire (Turbo + Stimulus) + Bootstrap 5
-- **Real-time**: ActionCable (via Redis)
-- **Mensageria**: Sidekiq
-- **IA/Visão**: YOLO11s local
-- **Infraestrutura**: Docker + Docker Compose
+- **Database**: MongoDB 7 with Mongoid
+- **Authentication**: Devise
+- **Frontend**: Hotwire (Turbo + Stimulus) and Bootstrap 5
+- **Realtime**: Action Cable through Redis
+- **Background jobs**: Sidekiq
+- **Local AI**: YOLO11s detection and Real-ESRGAN image upscaling
+- **Infrastructure**: Docker and Docker Compose
 
-## 🛠️ Configuração e Instalação
+## Setup
 
-### Pré-requisitos
-- Docker e Docker Compose instalados.
+### Requirements
 
-### Passo a Passo
+- Docker and Docker Compose
 
-1. **Clone o repositório**:
+### Installation
+
+1. Clone the repository:
+
    ```bash
    git clone <repo-url>
    cd smart-collection
    ```
 
-2. **Configuração de Ambiente**:
-   Crie um arquivo `.env` na raiz do projeto (use o `.env.example` como base):
+2. Create the environment file from the template:
+
    ```bash
-   REDIS_URL=redis://redis:6379/1
+   cp .env.example .env
    ```
 
-3. **Suba os containers**:
+3. Start the containers:
+
    ```bash
-   docker-compose up -d --build
+   docker compose up -d --build
    ```
 
-4. **Preparação do Banco**:
+4. Seed the database:
+
    ```bash
-   docker-compose exec web bin/rails db:seed
+   docker compose exec web bin/rails db:seed
    ```
 
-5. **Acesse a aplicação**:
-   Abra `http://localhost:3000` no seu navegador.
+5. Open the application:
 
-## 🧠 Funcionalidades Principais
+   ```text
+   http://localhost:3000
+   ```
 
-- **Autodetecção via IA**: Faça o upload de uma foto com várias miniaturas; a IA irá detectá-las, recortá-las e gerar uma fila de verificação para você catalogar tudo em segundos.
-- **Gestão de Acervo**: Controle marca, nome, ano, escala e cor de cada item.
-- **Sincronização em Tempo Real**: Status de processamento e atualizações de interface via Turbo Streams.
-- **Página de Exibição Pública**: Compartilhe sua coleção através de um link público elegante com busca integrada e rolagem infinita.
-- **Design Premium**: Interface moderna com modo lista/grade, animações suaves e foco na usabilidade.
+## Locale
+
+The application ships with Portuguese (`pt-BR`) and English (`en`) locales. Portuguese is currently the default locale in `config/initializers/locale.rb`.
+
+To use the system in English during development, open pages with `?locale=en` when the controller flow supports locale switching, or set the default locale to `:en` in `config/initializers/locale.rb` for an English-first local environment.
+
+## Main Features
+
+- **Private collections by default**: user data remains scoped to the authenticated owner.
+- **AI autodetection**: upload a photo with multiple items and let local YOLO detect, crop, and queue items for review.
+- **Collection management**: track brand, name, year, scale, color, photos, and metadata for each item.
+- **Image preparation**: optional local upscaling prepares photos for final storage and autodetection workflows.
+- **Realtime feedback**: processing states and interface updates use Turbo Streams.
+- **Secure public sharing**: collections can be shared through an explicit public token only when sharing is enabled.
+- **Exports**: generate PDF and CSV reports from the collection.
 
 ## Microservices
 
@@ -61,13 +79,16 @@ The project includes local AI microservices that run through Docker Compose:
 
 Image preparation thresholds are configured in `.env` with `IMAGE_UPSCALE_DEFAULT_MINIMUM_SIDE` for regular item photos and `AUTODETECTION_MINIMUM_SIDE` for autodetection photos.
 
-## 🧪 Testes
+## Tests
 
-Para rodar a suite de testes (RSpec):
+Run the Rails test suite through the safe wrapper:
+
 ```bash
-docker-compose exec web bin/safe_rspec
+docker compose exec web bin/safe_rspec
 ```
 
-## ⚖️ Licença
+The wrapper validates that the test environment is active before running RSpec.
 
-Este projeto é de uso privado e segue as diretrizes estabelecidas no documento `AGENTS.md`.
+## License
+
+This is a private-use project. Follow the repository rules in [`AGENTS.md`](AGENTS.md).
