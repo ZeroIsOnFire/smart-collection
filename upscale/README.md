@@ -18,7 +18,7 @@ O runtime e definido pelo Dockerfile usado pelo servico `upscale-service`.
 | `Dockerfile.cpu` | CPU | `realesr-general-x4v3.pth` |
 | `Dockerfile.nvidia` | NVIDIA/CUDA | `4x_NMKD-Siax_200k.pth` |
 | `Dockerfile.amd` | AMD/ROCm | `4x_NMKD-Siax_200k.pth` |
-| `Dockerfile.vulkan` | Vulkan/ncnn experimental | modelo ncnn montado pelo usuario |
+| `Dockerfile.vulkan` | Vulkan/ncnn experimental | `realesrgan-x4plus` |
 
 O `Dockerfile.amd` esta fixado em `rocm/pytorch:rocm6.4.2_ubuntu24.04_py3.12_pytorch_release_2.6.0`, que foi a combinacao validada no WSL2 com AMD.
 
@@ -34,17 +34,7 @@ Nao ha divisao entre `Dockerfile.amd` para Linux e Windows porque ambos continua
 
 `Dockerfile.vulkan` oferece uma alternativa experimental baseada em `Real-ESRGAN-ncnn-vulkan`. Ela usa `UPSCALE_RUNTIME=vulkan`, chama o binario ncnn por arquivos temporarios e preserva o fallback Lanczos se a execucao falhar.
 
-Esse caminho pode ser uma opcao cross-vendor para AMD, NVIDIA e Intel em hosts Linux com Vulkan funcional, mas nao substitui os runtimes PyTorch atuais. As releases Linux upstream do binario nao incluem modelos; monte ou copie arquivos ncnn `.param` e `.bin` compativeis em `VULKAN_MODEL_DIR` e defina `VULKAN_MODEL_NAME`.
-
-Exemplo de montagem local:
-
-```yaml
-upscale-service:
-  volumes:
-    - ./upscale/models/realesrgan-ncnn-vulkan:/app/models/realesrgan-ncnn-vulkan:ro
-  environment:
-    - VULKAN_MODEL_NAME=realesrgan-x4plus
-```
+Esse caminho pode ser uma opcao cross-vendor para AMD, NVIDIA e Intel em hosts Linux com Vulkan funcional, mas nao substitui os runtimes PyTorch atuais. O Dockerfile baixa o pacote oficial `realesrgan-ncnn-vulkan-20220424-ubuntu.zip` da release `v0.2.5.0` do `xinntao/Real-ESRGAN`, que ja inclui o binario e os modelos ncnn.
 
 A saida pode diferir do modelo `4x_NMKD-Siax_200k.pth` usado nos runtimes NVIDIA/AMD.
 

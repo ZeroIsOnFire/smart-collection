@@ -15,7 +15,7 @@ Microservico local para upscale inteligente de imagens com Real-ESRGAN e fallbac
   - CPU baixa `realesr-general-x4v3.pth`
   - NVIDIA baixa somente `4x_NMKD-Siax_200k.pth`
   - AMD baixa somente `4x_NMKD-Siax_200k.pth`
-  - Vulkan exige modelos ncnn `.param` e `.bin` montados ou copiados para `VULKAN_MODEL_DIR`
+  - Vulkan baixa o pacote oficial `realesrgan-ncnn-vulkan-20220424-ubuntu.zip`, com binario e modelos ncnn
 
 ## Contrato HTTP
 - `GET /health`: retorna status, runtime ativo, modelo ativo e parametros de tier/denoise.
@@ -33,11 +33,11 @@ O runtime e definido pela imagem Docker.
 | `Dockerfile.cpu` | `cpu` | `realesr-general-x4v3.pth` |
 | `Dockerfile.nvidia` | `nvidia` | `4x_NMKD-Siax_200k.pth` |
 | `Dockerfile.amd` | `amd` | `4x_NMKD-Siax_200k.pth` |
-| `Dockerfile.vulkan` | `vulkan` | modelo ncnn montado pelo usuario |
+| `Dockerfile.vulkan` | `vulkan` | `realesrgan-x4plus` |
 
 Nao reintroduza modelos antigos nem baixe pesos que nao pertencam ao Dockerfile escolhido.
 Nao divida `Dockerfile.amd` entre Windows e Linux sem uma alternativa ROCm comprovadamente mais leve; o caminho validado continua sendo a imagem ROCm/PyTorch. Para AMD, prefira Linux nativo com ROCm quando possivel ou `Dockerfile.cpu` quando o tamanho/compatibilidade forem prioridade.
-O runtime Vulkan e experimental, opt-in, e deve manter fallback Lanczos em qualquer falha do binario ncnn. As releases Linux upstream do binario nao incluem modelos; documente montagem/copia dos `.param` e `.bin` em vez de assumir modelo embutido.
+O runtime Vulkan e experimental, opt-in, e deve manter fallback Lanczos em qualquer falha do binario ncnn.
 
 ### Modelos Customizados
 Os runtimes GPU usam `RRDBNet(num_feat=64, num_block=23, num_grow_ch=32, scale=4)`.
