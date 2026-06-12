@@ -1,8 +1,8 @@
-# SCC YOLO Detection Service
+# SCC - Servico de Deteccao YOLO
 
 Microservico FastAPI responsavel pela deteccao local de veiculos e classificacao simples de cor para o fluxo de autodeteccao do Smart Collection Catalog.
 
-## Endpoints
+## Endpoints HTTP
 
 - `GET /health`: retorna status e modelo carregado.
 - `POST /detect`: recebe multipart `file` e retorna deteccoes com `label`, `score`, `vertices` normalizados e `color`.
@@ -11,14 +11,14 @@ Microservico FastAPI responsavel pela deteccao local de veiculos e classificacao
 
 Quando `YOLO_API_KEY` estiver configurada, envie o header `X-API-Key`.
 
-## Modelo
+## Modelo e deteccao
 
 - Modelo padrao: `yolo11s.pt`.
 - Pode ser alterado com `YOLO_MODEL`.
 - O servico usa classes de veiculos do COCO (`1..8`) para deteccao/classificacao.
 - Coordenadas retornam em vertices normalizados (`0.0` a `1.0`) no formato esperado pelo Rails.
 
-## Docker
+## Docker Compose
 
 O servico e construido a partir de `yolo/Dockerfile` e roda internamente na rede Docker. Ele nao precisa expor porta para o host.
 
@@ -46,7 +46,7 @@ Ver logs:
 docker compose logs --tail=80 yolo-service
 ```
 
-## Variaveis
+## Variaveis de ambiente
 
 - `YOLO_API_KEY`: chave opcional exigida no header `X-API-Key`.
 - `YOLO_MODEL`: caminho/nome do modelo; padrao `yolo11s.pt`.
@@ -63,7 +63,7 @@ A cor nao usa um modelo adicional. A classe `ColorDetector`:
 - aplica K-Means;
 - classifica em nomes simples como `Vermelho`, `Azul`, `Preto`, `Branco`, `Prata`, `Cinza`, `Dourado`, etc.
 
-## Gotchas
+## Cuidados
 
 - O monkeypatch de `torch.load(weights_only=False)` precisa acontecer antes de importar `ultralytics`, por causa do PyTorch 2.6+.
 - O container deve rodar com `ULTRALYTICS_OFFLINE=True`.
@@ -81,4 +81,3 @@ curl -H "X-API-Key: $YOLO_API_KEY" \
 ```
 
 Dentro do Compose, prefira chamar o host interno `http://yolo-service:8000` a partir dos containers Rails/Sidekiq.
-

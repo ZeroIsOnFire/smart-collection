@@ -1,4 +1,4 @@
-# SCC Image Upscale Service
+# SCC - Servico de Upscale de Imagens
 
 Microservico FastAPI usado pelo Rails para preparar fotos antes do salvamento final e antes da autodeteccao. O endpoint principal recebe uma imagem e devolve um JPEG com proporcao preservada e lado minimo garantido.
 
@@ -20,6 +20,26 @@ O runtime e definido pelo Dockerfile usado pelo servico `upscale-service`.
 | `Dockerfile.amd` | AMD/ROCm | `4x_NMKD-Siax_200k.pth` |
 | `Dockerfile.vulkan` | Vulkan/ncnn experimental | `realesrgan-x4plus` |
 
+## Recomendacao atual
+
+Para desenvolvimento local no Windows/Docker Desktop, use `Dockerfile.cpu`. O runtime Vulkan sobe nesse ambiente, mas nao recebe uma GPU real dentro do container; ele enxerga `llvmpipe`, que e Vulkan por CPU.
+
+Diagnostico observado no container:
+
+```text
+deviceType = PHYSICAL_DEVICE_TYPE_CPU
+deviceName = llvmpipe (LLVM 19.1.7, 256 bits)
+driverName = llvmpipe
+```
+
+Tambem foi verificado que o container nao recebe `/dev/dri` nem `/dev/dxg`. No host WSL existe `/dev/dxg`, mas ele nao chega ao container do Docker Desktop neste setup. Por isso, Vulkan no Docker Desktop/Windows nao deve ser tratado como aceleracao por GPU neste projeto.
+
+Opcoes recomendadas:
+
+- **CPU**: melhor padrao local quando compatibilidade e previsibilidade importam.
+- **AMD/ROCm no WSL2 validado**: melhor opcao com GPU AMD neste ambiente, apesar da imagem grande.
+- **Vulkan em Linux nativo**: candidato experimental quando o container receber `/dev/dri` e `vulkaninfo` listar uma GPU fisica.
+
 O `Dockerfile.amd` esta fixado em `rocm/pytorch:rocm6.4.2_ubuntu24.04_py3.12_pytorch_release_2.6.0`, que foi a combinacao validada no WSL2 com AMD.
 
 > **Aviso de tamanho no Windows/WSL2:** o caminho AMD/ROCm usa uma imagem base muito grande. Em ambientes Windows com WSL2, o build/pull e as camadas intermediarias podem consumir perto de **90 GB**. Planeje espaco em disco antes de testar esse runtime e prefira `Dockerfile.cpu` em maquinas com armazenamento limitado.
@@ -38,7 +58,7 @@ Esse caminho pode ser uma opcao cross-vendor para AMD, NVIDIA e Intel em hosts L
 
 A saida pode diferir do modelo `4x_NMKD-Siax_200k.pth` usado nos runtimes NVIDIA/AMD.
 
-No Windows, o binario upstream nativo pode ser avaliado fora do Docker. Docker com GPU/Vulkan em Windows/WSL2 nao e um caminho validado neste projeto; para container, prefira Linux com `/dev/dri`.
+No Windows, o binario upstream nativo pode ser avaliado fora do Docker. Docker com GPU/Vulkan em Windows/WSL2 nao e um caminho validado neste projeto; para container com GPU Vulkan real, prefira Linux nativo com `/dev/dri`.
 
 ## Modelos compativeis
 
@@ -182,7 +202,7 @@ Resultado esperado:
 
 O aviso `Can't initialize amdsmi - Error code: 34` pode aparecer no WSL2; ele nao impediu o PyTorch de usar a GPU no ambiente validado.
 
-## Gotchas
+## Cuidados
 
 - Mantenha o monkeypatch de `torch.load(weights_only=False)` antes de importar Real-ESRGAN.
 - Mantenha o shim `torchvision.transforms.functional_tensor` para compatibilidade do `basicsr`.
