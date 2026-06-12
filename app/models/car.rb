@@ -13,6 +13,8 @@ class Car
   field :color, type: String
   field :tags, type: Array, default: []
   field :detected_via_ai, type: Boolean, default: false
+  field :skip_upscaler, type: Boolean, default: false
+  field :photo_upscale_strategy, type: String
 
   # Atributo para persistência do CarrierWave entre falhas de validação
   field :photo_cache, type: String
@@ -105,6 +107,10 @@ class Car
       [photo_processing_crop_x, photo_processing_crop_y, photo_processing_crop_w, photo_processing_crop_h].all?(&:present?) &&
       photo_processing_crop_w.positive? &&
       photo_processing_crop_h.positive?
+  end
+
+  def photo_upscaled_by_ai?
+    photo_upscale_strategy == 'ai'
   end
 
   private

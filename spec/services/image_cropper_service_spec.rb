@@ -56,6 +56,30 @@ RSpec.describe ImageCropperService do
       FileUtils.rm_f(result.path) if result&.path
     end
 
+    it 'does not resize a small crop when AI and local fallback are disabled' do
+      narrow_vertices = [
+        { x: 0.1, y: 0.1 },
+        { x: 0.2, y: 0.1 },
+        { x: 0.2, y: 0.2 },
+        { x: 0.1, y: 0.2 }
+      ]
+
+      expect(ImageUpscalerService).to receive(:upscale_if_needed)
+        .with(photo_path, minimum_side: ImageUpscalerService.default_minimum_side, use_ai: false, local_fallback: false)
+        .ordered.and_return(nil)
+      expect(ImageUpscalerService).to receive(:upscale_if_needed)
+        .with(kind_of(String), minimum_side: ImageUpscalerService.default_minimum_side, use_ai: false, local_fallback: false)
+        .ordered.and_return(nil)
+
+      result = described_class.crop(photo_path, narrow_vertices, upscale: { use_ai: false, local_fallback: false })
+      final_image = MiniMagick::Image.open(result.path)
+
+      expect([final_image.width, final_image.height].min).to be < 360
+    ensure
+      result&.close
+      FileUtils.rm_f(result.path) if result&.path
+    end
+
     it 'passes disabled AI and local fallback flags to the upscaler' do
       expect(ImageUpscalerService).to receive(:upscale_if_needed)
         .with(photo_path, minimum_side: ImageUpscalerService.default_minimum_side, use_ai: false, local_fallback: true)

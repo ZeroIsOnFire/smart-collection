@@ -77,7 +77,7 @@ O projeto inclui microservicos locais de IA executados pelo Docker Compose:
 - `yolo-service`: deteccao local YOLO11s e classificacao simples de cor para fluxos de autodeteccao. Veja [`yolo/README.md`](yolo/README.md).
 - `upscale-service`: servico local de upscale/preparacao de imagem usado por uploads de itens e autodeteccao. O setup Docker padrao usa `upscale/Dockerfile.cpu`; veja [`upscale/README.md`](upscale/README.md).
 
-Os limites de preparacao de imagem sao configurados no `.env` com `IMAGE_UPSCALE_DEFAULT_MINIMUM_SIDE` para fotos comuns de itens e `AUTODETECTION_MINIMUM_SIDE` para fotos de autodeteccao.
+Os limites de preparacao de imagem sao configurados no `.env` com `IMAGE_UPSCALE_DEFAULT_MINIMUM_SIDE` para fotos comuns de itens e `AUTODETECTION_MINIMUM_SIDE` para fotos de autodeteccao. O padrao da autodeteccao e 800 px para reduzir o custo antes do YOLO.
 
 ## Testes
 

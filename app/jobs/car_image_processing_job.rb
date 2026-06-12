@@ -34,6 +34,9 @@ class CarImageProcessingJob < ApplicationJob
   end
 
   def apply_upscale(car)
+    clear_photo_upscale_strategy(car)
+    return nil if car.skip_upscaler?
+
     upscaled_file = ImageUpscalerService.upscale_if_needed(
       car.photo.path,
       minimum_side: ImageUpscalerService.default_minimum_side,
@@ -47,12 +50,14 @@ class CarImageProcessingJob < ApplicationJob
   end
 
   def apply_crop(car, crop_params)
+    clear_photo_upscale_strategy(car)
+
     cropped_file = ImageCropperService.crop(
       car.photo.path,
       crop_vertices(crop_params),
       padding: 0,
       minimum_side: ImageUpscalerService.default_minimum_side,
-      upscale: { use_ai: car.user.ai_upscaling_enabled?, local_fallback: false }
+      upscale: { use_ai: upscaler_enabled_for?(car), local_fallback: false }
     )
 
     track_upscaled_photo(cropped_file)
@@ -70,6 +75,15 @@ class CarImageProcessingJob < ApplicationJob
     car.photo = file
     car.photo.store!
     car.write_attribute(:photo_filename, car.photo.identifier)
+    car.photo_upscale_strategy = file.upscale_strategy.to_s if file.respond_to?(:upscale_strategy)
+  end
+
+  def clear_photo_upscale_strategy(car)
+    car.photo_upscale_strategy = nil
+  end
+
+  def upscaler_enabled_for?(car)
+    car.user.ai_upscaling_enabled? && !car.skip_upscaler?
   end
 
   def classify_color(car)

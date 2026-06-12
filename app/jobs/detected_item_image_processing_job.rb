@@ -37,8 +37,14 @@ class DetectedItemImageProcessingJob < ApplicationJob
       detected_item.position_data['vertices'],
       padding: 0,
       minimum_side: ImageCropperService.default_minimum_side,
-      upscale: { use_ai: detected_item.autodetection.user.ai_upscaling_enabled?, local_fallback: true }
+      upscale: upscale_options(detected_item)
     )
+  end
+
+  def upscale_options(detected_item)
+    enabled = detected_item.autodetection.user.ai_upscaling_enabled?
+
+    { use_ai: enabled, local_fallback: enabled }
   end
 
   def classify(processed_file)

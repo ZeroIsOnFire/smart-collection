@@ -260,11 +260,12 @@ class CarsController < ApplicationController
 
   def car_params
     params.require(:car).permit(:name, :brand, :observations, :size, :year, :photo, :remove_photo,
-                                :remote_photo_url, :color, :crop_x, :crop_y, :crop_w, :crop_h, :photo_cache)
+                                :remote_photo_url, :color, :crop_x, :crop_y, :crop_w, :crop_h, :photo_cache,
+                                :skip_upscaler)
   end
 
   def new_car_params
-    params.fetch(:car, {}).permit(:name, :brand, :observations, :size, :year, :color)
+    params.fetch(:car, {}).permit(:name, :brand, :observations, :size, :year, :color, :skip_upscaler)
   end
 
   def default_new_car_attributes

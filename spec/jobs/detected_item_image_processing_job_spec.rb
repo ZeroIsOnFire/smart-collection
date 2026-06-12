@@ -78,7 +78,7 @@ RSpec.describe DetectedItemImageProcessingJob do
           anything,
           padding: 0,
           minimum_side: ImageCropperService.default_minimum_side,
-          upscale: { use_ai: false, local_fallback: true }
+          upscale: { use_ai: false, local_fallback: false }
         )
         .and_return(file)
       allow(YoloDetectionService).to receive(:classify).and_return({})

@@ -68,31 +68,16 @@
               <span class="badge bg-primary bg-opacity-10 text-primary fw-semibold fs-6 rounded-pill"><%= car.brand %></span>
             <% end %>
           </div>
-          <% if car.year? %>
-            <span class="badge bg-secondary rounded-pill fs-6 px-3 py-2"><i class="bi bi-calendar me-1"></i><%= car.year %></span>
-          <% end %>
         </div>
 
         <hr class="my-3">
 
+        <%= render "cars/metadata_badges",
+                   car: car,
+                   badge_class: "text-muted small d-flex flex-wrap gap-3 mb-3",
+                   item_class: "d-inline-flex align-items-center gap-1 text-dark" %>
+
         <div class="row <%= modal ? "g-3" : "g-4" %> mb-3 car-details-stats">
-          <div class="col-sm-6">
-            <div class="d-flex flex-column">
-              <small class="text-uppercase fw-semibold text-muted tracking-wide mb-1"><%= t("activerecord.attributes.car.size") %></small>
-              <span class="fs-6 fw-medium text-dark"><%= car.size.presence || t("cars.show.fallback_name") %></span>
-            </div>
-          </div>
-          <div class="col-sm-6">
-            <div class="d-flex flex-column">
-              <small class="text-uppercase fw-semibold text-muted tracking-wide mb-1"><%= t("activerecord.attributes.car.color") %></small>
-              <span class="fs-6 fw-medium d-flex align-items-center gap-2 text-dark">
-                <% if car.color? %>
-                  <span class="d-inline-block rounded-circle shadow-sm public-detail-color-dot" style="background-color:<%= Car::COLORS[car.color] || '#ccc' %>;"></span>
-                <% end %>
-                <%= car.color.presence || t("cars.show.fallback_name") %>
-              </span>
-            </div>
-          </div>
           <div class="col-12">
             <div class="d-flex flex-column">
               <small class="text-uppercase fw-semibold text-muted tracking-wide mb-1"><%= t("activerecord.attributes.car.observations") %></small>

@@ -162,6 +162,7 @@ en:
         tags: "Tags"
         observations: "Item Notes"
         photo: "Main Photo"
+        skip_upscaler: "Do not use upscaler for this record"
 
   mongoid:
     models:
@@ -178,6 +179,7 @@ en:
         tags: "Tags"
         observations: "Item Notes"
         photo: "Main Photo"
+        skip_upscaler: "Do not use upscaler for this record"
 
   errors:
     format: "%{attribute} %{message}"
@@ -281,6 +283,8 @@ en:
       fallback_name: "—"
       no_photo: "No photo registered"
       view_full_photo: "View full photo"
+      photo_upscaled_by_ai: "AI"
+      photo_upscaled_by_ai_tooltip: "Photo enhanced by AI"
     form:
       main_photo: "Main Photo"
       upload_prompt: "Click or drag image here"
@@ -301,6 +305,7 @@ en:
       name_placeholder: "Ex: Porsche 911 Carrera, Ford Mustang GT, Ferrari LaFerrari"
       year_placeholder: "Ex: 1998"
       observations_placeholder: "Write details about the condition..."
+      skip_upscaler: "Do not use upscaler for this record"
 
   autodetections:
     title: "Photo Autodetection"

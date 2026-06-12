@@ -71,6 +71,10 @@
             <%= render "shared/ai_upscaling_notice",
                        translation_key: "cars.form.ai_upscaling_notice",
                        minimum_side: ImageUpscalerService.default_minimum_side %>
+            <div class="form-check form-switch d-inline-flex align-items-center gap-2 mt-3">
+              <%= f.check_box :skip_upscaler, class: "form-check-input", role: "switch" %>
+              <%= f.label :skip_upscaler, t("cars.form.skip_upscaler"), class: "form-check-label small text-muted" %>
+            </div>
           </div>
 
           <!-- Preview (hidden initially, shown after photo selected or existing) -->

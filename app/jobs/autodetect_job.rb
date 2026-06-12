@@ -30,7 +30,7 @@ class AutodetectJob < ApplicationJob
           autodetection.photo.path,
           data[:vertices],
           minimum_side: ImageCropperService.default_minimum_side,
-          upscale: { use_ai: autodetection.user.ai_upscaling_enabled?, local_fallback: true }
+          upscale: upscale_options(autodetection)
         )
 
         next unless cropped_file
@@ -61,10 +61,12 @@ class AutodetectJob < ApplicationJob
   private
 
   def prepare_photo_for_detection(autodetection)
+    return autodetection.photo.path unless autodetection.user.ai_upscaling_enabled?
+
     upscaled_file = ImageUpscalerService.upscale_if_needed(
       autodetection.photo.path,
       minimum_side: AutodetectionService.autodetection_minimum_side,
-      use_ai: autodetection.user.ai_upscaling_enabled?,
+      use_ai: true,
       local_fallback: true
     )
 
@@ -76,6 +78,12 @@ class AutodetectJob < ApplicationJob
     autodetection.photo.path
   ensure
     cleanup_tempfile(upscaled_file)
+  end
+
+  def upscale_options(autodetection)
+    enabled = autodetection.user.ai_upscaling_enabled?
+
+    { use_ai: enabled, local_fallback: enabled }
   end
 
   def cleanup_tempfile(tempfile)

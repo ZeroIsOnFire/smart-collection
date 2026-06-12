@@ -172,6 +172,7 @@ pt-BR:
         tags: "Tags"
         observations: "Observações do Item"
         photo: "Foto Principal"
+        skip_upscaler: "Não usar upscaler neste registro"
 
   # ── Mongoid ──────────────────────────────────────────
   mongoid:
@@ -189,6 +190,7 @@ pt-BR:
         tags: "Tags"
         observations: "Observações do Item"
         photo: "Foto Principal"
+        skip_upscaler: "Não usar upscaler neste registro"
 
   # ── Erros de Validação ─────────────────────────────────
   errors:
@@ -295,6 +297,8 @@ pt-BR:
       fallback_name: "—"
       no_photo: "Sem foto cadastrada"
       view_full_photo: "Ver foto completa"
+      photo_upscaled_by_ai: "IA"
+      photo_upscaled_by_ai_tooltip: "Foto melhorada por IA"
     form:
       main_photo: "Foto Principal"
       upload_prompt: "Clique ou arraste a imagem aqui"
@@ -315,6 +319,7 @@ pt-BR:
       name_placeholder: "Ex: Porsche 911 Carrera, Ford Mustang GT, Ferrari LaFerrari"
       year_placeholder: "Ex: 1998"
       observations_placeholder: "Escreva detalhes sobre o estado de conservação..."
+      skip_upscaler: "Não usar upscaler neste registro"
 
   # ── Autodetecção ───────────────────────────────────────
   autodetections:

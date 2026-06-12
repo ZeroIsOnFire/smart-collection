@@ -208,6 +208,15 @@ RSpec.describe 'Cars', type: :request do
       )
     end
 
+    it 'renders the per-record upscaler toggle' do
+      get new_car_path
+
+      document = Nokogiri::HTML(response.body)
+
+      expect(document.at_css('#car_skip_upscaler')).to be_present
+      expect(response.body).to include(I18n.t('cars.form.skip_upscaler'))
+    end
+
     it 'hides the AI upscaling notice when the user disables it' do
       user.update!(ai_upscaling_enabled: false)
       allow(ImageUpscalerService).to receive(:service_configured?).and_return(true)
@@ -257,6 +266,12 @@ RSpec.describe 'Cars', type: :request do
         end.to change(Car, :count).by(1)
 
         expect(Car.last.photo).to be_present
+      end
+
+      it 'persists the per-record upscaler preference' do
+        post cars_path, params: { car: valid_attributes.merge(skip_upscaler: '1') }
+
+        expect(Car.last.skip_upscaler).to be true
       end
 
       it 'prepends the created car and closes the modal with turbo stream' do
@@ -334,6 +349,7 @@ RSpec.describe 'Cars', type: :request do
     it 'renders the detail view inside the global modal frame' do
       updated_at = Time.zone.local(2026, 6, 11, 2, 22)
       car.update!(color: 'Azul', size: '1:64')
+      car.update!(photo_upscale_strategy: 'ai')
       car.set(updated_at: updated_at)
       car.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
       car.save!
@@ -364,6 +380,8 @@ RSpec.describe 'Cars', type: :request do
       expect(response.body).to include(I18n.t('activerecord.attributes.car.observations'))
       expect(response.body).to include('Azul')
       expect(response.body).to include('1:64')
+      expect(response.body).to include(I18n.t('cars.show.photo_upscaled_by_ai'))
+      expect(response.body).to include(I18n.t('cars.show.photo_upscaled_by_ai_tooltip'))
       expect(response.body).to include(I18n.l(car.created_at.to_date, format: :numeric))
       expect(response.body).to include(I18n.t('cars.show.updated_at', date: I18n.l(updated_at, format: :short)))
       expect(document.at_css('.public-detail-notes')).to be_present

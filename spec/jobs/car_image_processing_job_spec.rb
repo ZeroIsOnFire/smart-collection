@@ -63,6 +63,7 @@ RSpec.describe CarImageProcessingJob do
       expect do
         described_class.new.perform(user.id.to_s, car.id.to_s)
       end.to change { UsageMetric.values_for(['photos_upscaled_ai']).fetch('photos_upscaled_ai') }.from(0).to(1)
+      expect(Car.find(car.id).photo_upscale_strategy).to eq('ai')
     end
 
     it 'uses crop parameters when they are present' do
@@ -102,6 +103,42 @@ RSpec.describe CarImageProcessingJob do
       allow(YoloDetectionService).to receive(:classify_color).and_return(nil)
 
       described_class.new.perform(user.id.to_s, car.id.to_s)
+
+      expect(Car.find(car.id).photo_processing_status).to eq('completed')
+    end
+
+    it 'skips the upscaler for a car with the per-record flag enabled' do
+      car.update!(skip_upscaler: true)
+      attach_photo!(car)
+
+      expect(ImageUpscalerService).not_to receive(:upscale_if_needed)
+      allow(YoloDetectionService).to receive(:classify_color).and_return(nil)
+
+      described_class.new.perform(user.id.to_s, car.id.to_s)
+
+      processed_car = Car.find(car.id)
+      expect(processed_car.photo_processing_status).to eq('completed')
+      expect(processed_car.photo_upscale_strategy).to be_nil
+    end
+
+    it 'passes disabled AI to the cropper when the per-record flag is enabled' do
+      car.update!(skip_upscaler: true)
+      attach_photo!(car)
+      cropped_file = build_temp_image(width: 360, height: 360)
+      crop_params = { crop_x: '0.1', crop_y: '0.2', crop_w: '0.3', crop_h: '0.4' }
+
+      expect(ImageCropperService).to receive(:crop)
+        .with(
+          anything,
+          anything,
+          padding: 0,
+          minimum_side: ImageUpscalerService.default_minimum_side,
+          upscale: { use_ai: false, local_fallback: false }
+        )
+        .and_return(cropped_file)
+      allow(YoloDetectionService).to receive(:classify_color).and_return(nil)
+
+      described_class.new.perform(user.id.to_s, car.id.to_s, crop_params)
 
       expect(Car.find(car.id).photo_processing_status).to eq('completed')
     end

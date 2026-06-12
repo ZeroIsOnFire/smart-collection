@@ -77,7 +77,7 @@ The project includes local AI microservices that run through Docker Compose:
 - `yolo-service`: local YOLO11s detection and simple color classification for autodetection flows. See [`yolo/README.md`](yolo/README.md).
 - `upscale-service`: local image upscale/preparation service used by item uploads and autodetection. The default Docker setup uses `upscale/Dockerfile.cpu`; see [`upscale/README.md`](upscale/README.md).
 
-Image preparation thresholds are configured in `.env` with `IMAGE_UPSCALE_DEFAULT_MINIMUM_SIDE` for regular item photos and `AUTODETECTION_MINIMUM_SIDE` for autodetection photos.
+Image preparation thresholds are configured in `.env` with `IMAGE_UPSCALE_DEFAULT_MINIMUM_SIDE` for regular item photos and `AUTODETECTION_MINIMUM_SIDE` for autodetection photos. The autodetection default is 800 px to reduce pre-YOLO processing cost.
 
 ## Tests
 

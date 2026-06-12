@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class AutodetectionService
-  AUTODETECTION_MINIMUM_SIDE = 1080
+  AUTODETECTION_MINIMUM_SIDE = 800
   AUTODETECTION_MINIMUM_SIDE_ENV = 'AUTODETECTION_MINIMUM_SIDE'
   attr_reader :user
 
