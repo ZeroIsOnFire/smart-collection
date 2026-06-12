@@ -71,10 +71,6 @@
             <%= render "shared/ai_upscaling_notice",
                        translation_key: "cars.form.ai_upscaling_notice",
                        minimum_side: ImageUpscalerService.default_minimum_side %>
-            <div class="form-check form-switch d-inline-flex align-items-center gap-2 mt-3">
-              <%= f.check_box :skip_upscaler, class: "form-check-input", role: "switch" %>
-              <%= f.label :skip_upscaler, t("cars.form.skip_upscaler"), class: "form-check-label small text-muted" %>
-            </div>
           </div>
 
           <!-- Preview (hidden initially, shown after photo selected or existing) -->
@@ -105,6 +101,11 @@
             </div>
             <p class="text-muted small mt-3 mb-0"><%= t('cars.form.replace_button') %></p>
           </div>
+        </div>
+
+        <div class="car-upscaler-toggle form-check form-switch d-flex align-items-center gap-2 mt-3">
+          <%= f.check_box :skip_upscaler, class: "form-check-input flex-shrink-0", role: "switch" %>
+          <%= f.label :skip_upscaler, t("cars.form.skip_upscaler"), class: "form-check-label small fw-semibold" %>
         </div>
 
         <!-- Modal de Cropper -->
@@ -262,6 +263,24 @@
     background-color: var(--soft-secondary-bg) !important;
     border-color: var(--premium-indigo) !important;
     opacity: 0.8;
+  }
+  .car-upscaler-toggle {
+    background-color: var(--soft-secondary-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    color: var(--text-muted);
+    padding: 0.85rem 1rem;
+  }
+  .car-upscaler-toggle .form-check-input {
+    margin-left: 0;
+  }
+  .car-upscaler-toggle .form-check-input:not(:checked) {
+    background-color: var(--input-bg);
+    border-color: var(--border-color);
+  }
+  .car-upscaler-toggle .form-check-input:checked {
+    background-color: var(--premium-indigo);
+    border-color: var(--premium-indigo);
   }
 
   /* Cropper Customization */

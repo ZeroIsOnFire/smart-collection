@@ -214,6 +214,8 @@ RSpec.describe 'Cars', type: :request do
       document = Nokogiri::HTML(response.body)
 
       expect(document.at_css('#car_skip_upscaler')).to be_present
+      expect(document.at_css('.photo-dropzone #car_skip_upscaler')).to be_nil
+      expect(document.at_css('.car-upscaler-toggle #car_skip_upscaler')).to be_present
       expect(response.body).to include(I18n.t('cars.form.skip_upscaler'))
     end
 
