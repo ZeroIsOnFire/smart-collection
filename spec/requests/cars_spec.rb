@@ -303,6 +303,18 @@ RSpec.describe 'Cars', type: :request do
         expect(name_error.text.squish).to eq(I18n.t('errors.messages.blank'))
       end
 
+      it 'rejects non-numeric years' do
+        post cars_path, params: { car: valid_attributes.merge(year: 'abcd') }, as: :turbo_stream
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(response.body).to include(Car.human_attribute_name(:year))
+
+        document = Nokogiri::HTML.fragment(response.body)
+        year_error = document.at_css('.car_year .invalid-feedback')
+
+        expect(year_error.text.squish).to eq(I18n.t('errors.messages.not_a_number'))
+      end
+
       it 'persists the per-record upscaler preference' do
         post cars_path, params: { car: valid_attributes.merge(skip_upscaler: '1') }
 

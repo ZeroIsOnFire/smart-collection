@@ -186,7 +186,7 @@ class CarsController < ApplicationController
       render turbo_stream: turbo_stream.replace(
         "detected_item_#{@detected_item.id}",
         partial: 'detected_items/detected_item',
-        locals: { detected_item: @detected_item }
+        locals: { detected_item: @detected_item, car: @car }
       )
     end
   end

@@ -66,6 +66,26 @@ RSpec.describe 'DetectedItems', type: :request do
       expect(response.body).to include('replace')
       expect(response.body).to include("detected_item_#{@detected_item.id}")
     end
+
+    it 'shows validation errors and preserves invalid fields when adjustment submits form values' do
+      patch update_selection_detected_item_path(@detected_item),
+            params: crop_params.merge(name: '', year: 'abcd'),
+            headers: { 'Accept' => 'text/vnd.turbo-stream.html' }
+
+      expect(response).to have_http_status(:ok)
+      expect(@detected_item.reload.label).to be_present
+
+      document = Nokogiri::HTML.fragment(response.body)
+      name_input = document.at_css("#name_#{@detected_item.id}")
+      year_input = document.at_css("#year_#{@detected_item.id}")
+
+      expect(name_input['value']).to be_blank
+      expect(year_input['value']).to eq('abcd')
+      expect(document.css('.invalid-feedback').map { |node| node.text.squish }).to include(
+        I18n.t('errors.messages.blank'),
+        I18n.t('errors.messages.not_a_number')
+      )
+    end
   end
 
   describe 'POST /create' do
@@ -108,6 +128,28 @@ RSpec.describe 'DetectedItems', type: :request do
       expect(response.body).to include("detected_items_list_#{@autodetection.id}")
       expect(response.body).to include('local_toast_container')
       expect(response.body).to include(I18n.t('autodetections.messages.item_added'))
+    end
+  end
+
+  describe 'POST /cars from detected item' do
+    it 'shows validation errors and preserves blank name in the detected item form' do
+      post cars_path,
+           params: { detected_item_id: @detected_item.id, car: { name: '', year: 'abcd' } },
+           as: :turbo_stream
+
+      expect(response).to have_http_status(:ok)
+      expect(@detected_item.reload.status).to eq('pending')
+
+      document = Nokogiri::HTML.fragment(response.body)
+      name_input = document.at_css("#name_#{@detected_item.id}")
+      year_input = document.at_css("#year_#{@detected_item.id}")
+
+      expect(name_input['value']).to be_blank
+      expect(year_input['value']).to eq('abcd')
+      expect(document.css('.invalid-feedback').map { |node| node.text.squish }).to include(
+        I18n.t('errors.messages.blank'),
+        I18n.t('errors.messages.not_a_number')
+      )
     end
   end
 
