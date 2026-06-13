@@ -22,6 +22,15 @@ RSpec.describe 'Autodetections', type: :request do
       expect(response).to be_successful
     end
 
+    it 'persists the upscaler preference for the autodetection' do
+      post autodetections_path,
+           params: valid_params.deep_merge(autodetection: { skip_upscaler: '1' }),
+           as: :turbo_stream
+
+      expect(response).to be_successful
+      expect(Autodetection.last.skip_upscaler).to be true
+    end
+
     it 'shows validation errors below the photo field' do
       expect do
         post autodetections_path, params: { autodetection: {} }, as: :turbo_stream
@@ -41,6 +50,18 @@ RSpec.describe 'Autodetections', type: :request do
     it 'renders the show template' do
       get autodetection_path(autodetection)
       expect(response).to be_successful
+    end
+  end
+
+  describe 'GET /cars' do
+    it 'renders the upscaler preference in the autodetection form' do
+      get cars_path
+
+      document = Nokogiri::HTML(response.body)
+
+      expect(response).to be_successful
+      expect(document.at_css('#autodetection_skip_upscaler')).to be_present
+      expect(response.body).to include(I18n.t('autodetections.form.skip_upscaler'))
     end
   end
 

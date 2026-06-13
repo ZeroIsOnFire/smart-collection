@@ -11,7 +11,7 @@
     is_image_processing = detected_item.image_processing?
   %>
 
-  <% cache [detected_item, form_car.errors.details, form_car.attributes.slice('brand', 'name', 'color', 'year', 'size'), form_car.year_before_type_cast] do %>
+  <% cache [detected_item, form_car.errors.details, form_car.attributes.slice('brand', 'name', 'color', 'year', 'size', 'skip_upscaler'), form_car.year_before_type_cast] do %>
   <div class="card shadow-sm rounded-4 border-0 overflow-hidden position-relative detected-item-card <%= 'is-processed' if is_processed %>">
     <!-- Loading Overlay -->
     <div class="detected-item-loader">
@@ -140,6 +140,22 @@
                             error: field_error_message(form_car, :size),
                             input_html: { id: "size_#{detected_item.id}", class: "form-select bg-light border-0" },
                             label_html: { class: "text-secondary small text-uppercase tracking-wide", for: "size_#{detected_item.id}" } %>
+              </div>
+
+              <div class="col-12">
+                <% detected_item_skip_upscaler = has_form_errors ? form_car.skip_upscaler? : detected_item.skip_upscaler? %>
+                <div class="record-upscaler-toggle form-check form-switch">
+                  <%= hidden_field_tag "car[skip_upscaler]", "0", id: nil %>
+                  <%= check_box_tag "car[skip_upscaler]",
+                                    "1",
+                                    detected_item_skip_upscaler,
+                                    id: "skip_upscaler_#{detected_item.id}",
+                                    class: "form-check-input flex-shrink-0",
+                                    role: "switch" %>
+                  <%= label_tag "skip_upscaler_#{detected_item.id}",
+                                t("autodetections.detected_item.skip_upscaler"),
+                                class: "form-check-label small fw-semibold mb-0" %>
+                </div>
               </div>
             <% end %>
           <% end %>

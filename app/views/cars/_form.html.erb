@@ -112,7 +112,7 @@
           </div>
         </div>
 
-        <div class="car-upscaler-toggle form-check form-switch<%= ' d-none' if car.persisted? && car.photo? %> mt-3"
+        <div class="record-upscaler-toggle car-upscaler-toggle form-check form-switch<%= ' d-none' if car.persisted? && car.photo? %> mt-3"
              data-photo-upload-target="upscalerToggle">
           <%= f.check_box :skip_upscaler, class: "form-check-input flex-shrink-0", role: "switch" %>
           <%= f.label :skip_upscaler, t("cars.form.skip_upscaler"), class: "form-check-label small fw-semibold mb-0" %>

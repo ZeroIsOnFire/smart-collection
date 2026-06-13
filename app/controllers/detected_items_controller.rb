@@ -14,6 +14,7 @@ class DetectedItemsController < ApplicationController
       status: 'pending',
       label: t('autodetections.detected_item.new_item'),
       image_processing_status: 'pending',
+      skip_upscaler: @autodetection.skip_upscaler?,
       position_data: {
         'score' => 1.0, # Manual
         'vertices' => normalized_vertices
@@ -90,6 +91,7 @@ class DetectedItemsController < ApplicationController
       brand: selection_attributes[:brand],
       year: selection_attributes[:year],
       size: selection_attributes[:size],
+      skip_upscaler: selected_skip_upscaler(selection_attributes),
       image_processing_status: 'pending',
       image_processing_error: nil
     )
@@ -169,13 +171,21 @@ class DetectedItemsController < ApplicationController
   end
 
   def selection_attributes_from_params
-    params.permit(:brand, :name, :color, :year, :size).to_h.symbolize_keys
+    attributes = params.permit(:brand, :name, :color, :year, :size, :skip_upscaler).to_h.symbolize_keys
+    attributes[:skip_upscaler] = ActiveModel::Type::Boolean.new.cast(attributes[:skip_upscaler]) if attributes.key?(:skip_upscaler)
+    attributes
+  end
+
+  def selected_skip_upscaler(selection_attributes)
+    return selection_attributes[:skip_upscaler] if selection_attributes.key?(:skip_upscaler)
+
+    @detected_item.skip_upscaler
   end
 
   def selection_validation_car(selection_attributes)
     return if selection_attributes.empty?
 
-    current_user.cars.build(selection_attributes).tap(&:validate)
+    current_user.cars.build(selection_attributes.except(:skip_upscaler)).tap(&:validate)
   end
 
   def respond_with_selection_errors(car)

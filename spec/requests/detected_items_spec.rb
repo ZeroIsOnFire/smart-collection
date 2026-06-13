@@ -32,6 +32,11 @@ RSpec.describe 'DetectedItems', type: :request do
       expect(year_input['data-controller']).to eq('numeric-mask')
       expect(year_input['data-action']).to include('input->numeric-mask#sanitize')
       expect(name_input['data-controller']).not_to eq('numeric-mask')
+
+      skip_upscaler_input = document.at_css("#skip_upscaler_#{@detected_item.id}")
+
+      expect(skip_upscaler_input).to be_present
+      expect(response.body).to include(I18n.t('autodetections.detected_item.skip_upscaler'))
     end
   end
 
@@ -61,6 +66,17 @@ RSpec.describe 'DetectedItems', type: :request do
       expect(vertices.first['x']).to eq(0.2)
       expect(vertices.last['y']).to eq(0.7) # y + height
       expect(@detected_item.image_processing_status).to eq('pending')
+    end
+
+    it 'persists the upscaler preference before processing the adjusted selection' do
+      patch update_selection_detected_item_path(@detected_item),
+            params: crop_params.merge(name: 'Mazda RX-7', skip_upscaler: '1'),
+            headers: { 'Accept' => 'text/vnd.turbo-stream.html' }
+
+      expect(response).to have_http_status(:ok)
+      expect(@detected_item.reload.skip_upscaler).to be true
+      expect(DetectedItemImageProcessingJob).to have_been_enqueued
+        .with(@user.id.to_s, @detected_item.id.to_s, hash_including('skip_upscaler' => true))
     end
 
     it 'returns turbo stream response' do
@@ -124,6 +140,19 @@ RSpec.describe 'DetectedItems', type: :request do
       expect(new_item.status).to eq('pending')
       expect(new_item.position_data['score']).to eq(1.0)
       expect(new_item.image_processing_status).to eq('pending')
+    end
+
+    it 'inherits the autodetection upscaler preference for manual items' do
+      @autodetection.update!(skip_upscaler: true)
+
+      post autodetection_detected_items_path(@autodetection),
+           params: create_params,
+           headers: { 'Accept' => 'text/vnd.turbo-stream.html' }
+
+      new_item = DetectedItem.order_by(created_at: :desc).first
+
+      expect(response).to have_http_status(:ok)
+      expect(new_item.skip_upscaler).to be true
     end
 
     it 'appends a local toast on turbo stream success' do

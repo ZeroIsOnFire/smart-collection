@@ -57,7 +57,8 @@ RSpec.describe DetectedItemImageProcessingJob do
         color: 'Verde',
         brand: 'Hot Wheels',
         year: '1998',
-        size: '1:64'
+        size: '1:64',
+        skip_upscaler: '1'
       )
 
       processed_item = DetectedItem.find(detected_item.id)
@@ -66,10 +67,31 @@ RSpec.describe DetectedItemImageProcessingJob do
       expect(processed_item.brand).to eq('Hot Wheels')
       expect(processed_item.year).to eq(1998)
       expect(processed_item.size).to eq('1:64')
+      expect(processed_item.skip_upscaler).to be true
     end
 
     it 'honors the user AI upscaling preference' do
       user.update!(ai_upscaling_enabled: false)
+      file = cropped_file
+
+      expect(ImageCropperService).to receive(:crop)
+        .with(
+          anything,
+          anything,
+          padding: 0,
+          minimum_side: ImageCropperService.default_minimum_side,
+          upscale: { use_ai: false, local_fallback: false }
+        )
+        .and_return(file)
+      allow(YoloDetectionService).to receive(:classify).and_return({})
+
+      described_class.new.perform(user.id.to_s, detected_item.id.to_s)
+
+      expect(DetectedItem.find(detected_item.id).image_processing_status).to eq('completed')
+    end
+
+    it 'honors the detected item upscaler preference' do
+      detected_item.update!(skip_upscaler: true)
       file = cropped_file
 
       expect(ImageCropperService).to receive(:crop)

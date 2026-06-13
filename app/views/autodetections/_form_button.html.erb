@@ -52,6 +52,11 @@
                 <%= render "autodetections/photo_errors", autodetection: autodetection %>
               </div>
 
+              <div class="record-upscaler-toggle form-check form-switch mb-4">
+                <%= f.check_box :skip_upscaler, class: "form-check-input flex-shrink-0", role: "switch" %>
+                <%= f.label :skip_upscaler, t("autodetections.form.skip_upscaler"), class: "form-check-label small fw-semibold mb-0" %>
+              </div>
+
               <div class="row g-3">
                 <div class="col-6">
                   <button type="button" class="btn btn-premium rounded-pill w-100 py-3 d-flex align-items-center justify-content-center gap-2" data-action="click->autodetection-upload#openCamera">

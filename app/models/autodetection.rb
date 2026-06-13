@@ -7,6 +7,7 @@ class Autodetection
 
   field :status, type: String, default: 'pending'
   field :error_message, type: String
+  field :skip_upscaler, type: Boolean, default: false
 
   mount_uploader :photo, PhotoUploader
 

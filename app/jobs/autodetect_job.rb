@@ -38,6 +38,7 @@ class AutodetectJob < ApplicationJob
         autodetection.detected_items.create!(
           label: I18n.t('autodetections.detected_item.new_item'),
           color: data[:color],
+          skip_upscaler: autodetection.skip_upscaler?,
           position_data: {
             vertices: data[:vertices],
             score: data[:score]
@@ -61,7 +62,7 @@ class AutodetectJob < ApplicationJob
   private
 
   def prepare_photo_for_detection(autodetection)
-    return autodetection.photo.path unless autodetection.user.ai_upscaling_enabled?
+    return autodetection.photo.path unless upscaling_enabled?(autodetection)
 
     upscaled_file = ImageUpscalerService.upscale_if_needed(
       autodetection.photo.path,
@@ -81,9 +82,13 @@ class AutodetectJob < ApplicationJob
   end
 
   def upscale_options(autodetection)
-    enabled = autodetection.user.ai_upscaling_enabled?
+    enabled = upscaling_enabled?(autodetection)
 
     { use_ai: enabled, local_fallback: enabled }
+  end
+
+  def upscaling_enabled?(autodetection)
+    autodetection.user.ai_upscaling_enabled? && !autodetection.skip_upscaler?
   end
 
   def cleanup_tempfile(tempfile)

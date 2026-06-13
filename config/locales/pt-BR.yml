@@ -332,6 +332,7 @@ pt-BR:
       dropzone_title: "Arraste uma foto aqui"
       dropzone_help: "ou clique para selecionar do seu dispositivo"
       ai_upscaling_notice: "Se a imagem estiver abaixo de %{minimum_side}px, ela poderá receber upscale por IA."
+      skip_upscaler: "Não usar upscaler nesta autodetecção"
       validation_error_title: "Revise os campos destacados"
       camera: "Usar Câmera"
       gallery: "Galeria"
@@ -374,6 +375,7 @@ pt-BR:
       confirm_adjustment: "Confirmar Ajuste"
       discard: "Descartar"
       save_item: "Salvar Item"
+      skip_upscaler: "Não usar upscaler neste item"
       undo: "Desfazer"
       statuses:
         processing_title: "Processando..."

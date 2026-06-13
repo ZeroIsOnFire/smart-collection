@@ -90,7 +90,8 @@ class CarsController < ApplicationController
           color: @car.color,
           year: @car.year,
           size: @car.size,
-          label: @car.name
+          label: @car.name,
+          skip_upscaler: @car.skip_upscaler?
         )
         @detected_item.autodetection.check_completion!
       end
