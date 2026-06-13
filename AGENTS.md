@@ -45,6 +45,9 @@ Servico Rails premium para registro e gerenciamento de colecoes: itens, fotos, a
 ## Qualidade e Skills
 
 - Use skills de qualidade/seguranca principalmente no fechamento, em pedidos explicitos de QA/audit, ou quando a alteracao tocar fortemente a area da skill.
+- A fonte canonica das skills locais fica em `.skills/<nome-da-skill>/SKILL.md`.
+- Adaptadores especificos de agentes devem ser wrappers minimos apontando para a fonte canonica. No Codex, cada `.codex/skills/<nome-da-skill>/SKILL.md` deve conter apenas `@../../../.skills/<nome-da-skill>/SKILL.md`.
+- Os padroes futuros para agentes genericos (`.agents`) e Claude (`.claude`) devem reutilizar `.skills/` como fonte unica; a adaptacao funcional desses agentes fica para item futuro.
 - Rails: use `$quality-check-rails` para QA amplo, lint/testes gerais ou preparacao de CI.
 - JavaScript: use `$quality-check-javascript` para mudancas em `app/javascript`, npm, esbuild/jsbundling ou layouts que carregam JS.
 - Python: use `$quality-check-python` para mudancas em `yolo/` ou `upscale/`.
