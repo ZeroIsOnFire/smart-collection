@@ -315,6 +315,7 @@ pt-BR:
       save_crop: "Salvar Recorte"
       create_another: "Salvar e adicionar outro"
       predominant_color: "Cor Predominante"
+      validation_error_title: "Revise os campos destacados"
       brand_placeholder: "Ex: Hot Wheels, Matchbox, Maisto"
       name_placeholder: "Ex: Porsche 911 Carrera, Ford Mustang GT, Ferrari LaFerrari"
       year_placeholder: "Ex: 1998"

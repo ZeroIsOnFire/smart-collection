@@ -11,7 +11,8 @@ RSpec.describe 'Cars', type: :request do
     {
       name: 'Honda Civic',
       brand: 'Hot Wheels',
-      year: 2020
+      year: 2020,
+      photo: fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
     }
   end
 
@@ -260,14 +261,23 @@ RSpec.describe 'Cars', type: :request do
       end
 
       it 'creates a car with a photo' do
-        attributes_with_photo = valid_attributes.merge(
-          photo: fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
-        )
         expect do
-          post cars_path, params: { car: attributes_with_photo }
+          post cars_path, params: { car: valid_attributes }
         end.to change(Car, :count).by(1)
 
         expect(Car.last.photo).to be_present
+      end
+
+      it 'shows photo presence errors in the form' do
+        attributes_without_photo = valid_attributes.except(:photo)
+
+        expect do
+          post cars_path, params: { car: attributes_without_photo }, as: :turbo_stream
+        end.not_to change(Car, :count)
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(response.body).to include(I18n.t('cars.form.validation_error_title'))
+        expect(response.body).to include(Car.human_attribute_name(:photo))
       end
 
       it 'persists the per-record upscaler preference' do

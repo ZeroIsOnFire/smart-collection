@@ -42,6 +42,8 @@ class CarService
     prepared_params = normalize_params(params)
     enqueue_processing = should_process_photo?(prepared_params)
     car = user.cars.build(prepared_params)
+    return car_with_missing_photo_error(car) if missing_photo_on_create?(prepared_params)
+
     mark_photo_as_pending(car, prepared_params) if enqueue_processing
     enqueue_processing = false unless car.save
     enqueue_photo_processing(car, prepared_params) if enqueue_processing
@@ -108,6 +110,15 @@ class CarService
 
   def remove_photo?(params)
     ActiveModel::Type::Boolean.new.cast(params[:remove_photo])
+  end
+
+  def missing_photo_on_create?(params)
+    params.values_at(:photo, :remote_photo_url, :photo_cache).all?(&:blank?)
+  end
+
+  def car_with_missing_photo_error(car)
+    car.errors.add(:photo, :blank)
+    car
   end
 
   def mark_photo_as_pending(car, params)

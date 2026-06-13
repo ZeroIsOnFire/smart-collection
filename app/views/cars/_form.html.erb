@@ -10,7 +10,16 @@
     "color-detector-detect-url-value": detect_color_autodetections_path
   }
 }) do |f| %>
-  <%= f.error_notification %>
+  <% if car.errors.any? %>
+    <div class="alert alert-danger car-form-errors" role="alert">
+      <div class="fw-bold mb-1"><%= t("cars.form.validation_error_title") %></div>
+      <ul class="mb-0 ps-3">
+        <% car.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
 
   <div class="<%= modal ? 'modal-form-shell' : 'card border-0 shadow-sm rounded-4 overflow-hidden mb-4' %>">
     <div class="<%= modal ? 'p-0' : 'card-body p-4 p-md-5' %>">
@@ -103,7 +112,7 @@
           </div>
         </div>
 
-        <div class="car-upscaler-toggle<%= ' d-none' if car.persisted? && car.photo? %> mt-3"
+        <div class="car-upscaler-toggle form-check form-switch<%= ' d-none' if car.persisted? && car.photo? %> mt-3"
              data-photo-upload-target="upscalerToggle">
           <%= f.check_box :skip_upscaler, class: "form-check-input flex-shrink-0", role: "switch" %>
           <%= f.label :skip_upscaler, t("cars.form.skip_upscaler"), class: "form-check-label small fw-semibold mb-0" %>
@@ -265,6 +274,11 @@
     border-color: var(--premium-indigo) !important;
     opacity: 0.8;
   }
+  .car-form-errors {
+    background-color: var(--soft-danger-bg);
+    border-color: rgba(239, 68, 68, 0.35);
+    color: var(--text-main);
+  }
   .car-upscaler-toggle {
     align-items: center;
     background-color: var(--soft-secondary-bg);
@@ -274,6 +288,7 @@
     display: flex;
     gap: 0.65rem;
     padding: 0.85rem 1rem;
+    padding-left: 1rem;
   }
   .car-upscaler-toggle.d-none {
     display: none !important;
