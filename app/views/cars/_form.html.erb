@@ -103,9 +103,10 @@
           </div>
         </div>
 
-        <div class="car-upscaler-toggle form-check form-switch d-flex align-items-center gap-2 mt-3">
+        <div class="car-upscaler-toggle<%= ' d-none' if car.persisted? && car.photo? %> mt-3"
+             data-photo-upload-target="upscalerToggle">
           <%= f.check_box :skip_upscaler, class: "form-check-input flex-shrink-0", role: "switch" %>
-          <%= f.label :skip_upscaler, t("cars.form.skip_upscaler"), class: "form-check-label small fw-semibold" %>
+          <%= f.label :skip_upscaler, t("cars.form.skip_upscaler"), class: "form-check-label small fw-semibold mb-0" %>
         </div>
 
         <!-- Modal de Cropper -->
@@ -265,19 +266,29 @@
     opacity: 0.8;
   }
   .car-upscaler-toggle {
+    align-items: center;
     background-color: var(--soft-secondary-bg);
     border: 1px solid var(--border-color);
     border-radius: 0.75rem;
     color: var(--text-muted);
+    display: flex;
+    gap: 0.65rem;
     padding: 0.85rem 1rem;
+  }
+  .car-upscaler-toggle.d-none {
+    display: none !important;
   }
   .car-upscaler-toggle .form-check-input {
     background-position: left center;
     background-size: contain;
     cursor: pointer;
+    flex: 0 0 auto;
     height: 1.35rem;
-    margin-left: 0;
+    margin: 0;
     width: 2.5rem;
+  }
+  .car-upscaler-toggle .form-check-label {
+    line-height: 1.35rem;
   }
   .car-upscaler-toggle .form-check-input:not(:checked) {
     background-color: #cbd5e1;

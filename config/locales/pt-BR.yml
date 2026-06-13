@@ -298,7 +298,7 @@ pt-BR:
       no_photo: "Sem foto cadastrada"
       view_full_photo: "Ver foto completa"
       photo_upscaled_by_ai: "IA"
-      photo_upscaled_by_ai_tooltip: "Foto melhorada por IA"
+      photo_upscaled_by_ai_tooltip: "Foto tratada por IA"
     form:
       main_photo: "Foto Principal"
       upload_prompt: "Clique ou arraste a imagem aqui"

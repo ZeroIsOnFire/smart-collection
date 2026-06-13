@@ -339,6 +339,19 @@ RSpec.describe 'Cars', type: :request do
       expect(response.body).to include(I18n.t('cars.modal.edit_title'))
     end
 
+    it 'hides the per-record upscaler toggle until an existing photo is replaced' do
+      car.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+      car.save!
+
+      get edit_car_path(car), headers: { 'Turbo-Frame' => 'modal' }
+
+      document = Nokogiri::HTML(response.body)
+      toggle = document.at_css('.car-upscaler-toggle[data-photo-upload-target="upscalerToggle"]')
+
+      expect(toggle).to be_present
+      expect(toggle['class']).to include('d-none')
+    end
+
     it "redirects if trying to edit another user's car" do
       other_car = create(:car, user: other_user)
       get edit_car_path(other_car)

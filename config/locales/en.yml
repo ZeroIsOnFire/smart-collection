@@ -284,7 +284,7 @@ en:
       no_photo: "No photo registered"
       view_full_photo: "View full photo"
       photo_upscaled_by_ai: "AI"
-      photo_upscaled_by_ai_tooltip: "Photo enhanced by AI"
+      photo_upscaled_by_ai_tooltip: "Photo processed by AI"
     form:
       main_photo: "Main Photo"
       upload_prompt: "Click or drag image here"
