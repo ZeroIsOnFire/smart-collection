@@ -42,7 +42,8 @@ class CarService
     prepared_params = normalize_params(params)
     enqueue_processing = should_process_photo?(prepared_params)
     car = user.cars.build(prepared_params)
-    return car_with_missing_photo_error(car) if missing_photo_on_create?(prepared_params)
+    add_create_errors(car, prepared_params)
+    return car if car.errors.any?
 
     mark_photo_as_pending(car, prepared_params) if enqueue_processing
     enqueue_processing = false unless car.save
@@ -116,9 +117,9 @@ class CarService
     params.values_at(:photo, :remote_photo_url, :photo_cache).all?(&:blank?)
   end
 
-  def car_with_missing_photo_error(car)
-    car.errors.add(:photo, :blank)
-    car
+  def add_create_errors(car, params)
+    car.validate
+    car.errors.add(:photo, :blank) if missing_photo_on_create?(params)
   end
 
   def mark_photo_as_pending(car, params)

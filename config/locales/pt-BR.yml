@@ -332,6 +332,7 @@ pt-BR:
       dropzone_title: "Arraste uma foto aqui"
       dropzone_help: "ou clique para selecionar do seu dispositivo"
       ai_upscaling_notice: "Se a imagem estiver abaixo de %{minimum_side}px, ela poderá receber upscale por IA."
+      validation_error_title: "Revise os campos destacados"
       camera: "Usar Câmera"
       gallery: "Galeria"
       back_to_upload: "Voltar para Upload"

@@ -317,6 +317,7 @@ en:
       dropzone_title: "Drag a photo here"
       dropzone_help: "or click to select from your device"
       ai_upscaling_notice: "If the image is below %{minimum_side}px, it may be upscaled by AI."
+      validation_error_title: "Review the highlighted fields"
       camera: "Use Camera"
       gallery: "Gallery"
       back_to_upload: "Back to Upload"

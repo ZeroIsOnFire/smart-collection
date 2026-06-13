@@ -21,6 +21,18 @@ RSpec.describe 'Autodetections', type: :request do
                                           .and enqueue_job(AutodetectJob)
       expect(response).to be_successful
     end
+
+    it 'shows validation errors below the photo field' do
+      expect do
+        post autodetections_path, params: { autodetection: {} }, as: :turbo_stream
+      end.not_to change(Autodetection, :count)
+
+      expect(response).to be_successful
+      expect(response.body).to include('target="autodetection_form_errors"')
+      expect(response.body).to include('target="autodetection_photo_errors"')
+      expect(response.body).to include(I18n.t('autodetections.form.validation_error_title'))
+      expect(response.body).to include(Autodetection.human_attribute_name(:photo))
+    end
   end
 
   describe 'GET /show' do

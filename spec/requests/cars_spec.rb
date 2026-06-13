@@ -280,6 +280,18 @@ RSpec.describe 'Cars', type: :request do
         expect(response.body).to include(Car.human_attribute_name(:photo))
       end
 
+      it 'shows all validation errors at once' do
+        invalid_attributes = valid_attributes.except(:photo).merge(name: '')
+
+        expect do
+          post cars_path, params: { car: invalid_attributes }, as: :turbo_stream
+        end.not_to change(Car, :count)
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(response.body).to include(Car.human_attribute_name(:photo))
+        expect(response.body).to include(Car.human_attribute_name(:name))
+      end
+
       it 'persists the per-record upscaler preference' do
         post cars_path, params: { car: valid_attributes.merge(skip_upscaler: '1') }
 
