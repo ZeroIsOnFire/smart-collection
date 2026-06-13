@@ -157,6 +157,7 @@
         <div class="col-12">
           <%= f.input :brand,
                       placeholder: t("cars.form.brand_placeholder"),
+                      error: field_error_message(car, :brand),
                       input_html: { class: "form-control-lg bg-light border-0" },
                       label_html: { class: "text-secondary small text-uppercase tracking-wide" } %>
         </div>
@@ -164,6 +165,7 @@
         <div class="col-12">
           <%= f.input :name,
                       placeholder: t("cars.form.name_placeholder"),
+                      error: field_error_message(car, :name),
                       input_html: { class: "form-control-lg bg-light border-0" },
                       label_html: { class: "text-secondary small text-uppercase tracking-wide" } %>
         </div>
@@ -178,6 +180,7 @@
         <div class="col-md-6">
           <%= f.input :year,
                       placeholder: t("cars.form.year_placeholder"),
+                      error: field_error_message(car, :year),
                       input_html: { class: "form-control-lg bg-light border-0" },
                       label_html: { class: "text-secondary small text-uppercase tracking-wide" } %>
         </div>
@@ -187,6 +190,7 @@
                       as: :select,
                       collection: Car.scale_options,
                       include_blank: t('cars.form.select_scale'),
+                      error: field_error_message(car, :size),
                       input_html: { class: "form-select form-select-lg bg-light border-0" },
                       label_html: { class: "text-secondary small text-uppercase tracking-wide" } %>
         </div>
@@ -196,6 +200,7 @@
                       as: :select,
                       collection: Car.color_options,
                       include_blank: t('cars.form.select_color'),
+                      error: field_error_message(car, :color),
                       input_html: {
                         class: "form-select form-select-lg bg-light border-0",
                         data: {
@@ -218,6 +223,7 @@
                       as: :text,
                       label: false,
                       placeholder: t("cars.form.observations_placeholder"),
+                      error: field_error_message(car, :observations),
                       input_html: { class: "bg-light border-0", rows: 4 },
                       label_html: { class: "text-secondary small text-uppercase tracking-wide" } %>
         </div>

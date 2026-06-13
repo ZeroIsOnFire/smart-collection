@@ -292,6 +292,17 @@ RSpec.describe 'Cars', type: :request do
         expect(response.body).to include(Car.human_attribute_name(:name))
       end
 
+      it 'shows field errors without repeating the field name inline' do
+        invalid_attributes = valid_attributes.except(:photo).merge(name: '')
+
+        post cars_path, params: { car: invalid_attributes }, as: :turbo_stream
+
+        document = Nokogiri::HTML.fragment(response.body)
+        name_error = document.at_css('.car_name .invalid-feedback')
+
+        expect(name_error.text.squish).to eq(I18n.t('errors.messages.blank'))
+      end
+
       it 'persists the per-record upscaler preference' do
         post cars_path, params: { car: valid_attributes.merge(skip_upscaler: '1') }
 
