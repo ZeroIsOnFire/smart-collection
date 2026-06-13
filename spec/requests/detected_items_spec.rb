@@ -25,6 +25,13 @@ RSpec.describe 'DetectedItems', type: :request do
       expect(frame['data-detected-item-loading-label-value']).to eq(I18n.t('autodetections.messages.saving'))
       expect(response.body).to include('detected-item-loader-content')
       expect(submit_button['data-loading-html']).to include(I18n.t('autodetections.messages.saving'))
+
+      year_input = document.at_css("#year_#{@detected_item.id}")
+      name_input = document.at_css("#name_#{@detected_item.id}")
+
+      expect(year_input['data-controller']).to eq('numeric-mask')
+      expect(year_input['data-action']).to include('input->numeric-mask#sanitize')
+      expect(name_input['data-controller']).not_to eq('numeric-mask')
     end
   end
 

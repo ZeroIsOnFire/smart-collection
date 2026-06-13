@@ -181,7 +181,13 @@
           <%= f.input :year,
                       placeholder: t("cars.form.year_placeholder"),
                       error: field_error_message(car, :year),
-                      input_html: { class: "form-control-lg bg-light border-0" },
+                      input_html: {
+                        class: "form-control-lg bg-light border-0",
+                        data: {
+                          controller: "numeric-mask",
+                          action: "input->numeric-mask#sanitize"
+                        }
+                      },
                       label_html: { class: "text-secondary small text-uppercase tracking-wide" } %>
         </div>
 

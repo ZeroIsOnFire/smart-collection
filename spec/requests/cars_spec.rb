@@ -315,6 +315,18 @@ RSpec.describe 'Cars', type: :request do
         expect(year_error.text.squish).to eq(I18n.t('errors.messages.not_a_number'))
       end
 
+      it 'applies numeric mask only to the year field' do
+        get new_car_path
+
+        document = Nokogiri::HTML(response.body)
+        year_input = document.at_css('#car_year')
+        name_input = document.at_css('#car_name')
+
+        expect(year_input['data-controller']).to eq('numeric-mask')
+        expect(year_input['data-action']).to include('input->numeric-mask#sanitize')
+        expect(name_input['data-controller']).not_to eq('numeric-mask')
+      end
+
       it 'persists the per-record upscaler preference' do
         post cars_path, params: { car: valid_attributes.merge(skip_upscaler: '1') }
 
