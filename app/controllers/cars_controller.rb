@@ -272,9 +272,11 @@ class CarsController < ApplicationController
     latest_car = current_user.cars.desc(:created_at).first
     return {} unless latest_car
 
-    {
+    attributes = {
       brand: latest_car.brand,
       size: latest_car.size
     }.compact_blank
+    attributes[:skip_upscaler] = true if latest_car.skip_upscaler?
+    attributes
   end
 end

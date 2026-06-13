@@ -347,7 +347,7 @@ RSpec.describe 'Cars', type: :request do
       end
 
       it 'prepends the created car and keeps the modal ready for another item' do
-        attributes = valid_attributes.merge(size: '1:64')
+        attributes = valid_attributes.merge(size: '1:64', skip_upscaler: '1')
 
         expect do
           post cars_path,
@@ -366,6 +366,7 @@ RSpec.describe 'Cars', type: :request do
         expect(response.body).to include('flash_toasts')
         expect(document.at_css('#car_brand')['value']).to eq(attributes[:brand])
         expect(document.at_css('#car_size option[selected]')['value']).to eq(attributes[:size])
+        expect(document.at_css('#car_skip_upscaler')['checked']).to eq('checked')
       end
 
       it 'rerenders the modal form when turbo stream validation fails' do
