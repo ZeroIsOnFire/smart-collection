@@ -1,0 +1,4 @@
+interface:
+  display_name: "Quality Check Rails"
+  short_description: "Run Rails QA checks for Smart Collection."
+  default_prompt: "Use this skill to run Smart Collection Rails quality checks and fix any issues found."

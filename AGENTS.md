@@ -57,8 +57,8 @@ Servico Rails premium para registro e gerenciamento de colecoes: itens, fotos, a
 
 - Uploads usam CarrierWave, nao ActiveStorage. Uploaders ficam em `app/uploaders/`; fotos sao convertidas para JPG.
 - `ImageUpscalerService` centraliza upscale. IA depende de `User#ai_upscaling_enabled` e so chama `IMAGE_UPSCALE_SERVICE_URL` quando configurado.
-- Minimos por env: `IMAGE_UPSCALE_DEFAULT_MINIMUM_SIDE` (padrao 360) para itens gerais e `AUTODETECTION_MINIMUM_SIDE` (padrao 1080) para autodeteccao.
-- Upload geral nao usa fallback local quando o usuario desabilita IA; autodeteccao sempre deve preparar imagem para YOLO, usando fallback local se necessario.
+- Minimos por env: `IMAGE_UPSCALE_DEFAULT_MINIMUM_SIDE` (padrao 360) para itens gerais e `AUTODETECTION_MINIMUM_SIDE` (padrao 800) para autodeteccao.
+- Upload geral nao usa fallback local quando o usuario desabilita IA; autodeteccao tambem nao deve fazer resize/upscale local quando o upscaler de IA estiver desligado.
 - Preserve limpeza de `Tempfile` e cubra `ImageUpscalerService::UpscaleError` em specs quando alterar fluxo de imagem.
 - YOLO local e preferencial. Nao use label do YOLO como nome/modelo do item; use label generico traduzido.
 - Antes de mexer em microservicos, leia `yolo/AGENTS.md` ou `upscale/AGENTS.md`.

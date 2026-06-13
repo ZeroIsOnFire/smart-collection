@@ -1,0 +1,4 @@
+interface:
+  display_name: "Quality Check JavaScript"
+  short_description: "Run JavaScript QA checks for Smart Collection."
+  default_prompt: "Use this skill to validate Smart Collection JavaScript build and dependency quality."

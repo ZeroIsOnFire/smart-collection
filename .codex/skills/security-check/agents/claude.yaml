@@ -1,0 +1,4 @@
+interface:
+  display_name: "Security Check"
+  short_description: "Audit Smart Collection dependencies and run OWASP ZAP on the Rails app."
+  default_prompt: "Use this skill to audit Smart Collection dependencies across Ruby, JavaScript, and Python, run OWASP ZAP when appropriate, and fix vulnerabilities found."
