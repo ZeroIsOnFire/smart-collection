@@ -1,4 +1,7 @@
 <% car_dom_id = car.id.to_s %>
+<% routes = Rails.application.routes.url_helpers %>
+<% car_details_path = routes.car_path(car) %>
+<% car_edit_path = routes.edit_car_path(car) %>
 
 <div id="car_<%= car_dom_id %>" class="col animate-fade-in car-card-wrapper" data-car-card-id="<%= car_dom_id %>">
   <% cache [car, I18n.locale, local_assigns[:public], :card_actions_v4] do %>
@@ -14,18 +17,18 @@
             </button>
             <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3">
               <li>
-                <%= link_to car_path(car), class: 'dropdown-item d-flex align-items-center gap-2 py-2', data: { turbo_frame: "modal" } do %>
+                <%= link_to car_details_path, class: 'dropdown-item d-flex align-items-center gap-2 py-2', data: { turbo_frame: "modal" } do %>
                   <i class="bi bi-eye text-muted"></i> <%= t("cars.card.view_details") %>
                 <% end %>
               </li>
               <li>
-                <%= link_to edit_car_path(car), class: 'dropdown-item d-flex align-items-center gap-2 py-2', data: { turbo_frame: "modal" } do %>
+                <%= link_to car_edit_path, class: 'dropdown-item d-flex align-items-center gap-2 py-2', data: { turbo_frame: "modal" } do %>
                   <i class="bi bi-pencil text-muted"></i> <%= t("actions.edit") %>
                 <% end %>
               </li>
               <li><hr class="dropdown-divider"></li>
               <li>
-                <%= button_to car_path(car),
+                <%= button_to car_details_path,
                               method: :delete,
                               form: {
                                 data: {
@@ -47,7 +50,7 @@
       <% end %>
 
       <%# Detalhe: se for público, usamos o path do share, senão o path normal %>
-      <% target_path = local_assigns[:public] ? public_share_car_path(share_token: local_assigns[:user].share_token, id: car.id) : car_path(car) %>
+      <% target_path = local_assigns[:public] ? routes.public_share_car_path(share_token: local_assigns[:user].share_token, id: car.id) : car_details_path %>
       <%= link_to target_path, class: "text-decoration-none", data: { turbo_frame: "modal" } do %>
         <!-- Foto -->
         <% if car.photo? %>
