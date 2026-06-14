@@ -107,6 +107,20 @@ RSpec.describe CarImageProcessingJob do
       expect(Car.find(car.id).photo_processing_status).to eq('completed')
     end
 
+    it 'preserves an inherited AI strategy when no extra upscale is needed' do
+      attach_photo!(car)
+      car.update!(photo_upscale_strategy: 'ai')
+
+      expect(ImageUpscalerService).to receive(:upscale_if_needed).and_return(nil)
+      allow(YoloDetectionService).to receive(:classify_color).and_return(nil)
+
+      described_class.new.perform(user.id.to_s, car.id.to_s, photo_upscale_strategy: 'ai')
+
+      processed_car = Car.find(car.id)
+      expect(processed_car.photo_processing_status).to eq('completed')
+      expect(processed_car.photo_upscale_strategy).to eq('ai')
+    end
+
     it 'skips the upscaler for a car with the per-record flag enabled' do
       car.update!(skip_upscaler: true)
       attach_photo!(car)
@@ -119,6 +133,18 @@ RSpec.describe CarImageProcessingJob do
       processed_car = Car.find(car.id)
       expect(processed_car.photo_processing_status).to eq('completed')
       expect(processed_car.photo_upscale_strategy).to be_nil
+    end
+
+    it 'preserves an inherited AI strategy when the car skips extra upscaling' do
+      car.update!(skip_upscaler: true, photo_upscale_strategy: 'ai')
+      attach_photo!(car)
+
+      expect(ImageUpscalerService).not_to receive(:upscale_if_needed)
+      allow(YoloDetectionService).to receive(:classify_color).and_return(nil)
+
+      described_class.new.perform(user.id.to_s, car.id.to_s, photo_upscale_strategy: 'ai')
+
+      expect(Car.find(car.id).photo_upscale_strategy).to eq('ai')
     end
 
     it 'passes disabled AI to the cropper when the per-record flag is enabled' do

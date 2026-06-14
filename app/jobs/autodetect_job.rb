@@ -39,6 +39,7 @@ class AutodetectJob < ApplicationJob
           label: I18n.t('autodetections.detected_item.new_item'),
           color: data[:color],
           skip_upscaler: autodetection.skip_upscaler?,
+          cropped_photo_upscale_strategy: detected_item_upscale_strategy(autodetection, cropped_file),
           position_data: {
             vertices: data[:vertices],
             score: data[:score]
@@ -75,6 +76,7 @@ class AutodetectJob < ApplicationJob
 
     track_upscaled_photo(upscaled_file)
     autodetection.photo = upscaled_file
+    autodetection.photo_upscale_strategy = upscale_strategy(upscaled_file)
     autodetection.save!
     autodetection.photo.path
   ensure
@@ -104,5 +106,15 @@ class AutodetectJob < ApplicationJob
     return unless file.respond_to?(:upscale_strategy)
 
     UsageMetric.record!("photos_upscaled_#{file.upscale_strategy}")
+  end
+
+  def upscale_strategy(file)
+    return unless file.respond_to?(:upscale_strategy)
+
+    file.upscale_strategy.to_s
+  end
+
+  def detected_item_upscale_strategy(autodetection, file)
+    upscale_strategy(file).presence || autodetection.photo_upscale_strategy
   end
 end

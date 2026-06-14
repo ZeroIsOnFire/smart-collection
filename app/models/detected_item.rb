@@ -14,6 +14,7 @@ class DetectedItem
   field :size, type: String
   field :brand, type: String
   field :skip_upscaler, type: Boolean, default: false
+  field :cropped_photo_upscale_strategy, type: String
   field :image_processing_status, type: String
   field :image_processing_error, type: String
 

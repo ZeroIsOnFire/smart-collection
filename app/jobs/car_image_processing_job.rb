@@ -29,13 +29,18 @@ class CarImageProcessingJob < ApplicationJob
 
   private
 
-  def process_photo(car, crop_params)
-    crop_requested?(crop_params) ? apply_crop(car, crop_params) : apply_upscale(car)
+  def process_photo(car, processing_params)
+    crop_requested?(processing_params) ? apply_crop(car, processing_params) : apply_upscale(car, processing_params)
   end
 
-  def apply_upscale(car)
+  def apply_upscale(car, processing_params)
     clear_photo_upscale_strategy(car)
-    return nil if car.skip_upscaler?
+    inherited_strategy = processing_params[:photo_upscale_strategy].presence
+
+    if car.skip_upscaler?
+      restore_inherited_upscale_strategy(car, inherited_strategy)
+      return nil
+    end
 
     upscaled_file = ImageUpscalerService.upscale_if_needed(
       car.photo.path,
@@ -46,6 +51,7 @@ class CarImageProcessingJob < ApplicationJob
 
     track_upscaled_photo(upscaled_file)
     store_processed_photo(car, upscaled_file) if upscaled_file
+    restore_inherited_upscale_strategy(car, inherited_strategy) unless upscaled_file
     upscaled_file
   end
 
@@ -80,6 +86,10 @@ class CarImageProcessingJob < ApplicationJob
 
   def clear_photo_upscale_strategy(car)
     car.photo_upscale_strategy = nil
+  end
+
+  def restore_inherited_upscale_strategy(car, strategy)
+    car.photo_upscale_strategy = strategy if strategy.present?
   end
 
   def upscaler_enabled_for?(car)

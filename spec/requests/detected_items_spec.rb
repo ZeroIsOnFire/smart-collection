@@ -36,6 +36,7 @@ RSpec.describe 'DetectedItems', type: :request do
       skip_upscaler_input = document.at_css("#skip_upscaler_#{@detected_item.id}")
 
       expect(skip_upscaler_input).to be_present
+      expect(document.at_css('.detected-item-photo-col img')['src']).to include("v=#{@detected_item.updated_at.to_i}")
       expect(response.body).to include(I18n.t('autodetections.detected_item.skip_upscaler'))
     end
   end
@@ -168,6 +169,30 @@ RSpec.describe 'DetectedItems', type: :request do
   end
 
   describe 'POST /cars from detected item' do
+    it 'copies the detected item AI upscale strategy to the created car' do
+      @detected_item.update!(
+        brand: 'Hot Wheels',
+        label: 'Porsche 911',
+        color: 'Azul',
+        cropped_photo_upscale_strategy: 'ai'
+      )
+
+      expect do
+        post cars_path,
+             params: {
+               detected_item_id: @detected_item.id,
+               car: { name: 'Porsche 911', brand: 'Hot Wheels', color: 'Azul' }
+             },
+             as: :turbo_stream
+      end.to change(Car, :count).by(1)
+
+      created_car = Car.last
+
+      expect(response).to have_http_status(:ok)
+      expect(created_car.photo_upscale_strategy).to eq('ai')
+      expect(@detected_item.reload.status).to eq('saved')
+    end
+
     it 'shows validation errors and preserves blank name in the detected item form' do
       post cars_path,
            params: { detected_item_id: @detected_item.id, car: { name: '', year: 'abcd' } },

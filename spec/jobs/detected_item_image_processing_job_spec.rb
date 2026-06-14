@@ -40,6 +40,7 @@ RSpec.describe DetectedItemImageProcessingJob do
       expect(processed_item.label).to eq('Manual car')
       expect(processed_item.color).to eq('Azul')
       expect(processed_item.cropped_photo).to be_present
+      expect(processed_item.cropped_photo_upscale_strategy).to be_nil
       expect(processed_item.image_processing_status).to eq('completed')
     end
 
@@ -129,6 +130,19 @@ RSpec.describe DetectedItemImageProcessingJob do
       expect do
         described_class.new.perform(user.id.to_s, detected_item.id.to_s)
       end.to change { UsageMetric.values_for(['photos_upscaled_ai']).fetch('photos_upscaled_ai') }.from(0).to(1)
+      expect(DetectedItem.find(detected_item.id).cropped_photo_upscale_strategy).to eq('ai')
+    end
+
+    it 'inherits the autodetection photo strategy when the adjusted crop is not upscaled again' do
+      autodetection.update!(photo_upscale_strategy: 'ai')
+      file = cropped_file
+
+      allow(ImageCropperService).to receive(:crop).and_return(file)
+      allow(YoloDetectionService).to receive(:classify).and_return({})
+
+      described_class.new.perform(user.id.to_s, detected_item.id.to_s)
+
+      expect(DetectedItem.find(detected_item.id).cropped_photo_upscale_strategy).to eq('ai')
     end
 
     it 'does not process detected items from another user' do

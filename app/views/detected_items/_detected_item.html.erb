@@ -28,10 +28,11 @@
         <!-- Lado Esquerdo: Foto (25%) -->
         <div class="col-md-3 detected-item-photo-col border-end">
           <% if detected_item.cropped_photo? %>
-            <%= image_tag detected_item.cropped_photo.url,
+            <%= image_tag "#{detected_item.cropped_photo.url}?v=#{detected_item.updated_at.to_i}",
                           loading: "lazy",
                           class: "img-fluid w-100 h-100 object-fit-cover",
-                          style: "min-height: 220px;" %>
+                          style: "min-height: 220px;",
+                          data: { turbo_cache: "false" } %>
           <% else %>
             <div class="d-flex align-items-center justify-content-center bg-soft-secondary w-100" style="min-height: 220px;">
               <i class="bi bi-camera display-4 text-muted opacity-25"></i>

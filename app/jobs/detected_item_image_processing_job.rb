@@ -61,6 +61,7 @@ class DetectedItemImageProcessingJob < ApplicationJob
 
   def apply_processing_result(detected_item, processed_file, classification, attributes)
     detected_item.cropped_photo = processed_file if processed_file
+    detected_item.cropped_photo_upscale_strategy = detected_item_upscale_strategy(detected_item, processed_file)
     detected_item.label = attributes[:name].presence || classification[:label].presence || detected_item.label
     detected_item.color = resolved_color(detected_item, classification, attributes)
     detected_item.brand = attributes[:brand] if attributes.key?(:brand)
@@ -80,6 +81,16 @@ class DetectedItemImageProcessingJob < ApplicationJob
     return detected_color if submitted_color == detected_item.color && detected_color.present?
 
     submitted_color
+  end
+
+  def upscale_strategy(file)
+    return unless file.respond_to?(:upscale_strategy)
+
+    file.upscale_strategy.to_s
+  end
+
+  def detected_item_upscale_strategy(detected_item, file)
+    upscale_strategy(file).presence || detected_item.autodetection.photo_upscale_strategy
   end
 
   def broadcast_detected_item(detected_item)

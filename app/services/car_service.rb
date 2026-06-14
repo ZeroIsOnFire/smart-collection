@@ -139,7 +139,7 @@ class CarService
   end
 
   def crop_params(params)
-    params.slice(:crop_x, :crop_y, :crop_w, :crop_h).compact
+    params.slice(:crop_x, :crop_y, :crop_w, :crop_h, :photo_upscale_strategy).compact
   end
 
   def store_processing_crop(car, params)
