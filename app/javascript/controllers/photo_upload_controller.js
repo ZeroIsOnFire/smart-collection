@@ -88,7 +88,11 @@ export default class extends Controller {
     this.previewImgTarget.src = url
     this.previewTarget.classList.remove("d-none")
     this.uploadPromptTarget.classList.add("d-none")
-    this.hideUpscalerToggle()
+    if (this.hasUpscalerToggleTarget && this.upscalerToggleTarget.dataset.persistVisible === "true") {
+      this.showUpscalerToggle()
+    } else {
+      this.hideUpscalerToggle()
+    }
   }
 
   showUpscalerToggle() {

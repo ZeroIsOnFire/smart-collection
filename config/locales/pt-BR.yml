@@ -297,6 +297,7 @@ pt-BR:
       fallback_name: "—"
       no_photo: "Sem foto cadastrada"
       view_full_photo: "Ver foto completa"
+      view_original_photo: "Ver original"
       photo_upscaled_by_ai: "IA"
       photo_upscaled_by_ai_tooltip: "Foto tratada por IA"
     form:
@@ -321,6 +322,7 @@ pt-BR:
       year_placeholder: "Ex: 1998"
       observations_placeholder: "Escreva detalhes sobre o estado de conservação..."
       skip_upscaler: "Não usar upscaler neste registro"
+      skip_upscaler_existing: "Exibir versão original sem IA neste registro"
 
   # ── Autodetecção ───────────────────────────────────────
   autodetections:

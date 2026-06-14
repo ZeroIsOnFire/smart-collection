@@ -112,10 +112,15 @@
           </div>
         </div>
 
-        <div class="record-upscaler-toggle car-upscaler-toggle form-check form-switch<%= ' d-none' if car.persisted? && car.photo? %> mt-3"
-             data-photo-upload-target="upscalerToggle">
+        <%
+          show_upscaler_toggle = !car.persisted? || !car.photo? ||
+                                 (current_user.ai_upscaling_enabled? && ImageUpscalerService.service_configured?)
+        %>
+        <div class="record-upscaler-toggle car-upscaler-toggle form-check form-switch<%= ' d-none' unless show_upscaler_toggle %> mt-3"
+             data-photo-upload-target="upscalerToggle"
+             data-persist-visible="<%= show_upscaler_toggle %>">
           <%= f.check_box :skip_upscaler, class: "form-check-input flex-shrink-0", role: "switch" %>
-          <%= f.label :skip_upscaler, t("cars.form.skip_upscaler"), class: "form-check-label small fw-semibold mb-0" %>
+          <%= f.label :skip_upscaler, t(car.persisted? && car.photo? ? "cars.form.skip_upscaler_existing" : "cars.form.skip_upscaler"), class: "form-check-label small fw-semibold mb-0" %>
         </div>
 
         <!-- Modal de Cropper -->

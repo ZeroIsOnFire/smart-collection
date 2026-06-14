@@ -397,7 +397,8 @@ RSpec.describe 'Cars', type: :request do
       expect(response.body).to include(I18n.t('cars.modal.edit_title'))
     end
 
-    it 'hides the per-record upscaler toggle until an existing photo is replaced' do
+    it 'shows the per-record upscaler toggle for an existing photo when AI is enabled' do
+      allow(ImageUpscalerService).to receive(:service_configured?).and_return(true)
       car.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
       car.save!
 
@@ -407,7 +408,8 @@ RSpec.describe 'Cars', type: :request do
       toggle = document.at_css('.car-upscaler-toggle[data-photo-upload-target="upscalerToggle"]')
 
       expect(toggle).to be_present
-      expect(toggle['class']).to include('d-none')
+      expect(toggle['class']).not_to include('d-none')
+      expect(response.body).to include(I18n.t('cars.form.skip_upscaler_existing'))
     end
 
     it "redirects if trying to edit another user's car" do
@@ -459,6 +461,27 @@ RSpec.describe 'Cars', type: :request do
       expect(response.body).to include(I18n.t('cars.show.updated_at', date: I18n.l(updated_at, format: :short)))
       expect(document.at_css('.public-detail-notes')).to be_present
       expect(document.css('.car-details-timestamp').size).to eq(2)
+    end
+
+    it 'shows the original photo action only when the displayed photo is the AI variant' do
+      car.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/car_sample.jpg'), 'image/jpeg')
+      car.original_photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+      car.enhanced_photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/car_sample.jpg'), 'image/jpeg')
+      car.photo_variant = 'ai'
+      car.photo_upscale_strategy = 'ai'
+      car.save!
+
+      get car_path(car), headers: { 'Turbo-Frame' => 'modal' }
+
+      expect(response.body).to include(I18n.t('cars.show.view_original_photo'))
+      expect(response.body).to include(I18n.t('cars.show.photo_upscaled_by_ai'))
+
+      car.update!(photo_variant: 'original', photo_upscale_strategy: nil)
+
+      get car_path(car), headers: { 'Turbo-Frame' => 'modal' }
+
+      expect(response.body).not_to include(I18n.t('cars.show.view_original_photo'))
+      expect(response.body).not_to include(I18n.t('cars.show.photo_upscaled_by_ai'))
     end
 
     it 'shows aligned creation and update timestamps on the private detail page' do
@@ -553,6 +576,30 @@ RSpec.describe 'Cars', type: :request do
 
       expect(response).to redirect_to(edit_user_registration_path)
       expect(user.reload.ai_upscaling_enabled).to be true
+    end
+  end
+
+  describe 'PATCH /toggle_bulk_ai_upscaling' do
+    it 'toggles the bulk AI upscaling preference and enqueues the coordinator' do
+      allow(ImageUpscalerService).to receive(:service_configured?).and_return(true)
+
+      expect do
+        patch toggle_bulk_ai_upscaling_cars_path, as: :turbo_stream
+      end.to have_enqueued_job(BulkAiUpscaleJob).with(user.id.to_s)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('turbo-stream action="update" target="ai_upscaling_settings_toggle"')
+      expect(user.reload.bulk_ai_upscaling_enabled).to be true
+    end
+
+    it 'does not toggle bulk processing when global AI upscaling is disabled' do
+      allow(ImageUpscalerService).to receive(:service_configured?).and_return(true)
+      user.update!(ai_upscaling_enabled: false)
+
+      patch toggle_bulk_ai_upscaling_cars_path
+
+      expect(response).to redirect_to(edit_user_registration_path)
+      expect(user.reload.bulk_ai_upscaling_enabled).to be false
     end
   end
 

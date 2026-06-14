@@ -51,6 +51,15 @@
           </span>
         </div>
       </button>
+      <% if car.show_original_photo_link? %>
+        <%= link_to car.original_photo.url,
+                    class: "position-absolute bottom-0 start-0 m-3 badge bg-light text-dark rounded-pill px-3 py-2 text-decoration-none shadow-sm",
+                    target: "_blank",
+                    rel: "noopener",
+                    data: { turbo: false } do %>
+          <i class="bi bi-image me-1"></i> <%= t("cars.show.view_original_photo") %>
+        <% end %>
+      <% end %>
 
       <div class="photo-lightbox-overlay d-none"
            data-photo-lightbox-target="overlay"

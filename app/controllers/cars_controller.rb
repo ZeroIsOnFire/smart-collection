@@ -38,6 +38,23 @@ class CarsController < ApplicationController
     return redirect_to edit_user_registration_path unless ImageUpscalerService.service_configured?
 
     current_user.update(ai_upscaling_enabled: !current_user.ai_upscaling_enabled)
+    current_user.update(bulk_ai_upscaling_enabled: false) unless current_user.ai_upscaling_enabled?
+
+    respond_to do |format|
+      format.turbo_stream do
+        render turbo_stream: turbo_stream.update('ai_upscaling_settings_toggle', partial: 'cars/ai_upscaling_settings')
+      end
+      format.html { redirect_to edit_user_registration_path, notice: t('flash.updated', resource: t('nav.settings')) }
+    end
+  end
+
+  # PATCH /cars/toggle_bulk_ai_upscaling
+  def toggle_bulk_ai_upscaling
+    return redirect_to edit_user_registration_path unless ImageUpscalerService.service_configured?
+    return redirect_to edit_user_registration_path unless current_user.ai_upscaling_enabled?
+
+    current_user.update(bulk_ai_upscaling_enabled: !current_user.bulk_ai_upscaling_enabled)
+    BulkAiUpscaleJob.perform_later(current_user.id.to_s) if current_user.bulk_ai_upscaling_enabled?
 
     respond_to do |format|
       format.turbo_stream do
@@ -76,10 +93,13 @@ class CarsController < ApplicationController
     params_to_save = car_params
     if @detected_item
       params_to_save[:photo] = @detected_item.cropped_photo.file.to_file if @detected_item.cropped_photo.present?
+      params_to_save[:original_photo] = @detected_item.original_cropped_photo.file.to_file if @detected_item.original_cropped_photo.present?
+      params_to_save[:enhanced_photo] = @detected_item.enhanced_cropped_photo.file.to_file if @detected_item.enhanced_cropped_photo.present?
       params_to_save[:color] = @detected_item.color if @detected_item.color? && params_to_save[:color].blank?
       params_to_save[:detected_via_ai] = true
       detected_upscale_strategy = @detected_item.photo_upscale_strategy_for_car
       params_to_save[:photo_upscale_strategy] = detected_upscale_strategy if detected_upscale_strategy.present?
+      params_to_save[:photo_variant] = @detected_item.cropped_photo_variant.presence
     end
 
     @car = car_service.create(params_to_save)

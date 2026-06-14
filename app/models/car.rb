@@ -15,6 +15,7 @@ class Car
   field :detected_via_ai, type: Boolean, default: false
   field :skip_upscaler, type: Boolean, default: false
   field :photo_upscale_strategy, type: String
+  field :photo_variant, type: String
 
   # Atributo para persistência do CarrierWave entre falhas de validação
   field :photo_cache, type: String
@@ -65,6 +66,8 @@ class Car
   end
 
   mount_uploader :photo, PhotoUploader
+  mount_uploader :original_photo, PhotoUploader
+  mount_uploader :enhanced_photo, PhotoUploader
 
   index({
           name: 'text',
@@ -97,6 +100,7 @@ class Car
 
   validates :name, presence: true
   validates :photo_processing_status, inclusion: { in: PHOTO_PROCESSING_STATUSES }, allow_blank: true
+  validates :photo_variant, inclusion: { in: %w[original ai] }, allow_blank: true
   validate :year_must_be_numeric
 
   def photo_processing?
@@ -111,7 +115,27 @@ class Car
   end
 
   def photo_upscaled_by_ai?
-    photo_upscale_strategy == 'ai'
+    if original_photo? || enhanced_photo?
+      photo_variant == 'ai' && enhanced_photo?
+    else
+      photo_upscale_strategy == 'ai'
+    end
+  end
+
+  def original_photo_available?
+    original_photo?
+  end
+
+  def enhanced_photo_available?
+    enhanced_photo?
+  end
+
+  def show_original_photo_link?
+    photo_upscaled_by_ai? && original_photo_available?
+  end
+
+  def selectable_photo_variant?
+    original_photo_available? || enhanced_photo_available?
   end
 
   private

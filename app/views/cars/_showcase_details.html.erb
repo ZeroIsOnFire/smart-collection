@@ -5,7 +5,7 @@
 
 <div class="row car-showcase-row <%= modal ? "g-3" : "g-5" %>" data-controller="photo-lightbox">
   <div class="col-lg-7 mb-2 mb-lg-0">
-    <div class="card car-detail-card shadow-sm rounded-4 overflow-hidden bg-white h-100">
+    <div class="card car-detail-card shadow-sm rounded-4 overflow-hidden bg-white h-100 position-relative">
       <% if car.photo? %>
         <button type="button"
                 class="public-detail-photo p-4 d-flex align-items-center justify-content-center h-100 w-100 border-0 bg-light bg-opacity-50 position-relative"
@@ -18,6 +18,15 @@
             </span>
           </div>
         </button>
+        <% if car.show_original_photo_link? %>
+          <%= link_to car.original_photo.url,
+                      class: "position-absolute bottom-0 start-0 m-4 badge bg-light text-dark rounded-pill px-3 py-2 text-decoration-none shadow-sm",
+                      target: "_blank",
+                      rel: "noopener",
+                      data: { turbo: false } do %>
+            <i class="bi bi-image me-1"></i> <%= t("cars.show.view_original_photo") %>
+          <% end %>
+        <% end %>
       <% else %>
         <div class="public-detail-empty-photo bg-light d-flex align-items-center justify-content-center text-muted h-100">
           <div class="text-center">

@@ -11,6 +11,7 @@ class CarImageProcessingJob < ApplicationJob
     update_processing_state(car, status: 'processing')
 
     processing_params = crop_params.to_h.deep_symbolize_keys
+    preserve_original_photo(car)
     processed_file = process_photo(car, processing_params)
     classify_color(car)
 
@@ -27,6 +28,7 @@ class CarImageProcessingJob < ApplicationJob
     mark_as_failed(user_id, car_id, e.message)
   ensure
     cleanup_tempfile(processed_file)
+    enqueue_next_bulk_upscale(user_id) if crop_params.to_h.deep_symbolize_keys[:bulk_ai_upscale]
   end
 
   private
@@ -82,10 +84,13 @@ class CarImageProcessingJob < ApplicationJob
   end
 
   def store_processed_photo(car, file, inherited_strategy = nil)
+    strategy = resolved_upscale_strategy(file, inherited_strategy)
+    store_enhanced_photo(car, file) if strategy == 'ai'
     car.photo = file
     car.photo.store!
     car.write_attribute(:photo_filename, car.photo.identifier)
-    car.photo_upscale_strategy = resolved_upscale_strategy(file, inherited_strategy)
+    car.photo_upscale_strategy = strategy
+    car.photo_variant = strategy == 'ai' ? 'ai' : 'original'
   end
 
   def resolved_upscale_strategy(file, inherited_strategy)
@@ -97,10 +102,33 @@ class CarImageProcessingJob < ApplicationJob
 
   def clear_photo_upscale_strategy(car)
     car.photo_upscale_strategy = nil
+    car.photo_variant = car.original_photo? ? 'original' : nil
   end
 
   def restore_inherited_upscale_strategy(car, strategy)
-    car.photo_upscale_strategy = strategy if strategy.present?
+    return if strategy.blank?
+
+    car.photo_upscale_strategy = strategy
+    car.photo_variant = 'ai' if strategy == 'ai' && car.enhanced_photo?
+  end
+
+  def preserve_original_photo(car)
+    return if car.original_photo? || car.photo.blank?
+
+    File.open(car.photo.path) do |photo_file|
+      car.original_photo = photo_file
+      car.original_photo.store!
+      car.write_attribute(:original_photo_filename, car.original_photo.identifier)
+    end
+    car.photo_variant ||= car.photo_upscale_strategy == 'ai' ? 'ai' : 'original'
+  end
+
+  def store_enhanced_photo(car, file)
+    File.open(file.path) do |photo_file|
+      car.enhanced_photo = photo_file
+      car.enhanced_photo.store!
+      car.write_attribute(:enhanced_photo_filename, car.enhanced_photo.identifier)
+    end
   end
 
   def upscaler_enabled_for?(car)
@@ -193,10 +221,27 @@ class CarImageProcessingJob < ApplicationJob
     File.open(car.photo.path) do |photo_file|
       detected_item.cropped_photo = photo_file
       detected_item.cropped_photo_upscale_strategy = car.photo_upscale_strategy
+      detected_item.cropped_photo_variant = car.photo_variant
       detected_item.save!
     end
 
+    sync_detected_item_versions(car, detected_item)
+
     broadcast_detected_item(detected_item)
+  end
+
+  def sync_detected_item_versions(car, detected_item)
+    if car.original_photo?
+      File.open(car.original_photo.path) do |photo_file|
+        detected_item.original_cropped_photo = photo_file
+      end
+    end
+    if car.enhanced_photo?
+      File.open(car.enhanced_photo.path) do |photo_file|
+        detected_item.enhanced_cropped_photo = photo_file
+      end
+    end
+    detected_item.save!
   end
 
   def broadcast_detected_item(detected_item)
@@ -214,6 +259,13 @@ class CarImageProcessingJob < ApplicationJob
     tempfile.close
     tempfile.unlink
   rescue StandardError
+    nil
+  end
+
+  def enqueue_next_bulk_upscale(user_id)
+    user = User.find(user_id)
+    BulkAiUpscaleJob.perform_later(user.id.to_s) if user.bulk_ai_upscaling_enabled?
+  rescue Mongoid::Errors::DocumentNotFound
     nil
   end
 end

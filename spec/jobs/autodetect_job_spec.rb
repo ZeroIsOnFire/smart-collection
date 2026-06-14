@@ -38,6 +38,7 @@ RSpec.describe AutodetectJob do
       File.open(mock_file_path) do |mock_file|
         mock_file.define_singleton_method(:upscale_strategy) { :ai }
 
+        allow(ImageCropperService).to receive(:crop).and_return(mock_file)
         expect(ImageCropperService).to receive(:crop)
           .with(
             anything,

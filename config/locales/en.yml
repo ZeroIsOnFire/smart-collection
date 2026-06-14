@@ -283,6 +283,7 @@ en:
       fallback_name: "—"
       no_photo: "No photo registered"
       view_full_photo: "View full photo"
+      view_original_photo: "View original"
       photo_upscaled_by_ai: "AI"
       photo_upscaled_by_ai_tooltip: "Photo processed by AI"
     form:
@@ -307,6 +308,7 @@ en:
       year_placeholder: "Ex: 1998"
       observations_placeholder: "Write details about the condition..."
       skip_upscaler: "Do not use upscaler for this record"
+      skip_upscaler_existing: "Show the original non-AI version for this record"
 
   autodetections:
     title: "Photo Autodetection"
