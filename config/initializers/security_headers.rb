@@ -66,7 +66,7 @@ Rails.application.config.content_security_policy do |policy|
   policy.frame_ancestors :self
   policy.img_src :self, :data, :blob
   policy.object_src :none
-  policy.script_src :self, :unsafe_inline, 'https://cdnjs.cloudflare.com'
+  policy.script_src :self, 'https://cdnjs.cloudflare.com'
   policy.style_src :self, :unsafe_inline, 'https://fonts.googleapis.com', 'https://cdn.jsdelivr.net',
                    'https://cdnjs.cloudflare.com'
 end
