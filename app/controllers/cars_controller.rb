@@ -78,7 +78,7 @@ class CarsController < ApplicationController
       params_to_save[:photo] = @detected_item.cropped_photo.file.to_file if @detected_item.cropped_photo.present?
       params_to_save[:color] = @detected_item.color if @detected_item.color? && params_to_save[:color].blank?
       params_to_save[:detected_via_ai] = true
-      detected_upscale_strategy = @detected_item.cropped_photo_upscale_strategy
+      detected_upscale_strategy = @detected_item.photo_upscale_strategy_for_car
       params_to_save[:photo_upscale_strategy] = detected_upscale_strategy if detected_upscale_strategy.present?
     end
 

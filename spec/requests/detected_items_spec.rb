@@ -193,6 +193,43 @@ RSpec.describe 'DetectedItems', type: :request do
       expect(@detected_item.reload.status).to eq('saved')
     end
 
+    it 'marks the car as AI upscaled when saving a detected item from an AI-enabled autodetection without adjustment' do
+      @autodetection.update!(skip_upscaler: false)
+      @detected_item.update!(
+        brand: 'Hot Wheels',
+        label: 'Test Car',
+        color: 'Prata',
+        skip_upscaler: false,
+        cropped_photo_upscale_strategy: nil
+      )
+
+      expect do
+        post cars_path,
+             params: {
+               detected_item_id: @detected_item.id,
+               car: { name: 'Test Car', brand: 'Hot Wheels', color: 'Prata' }
+             },
+             as: :turbo_stream
+      end.to change(Car, :count).by(1)
+
+      expect(Car.last.photo_upscale_strategy).to eq('ai')
+    end
+
+    it 'does not mark the car as AI upscaled when the detected item skips upscaling' do
+      @autodetection.update!(skip_upscaler: false)
+      @detected_item.update!(
+        label: 'No AI',
+        skip_upscaler: true,
+        cropped_photo_upscale_strategy: nil
+      )
+
+      post cars_path,
+           params: { detected_item_id: @detected_item.id, car: { name: 'No AI' } },
+           as: :turbo_stream
+
+      expect(Car.last.photo_upscale_strategy).to be_nil
+    end
+
     it 'shows validation errors and preserves blank name in the detected item form' do
       post cars_path,
            params: { detected_item_id: @detected_item.id, car: { name: '', year: 'abcd' } },

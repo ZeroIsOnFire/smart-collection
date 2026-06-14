@@ -38,6 +38,13 @@ class DetectedItem
     image_processing_status.in?(%w[pending processing])
   end
 
+  def photo_upscale_strategy_for_car
+    return 'ai' if cropped_photo_upscale_strategy == 'ai' || autodetection.photo_upscale_strategy == 'ai'
+    return if skip_upscaler? || autodetection.skip_upscaler?
+
+    'ai' if autodetection.user.ai_upscaling_enabled?
+  end
+
   private
 
   def track_removal
