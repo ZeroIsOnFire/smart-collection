@@ -22,6 +22,7 @@ class DetectedItem
 
   belongs_to :autodetection
   index({ autodetection_id: 1 }, { background: true })
+  delegate :photo_upscale_strategy, to: :autodetection, prefix: true
 
   STATUSES = %w[pending saved rejected].freeze
   IMAGE_PROCESSING_STATUSES = %w[pending processing completed error].freeze

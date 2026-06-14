@@ -91,7 +91,7 @@ class DetectedItemImageProcessingJob < ApplicationJob
   end
 
   def detected_item_upscale_strategy(detected_item, file)
-    upscale_strategy(file).presence || detected_item.autodetection.photo_upscale_strategy
+    upscale_strategy(file).presence || detected_item.autodetection_photo_upscale_strategy
   end
 
   def resolved_skip_upscaler(detected_item, attributes)
