@@ -6,7 +6,7 @@ Smart Collection Catalog is a premium Rails service for registering and managing
 
 ## Technologies
 
-- **Backend**: Ruby on Rails 7.1+
+- **Backend**: Ruby on Rails 8.1
 - **Database**: MongoDB 7 with Mongoid
 - **Authentication**: Devise
 - **Frontend**: Hotwire (Turbo + Stimulus) and Bootstrap 5

@@ -24,7 +24,7 @@ Bundler.require(*Rails.groups)
 module SmartCollectionCatalog
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
-    config.load_defaults 7.1
+    config.load_defaults 8.1
 
     if Rails.env.test?
       config.hosts = [/.*/] # Permite qualquer Host header em CI (evita DNS rebinding errors)
