@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "esbuild app/javascript/application.js --bundle --format=esm --outdir=app/assets/builds --public-path=/assets",
+    "build": "esbuild app/javascript/application.js --bundle --format=esm --minify --legal-comments=none --outdir=app/assets/builds --public-path=/assets",
     "lint": "eslint \"app/javascript/**/*.js\"",
     "lint:fix": "eslint \"app/javascript/**/*.js\" --fix"
   },
@@ -12,7 +12,7 @@
     "@hotwired/turbo-rails": "^8.0.18",
     "@popperjs/core": "^2.11.8",
     "bootstrap": "^5.3.3",
-    "esbuild": "^0.27.0"
+    "esbuild": "^0.28.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
