@@ -33,7 +33,7 @@ export default class extends Controller {
   open(event) {
     event.preventDefault()
     event.stopPropagation()
-    const src = this.previewImgTarget.src
+    const src = this.previewImgTarget.dataset.cropSourceUrl || this.previewImgTarget.src
     if (src) {
       this.imageTarget.src = src
       this.modal.show()

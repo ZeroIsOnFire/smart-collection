@@ -84,6 +84,7 @@ export default class extends Controller {
 
     // Reset file input
     this.inputTarget.value = ""
+    this.previewImgTarget.removeAttribute("data-crop-source-url")
 
     // Hide preview, show upload prompt
     this.previewTarget.classList.add("d-none")
@@ -96,6 +97,7 @@ export default class extends Controller {
     const reader = new FileReader()
     reader.onload = (e) => {
       this.previewImgTarget.src = e.target.result
+      this.previewImgTarget.dataset.cropSourceUrl = e.target.result
       this.previewTarget.classList.remove("d-none")
       this.uploadPromptTarget.classList.add("d-none")
       // Clear remove flag in case it was set before
@@ -133,6 +135,7 @@ export default class extends Controller {
 
   showExistingPhoto(url) {
     this.previewImgTarget.src = url
+    this.previewImgTarget.dataset.cropSourceUrl = url
     this.previewTarget.classList.remove("d-none")
     this.uploadPromptTarget.classList.add("d-none")
     if (this.hasUpscalerToggleTarget && this.upscalerToggleTarget.dataset.persistVisible === "true") {
