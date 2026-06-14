@@ -27,11 +27,19 @@ class AutodetectionsController < ApplicationController
         format.turbo_stream do
           error_message = @autodetection.errors.full_messages.to_sentence
 
-          render turbo_stream: turbo_stream.append('flash_toasts', partial: 'shared/toast',
-                                                                   locals: {
-                                                                     type: :alert,
-                                                                     message: "#{t('activerecord.errors.template.header.one')}: #{error_message}"
-                                                                   })
+          render turbo_stream: turbo_stream.update(
+            'autodetection_form_errors',
+            partial: 'autodetections/form_errors',
+            locals: { autodetection: @autodetection }
+          ) + turbo_stream.update(
+            'autodetection_photo_errors',
+            partial: 'autodetections/photo_errors',
+            locals: { autodetection: @autodetection }
+          ) + turbo_stream.append('flash_toasts', partial: 'shared/toast',
+                                                  locals: {
+                                                    type: :alert,
+                                                    message: "#{t('activerecord.errors.template.header.one')}: #{error_message}"
+                                                  })
         end
         format.html do
           error_message = @autodetection.errors.full_messages.to_sentence
@@ -99,6 +107,6 @@ class AutodetectionsController < ApplicationController
   end
 
   def autodetection_params
-    params.require(:autodetection).permit(:photo)
+    params.fetch(:autodetection, {}).permit(:photo, :skip_upscaler)
   end
 end

@@ -78,6 +78,8 @@ class CarsController < ApplicationController
       params_to_save[:photo] = @detected_item.cropped_photo.file.to_file if @detected_item.cropped_photo.present?
       params_to_save[:color] = @detected_item.color if @detected_item.color? && params_to_save[:color].blank?
       params_to_save[:detected_via_ai] = true
+      detected_upscale_strategy = @detected_item.photo_upscale_strategy_for_car
+      params_to_save[:photo_upscale_strategy] = detected_upscale_strategy if detected_upscale_strategy.present?
     end
 
     @car = car_service.create(params_to_save)
@@ -90,7 +92,8 @@ class CarsController < ApplicationController
           color: @car.color,
           year: @car.year,
           size: @car.size,
-          label: @car.name
+          label: @car.name,
+          skip_upscaler: @car.skip_upscaler?
         )
         @detected_item.autodetection.check_completion!
       end
@@ -186,7 +189,7 @@ class CarsController < ApplicationController
       render turbo_stream: turbo_stream.replace(
         "detected_item_#{@detected_item.id}",
         partial: 'detected_items/detected_item',
-        locals: { detected_item: @detected_item }
+        locals: { detected_item: @detected_item, car: @car }
       )
     end
   end
@@ -260,20 +263,23 @@ class CarsController < ApplicationController
 
   def car_params
     params.require(:car).permit(:name, :brand, :observations, :size, :year, :photo, :remove_photo,
-                                :remote_photo_url, :color, :crop_x, :crop_y, :crop_w, :crop_h, :photo_cache)
+                                :remote_photo_url, :color, :crop_x, :crop_y, :crop_w, :crop_h, :photo_cache,
+                                :skip_upscaler)
   end
 
   def new_car_params
-    params.fetch(:car, {}).permit(:name, :brand, :observations, :size, :year, :color)
+    params.fetch(:car, {}).permit(:name, :brand, :observations, :size, :year, :color, :skip_upscaler)
   end
 
   def default_new_car_attributes
     latest_car = current_user.cars.desc(:created_at).first
     return {} unless latest_car
 
-    {
+    attributes = {
       brand: latest_car.brand,
       size: latest_car.size
     }.compact_blank
+    attributes[:skip_upscaler] = true if latest_car.skip_upscaler?
+    attributes
   end
 end

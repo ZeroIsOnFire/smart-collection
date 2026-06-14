@@ -118,6 +118,7 @@ export default class extends Controller {
       const color = document.getElementById(`color_${itemId}`)?.value
       const year = document.getElementById(`year_${itemId}`)?.value
       const size = document.getElementById(`size_${itemId}`)?.value
+      const skipUpscaler = document.getElementById(`skip_upscaler_${itemId}`)?.checked ? "1" : "0"
 
       const payload = {
         ...normalized,
@@ -125,7 +126,8 @@ export default class extends Controller {
         name,
         color,
         year,
-        size
+        size,
+        skip_upscaler: skipUpscaler
       }
 
       const response = await fetch(this.updateUrlValue, {

@@ -11,7 +11,8 @@ RSpec.describe 'Cars', type: :request do
     {
       name: 'Honda Civic',
       brand: 'Hot Wheels',
-      year: 2020
+      year: 2020,
+      photo: fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
     }
   end
 
@@ -208,6 +209,17 @@ RSpec.describe 'Cars', type: :request do
       )
     end
 
+    it 'renders the per-record upscaler toggle' do
+      get new_car_path
+
+      document = Nokogiri::HTML(response.body)
+
+      expect(document.at_css('#car_skip_upscaler')).to be_present
+      expect(document.at_css('.photo-dropzone #car_skip_upscaler')).to be_nil
+      expect(document.at_css('.car-upscaler-toggle #car_skip_upscaler')).to be_present
+      expect(response.body).to include(I18n.t('cars.form.skip_upscaler'))
+    end
+
     it 'hides the AI upscaling notice when the user disables it' do
       user.update!(ai_upscaling_enabled: false)
       allow(ImageUpscalerService).to receive(:service_configured?).and_return(true)
@@ -249,14 +261,76 @@ RSpec.describe 'Cars', type: :request do
       end
 
       it 'creates a car with a photo' do
-        attributes_with_photo = valid_attributes.merge(
-          photo: fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
-        )
         expect do
-          post cars_path, params: { car: attributes_with_photo }
+          post cars_path, params: { car: valid_attributes }
         end.to change(Car, :count).by(1)
 
         expect(Car.last.photo).to be_present
+      end
+
+      it 'shows photo presence errors in the form' do
+        attributes_without_photo = valid_attributes.except(:photo)
+
+        expect do
+          post cars_path, params: { car: attributes_without_photo }, as: :turbo_stream
+        end.not_to change(Car, :count)
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(response.body).to include(I18n.t('cars.form.validation_error_title'))
+        expect(response.body).to include(Car.human_attribute_name(:photo))
+      end
+
+      it 'shows all validation errors at once' do
+        invalid_attributes = valid_attributes.except(:photo).merge(name: '')
+
+        expect do
+          post cars_path, params: { car: invalid_attributes }, as: :turbo_stream
+        end.not_to change(Car, :count)
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(response.body).to include(Car.human_attribute_name(:photo))
+        expect(response.body).to include(Car.human_attribute_name(:name))
+      end
+
+      it 'shows field errors without repeating the field name inline' do
+        invalid_attributes = valid_attributes.except(:photo).merge(name: '')
+
+        post cars_path, params: { car: invalid_attributes }, as: :turbo_stream
+
+        document = Nokogiri::HTML.fragment(response.body)
+        name_error = document.at_css('.car_name .invalid-feedback')
+
+        expect(name_error.text.squish).to eq(I18n.t('errors.messages.blank'))
+      end
+
+      it 'rejects non-numeric years' do
+        post cars_path, params: { car: valid_attributes.merge(year: 'abcd') }, as: :turbo_stream
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(response.body).to include(Car.human_attribute_name(:year))
+
+        document = Nokogiri::HTML.fragment(response.body)
+        year_error = document.at_css('.car_year .invalid-feedback')
+
+        expect(year_error.text.squish).to eq(I18n.t('errors.messages.not_a_number'))
+      end
+
+      it 'applies numeric mask only to the year field' do
+        get new_car_path
+
+        document = Nokogiri::HTML(response.body)
+        year_input = document.at_css('#car_year')
+        name_input = document.at_css('#car_name')
+
+        expect(year_input['data-controller']).to eq('numeric-mask')
+        expect(year_input['data-action']).to include('input->numeric-mask#sanitize')
+        expect(name_input['data-controller']).not_to eq('numeric-mask')
+      end
+
+      it 'persists the per-record upscaler preference' do
+        post cars_path, params: { car: valid_attributes.merge(skip_upscaler: '1') }
+
+        expect(Car.last.skip_upscaler).to be true
       end
 
       it 'prepends the created car and closes the modal with turbo stream' do
@@ -273,7 +347,7 @@ RSpec.describe 'Cars', type: :request do
       end
 
       it 'prepends the created car and keeps the modal ready for another item' do
-        attributes = valid_attributes.merge(size: '1:64')
+        attributes = valid_attributes.merge(size: '1:64', skip_upscaler: '1')
 
         expect do
           post cars_path,
@@ -292,6 +366,7 @@ RSpec.describe 'Cars', type: :request do
         expect(response.body).to include('flash_toasts')
         expect(document.at_css('#car_brand')['value']).to eq(attributes[:brand])
         expect(document.at_css('#car_size option[selected]')['value']).to eq(attributes[:size])
+        expect(document.at_css('#car_skip_upscaler')['checked']).to eq('checked')
       end
 
       it 'rerenders the modal form when turbo stream validation fails' do
@@ -322,6 +397,19 @@ RSpec.describe 'Cars', type: :request do
       expect(response.body).to include(I18n.t('cars.modal.edit_title'))
     end
 
+    it 'hides the per-record upscaler toggle until an existing photo is replaced' do
+      car.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+      car.save!
+
+      get edit_car_path(car), headers: { 'Turbo-Frame' => 'modal' }
+
+      document = Nokogiri::HTML(response.body)
+      toggle = document.at_css('.car-upscaler-toggle[data-photo-upload-target="upscalerToggle"]')
+
+      expect(toggle).to be_present
+      expect(toggle['class']).to include('d-none')
+    end
+
     it "redirects if trying to edit another user's car" do
       other_car = create(:car, user: other_user)
       get edit_car_path(other_car)
@@ -334,6 +422,7 @@ RSpec.describe 'Cars', type: :request do
     it 'renders the detail view inside the global modal frame' do
       updated_at = Time.zone.local(2026, 6, 11, 2, 22)
       car.update!(color: 'Azul', size: '1:64')
+      car.update!(photo_upscale_strategy: 'ai')
       car.set(updated_at: updated_at)
       car.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
       car.save!
@@ -364,6 +453,8 @@ RSpec.describe 'Cars', type: :request do
       expect(response.body).to include(I18n.t('activerecord.attributes.car.observations'))
       expect(response.body).to include('Azul')
       expect(response.body).to include('1:64')
+      expect(response.body).to include(I18n.t('cars.show.photo_upscaled_by_ai'))
+      expect(response.body).to include(I18n.t('cars.show.photo_upscaled_by_ai_tooltip'))
       expect(response.body).to include(I18n.l(car.created_at.to_date, format: :numeric))
       expect(response.body).to include(I18n.t('cars.show.updated_at', date: I18n.l(updated_at, format: :short)))
       expect(document.at_css('.public-detail-notes')).to be_present

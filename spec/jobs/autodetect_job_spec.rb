@@ -36,6 +36,8 @@ RSpec.describe AutodetectJob do
       File.write(mock_file_path, 'fake content')
 
       File.open(mock_file_path) do |mock_file|
+        mock_file.define_singleton_method(:upscale_strategy) { :ai }
+
         expect(ImageCropperService).to receive(:crop)
           .with(
             anything,
@@ -52,6 +54,8 @@ RSpec.describe AutodetectJob do
         autodetection.reload
         expect(autodetection.status).to eq('to_verify')
         expect(autodetection.detected_items.first.label).to eq(I18n.t('autodetections.detected_item.new_item'))
+        expect(autodetection.detected_items.first.skip_upscaler).to be false
+        expect(autodetection.detected_items.first.cropped_photo_upscale_strategy).to eq('ai')
         expect(autodetection.detected_items.first.cropped_photo).to be_present
         expect(UsageMetric.values_for(['yolo_detected_items']).fetch('yolo_detected_items')).to eq(1)
       end
@@ -76,31 +80,122 @@ RSpec.describe AutodetectJob do
       saved_image = MiniMagick::Image.open(saved_autodetection.photo.path)
       expect(saved_image.width).to eq(1440)
       expect(saved_image.height).to eq(1440)
+      expect(saved_autodetection.photo_upscale_strategy).to be_nil
       expect(saved_autodetection.status).to eq('to_verify')
     end
 
     it 'tracks upscaled autodetection photos in the historical counters' do
-      upscaled_file = build_temp_image(width: 1440, height: 1440, upscale_strategy: :local)
+      upscaled_file = build_temp_image(width: 1440, height: 1440, upscale_strategy: :ai)
 
       allow(ImageUpscalerService).to receive(:upscale_if_needed).and_return(upscaled_file)
       allow(YoloDetectionService).to receive_messages(service_configured?: true, analyze: [])
 
       expect do
         described_class.new.perform(autodetection.id.to_s)
-      end.to change { UsageMetric.values_for(['photos_upscaled_local']).fetch('photos_upscaled_local') }.from(0).to(1)
+      end.to change { UsageMetric.values_for(['photos_upscaled_ai']).fetch('photos_upscaled_ai') }.from(0).to(1)
+      expect(Autodetection.find(autodetection.id).photo_upscale_strategy).to eq('ai')
     end
 
-    it 'uses local fallback when the user disables AI upscaling' do
+    it 'inherits the autodetection photo upscale strategy for detected item crops' do
+      autodetection.update!(photo_upscale_strategy: 'ai')
+      allow(ImageUpscalerService).to receive(:upscale_if_needed).and_return(nil)
+      allow(YoloDetectionService).to receive_messages(
+        service_configured?: true,
+        analyze: [
+          {
+            label: 'YOLO car',
+            score: 0.99,
+            vertices: [{ x: 0.1, y: 0.1 }, { x: 0.9, y: 0.9 }]
+          }
+        ]
+      )
+      mock_file_path = Rails.root.join('tmp/mock_crop_inherited_upscale.jpg')
+      File.write(mock_file_path, 'fake content')
+
+      File.open(mock_file_path) do |mock_file|
+        allow(ImageCropperService).to receive(:crop).and_return(mock_file)
+
+        described_class.new.perform(autodetection.id.to_s)
+      end
+
+      expect(Autodetection.find(autodetection.id).detected_items.first.cropped_photo_upscale_strategy).to eq('ai')
+      FileUtils.rm_f(mock_file_path)
+    end
+
+    it 'does not resize the autodetection photo when the user disables AI upscaling' do
       user.update!(ai_upscaling_enabled: false)
       allow(YoloDetectionService).to receive_messages(service_configured?: true, analyze: [])
 
-      expect(ImageUpscalerService).to receive(:upscale_if_needed)
-        .with(anything, minimum_side: AutodetectionService.autodetection_minimum_side, use_ai: false, local_fallback: true)
-        .and_return(nil)
+      expect(ImageUpscalerService).not_to receive(:upscale_if_needed)
 
       described_class.new.perform(autodetection.id.to_s)
 
       expect(autodetection.reload.status).to eq('to_verify')
+    end
+
+    it 'does not use local crop upscale when the user disables AI upscaling' do
+      user.update!(ai_upscaling_enabled: false)
+      allow(YoloDetectionService).to receive_messages(
+        service_configured?: true,
+        analyze: [
+          {
+            label: 'YOLO car',
+            score: 0.99,
+            vertices: [{ x: 0.1, y: 0.1 }, { x: 0.9, y: 0.9 }]
+          }
+        ]
+      )
+      mock_file_path = Rails.root.join('tmp/mock_crop_no_upscale.jpg')
+      File.write(mock_file_path, 'fake content')
+
+      File.open(mock_file_path) do |mock_file|
+        expect(ImageCropperService).to receive(:crop)
+          .with(
+            anything,
+            anything,
+            minimum_side: ImageCropperService.default_minimum_side,
+            upscale: { use_ai: false, local_fallback: false }
+          )
+          .and_return(mock_file)
+
+        described_class.new.perform(autodetection.id.to_s)
+      end
+
+      FileUtils.rm_f(mock_file_path)
+    end
+
+    it 'does not upscale the autodetection or crops when the record skips upscaling' do
+      autodetection.update!(skip_upscaler: true)
+      allow(YoloDetectionService).to receive_messages(
+        service_configured?: true,
+        analyze: [
+          {
+            label: 'YOLO car',
+            score: 0.99,
+            vertices: [{ x: 0.1, y: 0.1 }, { x: 0.9, y: 0.9 }]
+          }
+        ]
+      )
+      mock_file_path = Rails.root.join('tmp/mock_crop_skip_upscale.jpg')
+      File.write(mock_file_path, 'fake content')
+
+      expect(ImageUpscalerService).not_to receive(:upscale_if_needed)
+
+      File.open(mock_file_path) do |mock_file|
+        expect(ImageCropperService).to receive(:crop)
+          .with(
+            anything,
+            anything,
+            minimum_side: ImageCropperService.default_minimum_side,
+            upscale: { use_ai: false, local_fallback: false }
+          )
+          .and_return(mock_file)
+
+        described_class.new.perform(autodetection.id.to_s)
+      end
+
+      expect(autodetection.reload.detected_items.first.skip_upscaler).to be true
+      FileUtils.rm_f(mock_file_path)
     end
 
     it 'marca como erro caso o processamento falhe' do

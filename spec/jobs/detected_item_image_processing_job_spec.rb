@@ -40,6 +40,7 @@ RSpec.describe DetectedItemImageProcessingJob do
       expect(processed_item.label).to eq('Manual car')
       expect(processed_item.color).to eq('Azul')
       expect(processed_item.cropped_photo).to be_present
+      expect(processed_item.cropped_photo_upscale_strategy).to be_nil
       expect(processed_item.image_processing_status).to eq('completed')
     end
 
@@ -57,7 +58,8 @@ RSpec.describe DetectedItemImageProcessingJob do
         color: 'Verde',
         brand: 'Hot Wheels',
         year: '1998',
-        size: '1:64'
+        size: '1:64',
+        skip_upscaler: '1'
       )
 
       processed_item = DetectedItem.find(detected_item.id)
@@ -66,6 +68,7 @@ RSpec.describe DetectedItemImageProcessingJob do
       expect(processed_item.brand).to eq('Hot Wheels')
       expect(processed_item.year).to eq(1998)
       expect(processed_item.size).to eq('1:64')
+      expect(processed_item.skip_upscaler).to be true
     end
 
     it 'honors the user AI upscaling preference' do
@@ -78,7 +81,7 @@ RSpec.describe DetectedItemImageProcessingJob do
           anything,
           padding: 0,
           minimum_side: ImageCropperService.default_minimum_side,
-          upscale: { use_ai: false, local_fallback: true }
+          upscale: { use_ai: false, local_fallback: false }
         )
         .and_return(file)
       allow(YoloDetectionService).to receive(:classify).and_return({})
@@ -86,6 +89,49 @@ RSpec.describe DetectedItemImageProcessingJob do
       described_class.new.perform(user.id.to_s, detected_item.id.to_s)
 
       expect(DetectedItem.find(detected_item.id).image_processing_status).to eq('completed')
+    end
+
+    it 'honors the detected item upscaler preference' do
+      detected_item.update!(skip_upscaler: true)
+      file = cropped_file
+
+      expect(ImageCropperService).to receive(:crop)
+        .with(
+          anything,
+          anything,
+          padding: 0,
+          minimum_side: ImageCropperService.default_minimum_side,
+          upscale: { use_ai: false, local_fallback: false }
+        )
+        .and_return(file)
+      allow(YoloDetectionService).to receive(:classify).and_return({})
+
+      described_class.new.perform(user.id.to_s, detected_item.id.to_s)
+
+      expect(DetectedItem.find(detected_item.id).image_processing_status).to eq('completed')
+    end
+
+    it 'forces AI upscaling when the autodetection photo already used AI' do
+      autodetection.update!(photo_upscale_strategy: 'ai')
+      detected_item.update!(skip_upscaler: true)
+      file = cropped_file
+
+      expect(ImageCropperService).to receive(:crop)
+        .with(
+          anything,
+          anything,
+          padding: 0,
+          minimum_side: ImageCropperService.default_minimum_side,
+          upscale: { use_ai: true, local_fallback: true }
+        )
+        .and_return(file)
+      allow(YoloDetectionService).to receive(:classify).and_return({})
+
+      described_class.new.perform(user.id.to_s, detected_item.id.to_s, skip_upscaler: '1')
+
+      processed_item = DetectedItem.find(detected_item.id)
+      expect(processed_item.skip_upscaler).to be false
+      expect(processed_item.cropped_photo_upscale_strategy).to eq('ai')
     end
 
     it 'marks the detected item as error when processing fails' do
@@ -107,6 +153,19 @@ RSpec.describe DetectedItemImageProcessingJob do
       expect do
         described_class.new.perform(user.id.to_s, detected_item.id.to_s)
       end.to change { UsageMetric.values_for(['photos_upscaled_ai']).fetch('photos_upscaled_ai') }.from(0).to(1)
+      expect(DetectedItem.find(detected_item.id).cropped_photo_upscale_strategy).to eq('ai')
+    end
+
+    it 'inherits the autodetection photo strategy when the adjusted crop is not upscaled again' do
+      autodetection.update!(photo_upscale_strategy: 'ai')
+      file = cropped_file
+
+      allow(ImageCropperService).to receive(:crop).and_return(file)
+      allow(YoloDetectionService).to receive(:classify).and_return({})
+
+      described_class.new.perform(user.id.to_s, detected_item.id.to_s)
+
+      expect(DetectedItem.find(detected_item.id).cropped_photo_upscale_strategy).to eq('ai')
     end
 
     it 'does not process detected items from another user' do

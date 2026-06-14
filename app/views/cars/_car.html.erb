@@ -81,18 +81,7 @@
           </div>
 
           <!-- Ano + Escala + Cor -->
-          <% if car.year? || car.size? || car.color? %>
-            <div class="text-muted small d-flex gap-3">
-              <% if car.year? %><span><i class="bi bi-calendar me-1"></i><%= car.year %></span><% end %>
-              <% if car.size? %><span><i class="bi bi-arrows-fullscreen me-1"></i><%= car.size %></span><% end %>
-              <% if car.color? %>
-                <span class="d-flex align-items-center gap-1">
-                  <span class="d-inline-block rounded-circle shadow-sm" style="width:10px; height:10px; background-color:<%= Car::COLORS[car.color] || '#ccc' %>; border: 1px solid #dee2e6;"></span>
-                  <%= car.color %>
-                </span>
-              <% end %>
-            </div>
-          <% end %>
+          <%= render "cars/metadata_badges", car: car %>
         </div>
       <% end %>
 

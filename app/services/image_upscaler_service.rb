@@ -8,6 +8,9 @@ require 'uri'
 class ImageUpscalerService
   DEFAULT_MINIMUM_SIDE = 360
   DEFAULT_MINIMUM_SIDE_ENV = 'IMAGE_UPSCALE_DEFAULT_MINIMUM_SIDE'
+  DEFAULT_OPEN_TIMEOUT = 5
+  DEFAULT_READ_TIMEOUT = 180
+  DEFAULT_WRITE_TIMEOUT = 30
   class UpscaleError < StandardError; end
 
   def self.default_minimum_side
@@ -16,6 +19,12 @@ class ImageUpscalerService
 
   def self.minimum_side_from_env(env_key, fallback)
     value = ENV.fetch(env_key, nil).to_s.to_i
+
+    value.positive? ? value : fallback
+  end
+
+  def self.timeout_from_env(env_key, fallback)
+    value = ENV.fetch(env_key, nil).to_s.to_f
 
     value.positive? ? value : fallback
   end
@@ -64,6 +73,9 @@ class ImageUpscalerService
                        ], 'multipart/form-data')
 
       Net::HTTP.start(url.host, url.port, use_ssl: url.scheme == 'https') do |http|
+        http.open_timeout = timeout_from_env('IMAGE_UPSCALE_OPEN_TIMEOUT', DEFAULT_OPEN_TIMEOUT)
+        http.read_timeout = timeout_from_env('IMAGE_UPSCALE_READ_TIMEOUT', DEFAULT_READ_TIMEOUT)
+        http.write_timeout = timeout_from_env('IMAGE_UPSCALE_WRITE_TIMEOUT', DEFAULT_WRITE_TIMEOUT) if http.respond_to?(:write_timeout=)
         http.request(request)
       end
     end

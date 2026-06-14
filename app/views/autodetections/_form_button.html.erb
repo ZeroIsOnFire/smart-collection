@@ -25,6 +25,9 @@
                   action: "turbo:submit-start->autodetection-upload#onStart turbo:submit-end->autodetection-upload#onComplete"
                 },
                 multipart: true do |f| %>
+            <div id="autodetection_form_errors">
+              <%= render "autodetections/form_errors", autodetection: autodetection %>
+            </div>
 
             <%= f.file_field :photo,
                   class: "d-none",
@@ -44,6 +47,14 @@
                 <%= render "shared/ai_upscaling_notice",
                            translation_key: "autodetections.form.ai_upscaling_notice",
                            minimum_side: AutodetectionService.autodetection_minimum_side %>
+              </div>
+              <div id="autodetection_photo_errors">
+                <%= render "autodetections/photo_errors", autodetection: autodetection %>
+              </div>
+
+              <div class="record-upscaler-toggle form-check form-switch mb-4">
+                <%= f.check_box :skip_upscaler, class: "form-check-input flex-shrink-0", role: "switch" %>
+                <%= f.label :skip_upscaler, t("autodetections.form.skip_upscaler"), class: "form-check-label small fw-semibold mb-0" %>
               </div>
 
               <div class="row g-3">

@@ -72,9 +72,11 @@ class ImageCropperService
         return upscaled_output
       end
 
-      ImageUpscalerService.resize_image_to_minimum_side!(image, minimum_side)
-      image.write(output.path)
-      output.rewind
+      if upscale.fetch(:use_ai, true) || upscale.fetch(:local_fallback, false)
+        ImageUpscalerService.resize_image_to_minimum_side!(image, minimum_side)
+        image.write(output.path)
+        output.rewind
+      end
     end
 
     output

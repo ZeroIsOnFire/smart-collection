@@ -7,6 +7,8 @@ class Autodetection
 
   field :status, type: String, default: 'pending'
   field :error_message, type: String
+  field :skip_upscaler, type: Boolean, default: false
+  field :photo_upscale_strategy, type: String
 
   mount_uploader :photo, PhotoUploader
 
@@ -24,6 +26,10 @@ class Autodetection
   # Constants for status
   STATUSES = %w[pending processing to_verify completed error].freeze
   validates :status, inclusion: { in: STATUSES }
+
+  def photo_upscaled_by_ai?
+    photo_upscale_strategy == 'ai'
+  end
 
   # Verifica se todos os itens foram processados e conclui a autodetecção
   def check_completion!

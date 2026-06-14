@@ -2,14 +2,16 @@
              class="col-12 mb-4 d-block"
              data-controller="detected-item"
              data-detected-item-loading-label-value="<%= t('autodetections.messages.saving') %>">
-  <% cache detected_item do %>
   <%
+    form_car = local_assigns.fetch(:car, Car.new)
+    has_form_errors = form_car.errors.any?
     is_saved = detected_item.status == 'saved'
     is_rejected = detected_item.status == 'rejected'
     is_processed = is_saved || is_rejected
     is_image_processing = detected_item.image_processing?
   %>
 
+  <% cache [detected_item, form_car.errors.details, form_car.attributes.slice('brand', 'name', 'color', 'year', 'size', 'skip_upscaler'), form_car.year_before_type_cast] do %>
   <div class="card shadow-sm rounded-4 border-0 overflow-hidden position-relative detected-item-card <%= 'is-processed' if is_processed %>">
     <!-- Loading Overlay -->
     <div class="detected-item-loader">
@@ -26,10 +28,11 @@
         <!-- Lado Esquerdo: Foto (25%) -->
         <div class="col-md-3 detected-item-photo-col border-end">
           <% if detected_item.cropped_photo? %>
-            <%= image_tag detected_item.cropped_photo.url,
+            <%= image_tag "#{detected_item.cropped_photo.url}?v=#{detected_item.updated_at.to_i}",
                           loading: "lazy",
                           class: "img-fluid w-100 h-100 object-fit-cover",
-                          style: "min-height: 220px;" %>
+                          style: "min-height: 220px;",
+                          data: { turbo_cache: "false" } %>
           <% else %>
             <div class="d-flex align-items-center justify-content-center bg-soft-secondary w-100" style="min-height: 220px;">
               <i class="bi bi-camera display-4 text-muted opacity-25"></i>
@@ -80,13 +83,14 @@
               <p class="mb-0 text-muted ps-5"><%= t('autodetections.detected_item.statuses.rejected_text') %></p>
             </div>
           <% else %>
-            <%= simple_form_for(Car.new, url: cars_path, html: { id: "form_detected_item_#{detected_item.id}", class: "row g-3 detected-item-form" }) do |f| %>
+            <%= simple_form_for(form_car, url: cars_path, html: { id: "form_detected_item_#{detected_item.id}", class: "row g-3 detected-item-form" }) do |f| %>
               <%= hidden_field_tag :detected_item_id, detected_item.id %>
 
               <div class="col-12">
                 <%= f.input :brand,
                             label: t('autodetections.detected_item.brand_optional'),
-                            input_html: { value: detected_item.brand, id: "brand_#{detected_item.id}", class: "bg-light border-0" },
+                            error: field_error_message(form_car, :brand),
+                            input_html: { value: has_form_errors ? form_car.brand : detected_item.brand, id: "brand_#{detected_item.id}", class: "bg-light border-0" },
                             label_html: { class: "text-secondary small text-uppercase tracking-wide", for: "brand_#{detected_item.id}" } %>
               </div>
 
@@ -94,7 +98,8 @@
                 <%= f.input :name,
                             label: t('autodetections.detected_item.model_required'),
                             required: true,
-                            input_html: { value: detected_item.label, id: "name_#{detected_item.id}", class: "bg-light border-0 fw-bold" },
+                            error: field_error_message(form_car, :name),
+                            input_html: { value: has_form_errors ? form_car.name : detected_item.label, id: "name_#{detected_item.id}", class: "bg-light border-0 fw-bold" },
                             label_html: { class: "text-secondary small text-uppercase tracking-wide", for: "name_#{detected_item.id}" } %>
               </div>
 
@@ -102,9 +107,10 @@
                 <%= f.input :color,
                             as: :select,
                             collection: Car.color_options,
-                            selected: detected_item.color,
+                            selected: has_form_errors ? form_car.color : detected_item.color,
                             include_blank: t('autodetections.detected_item.select_prompt'),
                             label: t('autodetections.detected_item.color'),
+                            error: field_error_message(form_car, :color),
                             input_html: { id: "color_#{detected_item.id}", class: "form-select bg-light border-0" },
                             label_html: { class: "text-secondary small text-uppercase tracking-wide", for: "color_#{detected_item.id}" } %>
               </div>
@@ -112,7 +118,16 @@
               <div class="col-md-3">
                 <%= f.input :year,
                             label: t('autodetections.detected_item.year'),
-                            input_html: { value: detected_item.year, id: "year_#{detected_item.id}", class: "bg-light border-0" },
+                            error: field_error_message(form_car, :year),
+                            input_html: {
+                              value: has_form_errors ? form_car.year_before_type_cast : detected_item.year,
+                              id: "year_#{detected_item.id}",
+                              class: "bg-light border-0",
+                              data: {
+                                controller: "numeric-mask",
+                                action: "input->numeric-mask#sanitize"
+                              }
+                            },
                             label_html: { class: "text-secondary small text-uppercase tracking-wide", for: "year_#{detected_item.id}" } %>
               </div>
 
@@ -120,11 +135,32 @@
                 <%= f.input :size,
                             as: :select,
                             collection: Car.scale_options,
-                            selected: detected_item.size,
+                            selected: has_form_errors ? form_car.size : detected_item.size,
                             include_blank: t('autodetections.detected_item.select_prompt'),
                             label: t('autodetections.detected_item.size_scale'),
+                            error: field_error_message(form_car, :size),
                             input_html: { id: "size_#{detected_item.id}", class: "form-select bg-light border-0" },
                             label_html: { class: "text-secondary small text-uppercase tracking-wide", for: "size_#{detected_item.id}" } %>
+              </div>
+
+              <div class="col-12">
+                <%
+                  upscaler_skip_locked = detected_item.upscaler_skip_locked?
+                  detected_item_skip_upscaler = upscaler_skip_locked ? false : (has_form_errors ? form_car.skip_upscaler? : detected_item.skip_upscaler?)
+                %>
+                <div class="record-upscaler-toggle form-check form-switch <%= 'opacity-75' if upscaler_skip_locked %>">
+                  <%= hidden_field_tag "car[skip_upscaler]", "0", id: nil %>
+                  <%= check_box_tag "car[skip_upscaler]",
+                                    "1",
+                                    detected_item_skip_upscaler,
+                                    id: "skip_upscaler_#{detected_item.id}",
+                                    class: "form-check-input flex-shrink-0",
+                                    role: "switch",
+                                    disabled: upscaler_skip_locked %>
+                  <%= label_tag "skip_upscaler_#{detected_item.id}",
+                                t("autodetections.detected_item.skip_upscaler"),
+                                class: "form-check-label small fw-semibold mb-0" %>
+                </div>
               </div>
             <% end %>
           <% end %>

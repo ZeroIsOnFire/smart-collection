@@ -13,6 +13,8 @@ class Car
   field :color, type: String
   field :tags, type: Array, default: []
   field :detected_via_ai, type: Boolean, default: false
+  field :skip_upscaler, type: Boolean, default: false
+  field :photo_upscale_strategy, type: String
 
   # Atributo para persistência do CarrierWave entre falhas de validação
   field :photo_cache, type: String
@@ -95,6 +97,7 @@ class Car
 
   validates :name, presence: true
   validates :photo_processing_status, inclusion: { in: PHOTO_PROCESSING_STATUSES }, allow_blank: true
+  validate :year_must_be_numeric
 
   def photo_processing?
     photo_processing_status.in?(%w[pending processing])
@@ -107,6 +110,10 @@ class Car
       photo_processing_crop_h.positive?
   end
 
+  def photo_upscaled_by_ai?
+    photo_upscale_strategy == 'ai'
+  end
+
   private
 
   def track_creation
@@ -115,5 +122,12 @@ class Car
 
   def track_removal
     UsageMetric.record!('cars_removed')
+  end
+
+  def year_must_be_numeric
+    raw_year = year_before_type_cast
+    return if raw_year.blank? || raw_year.to_s.match?(/\A\d+\z/)
+
+    errors.add(:year, :not_a_number)
   end
 end

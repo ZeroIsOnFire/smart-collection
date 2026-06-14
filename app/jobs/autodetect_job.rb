@@ -30,7 +30,7 @@ class AutodetectJob < ApplicationJob
           autodetection.photo.path,
           data[:vertices],
           minimum_side: ImageCropperService.default_minimum_side,
-          upscale: { use_ai: autodetection.user.ai_upscaling_enabled?, local_fallback: true }
+          upscale: upscale_options(autodetection)
         )
 
         next unless cropped_file
@@ -38,6 +38,8 @@ class AutodetectJob < ApplicationJob
         autodetection.detected_items.create!(
           label: I18n.t('autodetections.detected_item.new_item'),
           color: data[:color],
+          skip_upscaler: autodetection.skip_upscaler?,
+          cropped_photo_upscale_strategy: detected_item_upscale_strategy(autodetection, cropped_file),
           position_data: {
             vertices: data[:vertices],
             score: data[:score]
@@ -61,10 +63,12 @@ class AutodetectJob < ApplicationJob
   private
 
   def prepare_photo_for_detection(autodetection)
+    return autodetection.photo.path unless upscaling_enabled?(autodetection)
+
     upscaled_file = ImageUpscalerService.upscale_if_needed(
       autodetection.photo.path,
       minimum_side: AutodetectionService.autodetection_minimum_side,
-      use_ai: autodetection.user.ai_upscaling_enabled?,
+      use_ai: true,
       local_fallback: true
     )
 
@@ -72,10 +76,21 @@ class AutodetectJob < ApplicationJob
 
     track_upscaled_photo(upscaled_file)
     autodetection.photo = upscaled_file
+    autodetection.photo_upscale_strategy = upscale_strategy(upscaled_file)
     autodetection.save!
     autodetection.photo.path
   ensure
     cleanup_tempfile(upscaled_file)
+  end
+
+  def upscale_options(autodetection)
+    enabled = upscaling_enabled?(autodetection)
+
+    { use_ai: enabled, local_fallback: enabled }
+  end
+
+  def upscaling_enabled?(autodetection)
+    autodetection.user.ai_upscaling_enabled? && !autodetection.skip_upscaler?
   end
 
   def cleanup_tempfile(tempfile)
@@ -91,5 +106,15 @@ class AutodetectJob < ApplicationJob
     return unless file.respond_to?(:upscale_strategy)
 
     UsageMetric.record!("photos_upscaled_#{file.upscale_strategy}")
+  end
+
+  def upscale_strategy(file)
+    return unless file.respond_to?(:upscale_strategy)
+
+    file.upscale_strategy.to_s
+  end
+
+  def detected_item_upscale_strategy(autodetection, file)
+    upscale_strategy(file).presence || autodetection.photo_upscale_strategy
   end
 end

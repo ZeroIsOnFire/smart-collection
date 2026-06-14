@@ -220,6 +220,33 @@ RSpec.describe ImageUpscalerService do
         small_photo&.close
         small_photo&.unlink
       end
+
+      it 'raises an explicit error when the remote service times out' do
+        small_photo = build_small_photo
+
+        stub_request(:post, upscale_endpoint).to_timeout
+
+        expect do
+          described_class.upscale_if_needed(small_photo.path, minimum_side: 360)
+        end.to raise_error(ImageUpscalerService::UpscaleError)
+      ensure
+        small_photo&.close
+        small_photo&.unlink
+      end
+    end
+  end
+
+  describe '.timeout_from_env' do
+    it 'uses a positive timeout from the environment' do
+      allow(ENV).to receive(:fetch).with('IMAGE_UPSCALE_READ_TIMEOUT', nil).and_return('240.5')
+
+      expect(described_class.timeout_from_env('IMAGE_UPSCALE_READ_TIMEOUT', 180)).to eq(240.5)
+    end
+
+    it 'uses the fallback when the timeout is invalid' do
+      allow(ENV).to receive(:fetch).with('IMAGE_UPSCALE_READ_TIMEOUT', nil).and_return('0')
+
+      expect(described_class.timeout_from_env('IMAGE_UPSCALE_READ_TIMEOUT', 180)).to eq(180)
     end
   end
 

@@ -10,7 +10,16 @@
     "color-detector-detect-url-value": detect_color_autodetections_path
   }
 }) do |f| %>
-  <%= f.error_notification %>
+  <% if car.errors.any? %>
+    <div class="alert alert-danger car-form-errors" role="alert">
+      <div class="fw-bold mb-1"><%= t("cars.form.validation_error_title") %></div>
+      <ul class="mb-0 ps-3">
+        <% car.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
 
   <div class="<%= modal ? 'modal-form-shell' : 'card border-0 shadow-sm rounded-4 overflow-hidden mb-4' %>">
     <div class="<%= modal ? 'p-0' : 'card-body p-4 p-md-5' %>">
@@ -103,6 +112,12 @@
           </div>
         </div>
 
+        <div class="record-upscaler-toggle car-upscaler-toggle form-check form-switch<%= ' d-none' if car.persisted? && car.photo? %> mt-3"
+             data-photo-upload-target="upscalerToggle">
+          <%= f.check_box :skip_upscaler, class: "form-check-input flex-shrink-0", role: "switch" %>
+          <%= f.label :skip_upscaler, t("cars.form.skip_upscaler"), class: "form-check-label small fw-semibold mb-0" %>
+        </div>
+
         <!-- Modal de Cropper -->
         <div class="modal fade" id="cropperModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
           <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -142,6 +157,7 @@
         <div class="col-12">
           <%= f.input :brand,
                       placeholder: t("cars.form.brand_placeholder"),
+                      error: field_error_message(car, :brand),
                       input_html: { class: "form-control-lg bg-light border-0" },
                       label_html: { class: "text-secondary small text-uppercase tracking-wide" } %>
         </div>
@@ -149,6 +165,7 @@
         <div class="col-12">
           <%= f.input :name,
                       placeholder: t("cars.form.name_placeholder"),
+                      error: field_error_message(car, :name),
                       input_html: { class: "form-control-lg bg-light border-0" },
                       label_html: { class: "text-secondary small text-uppercase tracking-wide" } %>
         </div>
@@ -163,7 +180,14 @@
         <div class="col-md-6">
           <%= f.input :year,
                       placeholder: t("cars.form.year_placeholder"),
-                      input_html: { class: "form-control-lg bg-light border-0" },
+                      error: field_error_message(car, :year),
+                      input_html: {
+                        class: "form-control-lg bg-light border-0",
+                        data: {
+                          controller: "numeric-mask",
+                          action: "input->numeric-mask#sanitize"
+                        }
+                      },
                       label_html: { class: "text-secondary small text-uppercase tracking-wide" } %>
         </div>
 
@@ -172,6 +196,7 @@
                       as: :select,
                       collection: Car.scale_options,
                       include_blank: t('cars.form.select_scale'),
+                      error: field_error_message(car, :size),
                       input_html: { class: "form-select form-select-lg bg-light border-0" },
                       label_html: { class: "text-secondary small text-uppercase tracking-wide" } %>
         </div>
@@ -181,6 +206,7 @@
                       as: :select,
                       collection: Car.color_options,
                       include_blank: t('cars.form.select_color'),
+                      error: field_error_message(car, :color),
                       input_html: {
                         class: "form-select form-select-lg bg-light border-0",
                         data: {
@@ -203,6 +229,7 @@
                       as: :text,
                       label: false,
                       placeholder: t("cars.form.observations_placeholder"),
+                      error: field_error_message(car, :observations),
                       input_html: { class: "bg-light border-0", rows: 4 },
                       label_html: { class: "text-secondary small text-uppercase tracking-wide" } %>
         </div>
@@ -258,6 +285,51 @@
     background-color: var(--soft-secondary-bg) !important;
     border-color: var(--premium-indigo) !important;
     opacity: 0.8;
+  }
+  .car-form-errors {
+    background-color: var(--soft-danger-bg);
+    border-color: rgba(239, 68, 68, 0.35);
+    color: var(--text-main);
+  }
+  .car-upscaler-toggle {
+    align-items: center;
+    background-color: var(--soft-secondary-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    color: var(--text-muted);
+    display: flex;
+    gap: 0.65rem;
+    padding: 0.85rem 1rem;
+    padding-left: 1rem;
+  }
+  .car-upscaler-toggle.d-none {
+    display: none !important;
+  }
+  .car-upscaler-toggle .form-check-input {
+    background-position: left center;
+    background-size: contain;
+    cursor: pointer;
+    flex: 0 0 auto;
+    height: 1.35rem;
+    margin: 0;
+    width: 2.5rem;
+  }
+  .car-upscaler-toggle .form-check-label {
+    line-height: 1.35rem;
+  }
+  .car-upscaler-toggle .form-check-input:not(:checked) {
+    background-color: #cbd5e1;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23ffffff'/%3e%3c/svg%3e");
+    border-color: #94a3b8;
+  }
+  .car-upscaler-toggle .form-check-input:checked {
+    background-color: var(--premium-indigo);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23ffffff'/%3e%3c/svg%3e");
+    border-color: var(--premium-indigo);
+  }
+  [data-theme="dark"] .car-upscaler-toggle .form-check-input:not(:checked) {
+    background-color: #334155;
+    border-color: #64748b;
   }
 
   /* Cropper Customization */

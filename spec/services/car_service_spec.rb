@@ -100,12 +100,25 @@ RSpec.describe CarService do
       params = valid_params.merge(photo: nil)
 
       expect do
-        described_class.new(user).create(params)
+        car = described_class.new(user).create(params)
+
+        expect(car).not_to be_persisted
+        expect(car.errors[:photo]).to be_present
       end.not_to enqueue_job(CarImageProcessingJob)
     end
 
+    it 'collects regular validation errors together with the missing photo error' do
+      params = valid_params.merge(name: '', photo: nil)
+
+      car = described_class.new(user).create(params)
+
+      expect(car).not_to be_persisted
+      expect(car.errors[:name]).to be_present
+      expect(car.errors[:photo]).to be_present
+    end
+
     it 'creates a car even with an empty year string' do
-      params = valid_params.merge(year: '', photo: nil)
+      params = valid_params.merge(year: '')
 
       expect do
         described_class.new(user).create(params)

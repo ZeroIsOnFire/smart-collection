@@ -10,7 +10,8 @@ class CarImageProcessingJob < ApplicationJob
 
     update_processing_state(car, status: 'processing')
 
-    processed_file = process_photo(car, crop_params.to_h.deep_symbolize_keys)
+    processing_params = crop_params.to_h.deep_symbolize_keys
+    processed_file = process_photo(car, processing_params)
     classify_color(car)
 
     car.photo_processing_status = 'completed'
@@ -18,6 +19,7 @@ class CarImageProcessingJob < ApplicationJob
     clear_processing_crop(car)
     car.save!
     broadcast_car(car)
+    sync_detected_item(car) if DetectedItem.exists?(car_id: car.id)
   rescue Mongoid::Errors::DocumentNotFound
     nil
   rescue StandardError => e
@@ -29,11 +31,19 @@ class CarImageProcessingJob < ApplicationJob
 
   private
 
-  def process_photo(car, crop_params)
-    crop_requested?(crop_params) ? apply_crop(car, crop_params) : apply_upscale(car)
+  def process_photo(car, processing_params)
+    crop_requested?(processing_params) ? apply_crop(car, processing_params) : apply_upscale(car, processing_params)
   end
 
-  def apply_upscale(car)
+  def apply_upscale(car, processing_params)
+    clear_photo_upscale_strategy(car)
+    inherited_strategy = processing_params[:photo_upscale_strategy].presence
+
+    if car.skip_upscaler?
+      restore_inherited_upscale_strategy(car, inherited_strategy)
+      return nil
+    end
+
     upscaled_file = ImageUpscalerService.upscale_if_needed(
       car.photo.path,
       minimum_side: ImageUpscalerService.default_minimum_side,
@@ -42,21 +52,26 @@ class CarImageProcessingJob < ApplicationJob
     )
 
     track_upscaled_photo(upscaled_file)
-    store_processed_photo(car, upscaled_file) if upscaled_file
+    store_processed_photo(car, upscaled_file, inherited_strategy) if upscaled_file
+    restore_inherited_upscale_strategy(car, inherited_strategy) unless upscaled_file
     upscaled_file
   end
 
   def apply_crop(car, crop_params)
+    clear_photo_upscale_strategy(car)
+    inherited_strategy = crop_params[:photo_upscale_strategy].presence
+
     cropped_file = ImageCropperService.crop(
       car.photo.path,
       crop_vertices(crop_params),
       padding: 0,
       minimum_side: ImageUpscalerService.default_minimum_side,
-      upscale: { use_ai: car.user.ai_upscaling_enabled?, local_fallback: false }
+      upscale: { use_ai: upscaler_enabled_for?(car), local_fallback: false }
     )
 
     track_upscaled_photo(cropped_file)
-    store_processed_photo(car, cropped_file) if cropped_file
+    store_processed_photo(car, cropped_file, inherited_strategy) if cropped_file
+    restore_inherited_upscale_strategy(car, inherited_strategy) unless cropped_file
     cropped_file
   end
 
@@ -66,10 +81,30 @@ class CarImageProcessingJob < ApplicationJob
     UsageMetric.record!("photos_upscaled_#{file.upscale_strategy}")
   end
 
-  def store_processed_photo(car, file)
+  def store_processed_photo(car, file, inherited_strategy = nil)
     car.photo = file
     car.photo.store!
     car.write_attribute(:photo_filename, car.photo.identifier)
+    car.photo_upscale_strategy = resolved_upscale_strategy(file, inherited_strategy)
+  end
+
+  def resolved_upscale_strategy(file, inherited_strategy)
+    file_strategy = file.upscale_strategy.to_s if file.respond_to?(:upscale_strategy)
+    return 'ai' if [file_strategy, inherited_strategy].include?('ai')
+
+    file_strategy.presence || inherited_strategy
+  end
+
+  def clear_photo_upscale_strategy(car)
+    car.photo_upscale_strategy = nil
+  end
+
+  def restore_inherited_upscale_strategy(car, strategy)
+    car.photo_upscale_strategy = strategy if strategy.present?
+  end
+
+  def upscaler_enabled_for?(car)
+    car.user.ai_upscaling_enabled? && !car.skip_upscaler?
   end
 
   def classify_color(car)
@@ -148,6 +183,28 @@ class CarImageProcessingJob < ApplicationJob
       target: "car_#{car.id}",
       partial: 'cars/car',
       locals: { car: car }
+    )
+  end
+
+  def sync_detected_item(car)
+    detected_item = DetectedItem.where(car_id: car.id).first
+    return unless detected_item && car.photo.present?
+
+    File.open(car.photo.path) do |photo_file|
+      detected_item.cropped_photo = photo_file
+      detected_item.cropped_photo_upscale_strategy = car.photo_upscale_strategy
+      detected_item.save!
+    end
+
+    broadcast_detected_item(detected_item)
+  end
+
+  def broadcast_detected_item(detected_item)
+    Turbo::StreamsChannel.broadcast_replace_to(
+      "autodetection_#{detected_item.autodetection_id}_items",
+      target: "detected_item_#{detected_item.id}",
+      partial: 'detected_items/detected_item',
+      locals: { detected_item: detected_item }
     )
   end
 

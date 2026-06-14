@@ -21,6 +21,13 @@ RSpec.describe Car, type: :model do
       car.brand = nil
       expect(car).to be_valid
     end
+
+    it 'is not valid with a non-numeric year' do
+      car.year = 'abcd'
+
+      expect(car).not_to be_valid
+      expect(car.errors[:year]).to include(I18n.t('errors.messages.not_a_number'))
+    end
   end
 
   describe 'associations' do

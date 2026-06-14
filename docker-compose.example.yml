@@ -97,6 +97,8 @@ services:
     # build:
     #   context: ./upscale
     #   dockerfile: Dockerfile.amd
+    # Recomendado para AMD com GPU compativel em Linux nativo.
+    # No Windows/WSL2, a imagem pode consumir perto de 90 GB; use CPU se precisar de um caminho menor.
     # devices:
     #   - "/dev/kfd:/dev/kfd"
     #   - "/dev/dri:/dev/dri"
@@ -106,11 +108,24 @@ services:
     # security_opt:
     #   - seccomp=unconfined
 
+    # Vulkan/ncnn experimental (Linux com Vulkan funcional):
+    # build:
+    #   context: ./upscale
+    #   dockerfile: Dockerfile.vulkan
+    # devices:
+    #   - "/dev/dri:/dev/dri"
+    # group_add:
+    #   - video
+    #   - render
+
     env_file:
       - .env
     environment:
       - IMAGE_UPSCALE_API_KEY=${IMAGE_UPSCALE_API_KEY:-}
       - REAL_ESRGAN_MODEL_PATH=${REAL_ESRGAN_MODEL_PATH:-}
+      - VULKAN_BINARY_PATH=${VULKAN_BINARY_PATH:-}
+      - VULKAN_MODEL_DIR=${VULKAN_MODEL_DIR:-}
+      - VULKAN_MODEL_NAME=${VULKAN_MODEL_NAME:-}
       # Upscale tiers: ratio = current_min_side / minimum_side
       # < TIER_4X_THRESHOLD     -> Real-ESRGAN 4x
       # < TIER_2X_THRESHOLD     -> Real-ESRGAN 2x

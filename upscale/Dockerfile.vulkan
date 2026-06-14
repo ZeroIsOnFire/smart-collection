@@ -1,0 +1,43 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+ENV PYTHONUNBUFFERED=1
+ENV PIP_NO_CACHE_DIR=1
+ENV UPSCALE_RUNTIME=vulkan
+ENV VULKAN_BINARY_PATH=/app/bin/realesrgan-ncnn-vulkan
+ENV VULKAN_MODEL_DIR=/app/models/realesrgan-ncnn-vulkan
+ENV VULKAN_MODEL_NAME=realesrgan-x4plus
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        ca-certificates \
+        curl \
+        libgl1 \
+        libglib2.0-0 \
+        libgomp1 \
+        libvulkan1 \
+        mesa-vulkan-drivers \
+        unzip \
+        vulkan-tools \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --upgrade pip \
+    && sed -i '/torch/d;/torchvision/d;/realesrgan/d' requirements.txt \
+    && pip install -r requirements.txt
+
+RUN mkdir -p /app/bin /app/models/realesrgan-ncnn-vulkan /tmp/realesrgan-ncnn-vulkan \
+    && curl -L --fail -o /tmp/realesrgan-ncnn-vulkan.zip \
+        https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesrgan-ncnn-vulkan-20220424-ubuntu.zip \
+    && unzip /tmp/realesrgan-ncnn-vulkan.zip -d /tmp/realesrgan-ncnn-vulkan \
+    && cp /tmp/realesrgan-ncnn-vulkan/realesrgan-ncnn-vulkan /app/bin/realesrgan-ncnn-vulkan \
+    && cp -R /tmp/realesrgan-ncnn-vulkan/models/. /app/models/realesrgan-ncnn-vulkan/ \
+    && chmod +x /app/bin/realesrgan-ncnn-vulkan \
+    && rm -rf /tmp/realesrgan-ncnn-vulkan /tmp/realesrgan-ncnn-vulkan.zip
+
+COPY main.py .
+
+EXPOSE 8000
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

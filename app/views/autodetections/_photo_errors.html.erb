@@ -1,0 +1,5 @@
+<% if autodetection.errors[:photo].any? %>
+  <div class="invalid-feedback d-block text-start mt-2 mb-3">
+    <%= autodetection.errors[:photo].to_sentence %>
+  </div>
+<% end %>

@@ -1,6 +1,8 @@
 import io
 import logging
 import os
+import subprocess
+import tempfile
 from collections import OrderedDict
 from functools import lru_cache
 
@@ -90,6 +92,8 @@ REAL_ESRGAN_SCALE = 4
 
 CPU_MODEL_PATH = "/app/models/realesr-general-x4v3.pth"
 GPU_MODEL_PATH = "/app/models/4x_NMKD-Siax_200k.pth"
+VULKAN_BINARY_PATH = "/app/bin/realesrgan-ncnn-vulkan"
+VULKAN_MODEL_DIR = "/app/models/realesrgan-ncnn-vulkan"
 GPU_RUNTIMES = {"nvidia", "amd"}
 RUNTIME_ALIASES = {
     "cpu": "cpu",
@@ -98,6 +102,8 @@ RUNTIME_ALIASES = {
     "gpu": "nvidia",
     "amd": "amd",
     "rocm": "amd",
+    "vulkan": "vulkan",
+    "ncnn": "vulkan",
 }
 
 # --- Upscale Tier Thresholds ---
@@ -136,9 +142,23 @@ def gpu_runtime_name(runtime):
     return runtime in GPU_RUNTIMES
 
 
+def vulkan_runtime_name(runtime):
+    return runtime == "vulkan"
+
+
 def model_path_for_runtime(runtime):
+    if vulkan_runtime_name(runtime):
+        return os.getenv("REAL_ESRGAN_MODEL_PATH") or os.getenv("VULKAN_MODEL_DIR") or VULKAN_MODEL_DIR
     default_path = GPU_MODEL_PATH if gpu_runtime_name(runtime) else CPU_MODEL_PATH
     return os.getenv("REAL_ESRGAN_MODEL_PATH") or default_path
+
+
+def vulkan_binary_path():
+    return os.getenv("VULKAN_BINARY_PATH") or VULKAN_BINARY_PATH
+
+
+def vulkan_model_name():
+    return os.getenv("VULKAN_MODEL_NAME") or "realesrgan-x4plus"
 
 
 def cpu_model_config():
@@ -165,11 +185,23 @@ def require_model_paths(model_path):
     return _require_model(model_path)
 
 
-@lru_cache(maxsize=3)
+@lru_cache(maxsize=4)
 def get_upscaler(runtime):
+    if runtime == "vulkan":
+        return get_vulkan_upscaler()
     if runtime == "cpu":
         return get_cpu_upscaler()
     return get_gpu_upscaler(runtime)
+
+
+def get_vulkan_upscaler():
+    binary_path = vulkan_binary_path()
+    model_dir = model_path_for_runtime("vulkan")
+    if not os.path.exists(binary_path):
+        raise RuntimeError(f"Real-ESRGAN ncnn Vulkan binary not found: {binary_path}")
+    if not os.path.isdir(model_dir):
+        raise RuntimeError(f"Real-ESRGAN ncnn Vulkan model directory not found: {model_dir}")
+    return {"binary_path": binary_path, "model_dir": model_dir, "model_name": vulkan_model_name()}
 
 
 def get_gpu_upscaler(runtime):
@@ -229,9 +261,40 @@ def upscale_with_realesrgan(image_bgr, outscale=None):
         outscale = REAL_ESRGAN_SCALE
 
     runtime = upscale_runtime()
+    if runtime == "vulkan":
+        return upscale_with_vulkan(image_bgr, outscale=outscale)
+
     upscaler = get_upscaler(runtime)
     output_bgr, _ = upscaler.enhance(image_bgr, outscale=outscale)
     return output_bgr
+
+
+def upscale_with_vulkan(image_bgr, outscale=None):
+    if outscale is None:
+        outscale = REAL_ESRGAN_SCALE
+
+    config = get_upscaler("vulkan")
+    with tempfile.TemporaryDirectory(prefix="scc-vulkan-upscale-") as temp_dir:
+        input_path = os.path.join(temp_dir, "input.png")
+        output_path = os.path.join(temp_dir, "output.png")
+        if not cv2.imwrite(input_path, image_bgr):
+            raise RuntimeError("Failed to write temporary Vulkan input image")
+
+        command = [
+            config["binary_path"],
+            "-i", input_path,
+            "-o", output_path,
+            "-m", config["model_dir"],
+            "-n", config["model_name"],
+            "-s", str(int(outscale)),
+            "-f", "png",
+        ]
+        subprocess.run(command, check=True, capture_output=True, text=True)
+
+        output_bgr = cv2.imread(output_path, cv2.IMREAD_COLOR)
+        if output_bgr is None:
+            raise RuntimeError("Real-ESRGAN ncnn Vulkan did not produce a readable output image")
+        return output_bgr
 
 
 def apply_denoise(image_bgr):

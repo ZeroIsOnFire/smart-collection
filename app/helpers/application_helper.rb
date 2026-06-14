@@ -38,6 +38,10 @@ module ApplicationHelper
     user.name.gsub(/\s+[a-f0-9]{24}$/i, '')
   end
 
+  def field_error_message(record, attribute)
+    record.errors[attribute].to_sentence.presence
+  end
+
   private
 
   def deep_stringify_translation_tree(value)

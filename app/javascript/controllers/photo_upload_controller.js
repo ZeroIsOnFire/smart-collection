@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 
 // Stimulus controller for photo upload with drag & drop, preview, and removal.
 export default class extends Controller {
-  static targets = ["dropzone", "input", "preview", "previewImg", "existingPhoto", "remotePhoto", "removeField", "uploadPrompt"]
+  static targets = ["dropzone", "input", "preview", "previewImg", "existingPhoto", "remotePhoto", "removeField", "uploadPrompt", "upscalerToggle"]
 
   connect() {
     // If there is an existing photo, show it right away
@@ -10,6 +10,8 @@ export default class extends Controller {
       this.showExistingPhoto(this.existingPhotoTarget.dataset.url)
     } else if (this.hasRemotePhotoTarget && this.remotePhotoTarget.dataset.url) {
       this.showExistingPhoto(this.remotePhotoTarget.dataset.url)
+    } else {
+      this.showUpscalerToggle()
     }
   }
 
@@ -65,6 +67,7 @@ export default class extends Controller {
     // Hide preview, show upload prompt
     this.previewTarget.classList.add("d-none")
     this.uploadPromptTarget.classList.remove("d-none")
+    this.hideUpscalerToggle()
   }
 
   // ------ Helpers ------
@@ -76,6 +79,7 @@ export default class extends Controller {
       this.uploadPromptTarget.classList.add("d-none")
       // Clear remove flag in case it was set before
       this.removeFieldTarget.value = ""
+      this.showUpscalerToggle()
     }
     reader.readAsDataURL(file)
   }
@@ -84,5 +88,14 @@ export default class extends Controller {
     this.previewImgTarget.src = url
     this.previewTarget.classList.remove("d-none")
     this.uploadPromptTarget.classList.add("d-none")
+    this.hideUpscalerToggle()
+  }
+
+  showUpscalerToggle() {
+    if (this.hasUpscalerToggleTarget) this.upscalerToggleTarget.classList.remove("d-none")
+  }
+
+  hideUpscalerToggle() {
+    if (this.hasUpscalerToggleTarget) this.upscalerToggleTarget.classList.add("d-none")
   }
 }

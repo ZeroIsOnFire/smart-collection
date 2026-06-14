@@ -63,6 +63,7 @@ RSpec.describe CarImageProcessingJob do
       expect do
         described_class.new.perform(user.id.to_s, car.id.to_s)
       end.to change { UsageMetric.values_for(['photos_upscaled_ai']).fetch('photos_upscaled_ai') }.from(0).to(1)
+      expect(Car.find(car.id).photo_upscale_strategy).to eq('ai')
     end
 
     it 'uses crop parameters when they are present' do
@@ -102,6 +103,106 @@ RSpec.describe CarImageProcessingJob do
       allow(YoloDetectionService).to receive(:classify_color).and_return(nil)
 
       described_class.new.perform(user.id.to_s, car.id.to_s)
+
+      expect(Car.find(car.id).photo_processing_status).to eq('completed')
+    end
+
+    it 'preserves an inherited AI strategy when no extra upscale is needed' do
+      attach_photo!(car)
+      car.update!(photo_upscale_strategy: 'ai')
+
+      expect(ImageUpscalerService).to receive(:upscale_if_needed).and_return(nil)
+      allow(YoloDetectionService).to receive(:classify_color).and_return(nil)
+
+      described_class.new.perform(user.id.to_s, car.id.to_s, photo_upscale_strategy: 'ai')
+
+      processed_car = Car.find(car.id)
+      expect(processed_car.photo_processing_status).to eq('completed')
+      expect(processed_car.photo_upscale_strategy).to eq('ai')
+    end
+
+    it 'keeps AI strategy when inherited from autodetection and the car receives local upscale' do
+      attach_photo!(car)
+      car.update!(photo_upscale_strategy: 'ai')
+      upscaled_file = build_temp_image(width: 420, height: 280, upscale_strategy: :local)
+
+      expect(ImageUpscalerService).to receive(:upscale_if_needed).and_return(upscaled_file)
+      allow(YoloDetectionService).to receive(:classify_color).and_return(nil)
+
+      described_class.new.perform(user.id.to_s, car.id.to_s, photo_upscale_strategy: 'ai')
+
+      expect(Car.find(car.id).photo_upscale_strategy).to eq('ai')
+    end
+
+    it 'skips the upscaler for a car with the per-record flag enabled' do
+      car.update!(skip_upscaler: true)
+      attach_photo!(car)
+
+      expect(ImageUpscalerService).not_to receive(:upscale_if_needed)
+      allow(YoloDetectionService).to receive(:classify_color).and_return(nil)
+
+      described_class.new.perform(user.id.to_s, car.id.to_s)
+
+      processed_car = Car.find(car.id)
+      expect(processed_car.photo_processing_status).to eq('completed')
+      expect(processed_car.photo_upscale_strategy).to be_nil
+    end
+
+    it 'preserves an inherited AI strategy when the car skips extra upscaling' do
+      car.update!(skip_upscaler: true, photo_upscale_strategy: 'ai')
+      attach_photo!(car)
+
+      expect(ImageUpscalerService).not_to receive(:upscale_if_needed)
+      allow(YoloDetectionService).to receive(:classify_color).and_return(nil)
+
+      described_class.new.perform(user.id.to_s, car.id.to_s, photo_upscale_strategy: 'ai')
+
+      expect(Car.find(car.id).photo_upscale_strategy).to eq('ai')
+    end
+
+    it 'syncs the linked detected item preview after processing the created car photo' do
+      autodetection = create(:autodetection, user: user)
+      detected_item = create(:detected_item, autodetection: autodetection, car_id: car.id, status: 'saved')
+      attach_photo!(car)
+      upscaled_file = build_temp_image(width: 420, height: 280, upscale_strategy: :ai)
+
+      allow(Turbo::StreamsChannel).to receive(:broadcast_replace_to)
+      expect(ImageUpscalerService).to receive(:upscale_if_needed).and_return(upscaled_file)
+      allow(YoloDetectionService).to receive(:classify_color).and_return(nil)
+
+      described_class.new.perform(user.id.to_s, car.id.to_s)
+
+      synced_item = DetectedItem.find(detected_item.id)
+      synced_image = MiniMagick::Image.open(synced_item.cropped_photo.path)
+
+      expect(synced_image.width).to eq(420)
+      expect(synced_item.cropped_photo_upscale_strategy).to eq('ai')
+      expect(Turbo::StreamsChannel).to have_received(:broadcast_replace_to).with(
+        "autodetection_#{autodetection.id}_items",
+        target: "detected_item_#{detected_item.id}",
+        partial: 'detected_items/detected_item',
+        locals: { detected_item: synced_item }
+      )
+    end
+
+    it 'passes disabled AI to the cropper when the per-record flag is enabled' do
+      car.update!(skip_upscaler: true)
+      attach_photo!(car)
+      cropped_file = build_temp_image(width: 360, height: 360)
+      crop_params = { crop_x: '0.1', crop_y: '0.2', crop_w: '0.3', crop_h: '0.4' }
+
+      expect(ImageCropperService).to receive(:crop)
+        .with(
+          anything,
+          anything,
+          padding: 0,
+          minimum_side: ImageUpscalerService.default_minimum_side,
+          upscale: { use_ai: false, local_fallback: false }
+        )
+        .and_return(cropped_file)
+      allow(YoloDetectionService).to receive(:classify_color).and_return(nil)
+
+      described_class.new.perform(user.id.to_s, car.id.to_s, crop_params)
 
       expect(Car.find(car.id).photo_processing_status).to eq('completed')
     end

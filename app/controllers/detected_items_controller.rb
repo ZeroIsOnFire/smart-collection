@@ -14,6 +14,7 @@ class DetectedItemsController < ApplicationController
       status: 'pending',
       label: t('autodetections.detected_item.new_item'),
       image_processing_status: 'pending',
+      skip_upscaler: @autodetection.skip_upscaler?,
       position_data: {
         'score' => 1.0, # Manual
         'vertices' => normalized_vertices
@@ -74,6 +75,10 @@ class DetectedItemsController < ApplicationController
 
   # PATCH /detected_items/:id/update_selection
   def update_selection
+    selection_attributes = selection_attributes_from_params
+    validation_car = selection_validation_car(selection_attributes)
+    return respond_with_selection_errors(validation_car) if validation_car&.errors&.any?
+
     normalized_vertices = normalized_vertices_from_params
 
     new_position_data = @detected_item.position_data.to_h
@@ -81,16 +86,17 @@ class DetectedItemsController < ApplicationController
 
     @detected_item.update(
       position_data: new_position_data,
-      label: params[:name].presence || @detected_item.label,
-      color: params[:color].presence || @detected_item.color,
-      brand: params[:brand],
-      year: params[:year],
-      size: params[:size],
+      label: selection_attributes.key?(:name) ? selection_attributes[:name] : @detected_item.label,
+      color: selection_attributes.key?(:color) ? selection_attributes[:color] : @detected_item.color,
+      brand: selection_attributes[:brand],
+      year: selection_attributes[:year],
+      size: selection_attributes[:size],
+      skip_upscaler: selected_skip_upscaler(selection_attributes),
       image_processing_status: 'pending',
       image_processing_error: nil
     )
 
-    enqueue_image_processing(@detected_item, selection_attributes)
+    enqueue_image_processing(@detected_item, selection_attributes.stringify_keys)
 
     respond_to do |format|
       format.turbo_stream do
@@ -116,6 +122,14 @@ class DetectedItemsController < ApplicationController
       "detected_item_#{detected_item.id}",
       partial: 'detected_items/detected_item',
       locals: { detected_item: detected_item }
+    )
+  end
+
+  def detected_item_form_replace_stream(detected_item, car)
+    turbo_stream.replace(
+      "detected_item_#{detected_item.id}",
+      partial: 'detected_items/detected_item',
+      locals: { detected_item: detected_item, car: car }
     )
   end
 
@@ -156,8 +170,32 @@ class DetectedItemsController < ApplicationController
     ]
   end
 
-  def selection_attributes
-    params.permit(:brand, :name, :color, :year, :size).to_h
+  def selection_attributes_from_params
+    attributes = params.permit(:brand, :name, :color, :year, :size, :skip_upscaler).to_h.symbolize_keys
+    attributes[:skip_upscaler] = ActiveModel::Type::Boolean.new.cast(attributes[:skip_upscaler]) if attributes.key?(:skip_upscaler)
+    attributes
+  end
+
+  def selected_skip_upscaler(selection_attributes)
+    return false if @detected_item.upscaler_skip_locked?
+    return selection_attributes[:skip_upscaler] if selection_attributes.key?(:skip_upscaler)
+
+    @detected_item.skip_upscaler
+  end
+
+  def selection_validation_car(selection_attributes)
+    return if selection_attributes.empty?
+
+    current_user.cars.build(selection_attributes.except(:skip_upscaler)).tap(&:validate)
+  end
+
+  def respond_with_selection_errors(car)
+    respond_to do |format|
+      format.turbo_stream do
+        render turbo_stream: detected_item_form_replace_stream(@detected_item, car)
+      end
+      format.html { redirect_back_or_to(root_path) }
+    end
   end
 
   def enqueue_image_processing(detected_item, attributes = {})
