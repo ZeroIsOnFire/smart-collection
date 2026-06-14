@@ -427,7 +427,7 @@ RSpec.describe 'Cars', type: :request do
       expect(response.body).to include(I18n.t('cars.form.ai_photo'))
     end
 
-    it 'hides the per-record upscaler toggle when the existing photo already meets the minimum side' do
+    it 'keeps the per-record upscaler toggle hidden when the existing photo already meets the minimum side' do
       allow(ImageUpscalerService).to receive(:service_configured?).and_return(true)
       car.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
       car.save!
@@ -435,9 +435,10 @@ RSpec.describe 'Cars', type: :request do
       get edit_car_path(car), headers: { 'Turbo-Frame' => 'modal' }
 
       document = Nokogiri::HTML(response.body)
+      toggle = document.at_css('.car-upscaler-toggle')
 
-      expect(document.at_css('.car-upscaler-toggle')).to be_nil
-      expect(response.body).not_to include(I18n.t('cars.form.skip_upscaler_existing'))
+      expect(toggle).to be_present
+      expect(toggle['class']).to include('d-none')
     end
 
     it "redirects if trying to edit another user's car" do
@@ -472,7 +473,7 @@ RSpec.describe 'Cars', type: :request do
       edit_link = document.at_css("a[href='#{edit_car_path(car)}']")
 
       expect(document.at_css('#turboModalLabel')).to be_nil
-      expect(document.at_css('[data-controller="photo-lightbox"]')).to be_present
+      expect(document.at_css('[data-controller*="photo-lightbox"]')).to be_present
       expect(document.at_css('.public-detail-photo[data-action="click->photo-lightbox#open"]')).to be_present
       expect(document.at_css('.photo-lightbox-overlay[data-photo-lightbox-target="overlay"]')).to be_present
       expect(response.body).not_to include('data-bs-target="#photoLightbox')
@@ -504,8 +505,17 @@ RSpec.describe 'Cars', type: :request do
 
       get car_path(car), headers: { 'Turbo-Frame' => 'modal' }
 
+      document = Nokogiri::HTML(response.body)
+      original_toggle = document.at_css('[data-action="click->photo-variant-toggle#toggle"]')
+      full_photo = document.at_css('[data-photo-variant-toggle-target="lightboxImage"]')
+
       expect(response.body).to include(I18n.t('cars.show.view_original_photo'))
       expect(response.body).to include(I18n.t('cars.show.photo_upscaled_by_ai'))
+      expect(response.body).to include(I18n.t('cars.show.view_ai_photo'))
+      expect(original_toggle).to be_present
+      expect(original_toggle.name).to eq('button')
+      expect(original_toggle['target']).to be_nil
+      expect(full_photo).to be_present
 
       car.update!(photo_variant: 'original', photo_upscale_strategy: nil)
 

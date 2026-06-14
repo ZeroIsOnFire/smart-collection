@@ -298,6 +298,7 @@ pt-BR:
       no_photo: "Sem foto cadastrada"
       view_full_photo: "Ver foto completa"
       view_original_photo: "Ver original"
+      view_ai_photo: "Ver com IA"
       photo_upscaled_by_ai: "IA"
       photo_upscaled_by_ai_tooltip: "Foto tratada por IA"
     form:

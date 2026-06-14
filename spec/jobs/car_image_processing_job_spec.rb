@@ -55,6 +55,22 @@ RSpec.describe CarImageProcessingJob do
       ).at_least(:once)
     end
 
+    it 'selects the AI variant when forced by the user choice' do
+      attach_photo!(car)
+      upscaled_file = build_temp_image(width: 420, height: 280, upscale_strategy: :ai)
+
+      allow(ImageUpscalerService).to receive(:upscale_if_needed).and_return(upscaled_file)
+      allow(YoloDetectionService).to receive(:classify_color).and_return(nil)
+
+      described_class.new.perform(user.id.to_s, car.id.to_s, force_ai_upscale: true)
+
+      processed_car = Car.find(car.id)
+      expect(processed_car.photo_variant).to eq('ai')
+      expect(processed_car.photo_upscale_strategy).to eq('ai')
+      expect(processed_car.skip_upscaler).to be false
+      expect(processed_car).to be_photo_upscaled_by_ai
+    end
+
     it 'tracks upscaled photos in the historical counters' do
       attach_photo!(car)
       upscaled_file = build_temp_image(width: 420, height: 280, upscale_strategy: :ai)

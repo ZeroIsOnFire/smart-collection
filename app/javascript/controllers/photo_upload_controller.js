@@ -21,6 +21,9 @@ export default class extends Controller {
     "originalVariantStatus",
     "aiVariantStatus"
   ]
+  static values = {
+    minimumSide: Number
+  }
 
   connect() {
     // If there is an existing photo, show it right away
@@ -29,7 +32,7 @@ export default class extends Controller {
     } else if (this.hasRemotePhotoTarget && this.remotePhotoTarget.dataset.url) {
       this.showExistingPhoto(this.remotePhotoTarget.dataset.url)
     } else {
-      this.showUpscalerToggle()
+      this.hideUpscalerToggle()
     }
   }
 
@@ -97,10 +100,26 @@ export default class extends Controller {
       this.uploadPromptTarget.classList.add("d-none")
       // Clear remove flag in case it was set before
       this.removeFieldTarget.value = ""
-      this.showNewPhotoUpscalerMessage()
-      this.showUpscalerToggle()
+      this.updateNewPhotoUpscalerVisibility(e.target.result)
     }
     reader.readAsDataURL(file)
+  }
+
+  updateNewPhotoUpscalerVisibility(url) {
+    const image = new Image()
+    image.onload = () => {
+      const minimumSide = this.minimumSideValue || 360
+      if (Math.min(image.naturalWidth, image.naturalHeight) < minimumSide) {
+        this.showNewPhotoUpscalerMessage()
+        this.showUpscalerToggle()
+      } else {
+        this.hideUpscalerToggle()
+      }
+    }
+    image.onerror = () => {
+      this.hideUpscalerToggle()
+    }
+    image.src = url
   }
 
   showExistingPhoto(url) {

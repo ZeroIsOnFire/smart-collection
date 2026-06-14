@@ -31,6 +31,7 @@
 
       <div class="col-12 mb-5"
            data-controller="photo-upload image-cropper"
+           data-photo-upload-minimum-side-value="<%= ImageUpscalerService.default_minimum_side %>"
            data-image-cropper-detect-url-value="<%= classify_autodetections_path %>"
            data-action="dragover->photo-upload#dragOver dragleave->photo-upload#dragLeave drop->photo-upload#drop">
 
@@ -114,19 +115,18 @@
 
         <%
           ai_upscale_relevant = !car.persisted? || !car.photo? || car_ai_upscale_relevant?(car)
-          show_upscaler_toggle = !car.persisted? || !car.photo? ||
-                                 (ai_upscale_relevant && current_user.ai_upscaling_enabled? && ImageUpscalerService.service_configured?)
-          show_variant_comparison = car.persisted? && car.photo? && show_upscaler_toggle
+          render_upscaler_toggle = current_user.ai_upscaling_enabled? && ImageUpscalerService.service_configured?
+          show_variant_comparison = car.persisted? && car.photo? && ai_upscale_relevant && render_upscaler_toggle
           displaying_ai_photo = show_variant_comparison && car_display_photo_upscaled_by_ai?(car, user: current_user)
           original_variant_selected = show_variant_comparison ? !displaying_ai_photo : car.skip_upscaler?
           original_variant_url = car.original_photo? ? car.original_photo.url : car.photo.url
           enhanced_variant_available = car.enhanced_photo?
           enhanced_variant_url = enhanced_variant_available ? car.enhanced_photo.url : car.photo.url
         %>
-        <% if show_upscaler_toggle %>
-          <div class="record-upscaler-toggle car-upscaler-toggle form-check form-switch mt-3"
+        <% if render_upscaler_toggle %>
+          <div class="record-upscaler-toggle car-upscaler-toggle form-check form-switch<%= ' d-none' unless show_variant_comparison %> mt-3"
                data-photo-upload-target="upscalerToggle"
-               data-persist-visible="<%= show_upscaler_toggle %>">
+               data-persist-visible="<%= show_variant_comparison %>">
             <div class="d-flex align-items-center gap-2">
               <%= f.check_box :skip_upscaler,
                               {

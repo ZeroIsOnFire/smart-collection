@@ -90,6 +90,19 @@ RSpec.describe CarService do
       )
     end
 
+    it 'selects the AI photo after processing when the per-record upscaler is enabled' do
+      params = valid_params.merge(skip_upscaler: '0')
+      allow(ImageUpscalerService).to receive(:service_configured?).and_return(true)
+
+      expect do
+        described_class.new(user).create(params)
+      end.to enqueue_job(CarImageProcessingJob).with(
+        user.id.to_s,
+        kind_of(String),
+        force_ai_upscale: true
+      )
+    end
+
     it 'keeps crop values for the processing thumbnail' do
       params = valid_params.merge(crop_x: '0.1', crop_y: '0.2', crop_w: '0.3', crop_h: '0.4')
 

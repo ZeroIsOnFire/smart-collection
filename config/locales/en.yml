@@ -284,6 +284,7 @@ en:
       no_photo: "No photo registered"
       view_full_photo: "View full photo"
       view_original_photo: "View original"
+      view_ai_photo: "View AI"
       photo_upscaled_by_ai: "AI"
       photo_upscaled_by_ai_tooltip: "Photo processed by AI"
     form:

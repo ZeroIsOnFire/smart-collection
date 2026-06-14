@@ -217,12 +217,25 @@ class CarService
   end
 
   def enqueue_photo_processing(car, params)
-    CarImageProcessingJob.perform_later(user.id.to_s, car.id.to_s, crop_params(params))
+    CarImageProcessingJob.perform_later(user.id.to_s, car.id.to_s, photo_processing_params(params))
   end
 
   def crop_params(params)
     params.slice(:crop_x, :crop_y, :crop_w, :crop_h, :photo_upscale_strategy, :force_ai_upscale,
                  :bulk_ai_upscale).compact
+  end
+
+  def photo_processing_params(params)
+    crop_params(params).tap do |processing_params|
+      processing_params[:force_ai_upscale] = true if ai_upscale_selected?(params)
+    end
+  end
+
+  def ai_upscale_selected?(params)
+    return false unless params.key?(:skip_upscaler)
+    return false unless user.ai_upscaling_enabled? && ImageUpscalerService.service_configured?
+
+    !ActiveModel::Type::Boolean.new.cast(params[:skip_upscaler])
   end
 
   def store_processing_crop(car, params)
