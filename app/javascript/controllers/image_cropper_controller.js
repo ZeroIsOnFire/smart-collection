@@ -81,6 +81,13 @@ export default class extends Controller {
     // Atualizar preview local com o crop
     const canvas = this.cropper.getCroppedCanvas()
     this.previewImgTarget.src = canvas.toDataURL()
+    this.element.dispatchEvent(new CustomEvent("photo-upload:crop-change", {
+      bubbles: true,
+      detail: {
+        width: data.width,
+        height: data.height
+      }
+    }))
 
     // Autodetecção após o recorte
     this.runClassification(canvas)

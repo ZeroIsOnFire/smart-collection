@@ -33,7 +33,7 @@
            data-controller="photo-upload image-cropper"
            data-photo-upload-minimum-side-value="<%= ImageUpscalerService.default_minimum_side %>"
            data-image-cropper-detect-url-value="<%= classify_autodetections_path %>"
-           data-action="dragover->photo-upload#dragOver dragleave->photo-upload#dragLeave drop->photo-upload#drop">
+           data-action="dragover->photo-upload#dragOver dragleave->photo-upload#dragLeave drop->photo-upload#drop photo-upload:crop-change->photo-upload#cropChanged">
 
         <%= f.hidden_field :crop_x, data: { "image-cropper-target": "x" } %>
         <%= f.hidden_field :crop_y, data: { "image-cropper-target": "y" } %>

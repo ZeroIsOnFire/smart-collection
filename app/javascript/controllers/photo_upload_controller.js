@@ -108,18 +108,27 @@ export default class extends Controller {
   updateNewPhotoUpscalerVisibility(url) {
     const image = new Image()
     image.onload = () => {
-      const minimumSide = this.minimumSideValue || 360
-      if (Math.min(image.naturalWidth, image.naturalHeight) < minimumSide) {
-        this.showNewPhotoUpscalerMessage()
-        this.showUpscalerToggle()
-      } else {
-        this.hideUpscalerToggle()
-      }
+      this.updateUpscalerVisibilityForSize(image.naturalWidth, image.naturalHeight)
     }
     image.onerror = () => {
       this.hideUpscalerToggle()
     }
     image.src = url
+  }
+
+  cropChanged(event) {
+    const { width, height } = event.detail || {}
+    this.updateUpscalerVisibilityForSize(width, height)
+  }
+
+  updateUpscalerVisibilityForSize(width, height) {
+    const minimumSide = this.minimumSideValue || 360
+    if (Math.min(width || 0, height || 0) < minimumSide) {
+      this.showNewPhotoUpscalerMessage()
+      this.showUpscalerToggle()
+    } else {
+      this.hideUpscalerToggle()
+    }
   }
 
   showExistingPhoto(url) {
