@@ -1,24 +1,28 @@
 <% modal = local_assigns.fetch(:modal, false) %>
 <% show_actions = local_assigns.fetch(:show_actions, false) %>
 <% show_timestamps = local_assigns.fetch(:show_timestamps, false) %>
+<% public_view = local_assigns.fetch(:public, false) %>
 <% car_dom_id = car.id.to_s %>
+<% display_user = car_display_user(car, local_assigns[:user]) %>
+<% display_photo_url = car_display_photo_url(car, user: display_user) %>
+<% display_photo_upscaled_by_ai = car_display_photo_upscaled_by_ai?(car, user: display_user) %>
 
 <div class="row car-showcase-row <%= modal ? "g-3" : "g-5" %>" data-controller="photo-lightbox">
   <div class="col-lg-7 mb-2 mb-lg-0">
     <div class="card car-detail-card shadow-sm rounded-4 overflow-hidden bg-white h-100 position-relative">
-      <% if car.photo? %>
+      <% if display_photo_url.present? %>
         <button type="button"
                 class="public-detail-photo p-4 d-flex align-items-center justify-content-center h-100 w-100 border-0 bg-light bg-opacity-50 position-relative"
                 data-action="click->photo-lightbox#open"
                 aria-label="<%= t("cars.show.view_full_photo") %>">
-          <%= image_tag car.photo.url, class: "img-fluid w-100 rounded-3 shadow-sm", alt: car.name.presence || t("cars.show.fallback_name") %>
+          <%= image_tag display_photo_url, class: "img-fluid w-100 rounded-3 shadow-sm", alt: car.name.presence || t("cars.show.fallback_name") %>
           <div class="position-absolute bottom-0 end-0 m-4">
             <span class="badge bg-dark bg-opacity-75 rounded-pill px-3 py-2 text-white shadow-sm backdrop-blur">
               <i class="bi bi-zoom-in me-1"></i> <%= t("cars.show.view_full_photo") %>
             </span>
           </div>
         </button>
-        <% if car.show_original_photo_link? %>
+        <% if car_show_original_photo_link?(car, user: display_user, public_view: public_view) %>
           <%= link_to car.original_photo.url,
                       class: "position-absolute bottom-0 start-0 m-4 badge bg-light text-dark rounded-pill px-3 py-2 text-decoration-none shadow-sm",
                       target: "_blank",
@@ -83,6 +87,7 @@
 
         <%= render "cars/metadata_badges",
                    car: car,
+                   photo_upscaled_by_ai: display_photo_upscaled_by_ai,
                    badge_class: "text-muted small d-flex flex-wrap gap-3 mb-3",
                    item_class: "d-inline-flex align-items-center gap-1 text-dark" %>
 
@@ -112,7 +117,7 @@
       </div>
     </div>
   </div>
-  <% if car.photo? %>
+  <% if display_photo_url.present? %>
     <div class="photo-lightbox-overlay d-none"
          data-photo-lightbox-target="overlay"
          data-action="click->photo-lightbox#close keydown@window->photo-lightbox#closeWithKeyboard"
@@ -120,7 +125,7 @@
          aria-modal="true"
          aria-label="<%= t("cars.show.view_full_photo") %>">
       <div class="photo-lightbox-stage" data-action="click->photo-lightbox#keepOpen">
-        <%= image_tag car.photo.url,
+        <%= image_tag display_photo_url,
               class: "photo-lightbox-image rounded-4 shadow-lg",
               alt: car.name.presence || t("cars.show.fallback_name") %>
         <button type="button"

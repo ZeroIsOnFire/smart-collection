@@ -309,6 +309,9 @@ en:
       observations_placeholder: "Write details about the condition..."
       skip_upscaler: "Do not use upscaler for this record"
       skip_upscaler_existing: "Show the original non-AI version for this record"
+      original_photo: "Original without AI"
+      ai_photo: "AI version"
+      ai_photo_missing: "AI version not generated yet"
 
   autodetections:
     title: "Photo Autodetection"

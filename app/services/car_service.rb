@@ -57,6 +57,7 @@ class CarService
     enqueue_processing = should_process_photo?(prepared_params)
     variant_toggle = photo_variant_toggle_requested?(car, prepared_params, enqueue_processing)
     car.attributes = prepared_params
+    reset_photo_versions(car) if replacing_photo?(prepared_params)
     clear_photo_processing(car) if remove_photo?(prepared_params)
     enqueue_processing = apply_photo_variant_toggle(car, prepared_params) == :enqueue if variant_toggle
     mark_photo_as_pending(car, prepared_params) if enqueue_processing
@@ -119,6 +120,11 @@ class CarService
       return :skip
     end
 
+    unless user.ai_upscaling_enabled?
+      use_original_photo(car) if car.original_photo_available?
+      return :skip
+    end
+
     if car.enhanced_photo_available?
       apply_enhanced_photo(car)
       return :skip
@@ -141,6 +147,7 @@ class CarService
     end
     car.photo_variant = 'original'
     car.photo_upscale_strategy = nil
+    car.skip_upscaler = true
   end
 
   def apply_enhanced_photo(car)
@@ -151,7 +158,21 @@ class CarService
     end
     car.photo_variant = 'ai'
     car.photo_upscale_strategy = 'ai'
+    car.skip_upscaler = false
     nil
+  end
+
+  def replacing_photo?(params)
+    params[:photo].present? || params[:remote_photo_url].present?
+  end
+
+  def reset_photo_versions(car)
+    car.remove_original_photo = true if car.respond_to?(:remove_original_photo=)
+    car.remove_enhanced_photo = true if car.respond_to?(:remove_enhanced_photo=)
+    car.write_attribute(:original_photo_filename, nil)
+    car.write_attribute(:enhanced_photo_filename, nil)
+    car.photo_variant = nil
+    car.photo_upscale_strategy = nil
   end
 
   def crop_requested?(params)

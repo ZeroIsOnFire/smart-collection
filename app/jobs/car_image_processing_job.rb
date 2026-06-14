@@ -11,7 +11,7 @@ class CarImageProcessingJob < ApplicationJob
     update_processing_state(car, status: 'processing')
 
     processing_params = crop_params.to_h.deep_symbolize_keys
-    preserve_original_photo(car)
+    preserve_original_photo(car) unless crop_requested?(processing_params)
     processed_file = process_photo(car, processing_params)
     classify_color(car)
 
@@ -40,9 +40,11 @@ class CarImageProcessingJob < ApplicationJob
   def apply_upscale(car, processing_params)
     clear_photo_upscale_strategy(car)
     inherited_strategy = processing_params[:photo_upscale_strategy].presence
+    preserve_original_photo(car)
 
     if car.skip_upscaler?
-      restore_inherited_upscale_strategy(car, inherited_strategy)
+      select_original_photo(car)
+      restore_inherited_upscale_strategy(car, inherited_strategy) if ai_variant_requested?(processing_params, inherited_strategy)
       return nil
     end
 
@@ -54,7 +56,14 @@ class CarImageProcessingJob < ApplicationJob
     )
 
     track_upscaled_photo(upscaled_file)
-    store_processed_photo(car, upscaled_file, inherited_strategy) if upscaled_file
+    if upscaled_file
+      store_processed_photo(
+        car,
+        upscaled_file,
+        inherited_strategy,
+        select_ai: ai_variant_requested?(processing_params, inherited_strategy)
+      )
+    end
     restore_inherited_upscale_strategy(car, inherited_strategy) unless upscaled_file
     upscaled_file
   end
@@ -62,19 +71,71 @@ class CarImageProcessingJob < ApplicationJob
   def apply_crop(car, crop_params)
     clear_photo_upscale_strategy(car)
     inherited_strategy = crop_params[:photo_upscale_strategy].presence
+    source_path = crop_source_path(car)
+    vertices = crop_vertices(crop_params)
+    ai_upscaler_enabled = upscaler_enabled_for?(car)
 
     cropped_file = ImageCropperService.crop(
-      car.photo.path,
-      crop_vertices(crop_params),
+      source_path,
+      vertices,
       padding: 0,
       minimum_side: ImageUpscalerService.default_minimum_side,
-      upscale: { use_ai: upscaler_enabled_for?(car), local_fallback: false }
+      upscale: { use_ai: false, local_fallback: false }
     )
 
-    track_upscaled_photo(cropped_file)
-    store_processed_photo(car, cropped_file, inherited_strategy) if cropped_file
-    restore_inherited_upscale_strategy(car, inherited_strategy) unless cropped_file
-    cropped_file
+    store_original_photo(car, cropped_file) if cropped_file
+    select_original_photo(car) if cropped_file
+
+    upscaled_file = nil
+    if ai_upscaler_enabled
+      upscaled_file = ImageCropperService.crop(
+        source_path,
+        vertices,
+        padding: 0,
+        minimum_side: ImageUpscalerService.default_minimum_side,
+        upscale: { use_ai: true, local_fallback: false }
+      )
+    end
+
+    processed_file = upscaled_file || cropped_file
+    track_upscaled_photo(upscaled_file)
+    if upscaled_file
+      store_processed_photo(
+        car,
+        upscaled_file,
+        inherited_strategy,
+        select_ai: ai_variant_requested?(crop_params, inherited_strategy)
+      )
+    end
+    restore_inherited_upscale_strategy(car, inherited_strategy) if processed_file.blank?
+    [cropped_file, upscaled_file].compact
+  end
+
+  def crop_source_path(car)
+    return car.original_photo.path if car.original_photo?
+
+    car.photo.path
+  end
+
+  def select_original_photo(car)
+    return unless car.original_photo?
+
+    File.open(car.original_photo.path) do |photo_file|
+      car.photo = photo_file
+      car.photo.store!
+      car.write_attribute(:photo_filename, car.photo.identifier)
+    end
+    car.photo_variant = 'original'
+    car.photo_upscale_strategy = nil
+    car.skip_upscaler = true
+  end
+
+  def store_original_photo(car, file)
+    File.open(file.path) do |photo_file|
+      car.original_photo = photo_file
+      car.original_photo.store!
+      car.write_attribute(:original_photo_filename, car.original_photo.identifier)
+    end
   end
 
   def track_upscaled_photo(file)
@@ -83,14 +144,19 @@ class CarImageProcessingJob < ApplicationJob
     UsageMetric.record!("photos_upscaled_#{file.upscale_strategy}")
   end
 
-  def store_processed_photo(car, file, inherited_strategy = nil)
+  def store_processed_photo(car, file, inherited_strategy = nil, select_ai: false)
     strategy = resolved_upscale_strategy(file, inherited_strategy)
     store_enhanced_photo(car, file) if strategy == 'ai'
-    car.photo = file
-    car.photo.store!
-    car.write_attribute(:photo_filename, car.photo.identifier)
-    car.photo_upscale_strategy = strategy
-    car.photo_variant = strategy == 'ai' ? 'ai' : 'original'
+    if strategy == 'ai' && select_ai
+      car.photo = file
+      car.photo.store!
+      car.write_attribute(:photo_filename, car.photo.identifier)
+      car.photo_upscale_strategy = 'ai'
+      car.photo_variant = 'ai'
+      car.skip_upscaler = false
+    else
+      select_original_photo(car)
+    end
   end
 
   def resolved_upscale_strategy(file, inherited_strategy)
@@ -109,7 +175,14 @@ class CarImageProcessingJob < ApplicationJob
     return if strategy.blank?
 
     car.photo_upscale_strategy = strategy
-    car.photo_variant = 'ai' if strategy == 'ai' && car.enhanced_photo?
+    return unless strategy == 'ai' && car.enhanced_photo?
+
+    car.photo_variant = 'ai'
+    car.skip_upscaler = false
+  end
+
+  def ai_variant_requested?(processing_params, inherited_strategy)
+    ActiveModel::Type::Boolean.new.cast(processing_params[:force_ai_upscale]) || inherited_strategy == 'ai'
   end
 
   def preserve_original_photo(car)
@@ -254,6 +327,10 @@ class CarImageProcessingJob < ApplicationJob
   end
 
   def cleanup_tempfile(tempfile)
+    if tempfile.is_a?(Array)
+      tempfile.each { |file| cleanup_tempfile(file) }
+      return
+    end
     return unless tempfile.respond_to?(:close)
 
     tempfile.close

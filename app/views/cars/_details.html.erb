@@ -1,5 +1,8 @@
 <% modal = local_assigns.fetch(:modal, false) %>
 <% car_dom_id = car.id.to_s %>
+<% display_user = car_display_user(car, local_assigns[:user]) %>
+<% display_photo_url = car_display_photo_url(car, user: display_user) %>
+<% display_photo_upscaled_by_ai = car_display_photo_upscaled_by_ai?(car, user: display_user) %>
 
 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
   <% unless modal %>
@@ -36,22 +39,22 @@
   </div>
 </div>
 
-<% cache [car, modal ? :modal : :page] do %>
+<% cache [car, modal ? :modal : :page, car_photo_cache_key(car, user: display_user)] do %>
   <div class="card premium-card car-details-card shadow-sm rounded-4 overflow-hidden mb-3 <%= "car-details-card-modal" if modal %>"
        data-controller="photo-lightbox">
-    <% if car.photo? %>
+    <% if display_photo_url.present? %>
       <button type="button"
               class="car-details-photo-button"
               data-action="click->photo-lightbox#open"
               aria-label="<%= t("cars.show.view_full_photo") %>">
-        <%= image_tag car.photo.url, style: "width: 100%; height: 100%; object-fit: cover; display: block;" %>
+        <%= image_tag display_photo_url, style: "width: 100%; height: 100%; object-fit: cover; display: block;" %>
         <div class="position-absolute bottom-0 end-0 m-3">
           <span class="badge bg-dark bg-opacity-60 rounded-pill px-3 py-2 text-white">
             <i class="bi bi-zoom-in me-1"></i> <%= t("cars.show.view_full_photo") %>
           </span>
         </div>
       </button>
-      <% if car.show_original_photo_link? %>
+      <% if car_show_original_photo_link?(car, user: display_user) %>
         <%= link_to car.original_photo.url,
                     class: "position-absolute bottom-0 start-0 m-3 badge bg-light text-dark rounded-pill px-3 py-2 text-decoration-none shadow-sm",
                     target: "_blank",
@@ -68,7 +71,7 @@
            aria-modal="true"
            aria-label="<%= t("cars.show.view_full_photo") %>">
         <div class="photo-lightbox-stage" data-action="click->photo-lightbox#keepOpen">
-          <%= image_tag car.photo.url,
+          <%= image_tag display_photo_url,
                 class: "photo-lightbox-image rounded-4 shadow-lg",
                 alt: car.name.presence || t("cars.show.fallback_name") %>
           <button type="button"
@@ -102,6 +105,7 @@
 
       <%= render "cars/metadata_badges",
                  car: car,
+                 photo_upscaled_by_ai: display_photo_upscaled_by_ai,
                  badge_class: "text-muted small d-flex flex-wrap gap-3 mb-3",
                  item_class: "d-inline-flex align-items-center gap-1" %>
 

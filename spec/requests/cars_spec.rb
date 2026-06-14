@@ -409,7 +409,12 @@ RSpec.describe 'Cars', type: :request do
 
       expect(toggle).to be_present
       expect(toggle['class']).not_to include('d-none')
+      expect(document.at_css('.car-ai-variant-comparison')).to be_present
+      expect(document.at_css('.car-ai-variant-card.is-missing .car-ai-variant-question')).to be_present
+      expect(document.at_css('#car_skip_upscaler')['checked']).to eq('checked')
       expect(response.body).to include(I18n.t('cars.form.skip_upscaler_existing'))
+      expect(response.body).to include(I18n.t('cars.form.original_photo'))
+      expect(response.body).to include(I18n.t('cars.form.ai_photo'))
     end
 
     it "redirects if trying to edit another user's car" do
@@ -424,9 +429,12 @@ RSpec.describe 'Cars', type: :request do
     it 'renders the detail view inside the global modal frame' do
       updated_at = Time.zone.local(2026, 6, 11, 2, 22)
       car.update!(color: 'Azul', size: '1:64')
-      car.update!(photo_upscale_strategy: 'ai')
       car.set(updated_at: updated_at)
       car.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+      car.original_photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+      car.enhanced_photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+      car.photo_variant = 'ai'
+      car.photo_upscale_strategy = 'ai'
       car.save!
       car.set(updated_at: updated_at)
 
@@ -482,6 +490,22 @@ RSpec.describe 'Cars', type: :request do
 
       expect(response.body).not_to include(I18n.t('cars.show.view_original_photo'))
       expect(response.body).not_to include(I18n.t('cars.show.photo_upscaled_by_ai'))
+    end
+
+    it 'shows only the original photo when account AI upscaling is disabled' do
+      user.update!(ai_upscaling_enabled: false)
+      car.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/car_sample.jpg'), 'image/jpeg')
+      car.original_photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+      car.enhanced_photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/car_sample.jpg'), 'image/jpeg')
+      car.photo_variant = 'ai'
+      car.photo_upscale_strategy = 'ai'
+      car.save!
+
+      get car_path(car), headers: { 'Turbo-Frame' => 'modal' }
+
+      expect(response.body).not_to include(I18n.t('cars.show.view_original_photo'))
+      expect(response.body).not_to include(I18n.t('cars.show.photo_upscaled_by_ai'))
+      expect(response.body).to include(car.original_photo.url)
     end
 
     it 'shows aligned creation and update timestamps on the private detail page' do

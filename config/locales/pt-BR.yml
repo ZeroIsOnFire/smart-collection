@@ -323,6 +323,9 @@ pt-BR:
       observations_placeholder: "Escreva detalhes sobre o estado de conservação..."
       skip_upscaler: "Não usar upscaler neste registro"
       skip_upscaler_existing: "Exibir versão original sem IA neste registro"
+      original_photo: "Original sem IA"
+      ai_photo: "Versão com IA"
+      ai_photo_missing: "Versão com IA ainda não gerada"
 
   # ── Autodetecção ───────────────────────────────────────
   autodetections:

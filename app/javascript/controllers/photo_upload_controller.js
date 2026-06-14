@@ -2,7 +2,25 @@ import { Controller } from "@hotwired/stimulus"
 
 // Stimulus controller for photo upload with drag & drop, preview, and removal.
 export default class extends Controller {
-  static targets = ["dropzone", "input", "preview", "previewImg", "existingPhoto", "remotePhoto", "removeField", "uploadPrompt", "upscalerToggle"]
+  static targets = [
+    "dropzone",
+    "input",
+    "preview",
+    "previewImg",
+    "existingPhoto",
+    "remotePhoto",
+    "removeField",
+    "uploadPrompt",
+    "upscalerToggle",
+    "upscalerCheckbox",
+    "upscalerExistingLabel",
+    "upscalerNewLabel",
+    "variantComparison",
+    "originalVariantCard",
+    "aiVariantCard",
+    "originalVariantStatus",
+    "aiVariantStatus"
+  ]
 
   connect() {
     // If there is an existing photo, show it right away
@@ -79,6 +97,7 @@ export default class extends Controller {
       this.uploadPromptTarget.classList.add("d-none")
       // Clear remove flag in case it was set before
       this.removeFieldTarget.value = ""
+      this.showNewPhotoUpscalerMessage()
       this.showUpscalerToggle()
     }
     reader.readAsDataURL(file)
@@ -90,9 +109,48 @@ export default class extends Controller {
     this.uploadPromptTarget.classList.add("d-none")
     if (this.hasUpscalerToggleTarget && this.upscalerToggleTarget.dataset.persistVisible === "true") {
       this.showUpscalerToggle()
+      this.showExistingPhotoUpscalerMessage()
     } else {
       this.hideUpscalerToggle()
     }
+  }
+
+  showNewPhotoUpscalerMessage() {
+    if (this.hasVariantComparisonTarget) this.variantComparisonTarget.classList.add("d-none")
+    if (this.hasUpscalerExistingLabelTarget) this.upscalerExistingLabelTarget.classList.add("d-none")
+    if (this.hasUpscalerNewLabelTarget) this.upscalerNewLabelTarget.classList.remove("d-none")
+  }
+
+  showExistingPhotoUpscalerMessage() {
+    if (this.hasVariantComparisonTarget) this.variantComparisonTarget.classList.remove("d-none")
+    if (this.hasUpscalerExistingLabelTarget) this.upscalerExistingLabelTarget.classList.remove("d-none")
+    if (this.hasUpscalerNewLabelTarget) this.upscalerNewLabelTarget.classList.add("d-none")
+    this.updateVariantSelection()
+  }
+
+  updateVariantSelection() {
+    if (!this.hasUpscalerCheckboxTarget) return
+
+    const originalSelected = this.upscalerCheckboxTarget.checked
+    if (this.hasOriginalVariantCardTarget && this.hasOriginalVariantStatusTarget) {
+      this.setVariantState(this.originalVariantCardTarget, this.originalVariantStatusTarget, originalSelected)
+    }
+    if (this.hasAiVariantCardTarget && this.hasAiVariantStatusTarget) {
+      this.setVariantState(this.aiVariantCardTarget, this.aiVariantStatusTarget, !originalSelected)
+    }
+  }
+
+  setVariantState(card, status, selected) {
+    if (!card || !status) return
+
+    card.classList.toggle("is-selected", selected)
+    status.classList.toggle("is-check", selected)
+    status.classList.toggle("is-cross", !selected)
+    const icon = status.querySelector("i")
+    if (!icon) return
+
+    icon.classList.toggle("bi-check-lg", selected)
+    icon.classList.toggle("bi-x-lg", !selected)
   }
 
   showUpscalerToggle() {

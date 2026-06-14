@@ -27,7 +27,7 @@ RSpec.describe CarImageProcessingJob do
   describe '#perform' do
     it 'upscales and classifies the photo in the background' do
       attach_photo!(car)
-      upscaled_file = build_temp_image(width: 420, height: 280)
+      upscaled_file = build_temp_image(width: 420, height: 280, upscale_strategy: :ai)
 
       allow(Turbo::StreamsChannel).to receive(:broadcast_replace_to)
       expect(ImageUpscalerService).to receive(:upscale_if_needed)
@@ -38,9 +38,11 @@ RSpec.describe CarImageProcessingJob do
       described_class.new.perform(user.id.to_s, car.id.to_s)
 
       processed_car = Car.find(car.id)
-      saved_image = MiniMagick::Image.open(processed_car.photo.path)
+      saved_image = MiniMagick::Image.open(processed_car.enhanced_photo.path)
       expect(saved_image.width).to eq(420)
       expect(saved_image.height).to eq(280)
+      expect(processed_car.photo_variant).to eq('original')
+      expect(processed_car).not_to be_photo_upscaled_by_ai
       expect(processed_car.color).to eq('Azul')
       expect(processed_car.photo_processing_status).to eq('completed')
       expect(processed_car.photo_processing_error).to be_nil
@@ -63,12 +65,15 @@ RSpec.describe CarImageProcessingJob do
       expect do
         described_class.new.perform(user.id.to_s, car.id.to_s)
       end.to change { UsageMetric.values_for(['photos_upscaled_ai']).fetch('photos_upscaled_ai') }.from(0).to(1)
-      expect(Car.find(car.id).photo_upscale_strategy).to eq('ai')
+      processed_car = Car.find(car.id)
+      expect(processed_car.enhanced_photo).to be_present
+      expect(processed_car.photo_upscale_strategy).to be_nil
     end
 
     it 'uses crop parameters when they are present' do
       attach_photo!(car)
       cropped_file = build_temp_image(width: 360, height: 360)
+      ai_cropped_file = build_temp_image(width: 720, height: 720, upscale_strategy: :ai)
       crop_params = { crop_x: '0.1', crop_y: '0.2', crop_w: '0.3', crop_h: '0.4' }
 
       expect(ImageCropperService).to receive(:crop)
@@ -82,15 +87,38 @@ RSpec.describe CarImageProcessingJob do
           ],
           padding: 0,
           minimum_side: ImageUpscalerService.default_minimum_side,
-          upscale: { use_ai: true, local_fallback: false }
+          upscale: { use_ai: false, local_fallback: false }
         )
         .and_return(cropped_file)
+      expect(ImageCropperService).to receive(:crop)
+        .with(
+          anything,
+          [
+            { 'x' => 0.1, 'y' => 0.2 },
+            { 'x' => 0.4, 'y' => 0.2 },
+            { 'x' => 0.4, 'y' => 0.6 },
+            { 'x' => 0.1, 'y' => 0.6 }
+          ],
+          padding: 0,
+          minimum_side: ImageUpscalerService.default_minimum_side,
+          upscale: { use_ai: true, local_fallback: false }
+        )
+        .and_return(ai_cropped_file)
       expect(ImageUpscalerService).not_to receive(:upscale_if_needed)
       allow(YoloDetectionService).to receive(:classify_color).and_return(nil)
 
       described_class.new.perform(user.id.to_s, car.id.to_s, crop_params)
 
-      expect(Car.find(car.id).photo_processing_status).to eq('completed')
+      processed_car = Car.find(car.id)
+      selected_image = MiniMagick::Image.open(processed_car.photo.path)
+      original_image = MiniMagick::Image.open(processed_car.original_photo.path)
+      enhanced_image = MiniMagick::Image.open(processed_car.enhanced_photo.path)
+
+      expect(processed_car.photo_processing_status).to eq('completed')
+      expect(selected_image.width).to eq(360)
+      expect(original_image.width).to eq(360)
+      expect(enhanced_image.width).to eq(720)
+      expect(processed_car.photo_variant).to eq('original')
     end
 
     it 'honors the user AI upscaling preference' do
@@ -173,10 +201,11 @@ RSpec.describe CarImageProcessingJob do
       described_class.new.perform(user.id.to_s, car.id.to_s)
 
       synced_item = DetectedItem.find(detected_item.id)
-      synced_image = MiniMagick::Image.open(synced_item.cropped_photo.path)
+      synced_image = MiniMagick::Image.open(synced_item.enhanced_cropped_photo.path)
 
       expect(synced_image.width).to eq(420)
-      expect(synced_item.cropped_photo_upscale_strategy).to eq('ai')
+      expect(synced_item.cropped_photo_upscale_strategy).to be_nil
+      expect(synced_item.cropped_photo_variant).to eq('original')
       expect(Turbo::StreamsChannel).to have_received(:broadcast_replace_to).with(
         "autodetection_#{autodetection.id}_items",
         target: "detected_item_#{detected_item.id}",

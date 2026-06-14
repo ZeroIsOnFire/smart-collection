@@ -159,6 +159,21 @@ RSpec.describe CarService do
       end.to enqueue_job(CarImageProcessingJob)
     end
 
+    it 'clears stored AI variants when the photo changes' do
+      car.original_photo = Rack::Test::UploadedFile.new(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+      car.enhanced_photo = Rack::Test::UploadedFile.new(Rails.root.join('spec/fixtures/files/car_sample.jpg'), 'image/jpeg')
+      car.photo_variant = 'ai'
+      car.photo_upscale_strategy = 'ai'
+      car.save!
+
+      updated_car = described_class.new(user).update(car.id, { photo: valid_params[:photo] })
+
+      expect(updated_car.original_photo).not_to be_present
+      expect(updated_car.enhanced_photo).not_to be_present
+      expect(updated_car.photo_variant).to be_nil
+      expect(updated_car.photo_upscale_strategy).to be_nil
+    end
+
     it 'switches an existing car back to the original photo when the upscaler toggle is checked' do
       car.original_photo = Rack::Test::UploadedFile.new(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
       car.enhanced_photo = Rack::Test::UploadedFile.new(Rails.root.join('spec/fixtures/files/car_sample.jpg'), 'image/jpeg')
@@ -187,6 +202,22 @@ RSpec.describe CarService do
         expect(updated_car.photo_variant).to eq('ai')
         expect(updated_car.photo_upscale_strategy).to eq('ai')
       end.not_to enqueue_job(CarImageProcessingJob)
+    end
+
+    it 'keeps the original selected when account AI upscaling is disabled' do
+      user.update!(ai_upscaling_enabled: false)
+      car.original_photo = Rack::Test::UploadedFile.new(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+      car.enhanced_photo = Rack::Test::UploadedFile.new(Rails.root.join('spec/fixtures/files/car_sample.jpg'), 'image/jpeg')
+      car.photo = Rack::Test::UploadedFile.new(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+      car.photo_variant = 'original'
+      car.skip_upscaler = true
+      car.save!
+
+      updated_car = described_class.new(user).update(car.id, { skip_upscaler: '0' })
+
+      expect(updated_car.photo_variant).to eq('original')
+      expect(updated_car.photo_upscale_strategy).to be_nil
+      expect(updated_car.skip_upscaler).to be true
     end
 
     it 'enqueues AI processing when enabling the upscaler for a car without an enhanced photo' do
