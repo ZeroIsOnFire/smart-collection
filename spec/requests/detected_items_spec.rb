@@ -39,6 +39,20 @@ RSpec.describe 'DetectedItems', type: :request do
       expect(document.at_css('.detected-item-photo-col img')['src']).to include("v=#{@detected_item.updated_at.to_i}")
       expect(response.body).to include(I18n.t('autodetections.detected_item.skip_upscaler'))
     end
+
+    it 'disables the item upscaler skip toggle when the autodetection photo used AI' do
+      @autodetection.update!(status: 'to_verify', photo_upscale_strategy: 'ai')
+      @detected_item.update!(skip_upscaler: true)
+
+      get autodetection_path(@autodetection)
+
+      document = Nokogiri::HTML(response.body)
+      skip_upscaler_input = document.at_css("#skip_upscaler_#{@detected_item.id}")
+
+      expect(response).to have_http_status(:ok)
+      expect(skip_upscaler_input['disabled']).to eq('disabled')
+      expect(skip_upscaler_input['checked']).to be_nil
+    end
   end
 
   describe 'PATCH /update_selection' do
@@ -76,6 +90,20 @@ RSpec.describe 'DetectedItems', type: :request do
 
       expect(response).to have_http_status(:ok)
       expect(@detected_item.reload.skip_upscaler).to be true
+      expect(DetectedItemImageProcessingJob).to have_been_enqueued
+        .with(@user.id.to_s, @detected_item.id.to_s, hash_including('skip_upscaler' => true))
+    end
+
+    it 'keeps upscaler enabled when adjusting an item from an AI-upscaled autodetection' do
+      @autodetection.update!(photo_upscale_strategy: 'ai')
+      @detected_item.update!(skip_upscaler: true)
+
+      patch update_selection_detected_item_path(@detected_item),
+            params: crop_params.merge(name: 'Mazda RX-7', skip_upscaler: '1'),
+            headers: { 'Accept' => 'text/vnd.turbo-stream.html' }
+
+      expect(response).to have_http_status(:ok)
+      expect(@detected_item.reload.skip_upscaler).to be false
       expect(DetectedItemImageProcessingJob).to have_been_enqueued
         .with(@user.id.to_s, @detected_item.id.to_s, hash_including('skip_upscaler' => true))
     end

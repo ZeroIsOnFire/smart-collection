@@ -27,6 +27,10 @@ class Autodetection
   STATUSES = %w[pending processing to_verify completed error].freeze
   validates :status, inclusion: { in: STATUSES }
 
+  def photo_upscaled_by_ai?
+    photo_upscale_strategy == 'ai'
+  end
+
   # Verifica se todos os itens foram processados e conclui a autodetecção
   def check_completion!
     # Se já estiver em erro ou já concluído, não faz nada

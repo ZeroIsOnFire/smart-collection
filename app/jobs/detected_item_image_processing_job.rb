@@ -42,7 +42,8 @@ class DetectedItemImageProcessingJob < ApplicationJob
   end
 
   def upscale_options(detected_item)
-    enabled = detected_item.autodetection.user.ai_upscaling_enabled? && !detected_item.skip_upscaler?
+    enabled = detected_item.upscaler_skip_locked? ||
+              (detected_item.autodetection.user.ai_upscaling_enabled? && !detected_item.skip_upscaler?)
 
     { use_ai: enabled, local_fallback: enabled }
   end
@@ -67,7 +68,7 @@ class DetectedItemImageProcessingJob < ApplicationJob
     detected_item.brand = attributes[:brand] if attributes.key?(:brand)
     detected_item.year = attributes[:year] if attributes.key?(:year)
     detected_item.size = attributes[:size] if attributes.key?(:size)
-    detected_item.skip_upscaler = attributes[:skip_upscaler] if attributes.key?(:skip_upscaler)
+    detected_item.skip_upscaler = resolved_skip_upscaler(detected_item, attributes)
     detected_item.image_processing_status = 'completed'
     detected_item.image_processing_error = nil
     detected_item.save!
@@ -91,6 +92,13 @@ class DetectedItemImageProcessingJob < ApplicationJob
 
   def detected_item_upscale_strategy(detected_item, file)
     upscale_strategy(file).presence || detected_item.autodetection.photo_upscale_strategy
+  end
+
+  def resolved_skip_upscaler(detected_item, attributes)
+    return false if detected_item.upscaler_skip_locked?
+    return attributes[:skip_upscaler] if attributes.key?(:skip_upscaler)
+
+    detected_item.skip_upscaler
   end
 
   def broadcast_detected_item(detected_item)

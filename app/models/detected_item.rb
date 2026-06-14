@@ -39,10 +39,14 @@ class DetectedItem
   end
 
   def photo_upscale_strategy_for_car
-    return 'ai' if cropped_photo_upscale_strategy == 'ai' || autodetection.photo_upscale_strategy == 'ai'
+    return 'ai' if cropped_photo_upscale_strategy == 'ai' || upscaler_skip_locked?
     return if skip_upscaler? || autodetection.skip_upscaler?
 
     'ai' if autodetection.user.ai_upscaling_enabled?
+  end
+
+  def upscaler_skip_locked?
+    autodetection.photo_upscaled_by_ai?
   end
 
   private

@@ -111,6 +111,29 @@ RSpec.describe DetectedItemImageProcessingJob do
       expect(DetectedItem.find(detected_item.id).image_processing_status).to eq('completed')
     end
 
+    it 'forces AI upscaling when the autodetection photo already used AI' do
+      autodetection.update!(photo_upscale_strategy: 'ai')
+      detected_item.update!(skip_upscaler: true)
+      file = cropped_file
+
+      expect(ImageCropperService).to receive(:crop)
+        .with(
+          anything,
+          anything,
+          padding: 0,
+          minimum_side: ImageCropperService.default_minimum_side,
+          upscale: { use_ai: true, local_fallback: true }
+        )
+        .and_return(file)
+      allow(YoloDetectionService).to receive(:classify).and_return({})
+
+      described_class.new.perform(user.id.to_s, detected_item.id.to_s, skip_upscaler: '1')
+
+      processed_item = DetectedItem.find(detected_item.id)
+      expect(processed_item.skip_upscaler).to be false
+      expect(processed_item.cropped_photo_upscale_strategy).to eq('ai')
+    end
+
     it 'marks the detected item as error when processing fails' do
       allow(ImageCropperService).to receive(:crop).and_raise(ImageUpscalerService::UpscaleError, 'upscaler failed')
 
