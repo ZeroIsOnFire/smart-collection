@@ -344,6 +344,8 @@ en:
       original_photo: "Original Reference Photo"
       add_manually: "Add Manually"
       waiting_items: "Waiting for item processing... they will appear here automatically."
+      ai_upscaling_notice_title: "AI upscaling applied to this autodetection"
+      ai_upscaling_notice_text: "All cars created from this autodetection will use AI upscaling, including items saved without crop adjustment."
       manual_modal_title: "Add items from photo"
       manual_modal_help: "Select the car in the original photo below by clicking and dragging. When you click add, the item will appear in the list and you can select another item without closing this screen."
       add_selected_item: "Add selected item"

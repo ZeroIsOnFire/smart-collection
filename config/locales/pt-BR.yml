@@ -359,6 +359,8 @@ pt-BR:
       original_photo: "Foto Original de Referência"
       add_manually: "Adicionar Manualmente"
       waiting_items: "Aguardando processamento dos itens... eles aparecerão aqui automaticamente."
+      ai_upscaling_notice_title: "Upscale por IA aplicado nesta autodetecção"
+      ai_upscaling_notice_text: "Todos os carros criados a partir desta autodetecção terão upscale por IA, inclusive os itens salvos sem ajuste de recorte."
       manual_modal_title: "Adicionar itens da foto"
       manual_modal_help: "Selecione o carro na foto original abaixo clicando e arrastando. Ao clicar em adicionar, o item aparecerá na lista e você poderá selecionar outro item sem fechar esta tela."
       add_selected_item: "Adicionar Item selecionado"

@@ -51,6 +51,28 @@ RSpec.describe 'Autodetections', type: :request do
       get autodetection_path(autodetection)
       expect(response).to be_successful
     end
+
+    it 'shows an AI upscaling notice when the autodetection photo used AI' do
+      autodetection.update!(photo_upscale_strategy: 'ai')
+
+      get autodetection_path(autodetection)
+
+      document = Nokogiri::HTML(response.body)
+
+      expect(response).to be_successful
+      expect(document.at_css('[data-ai-upscaling-notice]')).to be_present
+      expect(document.at_css('[data-ai-upscaling-notice]').text).to include(I18n.t('autodetections.show.ai_upscaling_notice_title'))
+      expect(document.at_css('[data-ai-upscaling-notice]').text).to include(I18n.t('autodetections.show.ai_upscaling_notice_text'))
+    end
+
+    it 'does not show the AI upscaling notice for regular autodetections' do
+      get autodetection_path(autodetection)
+
+      document = Nokogiri::HTML(response.body)
+
+      expect(response).to be_successful
+      expect(document.at_css('[data-ai-upscaling-notice]')).to be_nil
+    end
   end
 
   describe 'GET /cars' do
