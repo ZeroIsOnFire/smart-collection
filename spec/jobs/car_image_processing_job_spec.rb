@@ -72,7 +72,7 @@ RSpec.describe CarImageProcessingJob do
 
     it 'uses crop parameters when they are present' do
       attach_photo!(car)
-      cropped_file = build_temp_image(width: 360, height: 360)
+      cropped_file = build_temp_image(width: 320, height: 320)
       ai_cropped_file = build_temp_image(width: 720, height: 720, upscale_strategy: :ai)
       crop_params = { crop_x: '0.1', crop_y: '0.2', crop_w: '0.3', crop_h: '0.4' }
 
@@ -115,9 +115,25 @@ RSpec.describe CarImageProcessingJob do
       enhanced_image = MiniMagick::Image.open(processed_car.enhanced_photo.path)
 
       expect(processed_car.photo_processing_status).to eq('completed')
-      expect(selected_image.width).to eq(360)
-      expect(original_image.width).to eq(360)
+      expect(selected_image.width).to eq(320)
+      expect(original_image.width).to eq(320)
       expect(enhanced_image.width).to eq(720)
+      expect(processed_car.photo_variant).to eq('original')
+    end
+
+    it 'does not generate an AI crop when the cropped photo already meets the minimum side' do
+      attach_photo!(car)
+      cropped_file = build_temp_image(width: 420, height: 420)
+      crop_params = { crop_x: '0.1', crop_y: '0.2', crop_w: '0.3', crop_h: '0.4' }
+
+      expect(ImageCropperService).to receive(:crop).once.and_return(cropped_file)
+      allow(YoloDetectionService).to receive(:classify_color).and_return(nil)
+
+      described_class.new.perform(user.id.to_s, car.id.to_s, crop_params)
+
+      processed_car = Car.find(car.id)
+      expect(processed_car.original_photo).to be_present
+      expect(processed_car.enhanced_photo).not_to be_present
       expect(processed_car.photo_variant).to eq('original')
     end
 

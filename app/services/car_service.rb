@@ -120,6 +120,11 @@ class CarService
       return :skip
     end
 
+    unless ai_upscale_relevant?(car)
+      use_original_photo(car) if car.original_photo_available?
+      return :skip
+    end
+
     unless user.ai_upscaling_enabled?
       use_original_photo(car) if car.original_photo_available?
       return :skip
@@ -173,6 +178,13 @@ class CarService
     car.write_attribute(:enhanced_photo_filename, nil)
     car.photo_variant = nil
     car.photo_upscale_strategy = nil
+  end
+
+  def ai_upscale_relevant?(car)
+    source = car.original_photo? ? car.original_photo : car.photo
+    return false unless source&.path
+
+    ImageUpscalerService.upscale_needed?(source.path, minimum_side: car_image_minimum_side)
   end
 
   def crop_requested?(params)

@@ -20,6 +20,16 @@ RSpec.describe 'Cars', type: :request do
     sign_in user
   end
 
+  def uploaded_resized_fixture(width:, height:, filename: 'resized.jpg')
+    tempfile = Tempfile.new(['request_photo', '.jpg'], Rails.root.join('tmp'))
+    image = MiniMagick::Image.open(Rails.root.join('spec/fixtures/files/test_image.png'))
+    image.resize "#{width}x#{height}!"
+    image.write(tempfile.path)
+    Rack::Test::UploadedFile.new(tempfile.path, 'image/jpeg', original_filename: filename)
+  ensure
+    tempfile&.close
+  end
+
   describe 'GET /index' do
     it "renders a successful response and shows only user's cars" do
       car # create
@@ -397,9 +407,9 @@ RSpec.describe 'Cars', type: :request do
       expect(response.body).to include(I18n.t('cars.modal.edit_title'))
     end
 
-    it 'shows the per-record upscaler toggle for an existing photo when AI is enabled' do
+    it 'shows the per-record upscaler toggle for a small existing photo when AI is enabled' do
       allow(ImageUpscalerService).to receive(:service_configured?).and_return(true)
-      car.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+      car.photo = uploaded_resized_fixture(width: 240, height: 240)
       car.save!
 
       get edit_car_path(car), headers: { 'Turbo-Frame' => 'modal' }
@@ -417,6 +427,19 @@ RSpec.describe 'Cars', type: :request do
       expect(response.body).to include(I18n.t('cars.form.ai_photo'))
     end
 
+    it 'hides the per-record upscaler toggle when the existing photo already meets the minimum side' do
+      allow(ImageUpscalerService).to receive(:service_configured?).and_return(true)
+      car.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+      car.save!
+
+      get edit_car_path(car), headers: { 'Turbo-Frame' => 'modal' }
+
+      document = Nokogiri::HTML(response.body)
+
+      expect(document.at_css('.car-upscaler-toggle')).to be_nil
+      expect(response.body).not_to include(I18n.t('cars.form.skip_upscaler_existing'))
+    end
+
     it "redirects if trying to edit another user's car" do
       other_car = create(:car, user: other_user)
       get edit_car_path(other_car)
@@ -431,7 +454,7 @@ RSpec.describe 'Cars', type: :request do
       car.update!(color: 'Azul', size: '1:64')
       car.set(updated_at: updated_at)
       car.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
-      car.original_photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+      car.original_photo = uploaded_resized_fixture(width: 240, height: 240, filename: 'small_original.jpg')
       car.enhanced_photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
       car.photo_variant = 'ai'
       car.photo_upscale_strategy = 'ai'
@@ -473,7 +496,7 @@ RSpec.describe 'Cars', type: :request do
 
     it 'shows the original photo action only when the displayed photo is the AI variant' do
       car.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/car_sample.jpg'), 'image/jpeg')
-      car.original_photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+      car.original_photo = uploaded_resized_fixture(width: 240, height: 240, filename: 'small_original.jpg')
       car.enhanced_photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/car_sample.jpg'), 'image/jpeg')
       car.photo_variant = 'ai'
       car.photo_upscale_strategy = 'ai'
@@ -490,6 +513,21 @@ RSpec.describe 'Cars', type: :request do
 
       expect(response.body).not_to include(I18n.t('cars.show.view_original_photo'))
       expect(response.body).not_to include(I18n.t('cars.show.photo_upscaled_by_ai'))
+    end
+
+    it 'does not show AI actions when the original already meets the required size' do
+      car.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/car_sample.jpg'), 'image/jpeg')
+      car.original_photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+      car.enhanced_photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/car_sample.jpg'), 'image/jpeg')
+      car.photo_variant = 'ai'
+      car.photo_upscale_strategy = 'ai'
+      car.save!
+
+      get car_path(car), headers: { 'Turbo-Frame' => 'modal' }
+
+      expect(response.body).not_to include(I18n.t('cars.show.view_original_photo'))
+      expect(response.body).not_to include(I18n.t('cars.show.photo_upscaled_by_ai'))
+      expect(response.body).to include(car.original_photo.url)
     end
 
     it 'shows only the original photo when account AI upscaling is disabled' do

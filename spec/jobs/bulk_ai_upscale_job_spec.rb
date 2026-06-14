@@ -5,10 +5,18 @@ require 'rails_helper'
 RSpec.describe BulkAiUpscaleJob do
   let(:user) { create(:user, bulk_ai_upscaling_enabled: true) }
 
-  def attach_photo!(car)
-    car.photo = Rack::Test::UploadedFile.new(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+  def attach_photo!(car, width: 240, height: 240)
+    tempfile = Tempfile.new(['bulk_photo', '.jpg'], Rails.root.join('tmp'))
+    image = MiniMagick::Image.open(Rails.root.join('spec/fixtures/files/test_image.png'))
+    image.resize "#{width}x#{height}!"
+    image.write(tempfile.path)
+
+    car.photo = Rack::Test::UploadedFile.new(tempfile.path, 'image/jpeg')
     car.save!
     car
+  ensure
+    tempfile&.close
+    tempfile&.unlink
   end
 
   before do
@@ -31,6 +39,14 @@ RSpec.describe BulkAiUpscaleJob do
     car = attach_photo!(create(:car, user: user))
     car.enhanced_photo = Rack::Test::UploadedFile.new(Rails.root.join('spec/fixtures/files/car_sample.jpg'), 'image/jpeg')
     car.save!
+
+    expect do
+      described_class.new.perform(user.id.to_s)
+    end.not_to have_enqueued_job(CarImageProcessingJob)
+  end
+
+  it 'does not enqueue cars whose photo already meets the minimum side' do
+    attach_photo!(create(:car, user: user), width: 420, height: 420)
 
     expect do
       described_class.new.perform(user.id.to_s)

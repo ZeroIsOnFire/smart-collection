@@ -73,7 +73,7 @@ class CarImageProcessingJob < ApplicationJob
     inherited_strategy = crop_params[:photo_upscale_strategy].presence
     source_path = crop_source_path(car)
     vertices = crop_vertices(crop_params)
-    ai_upscaler_enabled = upscaler_enabled_for?(car)
+    ai_upscaler_requested = upscaler_enabled_for?(car)
 
     cropped_file = ImageCropperService.crop(
       source_path,
@@ -87,7 +87,7 @@ class CarImageProcessingJob < ApplicationJob
     select_original_photo(car) if cropped_file
 
     upscaled_file = nil
-    if ai_upscaler_enabled
+    if cropped_file && ai_upscaler_requested && ImageUpscalerService.upscale_needed?(cropped_file.path)
       upscaled_file = ImageCropperService.crop(
         source_path,
         vertices,

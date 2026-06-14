@@ -52,6 +52,13 @@ class BulkAiUpscaleJob < ApplicationJob
         .where(:photo_processing_status.nin => %w[pending processing])
         .where(:skip_upscaler.ne => true)
         .asc(:created_at)
-        .first
+        .detect { |car| upscale_needed?(car) }
+  end
+
+  def upscale_needed?(car)
+    source = car.original_photo? ? car.original_photo : car.photo
+    return false unless source&.path
+
+    ImageUpscalerService.upscale_needed?(source.path)
   end
 end

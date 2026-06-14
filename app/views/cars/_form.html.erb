@@ -113,8 +113,9 @@
         </div>
 
         <%
+          ai_upscale_relevant = !car.persisted? || !car.photo? || car_ai_upscale_relevant?(car)
           show_upscaler_toggle = !car.persisted? || !car.photo? ||
-                                 (current_user.ai_upscaling_enabled? && ImageUpscalerService.service_configured?)
+                                 (ai_upscale_relevant && current_user.ai_upscaling_enabled? && ImageUpscalerService.service_configured?)
           show_variant_comparison = car.persisted? && car.photo? && show_upscaler_toggle
           displaying_ai_photo = show_variant_comparison && car_display_photo_upscaled_by_ai?(car, user: current_user)
           original_variant_selected = show_variant_comparison ? !displaying_ai_photo : car.skip_upscaler?
@@ -122,65 +123,67 @@
           enhanced_variant_available = car.enhanced_photo?
           enhanced_variant_url = enhanced_variant_available ? car.enhanced_photo.url : car.photo.url
         %>
-        <div class="record-upscaler-toggle car-upscaler-toggle form-check form-switch<%= ' d-none' unless show_upscaler_toggle %> mt-3"
-             data-photo-upload-target="upscalerToggle"
-             data-persist-visible="<%= show_upscaler_toggle %>">
-          <div class="d-flex align-items-center gap-2">
-            <%= f.check_box :skip_upscaler,
-                            {
-                              class: "form-check-input flex-shrink-0",
-                              role: "switch",
-                              checked: original_variant_selected,
-                              data: {
-                                "photo-upload-target": "upscalerCheckbox",
-                                action: "change->photo-upload#updateVariantSelection"
-                              }
-                            } %>
-            <%= f.label :skip_upscaler, class: "form-check-label small fw-semibold mb-0" do %>
-              <span data-photo-upload-target="upscalerExistingLabel" class="<%= 'd-none' unless show_variant_comparison %>">
-                <%= t("cars.form.skip_upscaler_existing") %>
-              </span>
-              <span data-photo-upload-target="upscalerNewLabel" class="<%= 'd-none' if show_variant_comparison %>">
-                <%= t("cars.form.skip_upscaler") %>
-              </span>
+        <% if show_upscaler_toggle %>
+          <div class="record-upscaler-toggle car-upscaler-toggle form-check form-switch mt-3"
+               data-photo-upload-target="upscalerToggle"
+               data-persist-visible="<%= show_upscaler_toggle %>">
+            <div class="d-flex align-items-center gap-2">
+              <%= f.check_box :skip_upscaler,
+                              {
+                                class: "form-check-input flex-shrink-0",
+                                role: "switch",
+                                checked: original_variant_selected,
+                                data: {
+                                  "photo-upload-target": "upscalerCheckbox",
+                                  action: "change->photo-upload#updateVariantSelection"
+                                }
+                              } %>
+              <%= f.label :skip_upscaler, class: "form-check-label small fw-semibold mb-0" do %>
+                <span data-photo-upload-target="upscalerExistingLabel" class="<%= 'd-none' unless show_variant_comparison %>">
+                  <%= t("cars.form.skip_upscaler_existing") %>
+                </span>
+                <span data-photo-upload-target="upscalerNewLabel" class="<%= 'd-none' if show_variant_comparison %>">
+                  <%= t("cars.form.skip_upscaler") %>
+                </span>
+              <% end %>
+            </div>
+
+            <% if show_variant_comparison %>
+              <div class="car-ai-variant-comparison" data-photo-upload-target="variantComparison">
+                <div class="car-ai-variant-card<%= ' is-selected' if original_variant_selected %>"
+                     data-photo-upload-target="originalVariantCard">
+                  <div class="car-ai-variant-thumb">
+                    <%= image_tag original_variant_url, alt: t("cars.form.original_photo") %>
+                  </div>
+                  <div class="car-ai-variant-meta">
+                    <span><%= t("cars.form.original_photo") %></span>
+                    <span class="car-ai-variant-status <%= original_variant_selected ? 'is-check' : 'is-cross' %>"
+                          data-photo-upload-target="originalVariantStatus">
+                      <i class="bi <%= original_variant_selected ? 'bi-check-lg' : 'bi-x-lg' %>"></i>
+                    </span>
+                  </div>
+                </div>
+
+                <div class="car-ai-variant-card<%= ' is-selected' if displaying_ai_photo %><%= ' is-missing' unless enhanced_variant_available %>"
+                     data-photo-upload-target="aiVariantCard">
+                  <div class="car-ai-variant-thumb">
+                    <%= image_tag enhanced_variant_url, alt: t("cars.form.ai_photo") %>
+                    <% unless enhanced_variant_available %>
+                      <span class="car-ai-variant-question" aria-label="<%= t("cars.form.ai_photo_missing") %>">?</span>
+                    <% end %>
+                  </div>
+                  <div class="car-ai-variant-meta">
+                    <span><%= t("cars.form.ai_photo") %></span>
+                    <span class="car-ai-variant-status <%= displaying_ai_photo ? 'is-check' : 'is-cross' %>"
+                          data-photo-upload-target="aiVariantStatus">
+                      <i class="bi <%= displaying_ai_photo ? 'bi-check-lg' : 'bi-x-lg' %>"></i>
+                    </span>
+                  </div>
+                </div>
+              </div>
             <% end %>
           </div>
-
-          <% if show_variant_comparison %>
-            <div class="car-ai-variant-comparison" data-photo-upload-target="variantComparison">
-              <div class="car-ai-variant-card<%= ' is-selected' if original_variant_selected %>"
-                   data-photo-upload-target="originalVariantCard">
-                <div class="car-ai-variant-thumb">
-                  <%= image_tag original_variant_url, alt: t("cars.form.original_photo") %>
-                </div>
-                <div class="car-ai-variant-meta">
-                  <span><%= t("cars.form.original_photo") %></span>
-                  <span class="car-ai-variant-status <%= original_variant_selected ? 'is-check' : 'is-cross' %>"
-                        data-photo-upload-target="originalVariantStatus">
-                    <i class="bi <%= original_variant_selected ? 'bi-check-lg' : 'bi-x-lg' %>"></i>
-                  </span>
-                </div>
-              </div>
-
-              <div class="car-ai-variant-card<%= ' is-selected' if displaying_ai_photo %><%= ' is-missing' unless enhanced_variant_available %>"
-                   data-photo-upload-target="aiVariantCard">
-                <div class="car-ai-variant-thumb">
-                  <%= image_tag enhanced_variant_url, alt: t("cars.form.ai_photo") %>
-                  <% unless enhanced_variant_available %>
-                    <span class="car-ai-variant-question" aria-label="<%= t("cars.form.ai_photo_missing") %>">?</span>
-                  <% end %>
-                </div>
-                <div class="car-ai-variant-meta">
-                  <span><%= t("cars.form.ai_photo") %></span>
-                  <span class="car-ai-variant-status <%= displaying_ai_photo ? 'is-check' : 'is-cross' %>"
-                        data-photo-upload-target="aiVariantStatus">
-                    <i class="bi <%= displaying_ai_photo ? 'bi-check-lg' : 'bi-x-lg' %>"></i>
-                  </span>
-                </div>
-              </div>
-            </div>
-          <% end %>
-        </div>
+        <% end %>
 
         <!-- Modal de Cropper -->
         <div class="modal fade" id="cropperModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">

@@ -236,6 +236,22 @@ RSpec.describe ImageUpscalerService do
     end
   end
 
+  describe '.upscale_needed?' do
+    it 'returns false when the image already meets the minimum side' do
+      image = instance_double(MiniMagick::Image, width: 640, height: 600)
+      allow(MiniMagick::Image).to receive(:open).with(source_photo_path).and_return(image)
+
+      expect(described_class.upscale_needed?(source_photo_path, minimum_side: 360)).to be false
+    end
+
+    it 'returns true when the image is below the minimum side' do
+      image = instance_double(MiniMagick::Image, width: 640, height: 300)
+      allow(MiniMagick::Image).to receive(:open).with(source_photo_path).and_return(image)
+
+      expect(described_class.upscale_needed?(source_photo_path, minimum_side: 360)).to be true
+    end
+  end
+
   describe '.timeout_from_env' do
     it 'uses a positive timeout from the environment' do
       allow(ENV).to receive(:fetch).with('IMAGE_UPSCALE_READ_TIMEOUT', nil).and_return('240.5')

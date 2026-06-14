@@ -15,8 +15,16 @@ module CarsHelper
     display_user&.ai_upscaling_enabled? != false
   end
 
+  def car_ai_upscale_relevant?(car)
+    source = car.original_photo? ? car.original_photo : car.photo
+    return false unless source&.path
+
+    ImageUpscalerService.upscale_needed?(source.path)
+  end
+
   def car_display_photo(car, user: nil)
-    return car.original_photo if !car_ai_display_enabled?(car, user:) && car.original_photo?
+    ai_display_unavailable = !car_ai_display_enabled?(car, user:) || !car_ai_upscale_relevant?(car)
+    return car.original_photo if ai_display_unavailable && car.original_photo?
 
     car.photo
   end
@@ -26,7 +34,7 @@ module CarsHelper
   end
 
   def car_display_photo_upscaled_by_ai?(car, user: nil)
-    car_ai_display_enabled?(car, user:) && car.photo_upscaled_by_ai?
+    car_ai_display_enabled?(car, user:) && car_ai_upscale_relevant?(car) && car.photo_upscaled_by_ai?
   end
 
   def car_show_original_photo_link?(car, user: nil, public_view: false)
