@@ -136,8 +136,9 @@ export default class extends Controller {
   }
 
   showExistingPhoto(url) {
-    this.previewImgTarget.src = url
     this.previewImgTarget.dataset.cropSourceUrl = url
+    this.previewImgTarget.src = url
+    this.renderStoredCropPreview(url)
     this.previewTarget.classList.remove("d-none")
     this.uploadPromptTarget.classList.add("d-none")
     if (this.hasUpscalerToggleTarget && this.upscalerToggleTarget.dataset.persistVisible === "true") {
@@ -216,5 +217,69 @@ export default class extends Controller {
     ).forEach((field) => {
       field.value = ""
     })
+  }
+
+  renderStoredCropPreview(url) {
+    const crop = this.storedCrop()
+    if (!crop) return
+
+    const image = new Image()
+    image.onload = () => {
+      const sourceWidth = image.naturalWidth
+      const sourceHeight = image.naturalHeight
+      const cropWidth = Math.max(1, Math.round(sourceWidth * crop.w))
+      const cropHeight = Math.max(1, Math.round(sourceHeight * crop.h))
+      const canvas = document.createElement("canvas")
+      canvas.width = cropWidth
+      canvas.height = cropHeight
+
+      try {
+        canvas.getContext("2d").drawImage(
+          image,
+          sourceWidth * crop.x,
+          sourceHeight * crop.y,
+          cropWidth,
+          cropHeight,
+          0,
+          0,
+          cropWidth,
+          cropHeight
+        )
+        this.previewImgTarget.src = canvas.toDataURL()
+        this.updateUpscalerVisibilityForSize(cropWidth, cropHeight)
+      } catch (_error) {
+        this.previewImgTarget.src = url
+      }
+    }
+    image.onerror = () => {
+      this.previewImgTarget.src = url
+    }
+    image.src = url
+  }
+
+  storedCrop() {
+    const crop = {
+      x: Number.parseFloat(this.cropFieldValue("crop_x")),
+      y: Number.parseFloat(this.cropFieldValue("crop_y")),
+      w: Number.parseFloat(this.cropFieldValue("crop_w")),
+      h: Number.parseFloat(this.cropFieldValue("crop_h"))
+    }
+
+    if ([crop.x, crop.y, crop.w, crop.h].some((value) => Number.isNaN(value))) return null
+    if (crop.w <= 0 || crop.h <= 0) return null
+
+    const x = Math.max(0, Math.min(1, crop.x))
+    const y = Math.max(0, Math.min(1, crop.y))
+
+    return {
+      x,
+      y,
+      w: Math.max(0, Math.min(1 - x, crop.w)),
+      h: Math.max(0, Math.min(1 - y, crop.h))
+    }
+  }
+
+  cropFieldValue(name) {
+    return this.element.querySelector(`input[name='car[${name}]']`)?.value
   }
 }
