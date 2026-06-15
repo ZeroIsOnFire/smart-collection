@@ -441,6 +441,32 @@ RSpec.describe 'Cars', type: :request do
       expect(toggle['class']).to include('d-none')
     end
 
+    it 'uses the original photo and persisted crop coordinates for editing an AI-displayed car' do
+      car.original_photo = uploaded_resized_fixture(width: 240, height: 240, filename: 'small_original.jpg')
+      car.enhanced_photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/car_sample.jpg'), 'image/jpeg')
+      car.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/car_sample.jpg'), 'image/jpeg')
+      car.photo_variant = 'ai'
+      car.photo_upscale_strategy = 'ai'
+      car.photo_crop_x = 0.1
+      car.photo_crop_y = 0.2
+      car.photo_crop_w = 0.3
+      car.photo_crop_h = 0.4
+      car.save!
+
+      get edit_car_path(car), headers: { 'Turbo-Frame' => 'modal' }
+
+      document = Nokogiri::HTML(response.body)
+      existing_photo = document.at_css('[data-photo-upload-target="existingPhoto"]')
+
+      expect(response).to be_successful
+      expect(existing_photo['data-url']).to include(car.original_photo.url)
+      expect(existing_photo['data-url']).not_to include(car.enhanced_photo.url)
+      expect(document.at_css('#car_crop_x')['value']).to eq('0.1')
+      expect(document.at_css('#car_crop_y')['value']).to eq('0.2')
+      expect(document.at_css('#car_crop_w')['value']).to eq('0.3')
+      expect(document.at_css('#car_crop_h')['value']).to eq('0.4')
+    end
+
     it "redirects if trying to edit another user's car" do
       other_car = create(:car, user: other_user)
       get edit_car_path(other_car)
@@ -633,12 +659,18 @@ RSpec.describe 'Cars', type: :request do
       end
 
       it 'rerenders the modal form when turbo stream validation fails' do
-        patch car_path(car), params: { car: { name: '' } }, as: :turbo_stream
+        patch car_path(car),
+              params: { car: { name: '', crop_x: '0.1', crop_y: '0.2', crop_w: '0.3', crop_h: '0.4' } },
+              as: :turbo_stream
 
         expect(response).to have_http_status(:unprocessable_content)
         expect(response.body).to include('turbo-stream action="update" target="modal"')
         expect(response.body).to include('id="turboModal"')
         expect(response.body).to include("edit_car_#{car.id}")
+        expect(response.body).to include('value="0.1"')
+        expect(response.body).to include('value="0.2"')
+        expect(response.body).to include('value="0.3"')
+        expect(response.body).to include('value="0.4"')
       end
     end
   end

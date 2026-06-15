@@ -112,6 +112,10 @@ RSpec.describe CarService do
       expect(car.photo_processing_crop_y).to eq(0.2)
       expect(car.photo_processing_crop_w).to eq(0.3)
       expect(car.photo_processing_crop_h).to eq(0.4)
+      expect(car.photo_crop_x).to eq(0.1)
+      expect(car.photo_crop_y).to eq(0.2)
+      expect(car.photo_crop_w).to eq(0.3)
+      expect(car.photo_crop_h).to eq(0.4)
     end
 
     it 'does not enqueue photo processing when no photo or crop is provided' do
@@ -182,6 +186,10 @@ RSpec.describe CarService do
       car.enhanced_photo = Rack::Test::UploadedFile.new(Rails.root.join('spec/fixtures/files/car_sample.jpg'), 'image/jpeg')
       car.photo_variant = 'ai'
       car.photo_upscale_strategy = 'ai'
+      car.photo_crop_x = 0.1
+      car.photo_crop_y = 0.2
+      car.photo_crop_w = 0.3
+      car.photo_crop_h = 0.4
       car.save!
 
       updated_car = described_class.new(user).update(car.id, { photo: valid_params[:photo] })
@@ -190,6 +198,10 @@ RSpec.describe CarService do
       expect(updated_car.enhanced_photo).not_to be_present
       expect(updated_car.photo_variant).to be_nil
       expect(updated_car.photo_upscale_strategy).to be_nil
+      expect(updated_car.photo_crop_x).to be_nil
+      expect(updated_car.photo_crop_y).to be_nil
+      expect(updated_car.photo_crop_w).to be_nil
+      expect(updated_car.photo_crop_h).to be_nil
     end
 
     it 'switches an existing car back to the original photo when the upscaler toggle is checked' do

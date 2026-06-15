@@ -85,6 +85,7 @@ export default class extends Controller {
     // Reset file input
     this.inputTarget.value = ""
     this.previewImgTarget.removeAttribute("data-crop-source-url")
+    this.clearCropFields()
 
     // Hide preview, show upload prompt
     this.previewTarget.classList.add("d-none")
@@ -96,6 +97,7 @@ export default class extends Controller {
   showPreview(file) {
     const reader = new FileReader()
     reader.onload = (e) => {
+      this.clearCropFields()
       this.previewImgTarget.src = e.target.result
       this.previewImgTarget.dataset.cropSourceUrl = e.target.result
       this.previewTarget.classList.remove("d-none")
@@ -206,5 +208,13 @@ export default class extends Controller {
 
   hideUpscalerToggle() {
     if (this.hasUpscalerToggleTarget) this.upscalerToggleTarget.classList.add("d-none")
+  }
+
+  clearCropFields() {
+    this.element.querySelectorAll(
+      "input[name='car[crop_x]'], input[name='car[crop_y]'], input[name='car[crop_w]'], input[name='car[crop_h]']"
+    ).forEach((field) => {
+      field.value = ""
+    })
   }
 }

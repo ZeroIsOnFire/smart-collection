@@ -25,9 +25,13 @@ class Car
   field :photo_processing_crop_y, type: Float
   field :photo_processing_crop_w, type: Float
   field :photo_processing_crop_h, type: Float
+  field :photo_crop_x, type: Float
+  field :photo_crop_y, type: Float
+  field :photo_crop_w, type: Float
+  field :photo_crop_h, type: Float
 
   # Virtual attributes for image cropping
-  attr_accessor :crop_x, :crop_y, :crop_w, :crop_h
+  attr_writer :crop_x, :crop_y, :crop_w, :crop_h
 
   PHOTO_PROCESSING_STATUSES = %w[pending processing completed error].freeze
 
@@ -136,6 +140,22 @@ class Car
 
   def selectable_photo_variant?
     original_photo_available? || enhanced_photo_available?
+  end
+
+  def crop_x
+    defined?(@crop_x) && !@crop_x.nil? ? @crop_x : photo_crop_x
+  end
+
+  def crop_y
+    defined?(@crop_y) && !@crop_y.nil? ? @crop_y : photo_crop_y
+  end
+
+  def crop_w
+    defined?(@crop_w) && !@crop_w.nil? ? @crop_w : photo_crop_w
+  end
+
+  def crop_h
+    defined?(@crop_h) && !@crop_h.nil? ? @crop_h : photo_crop_h
   end
 
   private

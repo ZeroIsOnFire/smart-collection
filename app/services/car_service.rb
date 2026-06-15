@@ -178,6 +178,7 @@ class CarService
     car.write_attribute(:enhanced_photo_filename, nil)
     car.photo_variant = nil
     car.photo_upscale_strategy = nil
+    clear_photo_crop(car)
   end
 
   def ai_upscale_relevant?(car)
@@ -214,6 +215,7 @@ class CarService
     car.photo_processing_status = nil
     car.photo_processing_error = nil
     clear_processing_crop(car)
+    clear_photo_crop(car)
   end
 
   def enqueue_photo_processing(car, params)
@@ -245,6 +247,10 @@ class CarService
     car.photo_processing_crop_y = params[:crop_y]
     car.photo_processing_crop_w = params[:crop_w]
     car.photo_processing_crop_h = params[:crop_h]
+    car.photo_crop_x = params[:crop_x]
+    car.photo_crop_y = params[:crop_y]
+    car.photo_crop_w = params[:crop_w]
+    car.photo_crop_h = params[:crop_h]
   end
 
   def clear_processing_crop(car)
@@ -252,5 +258,12 @@ class CarService
     car.photo_processing_crop_y = nil
     car.photo_processing_crop_w = nil
     car.photo_processing_crop_h = nil
+  end
+
+  def clear_photo_crop(car)
+    car.photo_crop_x = nil
+    car.photo_crop_y = nil
+    car.photo_crop_w = nil
+    car.photo_crop_h = nil
   end
 end

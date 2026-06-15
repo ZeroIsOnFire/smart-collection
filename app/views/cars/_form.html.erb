@@ -53,10 +53,14 @@
               style: "position: absolute; width: 0; height: 0; opacity: 0; overflow: hidden;",
               data: { "photo-upload-target": "input", "color-detector-target": "input", action: "change->photo-upload#fileSelected change->color-detector#detect" } %>
 
+        <%
+          editable_photo = car.original_photo? ? car.original_photo : car.photo
+        %>
+
         <!-- Existing photo data (only on edit) -->
-        <% if car.photo? %>
+        <% if editable_photo.present? %>
           <span data-photo-upload-target="existingPhoto"
-                data-url="<%= car_photo_url(car, car.photo) %>"
+                data-url="<%= car_photo_url(car, editable_photo) %>"
                 class="d-none"></span>
         <% elsif car.remote_photo_url.present? %>
           <span data-photo-upload-target="remotePhoto"

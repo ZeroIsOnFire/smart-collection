@@ -36,6 +36,7 @@ module CarsHelper
   def car_photo_url(car, photo)
     url = photo&.url
     return if url.blank?
+    return url if car.updated_at.blank?
 
     separator = url.include?('?') ? '&' : '?'
     "#{url}#{separator}v=#{car.updated_at.to_i}"
