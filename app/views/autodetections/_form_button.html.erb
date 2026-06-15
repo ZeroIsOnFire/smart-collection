@@ -1,4 +1,5 @@
-<div data-controller="autodetection-upload">
+<div data-controller="autodetection-upload"
+     data-autodetection-upload-minimum-side-value="<%= AutodetectionService.autodetection_minimum_side %>">
   <button type="button"
           class="btn btn-premium rounded-pill px-4 d-flex align-items-center gap-2"
           data-bs-toggle="modal"
@@ -85,13 +86,18 @@
                 <img data-autodetection-upload-target="preview" class="img-fluid rounded shadow-sm border" style="max-height: 350px;">
               </div>
 
-              <%= render "shared/ai_upscaling_notice",
-                         translation_key: "autodetections.form.ai_upscaling_notice",
-                         minimum_side: AutodetectionService.autodetection_minimum_side %>
+              <div class="d-none" data-autodetection-upload-target="upscalerControls">
+                <%= render "shared/ai_upscaling_notice",
+                           translation_key: "autodetections.form.ai_upscaling_notice",
+                           minimum_side: AutodetectionService.autodetection_minimum_side %>
 
-              <div class="record-upscaler-toggle form-check form-switch mb-4 text-start">
-                <%= f.check_box :skip_upscaler, class: "form-check-input flex-shrink-0", role: "switch" %>
-                <%= f.label :skip_upscaler, t("autodetections.form.skip_upscaler"), class: "form-check-label small fw-semibold mb-0" %>
+                <div class="record-upscaler-toggle form-check form-switch mb-4 text-start">
+                  <%= f.check_box :skip_upscaler,
+                                  class: "form-check-input flex-shrink-0",
+                                  role: "switch",
+                                  data: { "autodetection-upload-target": "skipUpscaler" } %>
+                  <%= f.label :skip_upscaler, t("autodetections.form.skip_upscaler"), class: "form-check-label small fw-semibold mb-0" %>
+                </div>
               </div>
 
               <div class="row g-2">

@@ -2,6 +2,7 @@
 <% car_dom_id = car.id.to_s %>
 <% display_user = car_display_user(car, local_assigns[:user]) %>
 <% display_photo_url = car_display_photo_url(car, user: display_user) %>
+<% original_photo_url = car_photo_url(car, car.original_photo) %>
 <% display_photo_upscaled_by_ai = car_display_photo_upscaled_by_ai?(car, user: display_user) %>
 <% variant_toggle_available = car_show_original_photo_link?(car, user: display_user) %>
 
@@ -46,7 +47,7 @@
        data-controller="photo-lightbox<%= ' photo-variant-toggle' if variant_toggle_available %>"
        <% if variant_toggle_available %>
          data-photo-variant-toggle-ai-url-value="<%= display_photo_url %>"
-         data-photo-variant-toggle-original-url-value="<%= car.original_photo.url %>"
+         data-photo-variant-toggle-original-url-value="<%= original_photo_url %>"
          data-photo-variant-toggle-original-label-value="<%= t("cars.show.view_original_photo") %>"
          data-photo-variant-toggle-ai-label-value="<%= t("cars.show.view_ai_photo") %>"
        <% end %>>

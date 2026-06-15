@@ -55,6 +55,12 @@ class DetectedItem
     autodetection.photo_upscaled_by_ai?
   end
 
+  def cropped_photo_upscale_relevant?(minimum_side: ImageUpscalerService.default_minimum_side)
+    return false unless cropped_photo&.path
+
+    ImageUpscalerService.upscale_needed?(cropped_photo.path, minimum_side:)
+  end
+
   private
 
   def track_removal

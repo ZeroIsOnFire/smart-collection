@@ -11,9 +11,20 @@ RSpec.describe 'DetectedItems', type: :request do
     ActiveJob::Base.queue_adapter = :test
   end
 
+  def uploaded_resized_fixture(width:, height:, filename: 'detected_item.jpg')
+    tempfile = Tempfile.new(['detected_item', '.jpg'], Rails.root.join('tmp'))
+    image = MiniMagick::Image.open(Rails.root.join('spec/fixtures/files/car_sample.jpg'))
+    image.resize "#{width}x#{height}!"
+    image.write(tempfile.path)
+    Rack::Test::UploadedFile.new(tempfile.path, 'image/jpeg', original_filename: filename)
+  ensure
+    tempfile&.close
+  end
+
   describe 'GET /autodetections/:id' do
     it 'renders consistent loading hooks for detected item submissions' do
       @autodetection.update!(status: 'to_verify')
+      @detected_item.update!(cropped_photo: uploaded_resized_fixture(width: 240, height: 240, filename: 'small_crop.jpg'))
 
       get autodetection_path(@autodetection)
 
@@ -42,7 +53,10 @@ RSpec.describe 'DetectedItems', type: :request do
 
     it 'disables the item upscaler skip toggle when the autodetection photo used AI' do
       @autodetection.update!(status: 'to_verify', photo_upscale_strategy: 'ai')
-      @detected_item.update!(skip_upscaler: true)
+      @detected_item.update!(
+        skip_upscaler: true,
+        cropped_photo: uploaded_resized_fixture(width: 240, height: 240, filename: 'small_ai_crop.jpg')
+      )
 
       get autodetection_path(@autodetection)
 
@@ -52,6 +66,20 @@ RSpec.describe 'DetectedItems', type: :request do
       expect(response).to have_http_status(:ok)
       expect(skip_upscaler_input['disabled']).to eq('disabled')
       expect(skip_upscaler_input['checked']).to be_nil
+    end
+
+    it 'hides the item upscaler skip toggle when the cropped photo already meets the car photo limit' do
+      @autodetection.update!(status: 'to_verify')
+      @detected_item.update!(cropped_photo: uploaded_resized_fixture(width: 420, height: 420, filename: 'large_crop.jpg'))
+
+      get autodetection_path(@autodetection)
+
+      document = Nokogiri::HTML(response.body)
+      frame = document.at_css("#detected_item_#{@detected_item.id}")
+
+      expect(response).to have_http_status(:ok)
+      expect(document.at_css("#skip_upscaler_#{@detected_item.id}")).to be_nil
+      expect(frame.at_css('.record-upscaler-toggle')).to be_nil
     end
   end
 

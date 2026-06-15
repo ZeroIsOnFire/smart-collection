@@ -83,12 +83,20 @@ RSpec.describe 'Autodetections', type: :request do
       preview_toggle = document.at_css(
         '[data-autodetection-upload-target="previewContainer"] #autodetection_skip_upscaler'
       )
+      preview_controls = document.at_css(
+        '[data-autodetection-upload-target="previewContainer"] [data-autodetection-upload-target="upscalerControls"]'
+      )
       upload_toggle = document.at_css(
         '[data-autodetection-upload-target="uploadInterface"] #autodetection_skip_upscaler'
       )
+      upload_controller = document.at_css('[data-controller="autodetection-upload"]')
 
       expect(response).to be_successful
       expect(preview_toggle).to be_present
+      expect(preview_controls['class']).to include('d-none')
+      expect(upload_controller['data-autodetection-upload-minimum-side-value']).to eq(
+        AutodetectionService.autodetection_minimum_side.to_s
+      )
       expect(upload_toggle).to be_nil
       expect(response.body).to include(I18n.t('autodetections.form.skip_upscaler'))
       expect(response.body).to include(

@@ -30,7 +30,15 @@ module CarsHelper
   end
 
   def car_display_photo_url(car, user: nil)
-    car_display_photo(car, user:)&.url
+    car_photo_url(car, car_display_photo(car, user:))
+  end
+
+  def car_photo_url(car, photo)
+    url = photo&.url
+    return if url.blank?
+
+    separator = url.include?('?') ? '&' : '?'
+    "#{url}#{separator}v=#{car.updated_at.to_i}"
   end
 
   def car_display_photo_upscaled_by_ai?(car, user: nil)

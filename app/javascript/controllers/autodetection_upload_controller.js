@@ -3,7 +3,23 @@ import * as bootstrap from "bootstrap"
 import { t } from "../i18n"
 
 export default class extends Controller {
-  static targets = ["video", "canvas", "preview", "previewContainer", "input", "form", "dropzone", "captureBtn", "cameraInterface", "uploadInterface"]
+  static targets = [
+    "video",
+    "canvas",
+    "preview",
+    "previewContainer",
+    "input",
+    "form",
+    "dropzone",
+    "captureBtn",
+    "cameraInterface",
+    "uploadInterface",
+    "upscalerControls",
+    "skipUpscaler"
+  ]
+  static values = {
+    minimumSide: Number
+  }
 
   connect() {
     this.stream = null
@@ -94,6 +110,7 @@ export default class extends Controller {
     this.previewContainerTarget.classList.add("d-none")
     this.uploadInterfaceTarget.classList.remove("d-none")
     this.cameraInterfaceTarget.classList.add("d-none")
+    this.hideUpscalerControls()
     this.stopCamera()
   }
 
@@ -107,8 +124,35 @@ export default class extends Controller {
       this.previewTarget.src = event.target.result
       this.previewContainerTarget.classList.remove("d-none")
       this.uploadInterfaceTarget.classList.add("d-none")
+      this.updateUpscalerControls(event.target.result)
     }
     reader.readAsDataURL(file)
+  }
+
+  updateUpscalerControls(url) {
+    const image = new Image()
+    image.onload = () => {
+      const minimumSide = this.minimumSideValue || 800
+
+      if (Math.min(image.naturalWidth || 0, image.naturalHeight || 0) < minimumSide) {
+        this.showUpscalerControls()
+      } else {
+        this.hideUpscalerControls()
+      }
+    }
+    image.onerror = () => {
+      this.hideUpscalerControls()
+    }
+    image.src = url
+  }
+
+  showUpscalerControls() {
+    if (this.hasUpscalerControlsTarget) this.upscalerControlsTarget.classList.remove("d-none")
+  }
+
+  hideUpscalerControls() {
+    if (this.hasUpscalerControlsTarget) this.upscalerControlsTarget.classList.add("d-none")
+    if (this.hasSkipUpscalerTarget) this.skipUpscalerTarget.checked = false
   }
 
   onStart() {

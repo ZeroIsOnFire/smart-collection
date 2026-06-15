@@ -56,7 +56,7 @@
         <!-- Existing photo data (only on edit) -->
         <% if car.photo? %>
           <span data-photo-upload-target="existingPhoto"
-                data-url="<%= car.photo.url %>"
+                data-url="<%= car_photo_url(car, car.photo) %>"
                 class="d-none"></span>
         <% elsif car.remote_photo_url.present? %>
           <span data-photo-upload-target="remotePhoto"
@@ -119,9 +119,9 @@
           show_variant_comparison = car.persisted? && car.photo? && ai_upscale_relevant && render_upscaler_toggle
           displaying_ai_photo = show_variant_comparison && car_display_photo_upscaled_by_ai?(car, user: current_user)
           original_variant_selected = show_variant_comparison ? !displaying_ai_photo : car.skip_upscaler?
-          original_variant_url = car.original_photo? ? car.original_photo.url : car.photo.url
+          original_variant_url = car.original_photo? ? car_photo_url(car, car.original_photo) : car_photo_url(car, car.photo)
           enhanced_variant_available = car.enhanced_photo?
-          enhanced_variant_url = enhanced_variant_available ? car.enhanced_photo.url : car.photo.url
+          enhanced_variant_url = enhanced_variant_available ? car_photo_url(car, car.enhanced_photo) : car_photo_url(car, car.photo)
         %>
         <% if render_upscaler_toggle %>
           <div class="record-upscaler-toggle car-upscaler-toggle form-check form-switch<%= ' d-none' unless show_variant_comparison %> mt-3"

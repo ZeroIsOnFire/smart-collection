@@ -3,6 +3,20 @@
 require 'rails_helper'
 
 RSpec.describe CarsHelper, type: :helper do
+  describe '#car_display_photo_url' do
+    it 'adds the car timestamp to avoid stale image containers' do
+      car = create(
+        :car,
+        photo: Rack::Test::UploadedFile.new(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+      )
+      updated_at = Time.zone.local(2026, 6, 14, 10, 30)
+      car.set(updated_at:)
+
+      expect(helper.car_display_photo_url(car)).to include(car.photo.url)
+      expect(helper.car_display_photo_url(car)).to end_with("?v=#{updated_at.to_i}")
+    end
+  end
+
   describe '#car_card_photo_style' do
     it 'returns the default cover style without a processing crop' do
       car = build(:car)
