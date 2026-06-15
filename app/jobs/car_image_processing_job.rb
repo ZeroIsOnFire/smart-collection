@@ -42,7 +42,7 @@ class CarImageProcessingJob < ApplicationJob
     inherited_strategy = processing_params[:photo_upscale_strategy].presence
     preserve_original_photo(car)
 
-    if car.skip_upscaler?
+    if car.skip_upscaler? && !force_ai_upscale?(processing_params)
       select_original_photo(car)
       restore_inherited_upscale_strategy(car, inherited_strategy) if ai_variant_requested?(processing_params, inherited_strategy)
       return nil
@@ -51,7 +51,7 @@ class CarImageProcessingJob < ApplicationJob
     upscaled_file = ImageUpscalerService.upscale_if_needed(
       car.photo.path,
       minimum_side: ImageUpscalerService.default_minimum_side,
-      use_ai: car.user.ai_upscaling_enabled?,
+      use_ai: upscaler_enabled_for?(car, processing_params),
       local_fallback: false
     )
 
@@ -73,7 +73,7 @@ class CarImageProcessingJob < ApplicationJob
     inherited_strategy = crop_params[:photo_upscale_strategy].presence
     source_path = crop_source_path(car)
     vertices = crop_vertices(crop_params)
-    ai_upscaler_requested = upscaler_enabled_for?(car)
+    ai_upscaler_requested = upscaler_enabled_for?(car, crop_params)
 
     cropped_file = ImageCropperService.crop(
       source_path,
@@ -182,7 +182,11 @@ class CarImageProcessingJob < ApplicationJob
   end
 
   def ai_variant_requested?(processing_params, inherited_strategy)
-    ActiveModel::Type::Boolean.new.cast(processing_params[:force_ai_upscale]) || inherited_strategy == 'ai'
+    force_ai_upscale?(processing_params) || inherited_strategy == 'ai'
+  end
+
+  def force_ai_upscale?(processing_params)
+    ActiveModel::Type::Boolean.new.cast(processing_params[:force_ai_upscale])
   end
 
   def preserve_original_photo(car)
@@ -204,8 +208,8 @@ class CarImageProcessingJob < ApplicationJob
     end
   end
 
-  def upscaler_enabled_for?(car)
-    car.user.ai_upscaling_enabled? && !car.skip_upscaler?
+  def upscaler_enabled_for?(car, processing_params = {})
+    car.user.ai_upscaling_enabled? && (!car.skip_upscaler? || force_ai_upscale?(processing_params))
   end
 
   def classify_color(car)

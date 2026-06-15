@@ -56,10 +56,13 @@ RSpec.describe CarImageProcessingJob do
     end
 
     it 'selects the AI variant when forced by the user choice' do
+      car.update!(skip_upscaler: true)
       attach_photo!(car)
       upscaled_file = build_temp_image(width: 420, height: 280, upscale_strategy: :ai)
 
-      allow(ImageUpscalerService).to receive(:upscale_if_needed).and_return(upscaled_file)
+      expect(ImageUpscalerService).to receive(:upscale_if_needed)
+        .with(anything, minimum_side: ImageUpscalerService.default_minimum_side, use_ai: true, local_fallback: false)
+        .and_return(upscaled_file)
       allow(YoloDetectionService).to receive(:classify_color).and_return(nil)
 
       described_class.new.perform(user.id.to_s, car.id.to_s, force_ai_upscale: true)
