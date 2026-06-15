@@ -254,6 +254,10 @@ class CarsController < ApplicationController
 
   def render_update_success
     render turbo_stream: turbo_stream.replace("car_#{@car.id}", partial: 'cars/car', locals: { car: @car }) +
+                         turbo_stream.replace("car_showcase_details_#{@car.id}",
+                                              partial: 'cars/showcase_details',
+                                              locals: { car: @car, modal: true, show_actions: true, show_timestamps: true }) +
+                         turbo_stream.replace("car_details_#{@car.id}", partial: 'cars/details', locals: { car: @car }) +
                          turbo_stream.update('modal', '') +
                          turbo_stream.append('flash_toasts', partial: 'shared/toast',
                                                              locals: success_toast(:updated))

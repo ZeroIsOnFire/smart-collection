@@ -171,6 +171,22 @@ export default class extends Controller {
     }
   }
 
+  selectOriginalVariant() {
+    if (!this.hasUpscalerCheckboxTarget) return
+
+    this.upscalerCheckboxTarget.checked = true
+    this.upscalerCheckboxTarget.dispatchEvent(new Event("change", { bubbles: true }))
+    this.updateVariantSelection()
+  }
+
+  selectAiVariant() {
+    if (!this.hasUpscalerCheckboxTarget) return
+
+    this.upscalerCheckboxTarget.checked = false
+    this.upscalerCheckboxTarget.dispatchEvent(new Event("change", { bubbles: true }))
+    this.updateVariantSelection()
+  }
+
   setVariantState(card, status, selected) {
     if (!card || !status) return
 

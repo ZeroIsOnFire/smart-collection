@@ -289,6 +289,22 @@ class CarImageProcessingJob < ApplicationJob
       partial: 'cars/car',
       locals: { car: car }
     )
+    broadcast_car_details(car)
+  end
+
+  def broadcast_car_details(car)
+    Turbo::StreamsChannel.broadcast_replace_to(
+      "cars_#{car.user_id}",
+      target: "car_showcase_details_#{car.id}",
+      partial: 'cars/showcase_details',
+      locals: { car: car, modal: true, show_actions: true, show_timestamps: true }
+    )
+    Turbo::StreamsChannel.broadcast_replace_to(
+      "cars_#{car.user_id}",
+      target: "car_details_#{car.id}",
+      partial: 'cars/details',
+      locals: { car: car }
+    )
   end
 
   def sync_detected_item(car)

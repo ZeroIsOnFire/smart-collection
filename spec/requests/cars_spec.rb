@@ -570,6 +570,17 @@ RSpec.describe 'Cars', type: :request do
       expect(document.css('.car-details-timestamp').size).to eq(2)
     end
 
+    it 'subscribes to car detail updates for background photo processing' do
+      get car_path(car)
+
+      signed_stream = Turbo::StreamsChannel.signed_stream_name("cars_#{user.id}")
+      document = Nokogiri::HTML(response.body)
+
+      expect(response).to be_successful
+      expect(response.body).to include(signed_stream)
+      expect(document.at_css("#car_details_#{car.id}")).to be_present
+    end
+
     it "does not show another user's car" do
       other_car = create(:car, user: other_user)
 
@@ -615,6 +626,8 @@ RSpec.describe 'Cars', type: :request do
 
         expect(response).to have_http_status(:ok)
         expect(response.body).to include("turbo-stream action=\"replace\" target=\"car_#{car.id}\"")
+        expect(response.body).to include("turbo-stream action=\"replace\" target=\"car_showcase_details_#{car.id}\"")
+        expect(response.body).to include("turbo-stream action=\"replace\" target=\"car_details_#{car.id}\"")
         expect(response.body).to include('turbo-stream action="update" target="modal"')
         expect(response.body).to include('flash_toasts')
       end

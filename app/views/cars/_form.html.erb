@@ -151,7 +151,10 @@
             <% if show_variant_comparison %>
               <div class="car-ai-variant-comparison" data-photo-upload-target="variantComparison">
                 <div class="car-ai-variant-card<%= ' is-selected' if original_variant_selected %>"
-                     data-photo-upload-target="originalVariantCard">
+                     data-photo-upload-target="originalVariantCard"
+                     data-action="click->photo-upload#selectOriginalVariant"
+                     role="button"
+                     tabindex="0">
                   <div class="car-ai-variant-thumb">
                     <%= image_tag original_variant_url, alt: t("cars.form.original_photo") %>
                   </div>
@@ -165,7 +168,10 @@
                 </div>
 
                 <div class="car-ai-variant-card<%= ' is-selected' if displaying_ai_photo %><%= ' is-missing' unless enhanced_variant_available %>"
-                     data-photo-upload-target="aiVariantCard">
+                     data-photo-upload-target="aiVariantCard"
+                     data-action="click->photo-upload#selectAiVariant"
+                     role="button"
+                     tabindex="0">
                   <div class="car-ai-variant-thumb">
                     <%= image_tag enhanced_variant_url, alt: t("cars.form.ai_photo") %>
                     <% unless enhanced_variant_available %>

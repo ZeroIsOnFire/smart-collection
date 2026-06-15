@@ -53,6 +53,18 @@ RSpec.describe CarImageProcessingJob do
         partial: 'cars/car',
         locals: { car: processed_car }
       ).at_least(:once)
+      expect(Turbo::StreamsChannel).to have_received(:broadcast_replace_to).with(
+        "cars_#{user.id}",
+        target: "car_showcase_details_#{car.id}",
+        partial: 'cars/showcase_details',
+        locals: { car: processed_car, modal: true, show_actions: true, show_timestamps: true }
+      ).at_least(:once)
+      expect(Turbo::StreamsChannel).to have_received(:broadcast_replace_to).with(
+        "cars_#{user.id}",
+        target: "car_details_#{car.id}",
+        partial: 'cars/details',
+        locals: { car: processed_car }
+      ).at_least(:once)
     end
 
     it 'selects the AI variant when forced by the user choice' do

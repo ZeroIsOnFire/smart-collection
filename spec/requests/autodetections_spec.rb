@@ -76,14 +76,27 @@ RSpec.describe 'Autodetections', type: :request do
   end
 
   describe 'GET /cars' do
-    it 'renders the upscaler preference in the autodetection form' do
+    it 'renders the upscaler preference only in the selected-photo preview area' do
       get cars_path
 
       document = Nokogiri::HTML(response.body)
+      preview_toggle = document.at_css(
+        '[data-autodetection-upload-target="previewContainer"] #autodetection_skip_upscaler'
+      )
+      upload_toggle = document.at_css(
+        '[data-autodetection-upload-target="uploadInterface"] #autodetection_skip_upscaler'
+      )
 
       expect(response).to be_successful
-      expect(document.at_css('#autodetection_skip_upscaler')).to be_present
+      expect(preview_toggle).to be_present
+      expect(upload_toggle).to be_nil
       expect(response.body).to include(I18n.t('autodetections.form.skip_upscaler'))
+      expect(response.body).to include(
+        I18n.t(
+          'autodetections.form.ai_upscaling_notice',
+          minimum_side: AutodetectionService.autodetection_minimum_side
+        )
+      )
     end
   end
 

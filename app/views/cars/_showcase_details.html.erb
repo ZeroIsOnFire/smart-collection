@@ -8,7 +8,8 @@
 <% display_photo_upscaled_by_ai = car_display_photo_upscaled_by_ai?(car, user: display_user) %>
 <% variant_toggle_available = car_show_original_photo_link?(car, user: display_user, public_view: public_view) %>
 
-<div class="row car-showcase-row <%= modal ? "g-3" : "g-5" %>"
+<div id="car_showcase_details_<%= car_dom_id %>"
+     class="row car-showcase-row <%= modal ? "g-3" : "g-5" %>"
      data-controller="photo-lightbox<%= ' photo-variant-toggle' if variant_toggle_available %>"
      <% if variant_toggle_available %>
        data-photo-variant-toggle-ai-url-value="<%= display_photo_url %>"
