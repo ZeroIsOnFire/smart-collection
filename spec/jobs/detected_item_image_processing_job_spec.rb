@@ -11,23 +11,24 @@ RSpec.describe DetectedItemImageProcessingJob do
     Rails.root.join('spec/fixtures/files/car_sample.jpg').open
   end
 
-  def upscaled_cropped_file(strategy)
+  def file_with_upscale_metadata
     file = cropped_file
-    file.define_singleton_method(:upscale_strategy) { strategy }
+    file.define_singleton_method(:upscale_strategy) { :ai }
     file
   end
 
   describe '#perform' do
-    it 'crops and classifies the detected item in the background' do
+    it 'crops and classifies the detected item in the background without upscaler' do
       file = cropped_file
 
+      expect(ImageUpscalerService).not_to receive(:upscale_if_needed)
       expect(ImageCropperService).to receive(:crop)
         .with(
           anything,
           detected_item.position_data['vertices'],
           padding: 0,
           minimum_side: ImageCropperService.default_minimum_side,
-          upscale: { use_ai: true, local_fallback: true }
+          upscale: { use_ai: false, local_fallback: false }
         )
         .and_return(file)
       expect(YoloDetectionService).to receive(:classify)
@@ -40,7 +41,10 @@ RSpec.describe DetectedItemImageProcessingJob do
       expect(processed_item.label).to eq('Manual car')
       expect(processed_item.color).to eq('Azul')
       expect(processed_item.cropped_photo).to be_present
+      expect(processed_item.original_cropped_photo).not_to be_present
+      expect(processed_item.enhanced_cropped_photo).not_to be_present
       expect(processed_item.cropped_photo_upscale_strategy).to be_nil
+      expect(processed_item.cropped_photo_variant).to be_nil
       expect(processed_item.image_processing_status).to eq('completed')
     end
 
@@ -71,101 +75,50 @@ RSpec.describe DetectedItemImageProcessingJob do
       expect(processed_item.skip_upscaler).to be true
     end
 
-    it 'honors the user AI upscaling preference' do
-      user.update!(ai_upscaling_enabled: false)
-      file = cropped_file
-
-      expect(ImageCropperService).to receive(:crop)
-        .with(
-          anything,
-          anything,
-          padding: 0,
-          minimum_side: ImageCropperService.default_minimum_side,
-          upscale: { use_ai: false, local_fallback: false }
-        )
-        .and_return(file)
-      allow(YoloDetectionService).to receive(:classify).and_return({})
-
-      described_class.new.perform(user.id.to_s, detected_item.id.to_s)
-
-      expect(DetectedItem.find(detected_item.id).image_processing_status).to eq('completed')
-    end
-
-    it 'honors the detected item upscaler preference' do
-      detected_item.update!(skip_upscaler: true)
-      file = cropped_file
-
-      expect(ImageCropperService).to receive(:crop)
-        .with(
-          anything,
-          anything,
-          padding: 0,
-          minimum_side: ImageCropperService.default_minimum_side,
-          upscale: { use_ai: false, local_fallback: false }
-        )
-        .and_return(file)
-      allow(YoloDetectionService).to receive(:classify).and_return({})
-
-      described_class.new.perform(user.id.to_s, detected_item.id.to_s)
-
-      expect(DetectedItem.find(detected_item.id).image_processing_status).to eq('completed')
-    end
-
-    it 'forces AI upscaling when the autodetection photo already used AI' do
-      autodetection.update!(photo_upscale_strategy: 'ai')
-      detected_item.update!(skip_upscaler: true)
-      file = cropped_file
-
-      expect(ImageCropperService).to receive(:crop)
-        .with(
-          anything,
-          anything,
-          padding: 0,
-          minimum_side: ImageCropperService.default_minimum_side,
-          upscale: { use_ai: true, local_fallback: true }
-        )
-        .and_return(file)
-      allow(YoloDetectionService).to receive(:classify).and_return({})
-
-      described_class.new.perform(user.id.to_s, detected_item.id.to_s, skip_upscaler: '1')
-
-      processed_item = DetectedItem.find(detected_item.id)
-      expect(processed_item.skip_upscaler).to be false
-      expect(processed_item.cropped_photo_upscale_strategy).to eq('ai')
-    end
-
-    it 'marks the detected item as error when processing fails' do
-      allow(ImageCropperService).to receive(:crop).and_raise(ImageUpscalerService::UpscaleError, 'upscaler failed')
-
-      described_class.new.perform(user.id.to_s, detected_item.id.to_s)
-
-      failed_item = DetectedItem.find(detected_item.id)
-      expect(failed_item.image_processing_status).to eq('error')
-      expect(failed_item.image_processing_error).to eq('upscaler failed')
-    end
-
-    it 'tracks upscaled adjusted selections in the historical counters' do
-      file = upscaled_cropped_file(:ai)
+    it 'ignores upscale metadata returned by the cropper' do
+      file = file_with_upscale_metadata
 
       allow(ImageCropperService).to receive(:crop).and_return(file)
       allow(YoloDetectionService).to receive(:classify).and_return({})
 
       expect do
         described_class.new.perform(user.id.to_s, detected_item.id.to_s)
-      end.to change { UsageMetric.values_for(['photos_upscaled_ai']).fetch('photos_upscaled_ai') }.from(0).to(1)
-      expect(DetectedItem.find(detected_item.id).cropped_photo_upscale_strategy).to eq('ai')
+      end.not_to(change { UsageMetric.values_for(['photos_upscaled_ai']).fetch('photos_upscaled_ai') })
+
+      processed_item = DetectedItem.find(detected_item.id)
+      expect(processed_item.cropped_photo_upscale_strategy).to be_nil
+      expect(processed_item.cropped_photo_variant).to be_nil
+      expect(processed_item.enhanced_cropped_photo).not_to be_present
     end
 
-    it 'inherits the autodetection photo strategy when the adjusted crop is not upscaled again' do
-      autodetection.update!(photo_upscale_strategy: 'ai')
+    it 'keeps detected item processing independent from user AI upscaling preference' do
+      user.update!(ai_upscaling_enabled: true)
       file = cropped_file
 
-      allow(ImageCropperService).to receive(:crop).and_return(file)
+      expect(ImageCropperService).to receive(:crop)
+        .with(
+          anything,
+          anything,
+          padding: 0,
+          minimum_side: ImageCropperService.default_minimum_side,
+          upscale: { use_ai: false, local_fallback: false }
+        )
+        .and_return(file)
       allow(YoloDetectionService).to receive(:classify).and_return({})
 
       described_class.new.perform(user.id.to_s, detected_item.id.to_s)
 
-      expect(DetectedItem.find(detected_item.id).cropped_photo_upscale_strategy).to eq('ai')
+      expect(DetectedItem.find(detected_item.id).image_processing_status).to eq('completed')
+    end
+
+    it 'marks the detected item as error when processing fails' do
+      allow(ImageCropperService).to receive(:crop).and_raise(StandardError, 'crop failed')
+
+      described_class.new.perform(user.id.to_s, detected_item.id.to_s)
+
+      failed_item = DetectedItem.find(detected_item.id)
+      expect(failed_item.image_processing_status).to eq('error')
+      expect(failed_item.image_processing_error).to eq('crop failed')
     end
 
     it 'does not process detected items from another user' do

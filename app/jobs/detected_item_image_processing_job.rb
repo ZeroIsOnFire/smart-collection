@@ -9,19 +9,16 @@ class DetectedItemImageProcessingJob < ApplicationJob
 
     detected_item.update!(image_processing_status: 'processing', image_processing_error: nil)
 
-    original_file = crop_original_item_photo(detected_item)
     processed_file = crop_item_photo(detected_item)
     classification = classify(processed_file)
 
-    track_upscaled_photo(processed_file)
-    apply_processing_result(detected_item, processed_file, original_file, classification, attributes.to_h.deep_symbolize_keys)
+    apply_processing_result(detected_item, processed_file, classification, attributes.to_h.deep_symbolize_keys)
     broadcast_detected_item(detected_item)
   rescue StandardError => e
     Rails.logger.error "DetectedItemImageProcessingJob failed for item #{detected_item_id}: #{e.message}"
     mark_as_failed(user_id, detected_item_id, e.message)
   ensure
     cleanup_tempfile(processed_file)
-    cleanup_tempfile(original_file)
   end
 
   private
@@ -39,32 +36,8 @@ class DetectedItemImageProcessingJob < ApplicationJob
       detected_item.position_data['vertices'],
       padding: 0,
       minimum_side: ImageCropperService.default_minimum_side,
-      upscale: upscale_options(detected_item)
-    )
-  end
-
-  def crop_original_item_photo(detected_item)
-    return unless detected_item.autodetection.original_photo?
-
-    ImageCropperService.crop(
-      original_source_path(detected_item),
-      detected_item.position_data['vertices'],
-      padding: 0,
-      minimum_side: ImageCropperService.default_minimum_side,
       upscale: { use_ai: false, local_fallback: false }
     )
-  end
-
-  def original_source_path(detected_item)
-    autodetection = detected_item.autodetection
-    autodetection.original_photo? ? autodetection.original_photo.path : autodetection.photo.path
-  end
-
-  def upscale_options(detected_item)
-    enabled = detected_item.upscaler_skip_locked? ||
-              (detected_item.autodetection.user.ai_upscaling_enabled? && !detected_item.skip_upscaler?)
-
-    { use_ai: enabled, local_fallback: enabled }
   end
 
   def classify(processed_file)
@@ -73,21 +46,10 @@ class DetectedItemImageProcessingJob < ApplicationJob
     YoloDetectionService.classify(processed_file.path)
   end
 
-  def track_upscaled_photo(file)
-    return unless file.respond_to?(:upscale_strategy)
-
-    UsageMetric.record!("photos_upscaled_#{file.upscale_strategy}")
-  end
-
-  def apply_processing_result(detected_item, processed_file, original_file, classification, attributes)
-    strategy = detected_item_upscale_strategy(detected_item, processed_file)
-    display_file = strategy == 'ai' ? processed_file : (original_file || processed_file)
-
-    detected_item.cropped_photo = display_file if display_file
-    detected_item.original_cropped_photo = original_file if original_file
-    detected_item.enhanced_cropped_photo = processed_file if strategy == 'ai' && processed_file
-    detected_item.cropped_photo_upscale_strategy = strategy
-    detected_item.cropped_photo_variant = strategy == 'ai' ? 'ai' : 'original'
+  def apply_processing_result(detected_item, processed_file, classification, attributes)
+    detected_item.cropped_photo = processed_file if processed_file
+    detected_item.cropped_photo_upscale_strategy = nil
+    detected_item.cropped_photo_variant = nil
     detected_item.label = attributes[:name].presence || classification[:label].presence || detected_item.label
     detected_item.color = resolved_color(detected_item, classification, attributes)
     detected_item.brand = attributes[:brand] if attributes.key?(:brand)
@@ -109,18 +71,7 @@ class DetectedItemImageProcessingJob < ApplicationJob
     submitted_color
   end
 
-  def upscale_strategy(file)
-    return unless file.respond_to?(:upscale_strategy)
-
-    file.upscale_strategy.to_s
-  end
-
-  def detected_item_upscale_strategy(detected_item, file)
-    upscale_strategy(file).presence || detected_item.autodetection_photo_upscale_strategy
-  end
-
   def resolved_skip_upscaler(detected_item, attributes)
-    return false if detected_item.upscaler_skip_locked?
     return attributes[:skip_upscaler] if attributes.key?(:skip_upscaler)
 
     detected_item.skip_upscaler

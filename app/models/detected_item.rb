@@ -25,7 +25,6 @@ class DetectedItem
 
   belongs_to :autodetection
   index({ autodetection_id: 1 }, { background: true })
-  delegate :photo_upscale_strategy, to: :autodetection, prefix: true
 
   STATUSES = %w[pending saved rejected].freeze
   IMAGE_PROCESSING_STATUSES = %w[pending processing completed error].freeze
@@ -41,18 +40,6 @@ class DetectedItem
 
   def image_processing?
     image_processing_status.in?(%w[pending processing])
-  end
-
-  def photo_upscale_strategy_for_car
-    return 'ai' if cropped_photo_variant == 'ai'
-    return 'ai' if cropped_photo_variant.blank? && (cropped_photo_upscale_strategy == 'ai' || upscaler_skip_locked?)
-    return if skip_upscaler? || autodetection.skip_upscaler?
-
-    'ai' if autodetection.user.ai_upscaling_enabled?
-  end
-
-  def upscaler_skip_locked?
-    autodetection.photo_upscaled_by_ai?
   end
 
   def cropped_photo_upscale_relevant?(minimum_side: ImageUpscalerService.default_minimum_side)

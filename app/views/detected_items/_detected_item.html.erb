@@ -145,20 +145,18 @@
 
               <div class="col-12">
                 <%
-                  upscaler_skip_locked = detected_item.upscaler_skip_locked?
                   show_upscaler_toggle = detected_item.cropped_photo_upscale_relevant?
-                  detected_item_skip_upscaler = upscaler_skip_locked ? false : (has_form_errors ? form_car.skip_upscaler? : detected_item.skip_upscaler?)
+                  detected_item_skip_upscaler = has_form_errors ? form_car.skip_upscaler? : detected_item.skip_upscaler?
                 %>
                 <%= hidden_field_tag "car[skip_upscaler]", "0", id: nil %>
                 <% if show_upscaler_toggle %>
-                  <div class="record-upscaler-toggle form-check form-switch <%= 'opacity-75' if upscaler_skip_locked %>">
+                  <div class="record-upscaler-toggle form-check form-switch">
                     <%= check_box_tag "car[skip_upscaler]",
                                       "1",
                                       detected_item_skip_upscaler,
                                       id: "skip_upscaler_#{detected_item.id}",
                                       class: "form-check-input flex-shrink-0",
-                                      role: "switch",
-                                      disabled: upscaler_skip_locked %>
+                                      role: "switch" %>
                     <%= label_tag "skip_upscaler_#{detected_item.id}",
                                   t("autodetections.detected_item.skip_upscaler"),
                                   class: "form-check-label small fw-semibold mb-0" %>

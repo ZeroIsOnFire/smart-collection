@@ -65,7 +65,7 @@ To use the system in English during development, open pages with `?locale=en` wh
 - **Private collections by default**: user data remains scoped to the authenticated owner.
 - **AI autodetection**: upload a photo with multiple items and let local YOLO detect, crop, and queue items for review.
 - **Collection management**: track brand, name, year, scale, color, photos, and metadata for each item.
-- **Image preparation**: optional local upscaling prepares photos for final storage and autodetection workflows.
+- **Image preparation**: optional local upscaling prepares car photos for final storage.
 - **Realtime feedback**: processing states and interface updates use Turbo Streams.
 - **Secure public sharing**: collections can be shared through an explicit public token only when sharing is enabled.
 - **Exports**: generate PDF and CSV reports from the collection.
@@ -75,9 +75,9 @@ To use the system in English during development, open pages with `?locale=en` wh
 The project includes local AI microservices that run through Docker Compose:
 
 - `yolo-service`: local YOLO11s detection and simple color classification for autodetection flows. See [`yolo/README.md`](yolo/README.md).
-- `upscale-service`: local image upscale/preparation service used by item uploads and autodetection. The default Docker setup uses `upscale/Dockerfile.cpu`; see [`upscale/README.md`](upscale/README.md).
+- `upscale-service`: local image upscale/preparation service used by car photo uploads. The default Docker setup uses `upscale/Dockerfile.cpu`; see [`upscale/README.md`](upscale/README.md).
 
-Image preparation thresholds are configured in `.env` with `IMAGE_UPSCALE_DEFAULT_MINIMUM_SIDE` for regular item photos and `AUTODETECTION_MINIMUM_SIDE` for autodetection photos. The autodetection default is 800 px to reduce pre-YOLO processing cost.
+Image preparation thresholds are configured in `.env` with `IMAGE_UPSCALE_DEFAULT_MINIMUM_SIDE` for car photos.
 
 ## Tests
 

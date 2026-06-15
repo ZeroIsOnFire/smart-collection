@@ -309,32 +309,14 @@ class CarImageProcessingJob < ApplicationJob
 
   def sync_detected_item(car)
     detected_item = DetectedItem.where(car_id: car.id).first
-    return unless detected_item && car.photo.present?
+    return unless detected_item
 
-    File.open(car.photo.path) do |photo_file|
-      detected_item.cropped_photo = photo_file
-      detected_item.cropped_photo_upscale_strategy = car.photo_upscale_strategy
-      detected_item.cropped_photo_variant = car.photo_variant
-      detected_item.save!
-    end
-
-    sync_detected_item_versions(car, detected_item)
+    detected_item.update!(
+      cropped_photo_upscale_strategy: nil,
+      cropped_photo_variant: nil
+    )
 
     broadcast_detected_item(detected_item)
-  end
-
-  def sync_detected_item_versions(car, detected_item)
-    if car.original_photo?
-      File.open(car.original_photo.path) do |photo_file|
-        detected_item.original_cropped_photo = photo_file
-      end
-    end
-    if car.enhanced_photo?
-      File.open(car.enhanced_photo.path) do |photo_file|
-        detected_item.enhanced_cropped_photo = photo_file
-      end
-    end
-    detected_item.save!
   end
 
   def broadcast_detected_item(detected_item)

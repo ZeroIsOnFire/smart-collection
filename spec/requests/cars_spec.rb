@@ -30,6 +30,17 @@ RSpec.describe 'Cars', type: :request do
     tempfile&.close
   end
 
+  def processed_temp_image(width:, height:, filename: 'processed.jpg', upscale_strategy: nil)
+    tempfile = Tempfile.new(['request_processed_photo', '.jpg'], Rails.root.join('tmp'))
+    image = MiniMagick::Image.open(Rails.root.join('spec/fixtures/files/test_image.png'))
+    image.resize "#{width}x#{height}!"
+    image.write(tempfile.path)
+    tempfile.define_singleton_method(:original_filename) { filename }
+    tempfile.define_singleton_method(:content_type) { 'image/jpeg' }
+    tempfile.define_singleton_method(:upscale_strategy) { upscale_strategy } if upscale_strategy
+    tempfile
+  end
+
   describe 'GET /index' do
     it "renders a successful response and shows only user's cars" do
       car # create
@@ -97,14 +108,13 @@ RSpec.describe 'Cars', type: :request do
       expect(response.body).to include(I18n.t('cars.card.photo_processing'))
     end
 
-    it 'shows the autodetection AI upscaling notice when enabled and configured' do
+    it 'does not show the autodetection AI upscaling notice when enabled and configured' do
       allow(ImageUpscalerService).to receive(:service_configured?).and_return(true)
 
       get cars_path
 
-      expect(response.body).to include(
-        I18n.t('autodetections.form.ai_upscaling_notice', minimum_side: AutodetectionService.autodetection_minimum_side)
-      )
+      expect(response.body).not_to include('autodetection_skip_upscaler')
+      expect(response.body).not_to include('data-autodetection-upload-target="upscalerControls"')
     end
 
     it 'paginates the cars collection' do
@@ -341,6 +351,52 @@ RSpec.describe 'Cars', type: :request do
         post cars_path, params: { car: valid_attributes.merge(skip_upscaler: '1') }
 
         expect(Car.last.skip_upscaler).to be true
+      end
+
+      it 'creates a car from a detected item and keeps AI upscale only on the car' do
+        allow(ImageUpscalerService).to receive(:service_configured?).and_return(true)
+        allow(YoloDetectionService).to receive(:classify_color).and_return(nil)
+        upscaled_file = processed_temp_image(width: 420, height: 420, upscale_strategy: :ai)
+        autodetection = create(:autodetection, :completed, user: user)
+        detected_item = create(:detected_item, autodetection: autodetection, cropped_photo_upscale_strategy: nil,
+                                               cropped_photo_variant: nil)
+
+        expect(ImageUpscalerService).to receive(:upscale_if_needed)
+          .with(anything, minimum_side: ImageUpscalerService.default_minimum_side, use_ai: true, local_fallback: false)
+          .and_return(upscaled_file)
+
+        perform_enqueued_jobs do
+          post cars_path,
+               params: {
+                 detected_item_id: detected_item.id.to_s,
+                 car: {
+                   name: 'Verified car',
+                   brand: 'Hot Wheels',
+                   skip_upscaler: '0'
+                 }
+               },
+               as: :turbo_stream
+        end
+
+        car = Car.last
+        processed_item = detected_item.reload
+
+        expect(car.detected_via_ai).to be true
+        expect(car.original_photo).to be_present
+        expect(car.enhanced_photo).to be_present
+        expect(car.photo_upscale_strategy).to eq('ai')
+        expect(car.photo_variant).to eq('ai')
+        expect(processed_item.status).to eq('saved')
+        expect(processed_item.cropped_photo_upscale_strategy).to be_nil
+        expect(processed_item.cropped_photo_variant).to be_nil
+        expect(processed_item.enhanced_cropped_photo).not_to be_present
+      ensure
+        begin
+          upscaled_file&.close
+          upscaled_file&.unlink
+        rescue StandardError
+          nil
+        end
       end
 
       it 'prepends the created car and closes the modal with turbo stream' do

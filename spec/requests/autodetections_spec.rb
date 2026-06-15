@@ -22,13 +22,13 @@ RSpec.describe 'Autodetections', type: :request do
       expect(response).to be_successful
     end
 
-    it 'persists the upscaler preference for the autodetection' do
+    it 'ignores the legacy upscaler preference for the autodetection' do
       post autodetections_path,
            params: valid_params.deep_merge(autodetection: { skip_upscaler: '1' }),
            as: :turbo_stream
 
       expect(response).to be_successful
-      expect(Autodetection.last.skip_upscaler).to be true
+      expect(Autodetection.last.skip_upscaler).to be false
     end
 
     it 'shows validation errors below the photo field' do
@@ -52,7 +52,7 @@ RSpec.describe 'Autodetections', type: :request do
       expect(response).to be_successful
     end
 
-    it 'shows an AI upscaling notice when the autodetection photo used AI' do
+    it 'does not show an AI upscaling notice when the autodetection photo used AI' do
       autodetection.update!(photo_upscale_strategy: 'ai')
 
       get autodetection_path(autodetection)
@@ -60,9 +60,7 @@ RSpec.describe 'Autodetections', type: :request do
       document = Nokogiri::HTML(response.body)
 
       expect(response).to be_successful
-      expect(document.at_css('[data-ai-upscaling-notice]')).to be_present
-      expect(document.at_css('[data-ai-upscaling-notice]').text).to include(I18n.t('autodetections.show.ai_upscaling_notice_title'))
-      expect(document.at_css('[data-ai-upscaling-notice]').text).to include(I18n.t('autodetections.show.ai_upscaling_notice_text'))
+      expect(document.at_css('[data-ai-upscaling-notice]')).to be_nil
     end
 
     it 'does not show the AI upscaling notice for regular autodetections' do
@@ -76,7 +74,7 @@ RSpec.describe 'Autodetections', type: :request do
   end
 
   describe 'GET /cars' do
-    it 'renders the upscaler preference only in the selected-photo preview area' do
+    it 'does not render the upscaler preference in the autodetection modal' do
       get cars_path
 
       document = Nokogiri::HTML(response.body)
@@ -92,19 +90,10 @@ RSpec.describe 'Autodetections', type: :request do
       upload_controller = document.at_css('[data-controller="autodetection-upload"]')
 
       expect(response).to be_successful
-      expect(preview_toggle).to be_present
-      expect(preview_controls['class']).to include('d-none')
-      expect(upload_controller['data-autodetection-upload-minimum-side-value']).to eq(
-        AutodetectionService.autodetection_minimum_side.to_s
-      )
+      expect(preview_toggle).to be_nil
+      expect(preview_controls).to be_nil
+      expect(upload_controller['data-autodetection-upload-minimum-side-value']).to be_nil
       expect(upload_toggle).to be_nil
-      expect(response.body).to include(I18n.t('autodetections.form.skip_upscaler'))
-      expect(response.body).to include(
-        I18n.t(
-          'autodetections.form.ai_upscaling_notice',
-          minimum_side: AutodetectionService.autodetection_minimum_side
-        )
-      )
     end
   end
 

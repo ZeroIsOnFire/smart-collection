@@ -1,13 +1,7 @@
 # frozen_string_literal: true
 
 class AutodetectionService
-  AUTODETECTION_MINIMUM_SIDE = 800
-  AUTODETECTION_MINIMUM_SIDE_ENV = 'AUTODETECTION_MINIMUM_SIDE'
   attr_reader :user
-
-  def self.autodetection_minimum_side
-    ImageUpscalerService.minimum_side_from_env(AUTODETECTION_MINIMUM_SIDE_ENV, AUTODETECTION_MINIMUM_SIDE)
-  end
 
   def initialize(user)
     @user = user

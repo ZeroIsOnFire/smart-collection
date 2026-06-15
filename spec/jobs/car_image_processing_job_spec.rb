@@ -235,7 +235,7 @@ RSpec.describe CarImageProcessingJob do
       expect(Car.find(car.id).photo_upscale_strategy).to eq('ai')
     end
 
-    it 'syncs the linked detected item preview after processing the created car photo' do
+    it 'keeps the linked detected item without AI variants after processing the created car photo' do
       autodetection = create(:autodetection, user: user)
       detected_item = create(:detected_item, autodetection: autodetection, car_id: car.id, status: 'saved')
       attach_photo!(car)
@@ -248,11 +248,10 @@ RSpec.describe CarImageProcessingJob do
       described_class.new.perform(user.id.to_s, car.id.to_s)
 
       synced_item = DetectedItem.find(detected_item.id)
-      synced_image = MiniMagick::Image.open(synced_item.enhanced_cropped_photo.path)
 
-      expect(synced_image.width).to eq(420)
       expect(synced_item.cropped_photo_upscale_strategy).to be_nil
-      expect(synced_item.cropped_photo_variant).to eq('original')
+      expect(synced_item.cropped_photo_variant).to be_nil
+      expect(synced_item.enhanced_cropped_photo).not_to be_present
       expect(Turbo::StreamsChannel).to have_received(:broadcast_replace_to).with(
         "autodetection_#{autodetection.id}_items",
         target: "detected_item_#{detected_item.id}",
