@@ -134,10 +134,6 @@ class Car
     enhanced_photo?
   end
 
-  def show_original_photo_link?
-    photo_upscaled_by_ai? && original_photo_available?
-  end
-
   def selectable_photo_variant?
     original_photo_available? || enhanced_photo_available?
   end
