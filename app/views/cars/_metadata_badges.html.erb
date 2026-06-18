@@ -1,7 +1,8 @@
 <% badge_class = local_assigns.fetch(:badge_class, "text-muted small d-flex flex-wrap gap-3") %>
 <% item_class = local_assigns.fetch(:item_class, "d-inline-flex align-items-center gap-1") %>
+<% photo_upscaled_by_ai = local_assigns.fetch(:photo_upscaled_by_ai, car.photo_upscaled_by_ai?) %>
 
-<% if car.year? || car.size? || car.color? || car.photo_upscaled_by_ai? %>
+<% if car.year? || car.size? || car.color? || photo_upscaled_by_ai %>
   <div class="<%= badge_class %>">
     <% if car.year? %>
       <span class="<%= item_class %>" title="<%= t('activerecord.attributes.car.year') %>" aria-label="<%= t('activerecord.attributes.car.year') %>">
@@ -19,7 +20,7 @@
         <%= car.color %>
       </span>
     <% end %>
-    <% if car.photo_upscaled_by_ai? %>
+    <% if photo_upscaled_by_ai %>
       <span class="<%= item_class %>" title="<%= t('cars.show.photo_upscaled_by_ai_tooltip') %>" aria-label="<%= t('cars.show.photo_upscaled_by_ai_tooltip') %>">
         <i class="bi bi-stars"></i><%= t('cars.show.photo_upscaled_by_ai') %>
       </span>

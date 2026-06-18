@@ -14,6 +14,7 @@ import ModalFrameController from "./modal_frame_controller"
 import NumericMaskController from "./numeric_mask_controller"
 import PhotoLightboxController from "./photo_lightbox_controller"
 import PhotoUploadController from "./photo_upload_controller"
+import PhotoVariantToggleController from "./photo_variant_toggle_controller"
 import PasswordVisibilityController from "./password_visibility_controller"
 import PollController from "./poll_controller"
 import SearchFormController from "./search_form_controller"
@@ -37,6 +38,7 @@ application.register("modal-frame", ModalFrameController)
 application.register("numeric-mask", NumericMaskController)
 application.register("photo-lightbox", PhotoLightboxController)
 application.register("photo-upload", PhotoUploadController)
+application.register("photo-variant-toggle", PhotoVariantToggleController)
 application.register("password-visibility", PasswordVisibilityController)
 application.register("poll", PollController)
 application.register("search-form", SearchFormController)

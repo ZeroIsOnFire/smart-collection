@@ -54,9 +54,12 @@ class CarService
   def update(car_id, params)
     car = user.cars.find(car_id)
     prepared_params = normalize_params(params)
-    enqueue_processing = should_process_photo?(prepared_params)
+    enqueue_processing = should_process_photo?(prepared_params, car:)
+    variant_toggle = photo_variant_toggle_requested?(car, prepared_params, enqueue_processing)
     car.attributes = prepared_params
+    reset_photo_versions(car) if replacing_photo?(prepared_params)
     clear_photo_processing(car) if remove_photo?(prepared_params)
+    enqueue_processing = apply_photo_variant_toggle(car, prepared_params) == :enqueue if variant_toggle
     mark_photo_as_pending(car, prepared_params) if enqueue_processing
     enqueue_processing = false unless car.save
     enqueue_photo_processing(car, prepared_params) if enqueue_processing
@@ -99,14 +102,101 @@ class CarService
     params.to_h.deep_symbolize_keys
   end
 
-  def should_process_photo?(params)
+  def should_process_photo?(params, car: nil)
     return false if remove_photo?(params)
 
-    params[:photo].present? || crop_requested?(params)
+    params[:photo].present? || crop_requested?(params, car:)
   end
 
-  def crop_requested?(params)
-    params[:crop_x].present? && params[:crop_y].present? && params[:crop_w].present? && params[:crop_h].present?
+  def photo_variant_toggle_requested?(car, params, enqueue_processing)
+    params.key?(:skip_upscaler) && car.photo.present? && !enqueue_processing && !remove_photo?(params)
+  end
+
+  def apply_photo_variant_toggle(car, params)
+    skip_upscaler = ActiveModel::Type::Boolean.new.cast(params[:skip_upscaler])
+
+    if skip_upscaler
+      use_original_photo(car)
+      return :skip
+    end
+
+    unless ai_upscale_relevant?(car)
+      use_original_photo(car) if car.original_photo_available?
+      return :skip
+    end
+
+    unless user.ai_upscaling_enabled?
+      use_original_photo(car) if car.original_photo_available?
+      return :skip
+    end
+
+    if car.enhanced_photo_available?
+      apply_enhanced_photo(car)
+      return :skip
+    end
+    return :skip unless user.ai_upscaling_enabled? && ImageUpscalerService.service_configured?
+
+    use_original_photo(car) if car.original_photo_available?
+    params[:bulk_ai_upscale] = false
+    params[:force_ai_upscale] = true
+    :enqueue
+  end
+
+  def use_original_photo(car)
+    return unless car.original_photo_available?
+
+    File.open(car.original_photo.path) do |file|
+      car.photo = file
+      car.photo.store!
+      car.write_attribute(:photo_filename, car.photo.identifier)
+    end
+    car.photo_variant = 'original'
+    car.photo_upscale_strategy = nil
+    car.skip_upscaler = true
+  end
+
+  def apply_enhanced_photo(car)
+    File.open(car.enhanced_photo.path) do |file|
+      car.photo = file
+      car.photo.store!
+      car.write_attribute(:photo_filename, car.photo.identifier)
+    end
+    car.photo_variant = 'ai'
+    car.photo_upscale_strategy = 'ai'
+    car.skip_upscaler = false
+    nil
+  end
+
+  def replacing_photo?(params)
+    params[:photo].present? || params[:remote_photo_url].present?
+  end
+
+  def reset_photo_versions(car)
+    car.remove_original_photo = true if car.respond_to?(:remove_original_photo=)
+    car.remove_enhanced_photo = true if car.respond_to?(:remove_enhanced_photo=)
+    car.write_attribute(:original_photo_filename, nil)
+    car.write_attribute(:enhanced_photo_filename, nil)
+    car.photo_variant = nil
+    car.photo_upscale_strategy = nil
+    clear_photo_crop(car)
+  end
+
+  def ai_upscale_relevant?(car)
+    source = car.original_photo? ? car.original_photo : car.photo
+    return false unless source&.path
+
+    ImageUpscalerService.upscale_needed?(source.path, minimum_side: car_image_minimum_side)
+  end
+
+  def crop_requested?(params, car: nil)
+    return false unless params[:crop_x].present? && params[:crop_y].present? &&
+                        params[:crop_w].present? && params[:crop_h].present?
+    return true if car.nil? || replacing_photo?(params)
+
+    submitted_crop = params.values_at(:crop_x, :crop_y, :crop_w, :crop_h).map(&:to_f)
+    persisted_crop = [car.photo_crop_x, car.photo_crop_y, car.photo_crop_w, car.photo_crop_h].map { |value| value&.to_f }
+
+    submitted_crop != persisted_crop
   end
 
   def remove_photo?(params)
@@ -132,14 +222,29 @@ class CarService
     car.photo_processing_status = nil
     car.photo_processing_error = nil
     clear_processing_crop(car)
+    clear_photo_crop(car)
   end
 
   def enqueue_photo_processing(car, params)
-    CarImageProcessingJob.perform_later(user.id.to_s, car.id.to_s, crop_params(params))
+    CarImageProcessingJob.perform_later(user.id.to_s, car.id.to_s, photo_processing_params(params))
   end
 
   def crop_params(params)
-    params.slice(:crop_x, :crop_y, :crop_w, :crop_h, :photo_upscale_strategy).compact
+    params.slice(:crop_x, :crop_y, :crop_w, :crop_h, :photo_upscale_strategy, :force_ai_upscale,
+                 :bulk_ai_upscale).compact
+  end
+
+  def photo_processing_params(params)
+    crop_params(params).tap do |processing_params|
+      processing_params[:force_ai_upscale] = true if ai_upscale_selected?(params)
+    end
+  end
+
+  def ai_upscale_selected?(params)
+    return false unless params.key?(:skip_upscaler)
+    return false unless user.ai_upscaling_enabled? && ImageUpscalerService.service_configured?
+
+    !ActiveModel::Type::Boolean.new.cast(params[:skip_upscaler])
   end
 
   def store_processing_crop(car, params)
@@ -149,6 +254,10 @@ class CarService
     car.photo_processing_crop_y = params[:crop_y]
     car.photo_processing_crop_w = params[:crop_w]
     car.photo_processing_crop_h = params[:crop_h]
+    car.photo_crop_x = params[:crop_x]
+    car.photo_crop_y = params[:crop_y]
+    car.photo_crop_w = params[:crop_w]
+    car.photo_crop_h = params[:crop_h]
   end
 
   def clear_processing_crop(car)
@@ -156,5 +265,12 @@ class CarService
     car.photo_processing_crop_y = nil
     car.photo_processing_crop_w = nil
     car.photo_processing_crop_h = nil
+  end
+
+  def clear_photo_crop(car)
+    car.photo_crop_x = nil
+    car.photo_crop_y = nil
+    car.photo_crop_w = nil
+    car.photo_crop_h = nil
   end
 end

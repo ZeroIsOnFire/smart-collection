@@ -24,6 +24,7 @@ class User
   field :share_token, type: String
   field :sharing_enabled, type: Boolean, default: false
   field :ai_upscaling_enabled, type: Boolean, default: true
+  field :bulk_ai_upscaling_enabled, type: Boolean, default: false
   field :initial_setup_completed, type: Boolean, default: true
 
   index({ sharing_enabled: 1 }, { background: true })

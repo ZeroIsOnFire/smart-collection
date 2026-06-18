@@ -20,6 +20,27 @@ RSpec.describe 'Cars', type: :request do
     sign_in user
   end
 
+  def uploaded_resized_fixture(width:, height:, filename: 'resized.jpg')
+    tempfile = Tempfile.new(['request_photo', '.jpg'], Rails.root.join('tmp'))
+    image = MiniMagick::Image.open(Rails.root.join('spec/fixtures/files/test_image.png'))
+    image.resize "#{width}x#{height}!"
+    image.write(tempfile.path)
+    Rack::Test::UploadedFile.new(tempfile.path, 'image/jpeg', original_filename: filename)
+  ensure
+    tempfile&.close
+  end
+
+  def processed_temp_image(width:, height:, filename: 'processed.jpg', upscale_strategy: nil)
+    tempfile = Tempfile.new(['request_processed_photo', '.jpg'], Rails.root.join('tmp'))
+    image = MiniMagick::Image.open(Rails.root.join('spec/fixtures/files/test_image.png'))
+    image.resize "#{width}x#{height}!"
+    image.write(tempfile.path)
+    tempfile.define_singleton_method(:original_filename) { filename }
+    tempfile.define_singleton_method(:content_type) { 'image/jpeg' }
+    tempfile.define_singleton_method(:upscale_strategy) { upscale_strategy } if upscale_strategy
+    tempfile
+  end
+
   describe 'GET /index' do
     it "renders a successful response and shows only user's cars" do
       car # create
@@ -87,14 +108,13 @@ RSpec.describe 'Cars', type: :request do
       expect(response.body).to include(I18n.t('cars.card.photo_processing'))
     end
 
-    it 'shows the autodetection AI upscaling notice when enabled and configured' do
+    it 'does not show the autodetection AI upscaling notice when enabled and configured' do
       allow(ImageUpscalerService).to receive(:service_configured?).and_return(true)
 
       get cars_path
 
-      expect(response.body).to include(
-        I18n.t('autodetections.form.ai_upscaling_notice', minimum_side: AutodetectionService.autodetection_minimum_side)
-      )
+      expect(response.body).not_to include('autodetection_skip_upscaler')
+      expect(response.body).not_to include('data-autodetection-upload-target="upscalerControls"')
     end
 
     it 'paginates the cars collection' do
@@ -210,6 +230,8 @@ RSpec.describe 'Cars', type: :request do
     end
 
     it 'renders the per-record upscaler toggle' do
+      allow(ImageUpscalerService).to receive(:service_configured?).and_return(true)
+
       get new_car_path
 
       document = Nokogiri::HTML(response.body)
@@ -217,6 +239,8 @@ RSpec.describe 'Cars', type: :request do
       expect(document.at_css('#car_skip_upscaler')).to be_present
       expect(document.at_css('.photo-dropzone #car_skip_upscaler')).to be_nil
       expect(document.at_css('.car-upscaler-toggle #car_skip_upscaler')).to be_present
+      expect(document.at_css('#cropperModal.image-crop-modal')).to be_present
+      expect(document.at_css('#cropperModal .image-crop-modal-frame')).to be_present
       expect(response.body).to include(I18n.t('cars.form.skip_upscaler'))
     end
 
@@ -333,6 +357,52 @@ RSpec.describe 'Cars', type: :request do
         expect(Car.last.skip_upscaler).to be true
       end
 
+      it 'creates a car from a detected item and keeps AI upscale only on the car' do
+        allow(ImageUpscalerService).to receive(:service_configured?).and_return(true)
+        allow(YoloDetectionService).to receive(:classify_color).and_return(nil)
+        upscaled_file = processed_temp_image(width: 420, height: 420, upscale_strategy: :ai)
+        autodetection = create(:autodetection, :completed, user: user)
+        detected_item = create(:detected_item, autodetection: autodetection, cropped_photo_upscale_strategy: nil,
+                                               cropped_photo_variant: nil)
+
+        expect(ImageUpscalerService).to receive(:upscale_if_needed)
+          .with(anything, minimum_side: ImageUpscalerService.default_minimum_side, use_ai: true, local_fallback: false)
+          .and_return(upscaled_file)
+
+        perform_enqueued_jobs do
+          post cars_path,
+               params: {
+                 detected_item_id: detected_item.id.to_s,
+                 car: {
+                   name: 'Verified car',
+                   brand: 'Hot Wheels',
+                   skip_upscaler: '0'
+                 }
+               },
+               as: :turbo_stream
+        end
+
+        car = Car.last
+        processed_item = detected_item.reload
+
+        expect(car.detected_via_ai).to be true
+        expect(car.original_photo).to be_present
+        expect(car.enhanced_photo).to be_present
+        expect(car.photo_upscale_strategy).to eq('ai')
+        expect(car.photo_variant).to eq('ai')
+        expect(processed_item.status).to eq('saved')
+        expect(processed_item.cropped_photo_upscale_strategy).to be_nil
+        expect(processed_item.cropped_photo_variant).to be_nil
+        expect(processed_item.enhanced_cropped_photo).not_to be_present
+      ensure
+        begin
+          upscaled_file&.close
+          upscaled_file&.unlink
+        rescue StandardError
+          nil
+        end
+      end
+
       it 'prepends the created car and closes the modal with turbo stream' do
         expect do
           post cars_path, params: { car: valid_attributes }, as: :turbo_stream
@@ -347,6 +417,7 @@ RSpec.describe 'Cars', type: :request do
       end
 
       it 'prepends the created car and keeps the modal ready for another item' do
+        allow(ImageUpscalerService).to receive(:service_configured?).and_return(true)
         attributes = valid_attributes.merge(size: '1:64', skip_upscaler: '1')
 
         expect do
@@ -397,8 +468,9 @@ RSpec.describe 'Cars', type: :request do
       expect(response.body).to include(I18n.t('cars.modal.edit_title'))
     end
 
-    it 'hides the per-record upscaler toggle until an existing photo is replaced' do
-      car.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+    it 'shows the per-record upscaler toggle for a small existing photo when AI is enabled' do
+      allow(ImageUpscalerService).to receive(:service_configured?).and_return(true)
+      car.photo = uploaded_resized_fixture(width: 240, height: 240)
       car.save!
 
       get edit_car_path(car), headers: { 'Turbo-Frame' => 'modal' }
@@ -407,7 +479,78 @@ RSpec.describe 'Cars', type: :request do
       toggle = document.at_css('.car-upscaler-toggle[data-photo-upload-target="upscalerToggle"]')
 
       expect(toggle).to be_present
+      expect(toggle['class']).not_to include('d-none')
+      expect(document.at_css('.car-ai-variant-comparison')).to be_present
+      expect(document.at_css('.car-ai-variant-card.is-missing .car-ai-variant-question')).to be_present
+      expect(document.at_css('#car_skip_upscaler')['checked']).to eq('checked')
+      expect(response.body).to include(I18n.t('cars.form.skip_upscaler_existing'))
+      expect(response.body).to include(I18n.t('cars.form.original_photo'))
+      expect(response.body).to include(I18n.t('cars.form.ai_photo'))
+    end
+
+    it 'keeps the per-record upscaler toggle hidden when the existing photo already meets the minimum side' do
+      allow(ImageUpscalerService).to receive(:service_configured?).and_return(true)
+      car.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+      car.save!
+
+      get edit_car_path(car), headers: { 'Turbo-Frame' => 'modal' }
+
+      document = Nokogiri::HTML(response.body)
+      toggle = document.at_css('.car-upscaler-toggle')
+
+      expect(toggle).to be_present
       expect(toggle['class']).to include('d-none')
+    end
+
+    it 'shows original and AI choices when saved variants exist after processing' do
+      allow(ImageUpscalerService).to receive(:service_configured?).and_return(true)
+      car.original_photo = uploaded_resized_fixture(width: 360, height: 360, filename: 'processed_original.jpg')
+      car.enhanced_photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/car_sample.jpg'), 'image/jpeg')
+      car.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/car_sample.jpg'), 'image/jpeg')
+      car.photo_variant = 'ai'
+      car.photo_upscale_strategy = 'ai'
+      car.skip_upscaler = false
+      car.save!
+
+      get edit_car_path(car), headers: { 'Turbo-Frame' => 'modal' }
+
+      document = Nokogiri::HTML(response.body)
+      toggle = document.at_css('.car-upscaler-toggle[data-photo-upload-target="upscalerToggle"]')
+
+      expect(response).to be_successful
+      expect(toggle).to be_present
+      expect(toggle['class']).not_to include('d-none')
+      expect(toggle['data-persist-visible']).to eq('true')
+      expect(document.at_css('.car-ai-variant-comparison')).to be_present
+      expect(document.css('.car-ai-variant-card').size).to eq(2)
+      expect(document.at_css(".car-ai-variant-card.is-selected [alt=\"#{I18n.t('cars.form.ai_photo')}\"]")).to be_present
+      expect(document.at_css('#car_skip_upscaler')['checked']).to be_nil
+    end
+
+    it 'uses the original photo and persisted crop coordinates for editing an AI-displayed car' do
+      car.original_photo = uploaded_resized_fixture(width: 240, height: 240, filename: 'small_original.jpg')
+      car.enhanced_photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/car_sample.jpg'), 'image/jpeg')
+      car.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/car_sample.jpg'), 'image/jpeg')
+      car.photo_variant = 'ai'
+      car.photo_upscale_strategy = 'ai'
+      car.photo_crop_x = 0.1
+      car.photo_crop_y = 0.2
+      car.photo_crop_w = 0.3
+      car.photo_crop_h = 0.4
+      car.save!
+
+      get edit_car_path(car), headers: { 'Turbo-Frame' => 'modal' }
+
+      document = Nokogiri::HTML(response.body)
+      existing_photo = document.at_css('[data-photo-upload-target="existingPhoto"]')
+
+      expect(response).to be_successful
+      expect(existing_photo['data-url']).to include(car.original_photo.url)
+      expect(existing_photo['data-url']).not_to include(car.enhanced_photo.url)
+      expect(document.at_css('#car_crop_x')['value']).to eq('0.1')
+      expect(document.at_css('#car_crop_y')['value']).to eq('0.2')
+      expect(document.at_css('#car_crop_w')['value']).to eq('0.3')
+      expect(document.at_css('#car_crop_h')['value']).to eq('0.4')
     end
 
     it "redirects if trying to edit another user's car" do
@@ -422,9 +565,12 @@ RSpec.describe 'Cars', type: :request do
     it 'renders the detail view inside the global modal frame' do
       updated_at = Time.zone.local(2026, 6, 11, 2, 22)
       car.update!(color: 'Azul', size: '1:64')
-      car.update!(photo_upscale_strategy: 'ai')
       car.set(updated_at: updated_at)
       car.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+      car.original_photo = uploaded_resized_fixture(width: 240, height: 240, filename: 'small_original.jpg')
+      car.enhanced_photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+      car.photo_variant = 'ai'
+      car.photo_upscale_strategy = 'ai'
       car.save!
       car.set(updated_at: updated_at)
 
@@ -439,7 +585,7 @@ RSpec.describe 'Cars', type: :request do
       edit_link = document.at_css("a[href='#{edit_car_path(car)}']")
 
       expect(document.at_css('#turboModalLabel')).to be_nil
-      expect(document.at_css('[data-controller="photo-lightbox"]')).to be_present
+      expect(document.at_css('[data-controller*="photo-lightbox"]')).to be_present
       expect(document.at_css('.public-detail-photo[data-action="click->photo-lightbox#open"]')).to be_present
       expect(document.at_css('.photo-lightbox-overlay[data-photo-lightbox-target="overlay"]')).to be_present
       expect(response.body).not_to include('data-bs-target="#photoLightbox')
@@ -461,6 +607,67 @@ RSpec.describe 'Cars', type: :request do
       expect(document.css('.car-details-timestamp').size).to eq(2)
     end
 
+    it 'shows the original photo action only when the displayed photo is the AI variant' do
+      car.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/car_sample.jpg'), 'image/jpeg')
+      car.original_photo = uploaded_resized_fixture(width: 240, height: 240, filename: 'small_original.jpg')
+      car.enhanced_photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/car_sample.jpg'), 'image/jpeg')
+      car.photo_variant = 'ai'
+      car.photo_upscale_strategy = 'ai'
+      car.save!
+
+      get car_path(car), headers: { 'Turbo-Frame' => 'modal' }
+
+      document = Nokogiri::HTML(response.body)
+      original_toggle = document.at_css('[data-action="click->photo-variant-toggle#toggle"]')
+      full_photo = document.at_css('[data-photo-variant-toggle-target="lightboxImage"]')
+
+      expect(response.body).to include(I18n.t('cars.show.view_original_photo'))
+      expect(response.body).to include(I18n.t('cars.show.photo_upscaled_by_ai'))
+      expect(response.body).to include(I18n.t('cars.show.view_ai_photo'))
+      expect(original_toggle).to be_present
+      expect(original_toggle.name).to eq('button')
+      expect(original_toggle['target']).to be_nil
+      expect(full_photo).to be_present
+
+      car.update!(photo_variant: 'original', photo_upscale_strategy: nil)
+
+      get car_path(car), headers: { 'Turbo-Frame' => 'modal' }
+
+      expect(response.body).not_to include(I18n.t('cars.show.view_original_photo'))
+      expect(response.body).not_to include(I18n.t('cars.show.photo_upscaled_by_ai'))
+    end
+
+    it 'does not show AI actions when the original already meets the required size' do
+      car.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/car_sample.jpg'), 'image/jpeg')
+      car.original_photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+      car.enhanced_photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/car_sample.jpg'), 'image/jpeg')
+      car.photo_variant = 'ai'
+      car.photo_upscale_strategy = 'ai'
+      car.save!
+
+      get car_path(car), headers: { 'Turbo-Frame' => 'modal' }
+
+      expect(response.body).not_to include(I18n.t('cars.show.view_original_photo'))
+      expect(response.body).not_to include(I18n.t('cars.show.photo_upscaled_by_ai'))
+      expect(response.body).to include(car.original_photo.url)
+    end
+
+    it 'shows only the original photo when account AI upscaling is disabled' do
+      user.update!(ai_upscaling_enabled: false)
+      car.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/car_sample.jpg'), 'image/jpeg')
+      car.original_photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+      car.enhanced_photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/car_sample.jpg'), 'image/jpeg')
+      car.photo_variant = 'ai'
+      car.photo_upscale_strategy = 'ai'
+      car.save!
+
+      get car_path(car), headers: { 'Turbo-Frame' => 'modal' }
+
+      expect(response.body).not_to include(I18n.t('cars.show.view_original_photo'))
+      expect(response.body).not_to include(I18n.t('cars.show.photo_upscaled_by_ai'))
+      expect(response.body).to include(car.original_photo.url)
+    end
+
     it 'shows aligned creation and update timestamps on the private detail page' do
       updated_at = Time.zone.local(2026, 6, 11, 2, 22)
       car.set(updated_at: updated_at)
@@ -473,6 +680,17 @@ RSpec.describe 'Cars', type: :request do
 
       document = Nokogiri::HTML(response.body)
       expect(document.css('.car-details-timestamp').size).to eq(2)
+    end
+
+    it 'subscribes to car detail updates for background photo processing' do
+      get car_path(car)
+
+      signed_stream = Turbo::StreamsChannel.signed_stream_name("cars_#{user.id}")
+      document = Nokogiri::HTML(response.body)
+
+      expect(response).to be_successful
+      expect(response.body).to include(signed_stream)
+      expect(document.at_css("#car_details_#{car.id}")).to be_present
     end
 
     it "does not show another user's car" do
@@ -520,17 +738,25 @@ RSpec.describe 'Cars', type: :request do
 
         expect(response).to have_http_status(:ok)
         expect(response.body).to include("turbo-stream action=\"replace\" target=\"car_#{car.id}\"")
+        expect(response.body).to include("turbo-stream action=\"replace\" target=\"car_showcase_details_#{car.id}\"")
+        expect(response.body).to include("turbo-stream action=\"replace\" target=\"car_details_#{car.id}\"")
         expect(response.body).to include('turbo-stream action="update" target="modal"')
         expect(response.body).to include('flash_toasts')
       end
 
       it 'rerenders the modal form when turbo stream validation fails' do
-        patch car_path(car), params: { car: { name: '' } }, as: :turbo_stream
+        patch car_path(car),
+              params: { car: { name: '', crop_x: '0.1', crop_y: '0.2', crop_w: '0.3', crop_h: '0.4' } },
+              as: :turbo_stream
 
         expect(response).to have_http_status(:unprocessable_content)
         expect(response.body).to include('turbo-stream action="update" target="modal"')
         expect(response.body).to include('id="turboModal"')
         expect(response.body).to include("edit_car_#{car.id}")
+        expect(response.body).to include('value="0.1"')
+        expect(response.body).to include('value="0.2"')
+        expect(response.body).to include('value="0.3"')
+        expect(response.body).to include('value="0.4"')
       end
     end
   end
@@ -553,6 +779,30 @@ RSpec.describe 'Cars', type: :request do
 
       expect(response).to redirect_to(edit_user_registration_path)
       expect(user.reload.ai_upscaling_enabled).to be true
+    end
+  end
+
+  describe 'PATCH /toggle_bulk_ai_upscaling' do
+    it 'toggles the bulk AI upscaling preference and enqueues the coordinator' do
+      allow(ImageUpscalerService).to receive(:service_configured?).and_return(true)
+
+      expect do
+        patch toggle_bulk_ai_upscaling_cars_path, as: :turbo_stream
+      end.to have_enqueued_job(BulkAiUpscaleJob).with(user.id.to_s)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('turbo-stream action="update" target="ai_upscaling_settings_toggle"')
+      expect(user.reload.bulk_ai_upscaling_enabled).to be true
+    end
+
+    it 'does not toggle bulk processing when global AI upscaling is disabled' do
+      allow(ImageUpscalerService).to receive(:service_configured?).and_return(true)
+      user.update!(ai_upscaling_enabled: false)
+
+      patch toggle_bulk_ai_upscaling_cars_path
+
+      expect(response).to redirect_to(edit_user_registration_path)
+      expect(user.reload.bulk_ai_upscaling_enabled).to be false
     end
   end
 

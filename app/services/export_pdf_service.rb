@@ -108,6 +108,7 @@ class ExportPdfService
 
                 pdf.image photo_path, fit: [col_width - 10, img_height - 10], position: :center, vposition: :center,
                                       type: prawn_type
+                draw_ai_photo_badge(pdf, col_width) if car.photo_upscaled_by_ai?
               rescue StandardError
                 pdf.move_down (img_height / 2) - 5
                 pdf.fill_color '94A3B8'
@@ -251,5 +252,27 @@ class ExportPdfService
       nil
     end
     pdf_content
+  end
+
+  private
+
+  def draw_ai_photo_badge(pdf, col_width)
+    badge_label = I18n.t('export_pdf.ai_photo_badge')
+    badge_width = 28
+    badge_height = 13
+    x_position = col_width - badge_width - 8
+    y_position = pdf.bounds.top - 8
+    text_width = pdf.width_of(badge_label, size: 7, style: :bold)
+    text_x_position = x_position + ((badge_width - text_width) / 2)
+
+    pdf.fill_color '4F46E5'
+    pdf.transparent(0.72) do
+      pdf.fill_rounded_rectangle [x_position, y_position], badge_width, badge_height, 4
+    end
+    pdf.fill_color 'FFFFFF'
+    pdf.draw_text badge_label,
+                  at: [text_x_position, y_position - 9],
+                  size: 7,
+                  style: :bold
   end
 end

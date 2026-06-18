@@ -15,19 +15,22 @@ class DetectedItem
   field :brand, type: String
   field :skip_upscaler, type: Boolean, default: false
   field :cropped_photo_upscale_strategy, type: String
+  field :cropped_photo_variant, type: String
   field :image_processing_status, type: String
   field :image_processing_error, type: String
 
   mount_uploader :cropped_photo, CroppedPhotoUploader
+  mount_uploader :original_cropped_photo, CroppedPhotoUploader
+  mount_uploader :enhanced_cropped_photo, CroppedPhotoUploader
 
   belongs_to :autodetection
   index({ autodetection_id: 1 }, { background: true })
-  delegate :photo_upscale_strategy, to: :autodetection, prefix: true
 
   STATUSES = %w[pending saved rejected].freeze
   IMAGE_PROCESSING_STATUSES = %w[pending processing completed error].freeze
   validates :status, inclusion: { in: STATUSES }
   validates :image_processing_status, inclusion: { in: IMAGE_PROCESSING_STATUSES }, allow_blank: true
+  validates :cropped_photo_variant, inclusion: { in: %w[original ai] }, allow_blank: true
   validates :label, presence: true
 
   # Real-time broadcast to the autodetection page
@@ -39,15 +42,10 @@ class DetectedItem
     image_processing_status.in?(%w[pending processing])
   end
 
-  def photo_upscale_strategy_for_car
-    return 'ai' if cropped_photo_upscale_strategy == 'ai' || upscaler_skip_locked?
-    return if skip_upscaler? || autodetection.skip_upscaler?
+  def cropped_photo_upscale_relevant?(minimum_side: ImageUpscalerService.default_minimum_side)
+    return false unless cropped_photo&.path
 
-    'ai' if autodetection.user.ai_upscaling_enabled?
-  end
-
-  def upscaler_skip_locked?
-    autodetection.photo_upscaled_by_ai?
+    ImageUpscalerService.upscale_needed?(cropped_photo.path, minimum_side:)
   end
 
   private

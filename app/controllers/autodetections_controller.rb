@@ -107,6 +107,6 @@ class AutodetectionsController < ApplicationController
   end
 
   def autodetection_params
-    params.fetch(:autodetection, {}).permit(:photo, :skip_upscaler)
+    params.fetch(:autodetection, {}).permit(:photo)
   end
 end

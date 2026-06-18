@@ -177,7 +177,6 @@ class DetectedItemsController < ApplicationController
   end
 
   def selected_skip_upscaler(selection_attributes)
-    return false if @detected_item.upscaler_skip_locked?
     return selection_attributes[:skip_upscaler] if selection_attributes.key?(:skip_upscaler)
 
     @detected_item.skip_upscaler

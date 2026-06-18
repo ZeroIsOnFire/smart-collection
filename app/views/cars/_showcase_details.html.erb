@@ -1,23 +1,48 @@
 <% modal = local_assigns.fetch(:modal, false) %>
 <% show_actions = local_assigns.fetch(:show_actions, false) %>
 <% show_timestamps = local_assigns.fetch(:show_timestamps, false) %>
+<% public_view = local_assigns.fetch(:public, false) %>
 <% car_dom_id = car.id.to_s %>
+<% display_user = car_display_user(car, local_assigns[:user]) %>
+<% display_photo_url = car_display_photo_url(car, user: display_user) %>
+<% original_photo_url = car_photo_url(car, car.original_photo) %>
+<% display_photo_upscaled_by_ai = car_display_photo_upscaled_by_ai?(car, user: display_user) %>
+<% variant_toggle_available = car_show_original_photo_link?(car, user: display_user, public_view: public_view) %>
 
-<div class="row car-showcase-row <%= modal ? "g-3" : "g-5" %>" data-controller="photo-lightbox">
+<div id="car_showcase_details_<%= car_dom_id %>"
+     class="row car-showcase-row <%= modal ? "g-3" : "g-5" %>"
+     data-controller="photo-lightbox<%= ' photo-variant-toggle' if variant_toggle_available %>"
+     <% if variant_toggle_available %>
+       data-photo-variant-toggle-ai-url-value="<%= display_photo_url %>"
+       data-photo-variant-toggle-original-url-value="<%= original_photo_url %>"
+       data-photo-variant-toggle-original-label-value="<%= t("cars.show.view_original_photo") %>"
+       data-photo-variant-toggle-ai-label-value="<%= t("cars.show.view_ai_photo") %>"
+     <% end %>>
   <div class="col-lg-7 mb-2 mb-lg-0">
-    <div class="card car-detail-card shadow-sm rounded-4 overflow-hidden bg-white h-100">
-      <% if car.photo? %>
+    <div class="card car-detail-card shadow-sm rounded-4 overflow-hidden bg-white h-100 position-relative">
+      <% if display_photo_url.present? %>
         <button type="button"
                 class="public-detail-photo p-4 d-flex align-items-center justify-content-center h-100 w-100 border-0 bg-light bg-opacity-50 position-relative"
                 data-action="click->photo-lightbox#open"
                 aria-label="<%= t("cars.show.view_full_photo") %>">
-          <%= image_tag car.photo.url, class: "img-fluid w-100 rounded-3 shadow-sm", alt: car.name.presence || t("cars.show.fallback_name") %>
+          <%= image_tag display_photo_url,
+                        class: "img-fluid w-100 rounded-3 shadow-sm",
+                        alt: car.name.presence || t("cars.show.fallback_name"),
+                        data: { "photo-variant-toggle-target": "image" } %>
           <div class="position-absolute bottom-0 end-0 m-4">
             <span class="badge bg-dark bg-opacity-75 rounded-pill px-3 py-2 text-white shadow-sm backdrop-blur">
               <i class="bi bi-zoom-in me-1"></i> <%= t("cars.show.view_full_photo") %>
             </span>
           </div>
         </button>
+        <% if variant_toggle_available %>
+          <button type="button"
+                  class="position-absolute bottom-0 start-0 m-4 badge bg-light text-dark rounded-pill px-3 py-2 text-decoration-none shadow-sm border-0"
+                  data-action="click->photo-variant-toggle#toggle">
+            <i class="bi bi-image me-1"></i>
+            <span data-photo-variant-toggle-target="buttonLabel"><%= t("cars.show.view_original_photo") %></span>
+          </button>
+        <% end %>
       <% else %>
         <div class="public-detail-empty-photo bg-light d-flex align-items-center justify-content-center text-muted h-100">
           <div class="text-center">
@@ -74,6 +99,7 @@
 
         <%= render "cars/metadata_badges",
                    car: car,
+                   photo_upscaled_by_ai: display_photo_upscaled_by_ai,
                    badge_class: "text-muted small d-flex flex-wrap gap-3 mb-3",
                    item_class: "d-inline-flex align-items-center gap-1 text-dark" %>
 
@@ -103,7 +129,7 @@
       </div>
     </div>
   </div>
-  <% if car.photo? %>
+  <% if display_photo_url.present? %>
     <div class="photo-lightbox-overlay d-none"
          data-photo-lightbox-target="overlay"
          data-action="click->photo-lightbox#close keydown@window->photo-lightbox#closeWithKeyboard"
@@ -111,9 +137,10 @@
          aria-modal="true"
          aria-label="<%= t("cars.show.view_full_photo") %>">
       <div class="photo-lightbox-stage" data-action="click->photo-lightbox#keepOpen">
-        <%= image_tag car.photo.url,
+        <%= image_tag display_photo_url,
               class: "photo-lightbox-image rounded-4 shadow-lg",
-              alt: car.name.presence || t("cars.show.fallback_name") %>
+              alt: car.name.presence || t("cars.show.fallback_name"),
+              data: { "photo-variant-toggle-target": "lightboxImage" } %>
         <button type="button"
                 class="btn btn-dark btn-sm rounded-circle shadow photo-lightbox-close"
                 data-action="click->photo-lightbox#close"

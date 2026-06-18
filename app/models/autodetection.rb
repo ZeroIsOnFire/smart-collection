@@ -11,6 +11,8 @@ class Autodetection
   field :photo_upscale_strategy, type: String
 
   mount_uploader :photo, PhotoUploader
+  mount_uploader :original_photo, PhotoUploader
+  mount_uploader :enhanced_photo, PhotoUploader
 
   belongs_to :user
   has_many :detected_items, dependent: :destroy

@@ -65,7 +65,7 @@ Para usar o sistema em ingles durante o desenvolvimento, acesse as paginas com `
 - **Colecoes privadas por padrao**: dados de usuario permanecem escopados ao dono autenticado.
 - **Autodeteccao por IA**: envie uma foto com varios itens e deixe o YOLO local detectar, recortar e montar a fila de revisao.
 - **Gestao de acervo**: controle marca, nome, ano, escala, cor, fotos e metadados de cada item.
-- **Preparacao de imagens**: upscale local opcional prepara fotos para salvamento final e autodeteccao.
+- **Preparacao de imagens**: upscale local opcional prepara fotos de carros para salvamento final.
 - **Feedback em tempo real**: estados de processamento e atualizacoes de interface usam Turbo Streams.
 - **Compartilhamento publico seguro**: colecoes podem ser compartilhadas apenas com token publico explicito e compartilhamento habilitado.
 - **Exportacoes**: gere relatorios PDF e CSV da colecao.
@@ -75,9 +75,9 @@ Para usar o sistema em ingles durante o desenvolvimento, acesse as paginas com `
 O projeto inclui microservicos locais de IA executados pelo Docker Compose:
 
 - `yolo-service`: deteccao local YOLO11s e classificacao simples de cor para fluxos de autodeteccao. Veja [`yolo/README.md`](yolo/README.md).
-- `upscale-service`: servico local de upscale/preparacao de imagem usado por uploads de itens e autodeteccao. O setup Docker padrao usa `upscale/Dockerfile.cpu`; veja [`upscale/README.md`](upscale/README.md).
+- `upscale-service`: servico local de upscale/preparacao de imagem usado por uploads de fotos de carros. O setup Docker padrao usa `upscale/Dockerfile.cpu`; veja [`upscale/README.md`](upscale/README.md).
 
-Os limites de preparacao de imagem sao configurados no `.env` com `IMAGE_UPSCALE_DEFAULT_MINIMUM_SIDE` para fotos comuns de itens e `AUTODETECTION_MINIMUM_SIDE` para fotos de autodeteccao. O padrao da autodeteccao e 800 px para reduzir o custo antes do YOLO.
+Os limites de preparacao de imagem sao configurados no `.env` com `IMAGE_UPSCALE_DEFAULT_MINIMUM_SIDE` para fotos de carros.
 
 ## Testes
 

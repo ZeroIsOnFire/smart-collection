@@ -228,6 +228,7 @@ en:
     meta_info: "Generated at: %{date} | Total: %{count} items"
     no_image: "No Image"
     no_photo: "No Photo"
+    ai_photo_badge: "AI"
     page_info: "Page %{page} of %{total}"
 
   public_collections:
@@ -283,6 +284,8 @@ en:
       fallback_name: "—"
       no_photo: "No photo registered"
       view_full_photo: "View full photo"
+      view_original_photo: "View original"
+      view_ai_photo: "View AI"
       photo_upscaled_by_ai: "AI"
       photo_upscaled_by_ai_tooltip: "Photo processed by AI"
     form:
@@ -307,6 +310,10 @@ en:
       year_placeholder: "Ex: 1998"
       observations_placeholder: "Write details about the condition..."
       skip_upscaler: "Do not use upscaler for this record"
+      skip_upscaler_existing: "Show the original non-AI version for this record"
+      original_photo: "Original without AI"
+      ai_photo: "AI version"
+      ai_photo_missing: "AI version not generated yet"
 
   autodetections:
     title: "Photo Autodetection"
@@ -316,8 +323,6 @@ en:
       description: "Use a photo with multiple vehicles to create records quickly. Autodetection locates vehicles in the image, but it does not identify each vehicle name or model."
       dropzone_title: "Drag a photo here"
       dropzone_help: "or click to select from your device"
-      ai_upscaling_notice: "If the image is below %{minimum_side}px, it may be upscaled by AI."
-      skip_upscaler: "Do not use upscaler for this autodetection"
       validation_error_title: "Review the highlighted fields"
       camera: "Use Camera"
       gallery: "Gallery"
@@ -344,8 +349,6 @@ en:
       original_photo: "Original Reference Photo"
       add_manually: "Add Manually"
       waiting_items: "Waiting for item processing... they will appear here automatically."
-      ai_upscaling_notice_title: "AI upscaling applied to this autodetection"
-      ai_upscaling_notice_text: "All cars created from this autodetection will use AI upscaling, including items saved without crop adjustment."
       manual_modal_title: "Add items from photo"
       manual_modal_help: "Select the car in the original photo below by clicking and dragging. When you click add, the item will appear in the list and you can select another item without closing this screen."
       add_selected_item: "Add selected item"

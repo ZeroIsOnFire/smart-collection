@@ -1,1 +1,5 @@
-<%= render "cars/showcase_details", car: car, modal: local_assigns.fetch(:modal, false) %>
+<%= render "cars/showcase_details",
+           car: car,
+           user: local_assigns[:user],
+           modal: local_assigns.fetch(:modal, false),
+           public: true %>

@@ -31,8 +31,9 @@
 
       <div class="col-12 mb-5"
            data-controller="photo-upload image-cropper"
+           data-photo-upload-minimum-side-value="<%= ImageUpscalerService.default_minimum_side %>"
            data-image-cropper-detect-url-value="<%= classify_autodetections_path %>"
-           data-action="dragover->photo-upload#dragOver dragleave->photo-upload#dragLeave drop->photo-upload#drop">
+           data-action="dragover->photo-upload#dragOver dragleave->photo-upload#dragLeave drop->photo-upload#drop photo-upload:crop-change->photo-upload#cropChanged">
 
         <%= f.hidden_field :crop_x, data: { "image-cropper-target": "x" } %>
         <%= f.hidden_field :crop_y, data: { "image-cropper-target": "y" } %>
@@ -52,10 +53,14 @@
               style: "position: absolute; width: 0; height: 0; opacity: 0; overflow: hidden;",
               data: { "photo-upload-target": "input", "color-detector-target": "input", action: "change->photo-upload#fileSelected change->color-detector#detect" } %>
 
+        <%
+          editable_photo = car.original_photo? ? car.original_photo : car.photo
+        %>
+
         <!-- Existing photo data (only on edit) -->
-        <% if car.photo? %>
+        <% if editable_photo.present? %>
           <span data-photo-upload-target="existingPhoto"
-                data-url="<%= car.photo.url %>"
+                data-url="<%= car_photo_url(car, editable_photo) %>"
                 class="d-none"></span>
         <% elsif car.remote_photo_url.present? %>
           <span data-photo-upload-target="remotePhoto"
@@ -112,23 +117,95 @@
           </div>
         </div>
 
-        <div class="record-upscaler-toggle car-upscaler-toggle form-check form-switch<%= ' d-none' if car.persisted? && car.photo? %> mt-3"
-             data-photo-upload-target="upscalerToggle">
-          <%= f.check_box :skip_upscaler, class: "form-check-input flex-shrink-0", role: "switch" %>
-          <%= f.label :skip_upscaler, t("cars.form.skip_upscaler"), class: "form-check-label small fw-semibold mb-0" %>
-        </div>
+        <%
+          ai_upscale_relevant = !car.persisted? || !car.photo? || car_ai_upscale_relevant?(car)
+          variant_comparison_available = car.persisted? && car.photo? && car.selectable_photo_variant?
+          render_upscaler_toggle = current_user.ai_upscaling_enabled? && ImageUpscalerService.service_configured?
+          show_variant_comparison = car.persisted? && car.photo? && render_upscaler_toggle && (ai_upscale_relevant || variant_comparison_available)
+          displaying_ai_photo = show_variant_comparison && car_ai_display_enabled?(car, user: current_user) && car.photo_upscaled_by_ai?
+          original_variant_selected = show_variant_comparison ? !displaying_ai_photo : car.skip_upscaler?
+          original_variant_url = car.original_photo? ? car_photo_url(car, car.original_photo) : car_photo_url(car, car.photo)
+          enhanced_variant_available = car.enhanced_photo?
+          enhanced_variant_url = enhanced_variant_available ? car_photo_url(car, car.enhanced_photo) : car_photo_url(car, car.photo)
+        %>
+        <% if render_upscaler_toggle %>
+          <div class="record-upscaler-toggle car-upscaler-toggle form-check form-switch<%= ' d-none' unless show_variant_comparison %> mt-3"
+               data-photo-upload-target="upscalerToggle"
+               data-persist-visible="<%= show_variant_comparison %>">
+            <div class="d-flex align-items-center gap-2">
+              <%= f.check_box :skip_upscaler,
+                              {
+                                class: "form-check-input flex-shrink-0",
+                                role: "switch",
+                                checked: original_variant_selected,
+                                data: {
+                                  "photo-upload-target": "upscalerCheckbox",
+                                  action: "change->photo-upload#updateVariantSelection"
+                                }
+                              } %>
+              <%= f.label :skip_upscaler, class: "form-check-label small fw-semibold mb-0" do %>
+                <span data-photo-upload-target="upscalerExistingLabel" class="<%= 'd-none' unless show_variant_comparison %>">
+                  <%= t("cars.form.skip_upscaler_existing") %>
+                </span>
+                <span data-photo-upload-target="upscalerNewLabel" class="<%= 'd-none' if show_variant_comparison %>">
+                  <%= t("cars.form.skip_upscaler") %>
+                </span>
+              <% end %>
+            </div>
+
+            <% if show_variant_comparison %>
+              <div class="car-ai-variant-comparison" data-photo-upload-target="variantComparison">
+                <div class="car-ai-variant-card<%= ' is-selected' if original_variant_selected %>"
+                     data-photo-upload-target="originalVariantCard"
+                     data-action="click->photo-upload#selectOriginalVariant"
+                     role="button"
+                     tabindex="0">
+                  <div class="car-ai-variant-thumb">
+                    <%= image_tag original_variant_url, alt: t("cars.form.original_photo") %>
+                  </div>
+                  <div class="car-ai-variant-meta">
+                    <span><%= t("cars.form.original_photo") %></span>
+                    <span class="car-ai-variant-status <%= original_variant_selected ? 'is-check' : 'is-cross' %>"
+                          data-photo-upload-target="originalVariantStatus">
+                      <i class="bi <%= original_variant_selected ? 'bi-check-lg' : 'bi-x-lg' %>"></i>
+                    </span>
+                  </div>
+                </div>
+
+                <div class="car-ai-variant-card<%= ' is-selected' if displaying_ai_photo %><%= ' is-missing' unless enhanced_variant_available %>"
+                     data-photo-upload-target="aiVariantCard"
+                     data-action="click->photo-upload#selectAiVariant"
+                     role="button"
+                     tabindex="0">
+                  <div class="car-ai-variant-thumb">
+                    <%= image_tag enhanced_variant_url, alt: t("cars.form.ai_photo") %>
+                    <% unless enhanced_variant_available %>
+                      <span class="car-ai-variant-question" aria-label="<%= t("cars.form.ai_photo_missing") %>">?</span>
+                    <% end %>
+                  </div>
+                  <div class="car-ai-variant-meta">
+                    <span><%= t("cars.form.ai_photo") %></span>
+                    <span class="car-ai-variant-status <%= displaying_ai_photo ? 'is-check' : 'is-cross' %>"
+                          data-photo-upload-target="aiVariantStatus">
+                      <i class="bi <%= displaying_ai_photo ? 'bi-check-lg' : 'bi-x-lg' %>"></i>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
 
         <!-- Modal de Cropper -->
-        <div class="modal fade" id="cropperModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
-          <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal fade image-crop-modal" id="cropperModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+          <div class="modal-dialog modal-xl modal-dialog-centered image-crop-modal-dialog">
             <div class="modal-content border-0 shadow-lg rounded-4">
               <div class="modal-header border-0 pb-0">
                 <h5 class="modal-title fw-bold"><i class="bi bi-crop me-2 text-primary"></i> <%= t('cars.form.adjust_photo') %></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
-              <div class="modal-body p-0">
-                <div class="cropper-container-wrapper"
-                     style="height: 450px; max-height: 70vh; background-color: #0f172a; position: relative;">
+              <div class="modal-body image-crop-modal-body">
+                <div class="cropper-container-wrapper image-crop-modal-frame">
                   <img src="" data-image-cropper-target="image" class="img-fluid"
                        style="display: block; max-width: 100%; opacity: 0;">
                 </div>
@@ -298,6 +375,7 @@
     border-radius: 0.75rem;
     color: var(--text-muted);
     display: flex;
+    flex-direction: column;
     gap: 0.65rem;
     padding: 0.85rem 1rem;
     padding-left: 1rem;
@@ -317,6 +395,85 @@
   .car-upscaler-toggle .form-check-label {
     line-height: 1.35rem;
   }
+  .car-ai-variant-comparison {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
+  .car-ai-variant-card {
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .car-ai-variant-card.is-selected {
+    border-color: rgba(34, 197, 94, 0.75);
+    box-shadow: 0 0 0 0.15rem rgba(34, 197, 94, 0.15);
+  }
+  .car-ai-variant-thumb {
+    aspect-ratio: 4 / 3;
+    background-color: rgba(15, 23, 42, 0.08);
+    overflow: hidden;
+    position: relative;
+  }
+  .car-ai-variant-thumb img {
+    display: block;
+    height: 100%;
+    object-fit: cover;
+    width: 100%;
+  }
+  .car-ai-variant-card.is-missing .car-ai-variant-thumb img {
+    filter: blur(5px);
+    transform: scale(1.04);
+  }
+  .car-ai-variant-question {
+    align-items: center;
+    background-color: rgba(15, 23, 42, 0.62);
+    border-radius: 999px;
+    color: #fff;
+    display: flex;
+    font-size: 1.75rem;
+    font-weight: 700;
+    height: 3rem;
+    justify-content: center;
+    left: 50%;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 3rem;
+  }
+  .car-ai-variant-meta {
+    align-items: center;
+    display: flex;
+    font-size: 0.78rem;
+    font-weight: 700;
+    justify-content: space-between;
+    min-height: 2.25rem;
+    padding: 0.45rem 0.6rem;
+  }
+  .car-ai-variant-status {
+    align-items: center;
+    border-radius: 999px;
+    color: #fff;
+    display: inline-flex;
+    flex: 0 0 auto;
+    height: 1.35rem;
+    justify-content: center;
+    width: 1.35rem;
+  }
+  .car-ai-variant-status.is-check {
+    background-color: #16a34a;
+  }
+  .car-ai-variant-status.is-cross {
+    background-color: #dc2626;
+  }
+  @media (max-width: 575.98px) {
+    .car-ai-variant-comparison {
+      grid-template-columns: 1fr;
+    }
+  }
   .car-upscaler-toggle .form-check-input:not(:checked) {
     background-color: #cbd5e1;
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23ffffff'/%3e%3c/svg%3e");
@@ -334,7 +491,7 @@
 
   /* Cropper Customization */
   .cropper-view-box, .cropper-face {
-    border-radius: 4px;
+    border-radius: 0;
   }
   .cropper-line, .cropper-point {
     background-color: var(--premium-indigo);

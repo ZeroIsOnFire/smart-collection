@@ -74,6 +74,10 @@ RSpec.describe 'Public Collections', type: :request do
         observations: 'Versão especial com pintura azul e caixa preservada.'
       )
       car.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+      car.original_photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+      car.enhanced_photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+      car.photo_variant = 'ai'
+      car.photo_upscale_strategy = 'ai'
       car.save!
 
       get public_share_car_path(user.share_token, car.id), headers: { 'Turbo-Frame' => 'modal' }
@@ -92,6 +96,7 @@ RSpec.describe 'Public Collections', type: :request do
       expect(document.at_css("a[href='#{edit_car_path(car)}']")).to be_nil
       expect(document.at_css("[data-car-removal-trigger][data-car-removal-car-id='#{car.id}']")).to be_nil
       expect(response.body).to include(I18n.t('activerecord.attributes.car.color'))
+      expect(response.body).not_to include(I18n.t('cars.show.view_original_photo'))
       expect(response.body).to include('Azul')
       expect(response.body).to include('1:64')
       expect(response.body).to include(I18n.l(car.created_at.to_date, format: :numeric))

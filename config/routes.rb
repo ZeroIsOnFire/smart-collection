@@ -14,6 +14,7 @@ Rails.application.routes.draw do
     collection do
       patch :toggle_sharing
       patch :toggle_ai_upscaling
+      patch :toggle_bulk_ai_upscaling
     end
   end
 

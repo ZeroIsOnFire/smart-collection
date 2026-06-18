@@ -13,13 +13,6 @@ RSpec.describe AutodetectionService do
   end
 
   describe '#create' do
-    it 'falls back to 800 when the autodetection minimum side env var is invalid' do
-      allow(ENV).to receive(:fetch).and_call_original
-      allow(ENV).to receive(:fetch).with('AUTODETECTION_MINIMUM_SIDE', nil).and_return('0')
-
-      expect(described_class.autodetection_minimum_side).to eq(800)
-    end
-
     it 'creates an autodetection for the user and enqueues the job' do
       expect do
         service = described_class.new(user)

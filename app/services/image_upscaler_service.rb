@@ -33,8 +33,7 @@ class ImageUpscalerService
     source_path = resolved_photo_path(photo_path)
     return nil if source_path.blank?
 
-    image = MiniMagick::Image.open(source_path)
-    return nil if [image.width, image.height].min >= minimum_side
+    return nil unless upscale_needed?(source_path, minimum_side:)
 
     if use_ai && service_configured?
       upscale_via_service(source_path, minimum_side)
@@ -50,6 +49,17 @@ class ImageUpscalerService
 
   def self.service_configured?
     ENV['IMAGE_UPSCALE_SERVICE_URL'].present?
+  end
+
+  def self.upscale_needed?(photo_path, minimum_side: default_minimum_side)
+    source_path = resolved_photo_path(photo_path)
+    return false if source_path.blank?
+
+    image = MiniMagick::Image.open(source_path)
+    [image.width, image.height].min < minimum_side
+  rescue StandardError => e
+    Rails.logger.error "ImageUpscalerService eligibility check failed: #{e.message}"
+    false
   end
 
   def self.resolved_photo_path(photo_path)

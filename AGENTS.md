@@ -53,16 +53,19 @@ Servico Rails premium para registro e gerenciamento de colecoes: itens, fotos, a
 - Python: use `$quality-check-python` para mudancas em `yolo/` ou `upscale/`.
 - Seguranca: use `$security-check` para auditoria, vulnerabilidades ou correcoes de dependencias vulneraveis.
 - Se `brakeman --no-pager` estourar timeout sem retornar resultado, registre o timeout no documento de PR e nao invente status de seguranca verde. Reexecute com timeout maior ou em ambiente externo quando o usuario pedir fechamento de auditoria completo.
+- Ao executar uma tarefa originada de plano ou goal, faca no fechamento uma checagem de qualidade proporcional ao codigo alterado antes do commit. Para Rails, rode specs focados via `bin/safe_rspec` e RuboCop focado; para JS, rode lint/build quando alterar `app/javascript` ou assets carregados por JS; para Python/microservicos, rode testes/lint correspondentes em `yolo/` ou `upscale/`; para mudancas sensiveis ou dependencias, rode Brakeman/Bundler Audit quando aplicavel.
+- Se o QA amplo (`bin/qa`) estourar timeout ou falhar por CRLF, divida em etapas conforme a secao Docker e Testes, registre o resultado parcial no documento local de PR e nao declare status verde para uma etapa que nao concluiu.
 - Commits devem ser atomicos, em portugues, no formato Conventional Commits.
 - Ao criar commit, gere ou atualize um arquivo em `docs/` com dados do PR dos commits atuais. A pasta `docs/` e ignorada pelo Git; mantenha os arquivos locais, mas fora do versionamento.
 
 ## Imagens, YOLO e Upscale
 
 - Uploads usam CarrierWave, nao ActiveStorage. Uploaders ficam em `app/uploaders/`; fotos sao convertidas para JPG.
-- `ImageUpscalerService` centraliza upscale. IA depende de `User#ai_upscaling_enabled` e so chama `IMAGE_UPSCALE_SERVICE_URL` quando configurado.
-- Minimos por env: `IMAGE_UPSCALE_DEFAULT_MINIMUM_SIDE` (padrao 360) para itens gerais e `AUTODETECTION_MINIMUM_SIDE` (padrao 800) para autodeteccao.
-- Upload geral nao usa fallback local quando o usuario desabilita IA; autodeteccao tambem nao deve fazer resize/upscale local quando o upscaler de IA estiver desligado.
-- Preserve limpeza de `Tempfile` e cubra `ImageUpscalerService::UpscaleError` em specs quando alterar fluxo de imagem.
+- `ImageUpscalerService` centraliza upscale e deve afetar apenas o fluxo/model `Car`. IA depende de `User#ai_upscaling_enabled` e so chama `IMAGE_UPSCALE_SERVICE_URL` quando configurado.
+- Minimo por env: `IMAGE_UPSCALE_DEFAULT_MINIMUM_SIDE` (padrao 360) vale para fotos de `Car`.
+- Autodeteccao principal, recortes automaticos, recortes manuais e registros de verificacao nao usam upscaler, nem IA nem fallback local. O YOLO deve analisar a foto original enviada.
+- O toggle da verificacao de autodeteccao deve ser mantido apenas como preferencia para o `Car` criado receber ou nao upscale quando salvo.
+- Preserve limpeza de `Tempfile` e cubra `ImageUpscalerService::UpscaleError` em specs quando alterar fluxo de imagem de `Car`.
 - YOLO local e preferencial. Nao use label do YOLO como nome/modelo do item; use label generico traduzido.
 - Antes de mexer em microservicos, leia `yolo/AGENTS.md` ou `upscale/AGENTS.md`.
 - Gotchas YOLO: manter `ULTRALYTICS_OFFLINE=True`, monkeypatch de `torch.load(weights_only=False)` para PyTorch 2.6+ e algoritmo HSV/K-Means de cor.
@@ -85,6 +88,7 @@ Servico Rails premium para registro e gerenciamento de colecoes: itens, fotos, a
 ## Branches, PR e CI
 
 - Branches: `feature/`, `fix/`, `chore/`, `hotfix/`, `test/`, em kebab-case portugues, a partir de `main`.
+- No primeiro plano ou goal implementavel de uma sessao, crie um branch novo a partir de `main`, salvo se o usuario pedir explicitamente para usar o branch atual. Para continuacoes do mesmo plano/goal na mesma sessao, mantenha o branch ja criado. Se o usuario disser "neste branch", nao troque de branch.
 - CI de PR para `main`: build Docker, RSpec, RuboCop e Bundler Audit. PR com CI vermelho nao deve ser mergeado.
-- PRs devem ser pequenos e focados, com descricao do que foi feito, por que e como testar.
+- PRs devem ser pequenos e focados, com descricao do que foi feito, por que e como testar. Ao fechar plano/goal, atualize/crie um arquivo local em `docs/` com resumo, testes, riscos, timeouts e QA parcial antes do commit.
 - Checklist de review: escopo por usuario, testes adequados, arquitetura preservada, sem duplicacao desnecessaria, sem secrets e sem dependencias nao autorizadas.

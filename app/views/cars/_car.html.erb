@@ -1,9 +1,16 @@
 <% car_dom_id = car.id.to_s %>
+<% routes = Rails.application.routes.url_helpers %>
+<% car_details_path = routes.car_path(car) %>
+<% car_edit_path = routes.edit_car_path(car) %>
+<% public_view = local_assigns[:public].present? %>
+<% display_user = car_display_user(car, local_assigns[:user]) %>
+<% display_photo_url = car_display_photo_url(car, user: display_user) %>
+<% display_photo_upscaled_by_ai = car_display_photo_upscaled_by_ai?(car, user: display_user) %>
 
 <div id="car_<%= car_dom_id %>" class="col animate-fade-in car-card-wrapper" data-car-card-id="<%= car_dom_id %>">
-  <% cache [car, I18n.locale, local_assigns[:public], :card_actions_v4] do %>
+  <% cache [car, I18n.locale, public_view, :card_actions_v4, car_photo_cache_key(car, user: display_user, public_view: public_view)] do %>
     <div class="card premium-card h-100 shadow-sm border-0 position-relative rounded-4 overflow-hidden" style="transition: transform 0.2s ease, box-shadow 0.2s ease;">
-      <% unless local_assigns[:public] %>
+      <% unless public_view %>
         <!-- Menu Dropdown (Hiden on public views) -->
         <div class="position-absolute top-0 end-0 p-2 z-3 car-action-dropdown">
           <div class="dropdown">
@@ -14,18 +21,18 @@
             </button>
             <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3">
               <li>
-                <%= link_to car_path(car), class: 'dropdown-item d-flex align-items-center gap-2 py-2', data: { turbo_frame: "modal" } do %>
+                <%= link_to car_details_path, class: 'dropdown-item d-flex align-items-center gap-2 py-2', data: { turbo_frame: "modal" } do %>
                   <i class="bi bi-eye text-muted"></i> <%= t("cars.card.view_details") %>
                 <% end %>
               </li>
               <li>
-                <%= link_to edit_car_path(car), class: 'dropdown-item d-flex align-items-center gap-2 py-2', data: { turbo_frame: "modal" } do %>
+                <%= link_to car_edit_path, class: 'dropdown-item d-flex align-items-center gap-2 py-2', data: { turbo_frame: "modal" } do %>
                   <i class="bi bi-pencil text-muted"></i> <%= t("actions.edit") %>
                 <% end %>
               </li>
               <li><hr class="dropdown-divider"></li>
               <li>
-                <%= button_to car_path(car),
+                <%= button_to car_details_path,
                               method: :delete,
                               form: {
                                 data: {
@@ -47,12 +54,12 @@
       <% end %>
 
       <%# Detalhe: se for público, usamos o path do share, senão o path normal %>
-      <% target_path = local_assigns[:public] ? public_share_car_path(share_token: local_assigns[:user].share_token, id: car.id) : car_path(car) %>
+      <% target_path = public_view ? routes.public_share_car_path(share_token: local_assigns[:user].share_token, id: car.id) : car_details_path %>
       <%= link_to target_path, class: "text-decoration-none", data: { turbo_frame: "modal" } do %>
         <!-- Foto -->
-        <% if car.photo? %>
+        <% if display_photo_url.present? %>
           <div class="car-photo-container position-relative" style="height: 180px; overflow: hidden;">
-            <%= image_tag car.photo.url, loading: "lazy", style: car_card_photo_style(car) %>
+            <%= image_tag display_photo_url, loading: "lazy", style: car_card_photo_style(car) %>
             <% if car.photo_processing? %>
               <div class="position-absolute top-0 start-0 end-0 bottom-0 d-flex align-items-center justify-content-center bg-dark bg-opacity-50 text-white small fw-semibold">
                 <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
@@ -81,7 +88,7 @@
           </div>
 
           <!-- Ano + Escala + Cor -->
-          <%= render "cars/metadata_badges", car: car %>
+          <%= render "cars/metadata_badges", car: car, photo_upscaled_by_ai: display_photo_upscaled_by_ai %>
         </div>
       <% end %>
 

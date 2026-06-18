@@ -57,4 +57,24 @@ RSpec.describe Car, type: :model do
       expect(car.photo_processing_crop?).to be false
     end
   end
+
+  describe '#photo_upscaled_by_ai?' do
+    it 'is true for legacy AI photos without stored variants' do
+      car.photo_upscale_strategy = 'ai'
+
+      expect(car.photo_upscaled_by_ai?).to be true
+    end
+
+    it 'is true only when the displayed variant is the enhanced AI photo' do
+      car.original_photo = Rack::Test::UploadedFile.new(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+      car.enhanced_photo = Rack::Test::UploadedFile.new(Rails.root.join('spec/fixtures/files/car_sample.jpg'), 'image/jpeg')
+      car.photo_variant = 'original'
+
+      expect(car.photo_upscaled_by_ai?).to be false
+
+      car.photo_variant = 'ai'
+
+      expect(car.photo_upscaled_by_ai?).to be true
+    end
+  end
 end

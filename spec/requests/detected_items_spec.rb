@@ -11,9 +11,20 @@ RSpec.describe 'DetectedItems', type: :request do
     ActiveJob::Base.queue_adapter = :test
   end
 
+  def uploaded_resized_fixture(width:, height:, filename: 'detected_item.jpg')
+    tempfile = Tempfile.new(['detected_item', '.jpg'], Rails.root.join('tmp'))
+    image = MiniMagick::Image.open(Rails.root.join('spec/fixtures/files/car_sample.jpg'))
+    image.resize "#{width}x#{height}!"
+    image.write(tempfile.path)
+    Rack::Test::UploadedFile.new(tempfile.path, 'image/jpeg', original_filename: filename)
+  ensure
+    tempfile&.close
+  end
+
   describe 'GET /autodetections/:id' do
     it 'renders consistent loading hooks for detected item submissions' do
       @autodetection.update!(status: 'to_verify')
+      @detected_item.update!(cropped_photo: uploaded_resized_fixture(width: 240, height: 240, filename: 'small_crop.jpg'))
 
       get autodetection_path(@autodetection)
 
@@ -32,6 +43,8 @@ RSpec.describe 'DetectedItems', type: :request do
       expect(year_input['data-controller']).to eq('numeric-mask')
       expect(year_input['data-action']).to include('input->numeric-mask#sanitize')
       expect(name_input['data-controller']).not_to eq('numeric-mask')
+      expect(document.at_css("#adjustmentModal_#{@detected_item.id}.image-crop-modal")).to be_present
+      expect(document.at_css("#adjustmentModal_#{@detected_item.id} .image-crop-modal-frame")).to be_present
 
       skip_upscaler_input = document.at_css("#skip_upscaler_#{@detected_item.id}")
 
@@ -40,9 +53,12 @@ RSpec.describe 'DetectedItems', type: :request do
       expect(response.body).to include(I18n.t('autodetections.detected_item.skip_upscaler'))
     end
 
-    it 'disables the item upscaler skip toggle when the autodetection photo used AI' do
+    it 'keeps the item upscaler skip toggle editable when the autodetection photo used AI historically' do
       @autodetection.update!(status: 'to_verify', photo_upscale_strategy: 'ai')
-      @detected_item.update!(skip_upscaler: true)
+      @detected_item.update!(
+        skip_upscaler: true,
+        cropped_photo: uploaded_resized_fixture(width: 240, height: 240, filename: 'small_ai_crop.jpg')
+      )
 
       get autodetection_path(@autodetection)
 
@@ -50,8 +66,22 @@ RSpec.describe 'DetectedItems', type: :request do
       skip_upscaler_input = document.at_css("#skip_upscaler_#{@detected_item.id}")
 
       expect(response).to have_http_status(:ok)
-      expect(skip_upscaler_input['disabled']).to eq('disabled')
-      expect(skip_upscaler_input['checked']).to be_nil
+      expect(skip_upscaler_input['disabled']).to be_nil
+      expect(skip_upscaler_input['checked']).to eq('checked')
+    end
+
+    it 'hides the item upscaler skip toggle when the cropped photo already meets the car photo limit' do
+      @autodetection.update!(status: 'to_verify')
+      @detected_item.update!(cropped_photo: uploaded_resized_fixture(width: 420, height: 420, filename: 'large_crop.jpg'))
+
+      get autodetection_path(@autodetection)
+
+      document = Nokogiri::HTML(response.body)
+      frame = document.at_css("#detected_item_#{@detected_item.id}")
+
+      expect(response).to have_http_status(:ok)
+      expect(document.at_css("#skip_upscaler_#{@detected_item.id}")).to be_nil
+      expect(frame.at_css('.record-upscaler-toggle')).to be_nil
     end
   end
 
@@ -94,7 +124,7 @@ RSpec.describe 'DetectedItems', type: :request do
         .with(@user.id.to_s, @detected_item.id.to_s, hash_including('skip_upscaler' => true))
     end
 
-    it 'keeps upscaler enabled when adjusting an item from an AI-upscaled autodetection' do
+    it 'keeps the submitted upscaler preference when adjusting an item from an old AI-upscaled autodetection' do
       @autodetection.update!(photo_upscale_strategy: 'ai')
       @detected_item.update!(skip_upscaler: true)
 
@@ -103,7 +133,7 @@ RSpec.describe 'DetectedItems', type: :request do
             headers: { 'Accept' => 'text/vnd.turbo-stream.html' }
 
       expect(response).to have_http_status(:ok)
-      expect(@detected_item.reload.skip_upscaler).to be false
+      expect(@detected_item.reload.skip_upscaler).to be true
       expect(DetectedItemImageProcessingJob).to have_been_enqueued
         .with(@user.id.to_s, @detected_item.id.to_s, hash_including('skip_upscaler' => true))
     end
@@ -197,7 +227,7 @@ RSpec.describe 'DetectedItems', type: :request do
   end
 
   describe 'POST /cars from detected item' do
-    it 'copies the detected item AI upscale strategy to the created car' do
+    it 'does not copy the detected item AI upscale strategy to the created car' do
       @detected_item.update!(
         brand: 'Hot Wheels',
         label: 'Porsche 911',
@@ -217,11 +247,11 @@ RSpec.describe 'DetectedItems', type: :request do
       created_car = Car.last
 
       expect(response).to have_http_status(:ok)
-      expect(created_car.photo_upscale_strategy).to eq('ai')
+      expect(created_car.photo_upscale_strategy).to be_nil
       expect(@detected_item.reload.status).to eq('saved')
     end
 
-    it 'marks the car as AI upscaled when saving a detected item from an AI-enabled autodetection without adjustment' do
+    it 'keeps AI upscale as car processing responsibility when saving a detected item without adjustment' do
       @autodetection.update!(skip_upscaler: false)
       @detected_item.update!(
         brand: 'Hot Wheels',
@@ -240,7 +270,8 @@ RSpec.describe 'DetectedItems', type: :request do
              as: :turbo_stream
       end.to change(Car, :count).by(1)
 
-      expect(Car.last.photo_upscale_strategy).to eq('ai')
+      expect(Car.last.photo_upscale_strategy).to be_nil
+      expect(Car.last.skip_upscaler).to be false
     end
 
     it 'does not mark the car as AI upscaled when the detected item skips upscaling' do

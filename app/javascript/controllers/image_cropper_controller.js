@@ -33,8 +33,9 @@ export default class extends Controller {
   open(event) {
     event.preventDefault()
     event.stopPropagation()
-    const src = this.previewImgTarget.src
+    const src = this.previewImgTarget.dataset.cropSourceUrl || this.previewImgTarget.src
     if (src) {
+      this.imageTarget.style.opacity = '0'
       this.imageTarget.src = src
       this.modal.show()
     }
@@ -60,10 +61,42 @@ export default class extends Controller {
       checkOrientation: true,
       background: false,
       ready: () => {
-        // Tornar a imagem visível apenas quando o cropper estiver pronto
+        this.applyStoredCrop()
         this.imageTarget.style.opacity = '1'
       }
     })
+  }
+
+  applyStoredCrop() {
+    const crop = this.storedCrop()
+    if (!crop) return
+
+    const imageData = this.cropper.getImageData()
+    this.cropper.setData({
+      x: crop.x * imageData.naturalWidth,
+      y: crop.y * imageData.naturalHeight,
+      width: crop.w * imageData.naturalWidth,
+      height: crop.h * imageData.naturalHeight
+    })
+  }
+
+  storedCrop() {
+    const crop = {
+      x: Number.parseFloat(this.xTarget.value),
+      y: Number.parseFloat(this.yTarget.value),
+      w: Number.parseFloat(this.wTarget.value),
+      h: Number.parseFloat(this.hTarget.value)
+    }
+
+    if ([crop.x, crop.y, crop.w, crop.h].some((value) => Number.isNaN(value))) return null
+    if (crop.w <= 0 || crop.h <= 0) return null
+
+    return {
+      x: Math.max(0, crop.x),
+      y: Math.max(0, crop.y),
+      w: Math.min(1, crop.w),
+      h: Math.min(1, crop.h)
+    }
   }
 
   save() {
@@ -81,6 +114,13 @@ export default class extends Controller {
     // Atualizar preview local com o crop
     const canvas = this.cropper.getCroppedCanvas()
     this.previewImgTarget.src = canvas.toDataURL()
+    this.element.dispatchEvent(new CustomEvent("photo-upload:crop-change", {
+      bubbles: true,
+      detail: {
+        width: data.width,
+        height: data.height
+      }
+    }))
 
     // Autodetecção após o recorte
     this.runClassification(canvas)

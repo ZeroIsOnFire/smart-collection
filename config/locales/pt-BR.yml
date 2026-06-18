@@ -241,6 +241,7 @@ pt-BR:
     meta_info: "Gerado em: %{date} | Total: %{count} itens"
     no_image: "Sem Imagem"
     no_photo: "Sem Foto"
+    ai_photo_badge: "IA"
     page_info: "Página %{page} de %{total}"
 
   public_collections:
@@ -297,6 +298,8 @@ pt-BR:
       fallback_name: "—"
       no_photo: "Sem foto cadastrada"
       view_full_photo: "Ver foto completa"
+      view_original_photo: "Ver original"
+      view_ai_photo: "Ver com IA"
       photo_upscaled_by_ai: "IA"
       photo_upscaled_by_ai_tooltip: "Foto tratada por IA"
     form:
@@ -321,6 +324,10 @@ pt-BR:
       year_placeholder: "Ex: 1998"
       observations_placeholder: "Escreva detalhes sobre o estado de conservação..."
       skip_upscaler: "Não usar upscaler neste registro"
+      skip_upscaler_existing: "Exibir versão original sem IA neste registro"
+      original_photo: "Original sem IA"
+      ai_photo: "Versão com IA"
+      ai_photo_missing: "Versão com IA ainda não gerada"
 
   # ── Autodetecção ───────────────────────────────────────
   autodetections:
@@ -331,8 +338,6 @@ pt-BR:
       description: "Use uma foto com múltiplos veículos para criar registros rapidamente. A autodetecção localiza os veículos na imagem, mas não identifica o nome ou modelo de cada veículo."
       dropzone_title: "Arraste uma foto aqui"
       dropzone_help: "ou clique para selecionar do seu dispositivo"
-      ai_upscaling_notice: "Se a imagem estiver abaixo de %{minimum_side}px, ela poderá receber upscale por IA."
-      skip_upscaler: "Não usar upscaler nesta autodetecção"
       validation_error_title: "Revise os campos destacados"
       camera: "Usar Câmera"
       gallery: "Galeria"
@@ -359,8 +364,6 @@ pt-BR:
       original_photo: "Foto Original de Referência"
       add_manually: "Adicionar Manualmente"
       waiting_items: "Aguardando processamento dos itens... eles aparecerão aqui automaticamente."
-      ai_upscaling_notice_title: "Upscale por IA aplicado nesta autodetecção"
-      ai_upscaling_notice_text: "Todos os carros criados a partir desta autodetecção terão upscale por IA, inclusive os itens salvos sem ajuste de recorte."
       manual_modal_title: "Adicionar itens da foto"
       manual_modal_help: "Selecione o carro na foto original abaixo clicando e arrastando. Ao clicar em adicionar, o item aparecerá na lista e você poderá selecionar outro item sem fechar esta tela."
       add_selected_item: "Adicionar Item selecionado"
