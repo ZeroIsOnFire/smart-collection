@@ -43,6 +43,8 @@ RSpec.describe 'DetectedItems', type: :request do
       expect(year_input['data-controller']).to eq('numeric-mask')
       expect(year_input['data-action']).to include('input->numeric-mask#sanitize')
       expect(name_input['data-controller']).not_to eq('numeric-mask')
+      expect(document.at_css("#adjustmentModal_#{@detected_item.id}.image-crop-modal")).to be_present
+      expect(document.at_css("#adjustmentModal_#{@detected_item.id} .image-crop-modal-frame")).to be_present
 
       skip_upscaler_input = document.at_css("#skip_upscaler_#{@detected_item.id}")
 

@@ -119,9 +119,10 @@
 
         <%
           ai_upscale_relevant = !car.persisted? || !car.photo? || car_ai_upscale_relevant?(car)
+          variant_comparison_available = car.persisted? && car.photo? && car.selectable_photo_variant?
           render_upscaler_toggle = current_user.ai_upscaling_enabled? && ImageUpscalerService.service_configured?
-          show_variant_comparison = car.persisted? && car.photo? && ai_upscale_relevant && render_upscaler_toggle
-          displaying_ai_photo = show_variant_comparison && car_display_photo_upscaled_by_ai?(car, user: current_user)
+          show_variant_comparison = car.persisted? && car.photo? && render_upscaler_toggle && (ai_upscale_relevant || variant_comparison_available)
+          displaying_ai_photo = show_variant_comparison && car_ai_display_enabled?(car, user: current_user) && car.photo_upscaled_by_ai?
           original_variant_selected = show_variant_comparison ? !displaying_ai_photo : car.skip_upscaler?
           original_variant_url = car.original_photo? ? car_photo_url(car, car.original_photo) : car_photo_url(car, car.photo)
           enhanced_variant_available = car.enhanced_photo?
@@ -196,16 +197,15 @@
         <% end %>
 
         <!-- Modal de Cropper -->
-        <div class="modal fade" id="cropperModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
-          <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal fade image-crop-modal" id="cropperModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+          <div class="modal-dialog modal-xl modal-dialog-centered image-crop-modal-dialog">
             <div class="modal-content border-0 shadow-lg rounded-4">
               <div class="modal-header border-0 pb-0">
                 <h5 class="modal-title fw-bold"><i class="bi bi-crop me-2 text-primary"></i> <%= t('cars.form.adjust_photo') %></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
-              <div class="modal-body p-0">
-                <div class="cropper-container-wrapper"
-                     style="height: 450px; max-height: 70vh; background-color: #0f172a; position: relative;">
+              <div class="modal-body image-crop-modal-body">
+                <div class="cropper-container-wrapper image-crop-modal-frame">
                   <img src="" data-image-cropper-target="image" class="img-fluid"
                        style="display: block; max-width: 100%; opacity: 0;">
                 </div>
@@ -491,7 +491,7 @@
 
   /* Cropper Customization */
   .cropper-view-box, .cropper-face {
-    border-radius: 4px;
+    border-radius: 0;
   }
   .cropper-line, .cropper-point {
     background-color: var(--premium-indigo);

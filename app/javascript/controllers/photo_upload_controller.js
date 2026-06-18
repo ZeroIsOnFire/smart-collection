@@ -86,6 +86,7 @@ export default class extends Controller {
     this.inputTarget.value = ""
     this.previewImgTarget.removeAttribute("data-crop-source-url")
     this.clearCropFields()
+    this.disablePersistedVariantComparison()
 
     // Hide preview, show upload prompt
     this.previewTarget.classList.add("d-none")
@@ -97,6 +98,7 @@ export default class extends Controller {
   showPreview(file) {
     const reader = new FileReader()
     reader.onload = (e) => {
+      this.disablePersistedVariantComparison()
       this.clearCropFields()
       this.previewImgTarget.src = e.target.result
       this.previewImgTarget.dataset.cropSourceUrl = e.target.result
@@ -126,6 +128,12 @@ export default class extends Controller {
   }
 
   updateUpscalerVisibilityForSize(width, height) {
+    if (this.persistVariantComparisonVisible) {
+      this.showExistingPhotoUpscalerMessage()
+      this.showUpscalerToggle()
+      return
+    }
+
     const minimumSide = this.minimumSideValue || 360
     if (Math.min(width || 0, height || 0) < minimumSide) {
       this.showNewPhotoUpscalerMessage()
@@ -141,7 +149,7 @@ export default class extends Controller {
     this.renderStoredCropPreview(url)
     this.previewTarget.classList.remove("d-none")
     this.uploadPromptTarget.classList.add("d-none")
-    if (this.hasUpscalerToggleTarget && this.upscalerToggleTarget.dataset.persistVisible === "true") {
+    if (this.persistVariantComparisonVisible) {
       this.showUpscalerToggle()
       this.showExistingPhotoUpscalerMessage()
     } else {
@@ -281,5 +289,13 @@ export default class extends Controller {
 
   cropFieldValue(name) {
     return this.element.querySelector(`input[name='car[${name}]']`)?.value
+  }
+
+  get persistVariantComparisonVisible() {
+    return this.hasUpscalerToggleTarget && this.upscalerToggleTarget.dataset.persistVisible === "true"
+  }
+
+  disablePersistedVariantComparison() {
+    if (this.hasUpscalerToggleTarget) this.upscalerToggleTarget.dataset.persistVisible = "false"
   }
 }

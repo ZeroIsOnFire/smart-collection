@@ -219,6 +219,36 @@ RSpec.describe CarService do
       expect(updated_car).not_to be_photo_upscaled_by_ai
     end
 
+    it 'does not crop again when selecting the original variant with unchanged crop fields' do
+      car.original_photo = build_uploaded_image(width: 240, height: 240, filename: 'cropped_original.jpg')
+      car.enhanced_photo = Rack::Test::UploadedFile.new(Rails.root.join('spec/fixtures/files/car_sample.jpg'), 'image/jpeg')
+      car.photo = Rack::Test::UploadedFile.new(Rails.root.join('spec/fixtures/files/car_sample.jpg'), 'image/jpeg')
+      car.photo_variant = 'ai'
+      car.photo_upscale_strategy = 'ai'
+      car.photo_crop_x = 0.1
+      car.photo_crop_y = 0.2
+      car.photo_crop_w = 0.3
+      car.photo_crop_h = 0.4
+      car.save!
+
+      expect do
+        updated_car = described_class.new(user).update(
+          car.id,
+          {
+            skip_upscaler: '1',
+            crop_x: '0.1',
+            crop_y: '0.2',
+            crop_w: '0.3',
+            crop_h: '0.4'
+          }
+        )
+
+        expect(updated_car.photo_processing_status).to be_nil
+        expect(updated_car.photo_variant).to eq('original')
+        expect(updated_car.photo_upscale_strategy).to be_nil
+      end.not_to enqueue_job(CarImageProcessingJob)
+    end
+
     it 'uses the existing enhanced photo when the upscaler toggle is unchecked' do
       car.original_photo = build_uploaded_image(width: 240, height: 240, filename: 'small_original.jpg')
       car.enhanced_photo = Rack::Test::UploadedFile.new(Rails.root.join('spec/fixtures/files/car_sample.jpg'), 'image/jpeg')

@@ -18,6 +18,7 @@ class CarImageProcessingJob < ApplicationJob
     car.photo_processing_status = 'completed'
     car.photo_processing_error = nil
     clear_processing_crop(car)
+    clear_photo_crop(car) if crop_requested?(processing_params)
     car.save!
     broadcast_car(car)
     sync_detected_item(car) if DetectedItem.exists?(car_id: car.id)
@@ -275,6 +276,13 @@ class CarImageProcessingJob < ApplicationJob
     car.photo_processing_crop_y = nil
     car.photo_processing_crop_w = nil
     car.photo_processing_crop_h = nil
+  end
+
+  def clear_photo_crop(car)
+    car.photo_crop_x = nil
+    car.photo_crop_y = nil
+    car.photo_crop_w = nil
+    car.photo_crop_h = nil
   end
 
   def update_processing_state(car, status:)

@@ -213,8 +213,8 @@
 
 
   <!-- Modal de Ajuste de Seleção (Cropper) -->
-  <div class="modal fade" id="adjustmentModal_<%= detected_item.id %>" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+  <div class="modal fade image-crop-modal" id="adjustmentModal_<%= detected_item.id %>" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl modal-dialog-centered image-crop-modal-dialog">
       <%
         # Calcular coordenadas iniciais para o cropper baseadas no position_data
         vertices = detected_item.position_data["vertices"] || []
@@ -242,9 +242,8 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
 
-        <div class="modal-body p-0">
-          <div class="cropper-container-wrapper"
-               style="height: 450px; max-height: 70vh; background-color: #0f172a; position: relative;">
+        <div class="modal-body image-crop-modal-body">
+          <div class="cropper-container-wrapper image-crop-modal-frame">
             <img src="<%= detected_item.autodetection.photo.url %>"
                  data-selection-adjustment-target="image"
                  class="img-fluid"

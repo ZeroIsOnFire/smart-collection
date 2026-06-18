@@ -237,6 +237,8 @@ RSpec.describe 'Cars', type: :request do
       expect(document.at_css('#car_skip_upscaler')).to be_present
       expect(document.at_css('.photo-dropzone #car_skip_upscaler')).to be_nil
       expect(document.at_css('.car-upscaler-toggle #car_skip_upscaler')).to be_present
+      expect(document.at_css('#cropperModal.image-crop-modal')).to be_present
+      expect(document.at_css('#cropperModal .image-crop-modal-frame')).to be_present
       expect(response.body).to include(I18n.t('cars.form.skip_upscaler'))
     end
 
@@ -495,6 +497,31 @@ RSpec.describe 'Cars', type: :request do
 
       expect(toggle).to be_present
       expect(toggle['class']).to include('d-none')
+    end
+
+    it 'shows original and AI choices when saved variants exist after processing' do
+      allow(ImageUpscalerService).to receive(:service_configured?).and_return(true)
+      car.original_photo = uploaded_resized_fixture(width: 360, height: 360, filename: 'processed_original.jpg')
+      car.enhanced_photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/car_sample.jpg'), 'image/jpeg')
+      car.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/car_sample.jpg'), 'image/jpeg')
+      car.photo_variant = 'ai'
+      car.photo_upscale_strategy = 'ai'
+      car.skip_upscaler = false
+      car.save!
+
+      get edit_car_path(car), headers: { 'Turbo-Frame' => 'modal' }
+
+      document = Nokogiri::HTML(response.body)
+      toggle = document.at_css('.car-upscaler-toggle[data-photo-upload-target="upscalerToggle"]')
+
+      expect(response).to be_successful
+      expect(toggle).to be_present
+      expect(toggle['class']).not_to include('d-none')
+      expect(toggle['data-persist-visible']).to eq('true')
+      expect(document.at_css('.car-ai-variant-comparison')).to be_present
+      expect(document.css('.car-ai-variant-card').size).to eq(2)
+      expect(document.at_css(".car-ai-variant-card.is-selected [alt=\"#{I18n.t('cars.form.ai_photo')}\"]")).to be_present
+      expect(document.at_css('#car_skip_upscaler')['checked']).to be_nil
     end
 
     it 'uses the original photo and persisted crop coordinates for editing an AI-displayed car' do

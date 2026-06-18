@@ -106,6 +106,7 @@ RSpec.describe CarImageProcessingJob do
       cropped_file = build_temp_image(width: 320, height: 320)
       ai_cropped_file = build_temp_image(width: 720, height: 720, upscale_strategy: :ai)
       crop_params = { crop_x: '0.1', crop_y: '0.2', crop_w: '0.3', crop_h: '0.4' }
+      car.update!(photo_crop_x: 0.1, photo_crop_y: 0.2, photo_crop_w: 0.3, photo_crop_h: 0.4)
 
       expect(ImageCropperService).to receive(:crop)
         .with(
@@ -150,6 +151,10 @@ RSpec.describe CarImageProcessingJob do
       expect(original_image.width).to eq(320)
       expect(enhanced_image.width).to eq(720)
       expect(processed_car.photo_variant).to eq('original')
+      expect(processed_car.photo_crop_x).to be_nil
+      expect(processed_car.photo_crop_y).to be_nil
+      expect(processed_car.photo_crop_w).to be_nil
+      expect(processed_car.photo_crop_h).to be_nil
     end
 
     it 'does not generate an AI crop when the cropped photo already meets the minimum side' do

@@ -54,7 +54,7 @@ class CarService
   def update(car_id, params)
     car = user.cars.find(car_id)
     prepared_params = normalize_params(params)
-    enqueue_processing = should_process_photo?(prepared_params)
+    enqueue_processing = should_process_photo?(prepared_params, car:)
     variant_toggle = photo_variant_toggle_requested?(car, prepared_params, enqueue_processing)
     car.attributes = prepared_params
     reset_photo_versions(car) if replacing_photo?(prepared_params)
@@ -102,10 +102,10 @@ class CarService
     params.to_h.deep_symbolize_keys
   end
 
-  def should_process_photo?(params)
+  def should_process_photo?(params, car: nil)
     return false if remove_photo?(params)
 
-    params[:photo].present? || crop_requested?(params)
+    params[:photo].present? || crop_requested?(params, car:)
   end
 
   def photo_variant_toggle_requested?(car, params, enqueue_processing)
@@ -188,8 +188,15 @@ class CarService
     ImageUpscalerService.upscale_needed?(source.path, minimum_side: car_image_minimum_side)
   end
 
-  def crop_requested?(params)
-    params[:crop_x].present? && params[:crop_y].present? && params[:crop_w].present? && params[:crop_h].present?
+  def crop_requested?(params, car: nil)
+    return false unless params[:crop_x].present? && params[:crop_y].present? &&
+                        params[:crop_w].present? && params[:crop_h].present?
+    return true if car.nil? || replacing_photo?(params)
+
+    submitted_crop = params.values_at(:crop_x, :crop_y, :crop_w, :crop_h).map(&:to_f)
+    persisted_crop = [car.photo_crop_x, car.photo_crop_y, car.photo_crop_w, car.photo_crop_h].map { |value| value&.to_f }
+
+    submitted_crop != persisted_crop
   end
 
   def remove_photo?(params)
