@@ -230,6 +230,8 @@ RSpec.describe 'Cars', type: :request do
     end
 
     it 'renders the per-record upscaler toggle' do
+      allow(ImageUpscalerService).to receive(:service_configured?).and_return(true)
+
       get new_car_path
 
       document = Nokogiri::HTML(response.body)
@@ -415,6 +417,7 @@ RSpec.describe 'Cars', type: :request do
       end
 
       it 'prepends the created car and keeps the modal ready for another item' do
+        allow(ImageUpscalerService).to receive(:service_configured?).and_return(true)
         attributes = valid_attributes.merge(size: '1:64', skip_upscaler: '1')
 
         expect do
