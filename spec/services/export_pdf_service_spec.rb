@@ -28,5 +28,29 @@ RSpec.describe ExportPdfService do
 
       expect(I18n).to have_received(:l).with(generated_at, format: :export_timestamp)
     end
+
+    it 'marks photos displayed with the AI-enhanced variant' do
+      car = create(:car, user: user, photo_variant: 'ai')
+      car.photo = Rack::Test::UploadedFile.new(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+      car.enhanced_photo = Rack::Test::UploadedFile.new(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+      car.save!
+      service = described_class.new(user, [car])
+
+      expect(service).to receive(:draw_ai_photo_badge).once.and_call_original
+
+      service.generate
+    end
+
+    it 'does not mark photos displayed with the original variant' do
+      car = create(:car, user: user, photo_variant: 'original')
+      car.photo = Rack::Test::UploadedFile.new(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+      car.enhanced_photo = Rack::Test::UploadedFile.new(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+      car.save!
+      service = described_class.new(user, [car])
+
+      expect(service).not_to receive(:draw_ai_photo_badge)
+
+      service.generate
+    end
   end
 end

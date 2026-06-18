@@ -241,6 +241,7 @@ pt-BR:
     meta_info: "Gerado em: %{date} | Total: %{count} itens"
     no_image: "Sem Imagem"
     no_photo: "Sem Foto"
+    ai_photo_badge: "IA"
     page_info: "Página %{page} de %{total}"
 
   public_collections:
