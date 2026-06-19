@@ -9,7 +9,8 @@ WORKDIR /rails
 
 # Set development environment default
 ENV RAILS_ENV="development" \
-    BUNDLE_PATH="/usr/local/bundle"
+    BUNDLE_PATH="/usr/local/bundle" \
+    PLAYWRIGHT_BROWSERS_PATH="/ms-playwright"
 
 
 # Throw-away build stage to reduce size of final image
@@ -51,9 +52,12 @@ RUN apt-get update -qq && \
 COPY --from=build /usr/local/bundle /usr/local/bundle
 COPY --from=build /rails /rails
 
-# Run and own only the runtime files as a non-root user for security
+# Create the app user and install Playwright browser runtime for containerized tests
 RUN useradd rails --create-home --shell /bin/bash && \
+    npx playwright install --with-deps chromium && \
     mkdir -p public/uploads storage && \
+    chown -R rails:rails /ms-playwright && \
+    rm -rf /var/lib/apt/lists /var/cache/apt/archives && \
     chown -R rails:rails log tmp public/uploads storage
 USER rails:rails
 
