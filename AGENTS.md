@@ -25,6 +25,7 @@ Servico Rails premium para registro e gerenciamento de colecoes: itens, fotos, a
 
 - A UI segue visual premium: paleta existente, glassmorphism, Bootstrap Icons, modais polidos, Grid/List, infinite scroll e transicoes suaves.
 - Ao editar views, mantenha responsividade, acessibilidade basica e consistencia com os componentes existentes.
+- Ao alterar funcionalidades visiveis de frontend, fluxos Hotwire/Turbo/Stimulus, formularios, modais, navegacao, estados interativos ou responsividade, valide o comportamento com Playwright em navegador real.
 - E proibido texto hardcoded em views, controllers, Turbo Streams, JS, toasts, botoes e erros. Use I18n Rails e `config/locales/javascript.*.yml` para textos do JavaScript.
 - Stimulus fica em `app/javascript/controllers/`; registre novos controllers em `app/javascript/controllers/index.js`.
 
@@ -32,6 +33,7 @@ Servico Rails premium para registro e gerenciamento de colecoes: itens, fotos, a
 
 - Rode o projeto via Docker Compose. O `docker-compose.yml` local nao e versionado; use `docker-compose.example.yml` como template.
 - Comandos Rails, RSpec e RuboCop devem rodar no container `web`.
+- Testes Playwright devem rodar dentro do Docker, no container `web`, com `docker compose exec web npm run test:e2e -- caminho/do/teste.spec.js --browser=chromium`. Use `http://127.0.0.1:3000` quando o teste roda no proprio container `web`.
 - RSpec deve usar `docker compose exec web bin/safe_rspec`; nunca rode `bundle exec rspec` direto. O wrapper valida `Rails.env=test` e banco Mongoid com `test` no nome.
 - Se `bin/safe_rspec` ou `bin/qa` falhar no container com mensagens como `$'\r': command not found` ou `cannot execute: required file not found`, o problema costuma ser CRLF nos scripts. Use o workaround sem alterar arquivos: `docker compose exec web sh -lc "tr -d '\r' < bin/safe_rspec | bash -s -- spec/caminho_spec.rb"` para specs focados, `docker compose exec web sh -lc "tr -d '\r' < bin/safe_rspec | bash"` para a suite completa e `docker compose exec web sh -lc "tr -d '\r' < bin/qa | bash"` para QA amplo.
 - O `bin/qa` com CRLF removido em memoria pode ainda falhar na etapa final porque chama `bin/safe_rspec` diretamente. Quando isso acontecer, registre o resultado parcial do QA e rode a suite separadamente com o workaround acima.
@@ -53,7 +55,7 @@ Servico Rails premium para registro e gerenciamento de colecoes: itens, fotos, a
 - Python: use `$quality-check-python` para mudancas em `yolo/` ou `upscale/`.
 - Seguranca: use `$security-check` para auditoria, vulnerabilidades ou correcoes de dependencias vulneraveis.
 - Se `brakeman --no-pager` estourar timeout sem retornar resultado, registre o timeout no documento de PR e nao invente status de seguranca verde. Reexecute com timeout maior ou em ambiente externo quando o usuario pedir fechamento de auditoria completo.
-- Ao executar uma tarefa originada de plano ou goal, faca no fechamento uma checagem de qualidade proporcional ao codigo alterado antes do commit. Para Rails, rode specs focados via `bin/safe_rspec` e RuboCop focado; para JS, rode lint/build quando alterar `app/javascript` ou assets carregados por JS; para Python/microservicos, rode testes/lint correspondentes em `yolo/` ou `upscale/`; para mudancas sensiveis ou dependencias, rode Brakeman/Bundler Audit quando aplicavel.
+- Ao executar uma tarefa originada de plano ou goal, faca no fechamento uma checagem de qualidade proporcional ao codigo alterado antes do commit. Para Rails, rode specs focados via `bin/safe_rspec` e RuboCop focado; para JS, rode lint/build quando alterar `app/javascript` ou assets carregados por JS; para funcionalidades visiveis de frontend, rode Playwright dentro do Docker; para Python/microservicos, rode testes/lint correspondentes em `yolo/` ou `upscale/`; para mudancas sensiveis ou dependencias, rode Brakeman/Bundler Audit quando aplicavel.
 - Se o QA amplo (`bin/qa`) estourar timeout ou falhar por CRLF, divida em etapas conforme a secao Docker e Testes, registre o resultado parcial no documento local de PR e nao declare status verde para uma etapa que nao concluiu.
 - Commits devem ser atomicos, em portugues, no formato Conventional Commits.
 - Ao criar commit, gere ou atualize um arquivo em `docs/` com dados do PR dos commits atuais. A pasta `docs/` e ignorada pelo Git; mantenha os arquivos locais, mas fora do versionamento.
