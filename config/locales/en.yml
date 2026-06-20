@@ -245,6 +245,12 @@ en:
       loading: "Loading..."
       grid_view: "Grid"
       list_view: "List"
+      gallery_view: "Gallery"
+      gallery_label: "Collection carousel gallery"
+      gallery_thumbnails: "Gallery thumbnails"
+      previous_item: "Previous item"
+      next_item: "Next item"
+      show_gallery_item: "Show %{name} in the gallery"
       empty_title: "No vehicles found"
       empty_text: "Try searching for another term or clear the search."
     show:

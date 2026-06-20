@@ -258,6 +258,12 @@ pt-BR:
       loading: "Carregando..."
       grid_view: "Grade"
       list_view: "Lista"
+      gallery_view: "Galeria"
+      gallery_label: "Galeria em carrossel da coleção"
+      gallery_thumbnails: "Miniaturas da galeria"
+      previous_item: "Item anterior"
+      next_item: "Próximo item"
+      show_gallery_item: "Mostrar %{name} na galeria"
       empty_title: "Nenhum veículo encontrado"
       empty_text: "Tente buscar por outro termo ou limpe a pesquisa."
     show:

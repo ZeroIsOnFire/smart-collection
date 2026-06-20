@@ -1,0 +1,20 @@
+<% display_photo_url = car_display_photo_url(car, user: user) %>
+<% index = local_assigns.fetch(:gallery_thumbnail_counter, local_assigns.fetch(:car_counter, 0)) %>
+<% active = local_assigns.fetch(:active, index.zero?) %>
+
+<button type="button"
+        class="public-gallery-thumb<%= " active" if active %>"
+        data-bs-target="#<%= gallery_id %>"
+        data-bs-slide-to="<%= index %>"
+        aria-label="<%= t("public_collections.index.show_gallery_item", name: car.name.presence || t("cars.show.fallback_name")) %>"
+        aria-current="<%= "true" if active %>">
+  <% if display_photo_url.present? %>
+    <%= image_tag display_photo_url,
+                  loading: "lazy",
+                  alt: car.name.presence || t("cars.show.fallback_name") %>
+  <% else %>
+    <span class="public-gallery-thumb-empty">
+      <i class="bi bi-camera"></i>
+    </span>
+  <% end %>
+</button>
