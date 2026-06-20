@@ -237,12 +237,28 @@ pt-BR:
   # ── Exportação PDF ─────────────────────────────────────
   export_pdf:
     title: "CATÁLOGO DE COLEÇÃO"
+    eyebrow: "SMART COLLECTION"
+    catalog_section: "Itens da coleção"
     user_placeholder: "Usuário"
     meta_info: "Gerado em: %{date} | Total: %{count} itens"
+    generated_at: "Gerado em %{date}"
+    cover_description: "Um relatório visual com resumo da coleção, fotos, metadados e observações dos itens catalogados."
+    empty_collection: "Nenhum item cadastrado nesta coleção."
     no_image: "Sem Imagem"
     no_photo: "Sem Foto"
     ai_photo_badge: "IA"
     page_info: "Página %{page} de %{total}"
+    summary:
+      items: "Itens"
+      brands: "Marcas"
+      years: "Anos"
+      ai_photos: "Fotos IA"
+      not_available: "N/D"
+    metadata:
+      brand: "Marca"
+      year: "Ano"
+      scale: "Escala"
+      color: "Cor"
 
   public_collections:
     layout:

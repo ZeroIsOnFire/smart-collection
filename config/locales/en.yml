@@ -224,12 +224,28 @@ en:
 
   export_pdf:
     title: "COLLECTION CATALOG"
+    eyebrow: "SMART COLLECTION"
+    catalog_section: "Collection items"
     user_placeholder: "User"
     meta_info: "Generated at: %{date} | Total: %{count} items"
+    generated_at: "Generated at %{date}"
+    cover_description: "A visual report with collection summary, photos, metadata and notes for cataloged items."
+    empty_collection: "No items have been registered in this collection."
     no_image: "No Image"
     no_photo: "No Photo"
     ai_photo_badge: "AI"
     page_info: "Page %{page} of %{total}"
+    summary:
+      items: "Items"
+      brands: "Brands"
+      years: "Years"
+      ai_photos: "AI photos"
+      not_available: "N/A"
+    metadata:
+      brand: "Brand"
+      year: "Year"
+      scale: "Scale"
+      color: "Color"
 
   public_collections:
     layout:
