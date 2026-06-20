@@ -70,7 +70,7 @@
           </div>
         <% end %>
 
-        <% if car.tags.present? %>
+        <% if car.tags? %>
           <div class="public-gallery-spec public-gallery-spec-wide">
             <i class="bi bi-tags"></i>
             <span><%= t("activerecord.attributes.car.tags") %></span>
