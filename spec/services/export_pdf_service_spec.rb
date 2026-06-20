@@ -26,7 +26,29 @@ RSpec.describe ExportPdfService do
 
       described_class.new(user, cars, generated_at: generated_at).generate
 
-      expect(I18n).to have_received(:l).with(generated_at, format: :export_timestamp)
+      expect(I18n).to have_received(:l).with(generated_at, format: :export_timestamp).at_least(:once)
+    end
+
+    it 'draws a cover page with collection summary before the catalog' do
+      expect(service).to receive(:draw_cover_page).ordered.and_call_original
+      expect(service).to receive(:draw_catalog_pages).ordered.and_call_original
+      expect(service).to receive(:draw_collection_summary).and_call_original
+
+      service.generate
+    end
+
+    it 'calculates collection metrics for the cover summary' do
+      extra_car = create(:car, user: user, brand: 'Matchbox', year: 1980)
+      service = described_class.new(user, cars + [extra_car])
+
+      metrics = service.send(:collection_metrics)
+
+      expect(metrics).to include(
+        { label: I18n.t('export_pdf.summary.items'), value: '3' },
+        { label: I18n.t('export_pdf.summary.brands'), value: '2' },
+        { label: I18n.t('export_pdf.summary.years'), value: '1970-1980' },
+        { label: I18n.t('export_pdf.summary.ai_photos'), value: '0' }
+      )
     end
 
     it 'marks photos displayed with the AI-enhanced variant' do
@@ -39,6 +61,16 @@ RSpec.describe ExportPdfService do
       expect(service).to receive(:draw_ai_photo_badge).once.and_call_original
 
       service.generate
+    end
+
+    it 'uses the enhanced photo file when the displayed variant is AI' do
+      car = create(:car, user: user, photo_variant: 'ai')
+      car.photo = Rack::Test::UploadedFile.new(Rails.root.join('spec/fixtures/files/car_sample.jpg'), 'image/jpeg')
+      car.enhanced_photo = Rack::Test::UploadedFile.new(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+      car.save!
+      service = described_class.new(user, [car])
+
+      expect(service.send(:displayed_photo_path, car)).to eq(car.enhanced_photo.path)
     end
 
     it 'does not mark photos displayed with the original variant' do

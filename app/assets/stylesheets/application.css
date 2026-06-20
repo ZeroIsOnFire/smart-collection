@@ -1195,6 +1195,244 @@ body {
   max-width: 100%;
 }
 
+.public-gallery-shell {
+  display: none;
+  margin-bottom: 2rem;
+}
+
+.view-gallery .public-gallery-shell {
+  display: block;
+}
+
+.public-gallery-carousel {
+  background: var(--public-surface);
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 0.75rem;
+  box-shadow: 0 22px 60px rgba(15, 23, 42, 0.14);
+  overflow: hidden;
+}
+
+.public-gallery-feature {
+  color: var(--public-text);
+  display: block;
+}
+
+.public-gallery-photo {
+  aspect-ratio: 16 / 6;
+  background: #e8edf5;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.24);
+  overflow: hidden;
+  position: relative;
+}
+
+[data-theme="dark"] .public-gallery-photo {
+  background: #0b1020;
+}
+
+.public-gallery-photo img {
+  display: block;
+  height: 100%;
+  object-fit: contain;
+  width: 100%;
+}
+
+.public-gallery-lightbox-button {
+  align-items: center;
+  background: rgba(15, 23, 42, 0.76);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  bottom: auto;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.22);
+  color: #fff;
+  display: inline-flex;
+  height: 2.75rem;
+  justify-content: center;
+  padding: 0;
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  width: 2.75rem;
+  z-index: 5;
+}
+
+.public-gallery-lightbox-button:hover,
+.public-gallery-lightbox-button:focus-visible {
+  background: rgba(15, 23, 42, 0.9);
+  transform: translateY(-1px);
+}
+
+.public-gallery-empty-photo {
+  align-items: center;
+  color: rgba(255, 255, 255, 0.72);
+  display: flex;
+  flex-direction: column;
+  font-weight: 700;
+  gap: 0.5rem;
+  height: 100%;
+  justify-content: center;
+}
+
+.public-gallery-empty-photo .bi {
+  font-size: 2.5rem;
+}
+
+.public-gallery-summary {
+  align-items: center;
+  display: grid;
+  gap: 0.55rem;
+  grid-template-columns: 1fr;
+  padding: 0.8rem 2rem 0.9rem;
+}
+
+.public-gallery-title-block h2 {
+  color: var(--public-text);
+  font-size: clamp(1.2rem, 1.4vw, 1.55rem);
+  font-weight: 800;
+  letter-spacing: 0;
+  margin: 0;
+}
+
+.public-gallery-specs {
+  display: grid;
+  gap: 0.45rem 0.65rem;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.public-gallery-spec {
+  align-items: center;
+  background: rgba(148, 163, 184, 0.08);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 0.5rem;
+  column-gap: 0.55rem;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  min-width: 0;
+  padding: 0.42rem 0.6rem;
+}
+
+.public-gallery-spec .bi,
+.public-gallery-color {
+  color: var(--public-text);
+  font-size: 1.1rem;
+  grid-row: span 2;
+}
+
+.public-gallery-color {
+  border: 1px solid rgba(148, 163, 184, 0.7);
+  border-radius: 999px;
+  height: 1.15rem;
+  width: 1.15rem;
+}
+
+.public-gallery-spec span {
+  color: var(--public-text);
+  font-size: 0.86rem;
+  font-weight: 800;
+  line-height: 1.1;
+  min-width: 0;
+}
+
+.public-gallery-spec strong {
+  color: var(--public-text-muted);
+  font-size: 0.82rem;
+  font-weight: 500;
+  line-height: 1.25;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.public-gallery-spec-wide {
+  grid-column: span 2;
+}
+
+.public-gallery-notes strong {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.public-gallery-control {
+  background: rgba(17, 24, 39, 0.64);
+  border-radius: 999px;
+  height: 3.25rem;
+  opacity: 1;
+  top: calc(50% - 3rem);
+  width: 3.25rem;
+}
+
+.public-gallery-control.carousel-control-prev {
+  left: 1.75rem;
+}
+
+.public-gallery-control.carousel-control-next {
+  right: 1.75rem;
+}
+
+.public-gallery-thumbnails {
+  display: flex;
+  gap: 0.55rem;
+  justify-content: normal;
+  margin: 0.85rem 0 0;
+  overflow-x: auto;
+  padding: 0 0 0.25rem;
+  position: static;
+  scrollbar-width: thin;
+}
+
+.public-gallery-thumb {
+  aspect-ratio: 16 / 9;
+  background: var(--public-surface);
+  border: 2px solid transparent;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.12);
+  box-sizing: border-box;
+  flex: 0 0 clamp(112px, 13vw, 168px);
+  height: auto !important;
+  opacity: 1;
+  overflow: hidden;
+  padding: 0;
+  text-indent: 0;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  width: clamp(112px, 13vw, 168px) !important;
+}
+
+.public-gallery-thumbnails .public-gallery-thumb,
+.public-gallery-thumbnails [data-bs-target] {
+  background-clip: border-box;
+  background-color: var(--public-surface);
+  flex: 0 0 clamp(112px, 13vw, 168px);
+  height: auto !important;
+  margin: 0;
+  opacity: 1;
+  text-indent: 0;
+  width: clamp(112px, 13vw, 168px) !important;
+}
+
+.public-gallery-thumb.active,
+.public-gallery-thumb:hover,
+.public-gallery-thumb:focus-visible {
+  border-color: var(--public-primary);
+  box-shadow: 0 14px 34px rgba(79, 70, 229, 0.24);
+  transform: translateY(-1px);
+}
+
+.public-gallery-thumb img,
+.public-gallery-thumb-empty {
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.public-gallery-thumb-empty {
+  align-items: center;
+  color: var(--public-text-muted);
+  display: flex;
+  justify-content: center;
+}
+
 .hero-gradient-subtle {
   background: linear-gradient(180deg, var(--public-primary) 0%, var(--public-bg) 100%);
   height: 300px;
@@ -1324,11 +1562,59 @@ body {
   .public-view-toggle {
     overflow-x: auto;
   }
+
+  .public-gallery-photo {
+    aspect-ratio: 4 / 3;
+  }
+
+  .public-gallery-summary {
+    padding: 0.85rem 1rem 0.95rem;
+  }
 }
 
 @media (max-width: 991.98px) {
   .car-showcase-row {
     --bs-gutter-y: 0.75rem;
+  }
+
+  .public-gallery-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .public-gallery-specs {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  }
+
+  .public-gallery-control {
+    height: 2.75rem;
+    top: 35%;
+    width: 2.75rem;
+  }
+
+  .public-gallery-control.carousel-control-prev {
+    left: 0.75rem;
+  }
+
+  .public-gallery-control.carousel-control-next {
+    right: 0.75rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .public-gallery-specs {
+    grid-template-columns: 1fr;
+  }
+
+  .public-gallery-spec {
+    padding: 0.55rem 0.65rem;
+  }
+
+  .public-gallery-spec-wide {
+    grid-column: auto;
+  }
+
+  .public-gallery-thumbnails {
+    overflow-x: auto;
   }
 }
 
@@ -1381,6 +1667,11 @@ body {
   max-width: none !important;
   padding: 0 !important;
   margin: 0 !important;
+}
+
+.view-gallery #cars_grid_inner,
+.view-gallery #cars_grid_inner.grid-view {
+  display: none !important;
 }
 
 .view-list #cars_grid_inner {

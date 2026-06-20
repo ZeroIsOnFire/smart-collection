@@ -3,276 +3,407 @@
 require 'prawn'
 
 class ExportPdfService
+  CATALOG_COLUMNS = 2
+  CATALOG_GUTTER = 18
+  CARD_HEIGHT = 265
+  CARD_IMAGE_HEIGHT = 150
+  COLORS = {
+    navy: '0F172A',
+    slate: '1E293B',
+    muted: '64748B',
+    soft: 'F8FAFC',
+    line: 'E2E8F0',
+    gold: 'D4AF37',
+    blue: '2563EB',
+    indigo: '4F46E5',
+    white: 'FFFFFF'
+  }.freeze
+
   def initialize(user, cars, generated_at: Time.current)
     @user = user
-    @cars = cars
+    @cars = cars.to_a
     @generated_at = generated_at
     @temp_files = []
   end
 
   def generate
     Prawn::Fonts::AFM.hide_m17n_warning = true
-    pdf_content = Prawn::Document.new(page_size: 'A4', margin: [40, 30, 40, 30]) do |pdf|
-      # --- Header Premium ---
-      pdf.fill_color '1E293B' # Slate escuro
-      pdf.fill_rectangle [pdf.bounds.left, pdf.bounds.top], pdf.bounds.width, 80
 
-      pdf.fill_color 'FFFFFF'
+    Prawn::Document.new(page_size: 'A4', margin: [44, 34, 44, 34]) do |pdf|
       pdf.font 'Helvetica'
 
-      pdf.move_down 20
-      raw_title = I18n.t('export_pdf.title')
-      safe_title = begin
-        raw_title.encode('Windows-1252', invalid: :replace, undef: :replace,
-                                         replace: '')
-      rescue StandardError
-        'CATALOGO DE COLECAO'
-      end
-      pdf.text safe_title, size: 8, style: :bold, align: :center, character_spacing: 2
-
-      pdf.move_down 3
-      # Tentar converter nome do usuário para Windows-1252 para evitar crash no Prawn
-      user_name = @user.name.presence || I18n.t('export_pdf.user_placeholder')
-      safe_user = begin
-        user_name.encode('Windows-1252', invalid: :replace, undef: :replace, replace: '')
-      rescue StandardError
-        'USUARIO'
-      end
-      pdf.text safe_user.upcase, size: 20, style: :bold, align: :center
-
-      pdf.move_down 3
-      pdf.fill_color '94A3B8'
-      meta_info = I18n.t('export_pdf.meta_info',
-                         date: I18n.l(@generated_at, format: :export_timestamp),
-                         count: @cars.count)
-      pdf.text meta_info, size: 8, align: :center
-
-      pdf.move_down 40
-
-      # --- Grid Settings ---
-      columns = 4
-      gutter = 12
-      col_width = (pdf.bounds.width - (gutter * (columns - 1))) / columns
-      card_height = 185
-      img_height = 95
-
-      y_start = pdf.cursor
-
-      @cars.each_with_index do |car, index|
-        col = index % columns
-
-        if col.zero? && index.positive? && y_start - card_height < pdf.bounds.bottom
-          pdf.start_new_page
-          y_start = pdf.cursor
-        end
-
-        x = col * (col_width + gutter)
-
-        pdf.bounding_box([x, y_start], width: col_width, height: card_height) do
-          # Sombra sutil (retângulo deslocado)
-          pdf.fill_color 'F1F5F9'
-          pdf.fill_rounded_rectangle [2, pdf.bounds.top - 2], col_width, card_height, 10
-
-          # Card background
-          pdf.fill_color 'FFFFFF'
-          pdf.fill_rounded_rectangle [0, pdf.bounds.top], col_width, card_height, 10
-
-          # Border
-          pdf.stroke_color 'E2E8F0'
-          pdf.line_width = 0.5
-          pdf.stroke_rounded_rectangle [0, pdf.bounds.top], col_width, card_height, 10
-
-          # --- Image Area ---
-          pdf.bounding_box([0, pdf.bounds.top], width: col_width, height: img_height) do
-            # Clip image to rounded corners top
-            pdf.fill_color 'F8FAFC'
-            pdf.fill_rounded_rectangle [0, pdf.bounds.top], col_width, img_height, 10
-
-            if car.photo? && File.exist?(car.photo.path)
-              begin
-                photo_path = car.photo.path
-                image = MiniMagick::Image.open(photo_path)
-                real_type = image.type.downcase
-
-                if %w[jpeg png].include?(real_type)
-                  prawn_type = (real_type == 'jpeg' ? :jpg : :png)
-                else
-                  temp_jpg = Tempfile.new(['photo_convert', '.jpg'])
-                  temp_jpg.binmode
-                  @temp_files << temp_jpg
-                  image.format 'jpg'
-                  image.write temp_jpg.path
-                  photo_path = temp_jpg.path
-                  prawn_type = :jpg
-                end
-
-                pdf.image photo_path, fit: [col_width - 10, img_height - 10], position: :center, vposition: :center,
-                                      type: prawn_type
-                draw_ai_photo_badge(pdf, col_width) if car.photo_upscaled_by_ai?
-              rescue StandardError
-                pdf.move_down (img_height / 2) - 5
-                pdf.fill_color '94A3B8'
-                pdf.text I18n.t('export_pdf.no_image'), align: :center, size: 8
-              end
-            else
-              pdf.move_down (img_height / 2) - 5
-              pdf.fill_color '94A3B8'
-              pdf.text I18n.t('export_pdf.no_photo'), align: :center, size: 8
-            end
-          end
-
-          # --- Text Area ---
-          text_box_y = pdf.bounds.top - img_height - 8
-          pdf.bounding_box([6, text_box_y], width: col_width - 12, height: card_height - img_height - 8) do
-            # Name
-            pdf.fill_color '0F172A'
-            safe_name = begin
-              car.name.encode('Windows-1252', invalid: :replace, undef: :replace, replace: '')
-            rescue StandardError
-              car.name
-            end
-            pdf.text safe_name, size: 8.5, style: :bold, align: :center, overflow: :truncate
-
-            pdf.move_down 3
-
-            # Details
-            details = []
-            details << car.brand if car.brand?
-            details << car.year.to_s if car.year?
-            details << car.size if car.size?
-
-            safe_details = begin
-              details.join(' • ').encode('Windows-1252', invalid: :replace, undef: :replace,
-                                                         replace: '')
-            rescue StandardError
-              details.join(' • ')
-            end
-            pdf.fill_color '64748B'
-            pdf.text safe_details, size: 7, align: :center, overflow: :truncate
-
-            # Color
-            if car.color?
-              pdf.move_down 5
-              color_hex = Car::COLORS[car.color] || '#CCCCCC'
-              prawn_color = color_hex.delete('#')
-
-              color_text = begin
-                car.color.encode('Windows-1252', invalid: :replace, undef: :replace,
-                                                 replace: '')
-              rescue StandardError
-                car.color
-              end
-              text_width = pdf.width_of(color_text, size: 7)
-              total_width = 12 + text_width
-              start_x = (pdf.bounds.width - total_width) / 2
-
-              # Círculo de cor
-              pdf.fill_color prawn_color
-              pdf.fill_circle [start_x + 4, pdf.cursor - 3.5], 3.5
-              pdf.stroke_color 'DEE2E6'
-              pdf.line_width = 0.5
-              pdf.stroke_circle [start_x + 4, pdf.cursor - 3.5], 3.5
-
-              # Texto da cor
-              pdf.fill_color '64748B'
-              pdf.draw_text color_text, at: [start_x + 12, pdf.cursor - 6], size: 7
-
-              # IMPORTANTE: Avançar o cursor manualmente após usar draw_text/fill_circle
-              pdf.move_down 10
-            end
-
-            # Observations
-            if car.observations?
-              pdf.move_down 2 # Pequeno ajuste
-              clean_obs = car.observations.to_s.squish
-              safe_obs = begin
-                clean_obs.encode('Windows-1252', invalid: :replace, undef: :replace,
-                                                 replace: '')
-              rescue StandardError
-                clean_obs
-              end
-              pdf.fill_color '94A3B8'
-
-              # Aumentamos a altura disponível para aproveitar o espaço do card
-              pdf.text_box safe_obs,
-                           at: [0, pdf.cursor],
-                           width: pdf.bounds.width,
-                           height: 40, # Mais espaço para observações
-                           size: 6.5,
-                           align: :center,
-                           overflow: :truncate,
-                           font_style: :italic,
-                           leading: 1
-            end
-          end
-        end
-
-        y_start -= (card_height + gutter) if col == columns - 1
-      end
-
-      # --- Footer com Logo e numeração ---
-      pdf.repeat(:all) do
-        pdf.stroke_color 'E2E8F0'
-        pdf.line_width = 0.5
-        pdf.stroke_horizontal_line pdf.bounds.left, pdf.bounds.right, at: -5
-
-        # Logo no Rodapé (Esquerda)
-        logo_path = Rails.public_path.join('logo/logo.png')
-        if File.exist?(logo_path)
-          pdf.image logo_path, at: [pdf.bounds.left, -10], height: 24
-          pdf.fill_color '94A3B8'
-          pdf.draw_text 'SmartCollection', at: [pdf.bounds.left + 32, -26], size: 8, style: :bold
-        else
-          pdf.fill_color '3B82F6'
-          pdf.fill_circle [pdf.bounds.left + 10, -20.5], 4
-          pdf.fill_color '1D4ED8'
-          pdf.fill_circle [pdf.bounds.left + 15, -24.5], 4
-
-          pdf.fill_color '94A3B8'
-          pdf.draw_text 'Smart', at: [pdf.bounds.left + 25, -25], size: 8, style: :bold
-          pdf.fill_color '3B82F6'
-          pdf.draw_text 'Collection', at: [pdf.bounds.left + 48, -25], size: 8, style: :bold
-        end
-      end
-
-      page_string = I18n.t('export_pdf.page_info', page: '<page>', total: '<total>')
-      pdf.number_pages page_string,
-                       at: [pdf.bounds.left, -18.5],
-                       size: 8,
-                       color: '94A3B8',
-                       align: :right
+      draw_cover_page(pdf)
+      pdf.start_new_page
+      draw_catalog_pages(pdf)
+      draw_footer(pdf)
+      draw_page_numbers(pdf)
     end.render
-
-    begin
-      @temp_files.each do |f|
-        f.close
-        f.unlink
-      end
-    rescue StandardError
-      nil
-    end
-    pdf_content
+  ensure
+    cleanup_temp_files
   end
 
   private
 
+  def draw_cover_page(pdf)
+    draw_cover_background(pdf)
+
+    pdf.fill_color COLORS[:white]
+    pdf.move_down 46
+    pdf.text(
+      safe_text(I18n.t('export_pdf.eyebrow')),
+      size: 9,
+      style: :bold,
+      align: :center,
+      character_spacing: 2
+    )
+    pdf.move_down 10
+    pdf.text(
+      safe_text(I18n.t('export_pdf.title')),
+      size: 30,
+      style: :bold,
+      align: :center,
+      leading: 2
+    )
+    pdf.move_down 8
+    pdf.fill_color 'CBD5E1'
+    pdf.text safe_text(collection_owner_name), size: 14, align: :center
+    pdf.move_down 22
+
+    draw_cover_divider(pdf)
+    draw_collection_summary(pdf)
+    draw_cover_highlights(pdf)
+  end
+
+  def draw_cover_background(pdf)
+    pdf.canvas do
+      pdf.fill_color COLORS[:navy]
+      pdf.fill_rectangle [pdf.bounds.left, pdf.bounds.top], pdf.bounds.width, pdf.bounds.height
+
+      pdf.fill_color '172554'
+      pdf.transparent(0.28) do
+        pdf.fill_circle [pdf.bounds.right - 64, pdf.bounds.top - 72], 140
+        pdf.fill_circle [pdf.bounds.left + 24, pdf.bounds.bottom + 68], 110
+      end
+    end
+  end
+
+  def draw_cover_divider(pdf)
+    x = (pdf.bounds.width - 130) / 2
+    pdf.stroke_color COLORS[:gold]
+    pdf.line_width = 1.4
+    pdf.stroke_horizontal_line x, x + 130, at: pdf.cursor
+    pdf.move_down 28
+  end
+
+  def draw_collection_summary(pdf)
+    metrics = collection_metrics
+    card_width = (pdf.bounds.width - 24) / 4
+
+    pdf.bounding_box([0, pdf.cursor], width: pdf.bounds.width, height: 86) do
+      metrics.each_with_index do |metric, index|
+        x = index * (card_width + 8)
+        pdf.bounding_box([x, pdf.bounds.top], width: card_width, height: 72) do
+          pdf.fill_color 'FFFFFF'
+          pdf.transparent(0.1) do
+            pdf.fill_rounded_rectangle [0, pdf.bounds.top], card_width, 72, 8
+          end
+          pdf.stroke_color '334155'
+          pdf.line_width = 0.5
+          pdf.stroke_rounded_rectangle [0, pdf.bounds.top], card_width, 72, 8
+
+          pdf.move_down 13
+          pdf.fill_color COLORS[:white]
+          pdf.text safe_text(metric[:value]), size: 15, style: :bold, align: :center
+          pdf.move_down 5
+          pdf.fill_color 'CBD5E1'
+          pdf.text safe_text(metric[:label]), size: 7.5, align: :center, character_spacing: 0.5
+        end
+      end
+    end
+
+    pdf.move_down 18
+  end
+
+  def draw_cover_highlights(pdf)
+    pdf.fill_color 'CBD5E1'
+    pdf.text safe_text(I18n.t('export_pdf.cover_description')), size: 10, align: :center, leading: 3
+    pdf.move_down 18
+    pdf.fill_color COLORS[:gold]
+    pdf.text safe_text(I18n.t('export_pdf.generated_at',
+                              date: I18n.l(@generated_at, format: :export_timestamp))),
+             size: 8.5,
+             style: :bold,
+             align: :center,
+             character_spacing: 1
+  end
+
+  def draw_catalog_pages(pdf)
+    draw_catalog_header(pdf)
+
+    if @cars.empty?
+      draw_empty_catalog(pdf)
+      return
+    end
+
+    col_width = (pdf.bounds.width - (CATALOG_GUTTER * (CATALOG_COLUMNS - 1))) / CATALOG_COLUMNS
+    y_start = pdf.cursor
+
+    @cars.each_with_index do |car, index|
+      col = index % CATALOG_COLUMNS
+
+      if col.zero? && index.positive? && y_start - CARD_HEIGHT < pdf.bounds.bottom
+        pdf.start_new_page
+        draw_catalog_header(pdf)
+        y_start = pdf.cursor
+      end
+
+      x = col * (col_width + CATALOG_GUTTER)
+      draw_catalog_card(pdf, car, x, y_start, col_width)
+      y_start -= (CARD_HEIGHT + CATALOG_GUTTER) if col == CATALOG_COLUMNS - 1
+    end
+  end
+
+  def draw_catalog_header(pdf)
+    pdf.fill_color COLORS[:navy]
+    pdf.text safe_text(I18n.t('export_pdf.catalog_section')), size: 15, style: :bold
+    pdf.move_down 5
+    pdf.fill_color COLORS[:muted]
+    pdf.text safe_text(I18n.t('export_pdf.meta_info',
+                              date: I18n.l(@generated_at, format: :export_timestamp),
+                              count: @cars.count)),
+             size: 8.5
+    pdf.move_down 20
+  end
+
+  def draw_empty_catalog(pdf)
+    pdf.move_down 110
+    pdf.fill_color 'CBD5E1'
+    pdf.fill_circle [pdf.bounds.width / 2, pdf.cursor], 34
+    pdf.move_down 48
+    pdf.fill_color COLORS[:muted]
+    pdf.text safe_text(I18n.t('export_pdf.empty_collection')), size: 11, align: :center
+  end
+
+  def draw_catalog_card(pdf, car, x_position, y_start, col_width)
+    pdf.bounding_box([x_position, y_start], width: col_width, height: CARD_HEIGHT) do
+      draw_card_frame(pdf, col_width)
+      draw_photo_area(pdf, car, col_width)
+      draw_card_body(pdf, car, col_width)
+    end
+  end
+
+  def draw_card_frame(pdf, col_width)
+    pdf.fill_color 'E2E8F0'
+    pdf.transparent(0.35) do
+      pdf.fill_rounded_rectangle [3, pdf.bounds.top - 3], col_width, CARD_HEIGHT, 10
+    end
+
+    pdf.fill_color COLORS[:white]
+    pdf.fill_rounded_rectangle [0, pdf.bounds.top], col_width, CARD_HEIGHT, 10
+    pdf.stroke_color COLORS[:line]
+    pdf.line_width = 0.6
+    pdf.stroke_rounded_rectangle [0, pdf.bounds.top], col_width, CARD_HEIGHT, 10
+  end
+
+  def draw_photo_area(pdf, car, col_width)
+    pdf.bounding_box([0, pdf.bounds.top], width: col_width, height: CARD_IMAGE_HEIGHT) do
+      pdf.fill_color COLORS[:soft]
+      pdf.fill_rounded_rectangle [0, pdf.bounds.top], col_width, CARD_IMAGE_HEIGHT, 10
+
+      image_data = prepared_photo(car)
+
+      if image_data
+        pdf.image image_data[:path],
+                  fit: [col_width - 16, CARD_IMAGE_HEIGHT - 16],
+                  position: :center,
+                  vposition: :center,
+                  type: image_data[:type]
+        draw_ai_photo_badge(pdf, col_width) if car.photo_upscaled_by_ai?
+      else
+        pdf.move_down (CARD_IMAGE_HEIGHT / 2) - 8
+        pdf.fill_color '94A3B8'
+        pdf.text safe_text(I18n.t('export_pdf.no_photo')), align: :center, size: 8.5
+      end
+    rescue StandardError
+      pdf.move_down (CARD_IMAGE_HEIGHT / 2) - 8
+      pdf.fill_color '94A3B8'
+      pdf.text safe_text(I18n.t('export_pdf.no_image')), align: :center, size: 8.5
+    end
+  end
+
+  def draw_card_body(pdf, car, col_width)
+    pdf.bounding_box([12, pdf.bounds.top - CARD_IMAGE_HEIGHT - 12],
+                     width: col_width - 24,
+                     height: CARD_HEIGHT - CARD_IMAGE_HEIGHT - 18) do
+      pdf.fill_color COLORS[:navy]
+      pdf.text safe_text(car.name), size: 11, style: :bold, overflow: :truncate
+      pdf.move_down 8
+
+      draw_metadata_row(pdf, I18n.t('export_pdf.metadata.brand'), car.brand) if car.brand?
+      draw_metadata_row(pdf, I18n.t('export_pdf.metadata.year'), car.year.to_s) if car.year?
+      draw_metadata_row(pdf, I18n.t('export_pdf.metadata.scale'), car.size) if car.size?
+      draw_color_row(pdf, car) if car.color?
+
+      return unless car.observations?
+
+      pdf.move_down 7
+      pdf.fill_color '94A3B8'
+      pdf.text_box safe_text(car.observations.to_s.squish),
+                   at: [0, pdf.cursor],
+                   width: pdf.bounds.width,
+                   height: 28,
+                   size: 7,
+                   overflow: :truncate,
+                   font_style: :italic,
+                   leading: 1
+    end
+  end
+
+  def draw_metadata_row(pdf, label, value)
+    pdf.fill_color COLORS[:muted]
+    pdf.formatted_text [
+      { text: "#{safe_text(label)}: ", styles: [:bold] },
+      { text: safe_text(value) }
+    ], size: 8, leading: 1
+  end
+
+  def draw_color_row(pdf, car)
+    color_hex = Car::COLORS[car.color] || '#CCCCCC'
+    prawn_color = color_hex.delete('#')
+    y = pdf.cursor - 4
+
+    pdf.fill_color COLORS[:muted]
+    pdf.draw_text "#{safe_text(I18n.t('export_pdf.metadata.color'))}:",
+                  at: [0, y - 2],
+                  size: 8,
+                  style: :bold
+
+    label_width = pdf.width_of("#{safe_text(I18n.t('export_pdf.metadata.color'))}:", size: 8, style: :bold)
+    pdf.fill_color prawn_color
+    pdf.fill_circle [label_width + 9, y], 4
+    pdf.stroke_color 'CBD5E1'
+    pdf.line_width = 0.5
+    pdf.stroke_circle [label_width + 9, y], 4
+
+    pdf.fill_color COLORS[:muted]
+    pdf.draw_text safe_text(car.color), at: [label_width + 18, y - 3], size: 8
+    pdf.move_down 14
+  end
+
+  def prepared_photo(car)
+    path = displayed_photo_path(car)
+    return if path.blank? || !File.exist?(path)
+
+    image = MiniMagick::Image.open(path)
+    real_type = image.type.downcase
+    return { path: path, type: (real_type == 'jpeg' ? :jpg : :png) } if %w[jpeg png].include?(real_type)
+
+    temp_jpg = Tempfile.new(['photo_convert', '.jpg'])
+    temp_jpg.binmode
+    @temp_files << temp_jpg
+    image.format 'jpg'
+    image.write temp_jpg.path
+
+    { path: temp_jpg.path, type: :jpg }
+  end
+
+  def displayed_photo_path(car)
+    return car.enhanced_photo.path if car.photo_upscaled_by_ai? && car.enhanced_photo?
+    return car.photo.path if car.photo?
+
+    nil
+  end
+
+  def draw_footer(pdf)
+    pdf.repeat(:all) do
+      pdf.stroke_color COLORS[:line]
+      pdf.line_width = 0.5
+      pdf.stroke_horizontal_line pdf.bounds.left, pdf.bounds.right, at: -5
+
+      logo_path = Rails.public_path.join('logo/logo.png')
+      if File.exist?(logo_path)
+        pdf.image logo_path, at: [pdf.bounds.left, -10], height: 24
+        pdf.fill_color '94A3B8'
+        pdf.draw_text 'SmartCollection', at: [pdf.bounds.left + 32, -26], size: 8, style: :bold
+      else
+        pdf.fill_color COLORS[:blue]
+        pdf.fill_circle [pdf.bounds.left + 10, -20.5], 4
+        pdf.fill_color '1D4ED8'
+        pdf.fill_circle [pdf.bounds.left + 15, -24.5], 4
+
+        pdf.fill_color '94A3B8'
+        pdf.draw_text 'Smart', at: [pdf.bounds.left + 25, -25], size: 8, style: :bold
+        pdf.fill_color COLORS[:blue]
+        pdf.draw_text 'Collection', at: [pdf.bounds.left + 48, -25], size: 8, style: :bold
+      end
+    end
+  end
+
+  def draw_page_numbers(pdf)
+    page_string = I18n.t('export_pdf.page_info', page: '<page>', total: '<total>')
+    pdf.number_pages page_string,
+                     at: [pdf.bounds.left, -18.5],
+                     size: 8,
+                     color: '94A3B8',
+                     align: :right
+  end
+
   def draw_ai_photo_badge(pdf, col_width)
     badge_label = I18n.t('export_pdf.ai_photo_badge')
-    badge_width = 28
-    badge_height = 13
-    x_position = col_width - badge_width - 8
-    y_position = pdf.bounds.top - 8
+    badge_width = 32
+    badge_height = 14
+    x_position = col_width - badge_width - 10
+    y_position = pdf.bounds.top - 10
     text_width = pdf.width_of(badge_label, size: 7, style: :bold)
     text_x_position = x_position + ((badge_width - text_width) / 2)
 
-    pdf.fill_color '4F46E5'
-    pdf.transparent(0.72) do
+    pdf.fill_color COLORS[:indigo]
+    pdf.transparent(0.78) do
       pdf.fill_rounded_rectangle [x_position, y_position], badge_width, badge_height, 4
     end
-    pdf.fill_color 'FFFFFF'
+    pdf.fill_color COLORS[:white]
     pdf.draw_text badge_label,
                   at: [text_x_position, y_position - 9],
                   size: 7,
                   style: :bold
+  end
+
+  def collection_metrics
+    [
+      { label: I18n.t('export_pdf.summary.items'), value: @cars.count.to_s },
+      { label: I18n.t('export_pdf.summary.brands'), value: distinct_count(:brand).to_s },
+      { label: I18n.t('export_pdf.summary.years'), value: year_range },
+      { label: I18n.t('export_pdf.summary.ai_photos'), value: @cars.count(&:photo_upscaled_by_ai?).to_s }
+    ]
+  end
+
+  def distinct_count(attribute)
+    @cars.filter_map { |car| car.public_send(attribute).presence }.uniq.count
+  end
+
+  def year_range
+    years = @cars.filter_map(&:year)
+    return I18n.t('export_pdf.summary.not_available') if years.empty?
+
+    years.min == years.max ? years.first.to_s : "#{years.min}-#{years.max}"
+  end
+
+  def collection_owner_name
+    @user.name.presence || I18n.t('export_pdf.user_placeholder')
+  end
+
+  def safe_text(value, fallback = '')
+    value.to_s.encode('Windows-1252', invalid: :replace, undef: :replace, replace: fallback)
+  rescue StandardError
+    fallback
+  end
+
+  def cleanup_temp_files
+    @temp_files.each do |file|
+      file.close
+      file.unlink
+    rescue StandardError
+      nil
+    end
   end
 end

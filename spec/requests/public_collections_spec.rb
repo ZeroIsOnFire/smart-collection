@@ -14,20 +14,45 @@ RSpec.describe 'Public Collections', type: :request do
       expect(response.body).to include('Public Car')
     end
 
-    it 'renders public view modes without carousel and opens public cards in a modal' do
+    it 'renders public view modes with a premium gallery carousel and opens public cards in a modal' do
+      car.update!(
+        brand: 'Porsche',
+        year: 2024,
+        size: '1:64',
+        color: 'Azul',
+        tags: %w[Premium Destaque],
+        observations: 'Miniatura com pintura especial e caixa preservada.',
+        photo: fixture_file_upload(Rails.root.join('spec/fixtures/files/car_sample.jpg'), 'image/jpeg')
+      )
+
       get public_share_path(user.share_token)
 
       document = Nokogiri::HTML(response.body)
       view_toggle = document.at_css('[data-view-toggle-storage-key-value="public_collection_view_preference"]')
       carousel = document.at_css('#publicCollectionCarousel')
-      carousel_button = document.at_css('[data-action="click->view-toggle#setCarousel"]')
+      gallery_button = document.at_css('[data-action="click->view-toggle#setGallery"]')
       public_card_link = document.at_css("#cars_grid_inner a[href='#{public_share_car_path(user.share_token, car)}']")
+      gallery_slide_link = document.at_css(".public-gallery-slide a[href='#{public_share_car_path(user.share_token, car)}']")
 
       expect(view_toggle['data-view-toggle-storage-key-value']).to eq('public_collection_view_preference')
-      expect(carousel).to be_nil
-      expect(carousel_button).to be_nil
+      expect(carousel).to be_present
+      expect(gallery_button).to be_present
       expect(public_card_link['data-turbo-frame']).to eq('modal')
-      expect(response.body).not_to include('public-carousel-viewport')
+      expect(gallery_slide_link).to be_nil
+      expect(document.at_css('.public-gallery-slide .public-gallery-feature')).to be_present
+      expect(document.at_css('.public-gallery-thumbnails.carousel-indicators')).to be_present
+      expect(document.at_css('.public-gallery-photo img')).to be_present
+      expect(document.at_css('.public-gallery-lightbox-button[data-action="click->photo-lightbox#open"]')).to be_present
+      expect(document.at_css('.public-gallery-slide[data-controller="photo-lightbox"]')).to be_present
+      expect(document.at_css('.public-gallery-slide .photo-lightbox-overlay')).to be_present
+      expect(response.body).to include('Porsche')
+      expect(response.body).to include('2024')
+      expect(response.body).to include('1:64')
+      expect(response.body).to include('Azul')
+      expect(response.body).to include('Premium, Destaque')
+      expect(response.body).to include('Miniatura com pintura especial')
+      expect(document.at_css('.public-gallery-thumbnails')).to be_present
+      expect(response.body).to include('public-gallery-shell')
       expect(response.body).to include('data-search-form-target="spinner"')
     end
 
@@ -42,6 +67,10 @@ RSpec.describe 'Public Collections', type: :request do
       get public_share_path(user.share_token), params: { page: 2 }, as: :turbo_stream
 
       expect(response).to have_http_status(:success)
+      expect(response.body).to include('turbo-stream action="append" target="public_gallery_slides"')
+      expect(response.body).to include('turbo-stream action="append" target="public_gallery_thumbnails"')
+      expect(response.body).to include('data-bs-slide-to="20"')
+      expect(response.body).not_to include('public-gallery-slide active')
       expect(response.body).not_to include('turbo-stream action="replace" target="cars_sentinel"')
       expect(response.body).to include('turbo-stream action="remove" target="cars_sentinel"')
     end

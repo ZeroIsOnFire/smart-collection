@@ -62,12 +62,17 @@
         <button type="button" class="btn btn-sm text-muted rounded-pill px-3 fw-medium d-flex align-items-center gap-2" data-view-toggle-target="listButton" data-action="click->view-toggle#setList">
           <i class="bi bi-list-ul"></i> <%= t("public_collections.index.list_view") %>
         </button>
+        <button type="button" class="btn btn-sm text-muted rounded-pill px-3 fw-medium d-flex align-items-center gap-2" data-view-toggle-target="galleryButton" data-action="click->view-toggle#setGallery">
+          <i class="bi bi-images"></i> <%= t("public_collections.index.gallery_view") %>
+        </button>
       </div>
     </div>
 
     <turbo-frame id="cars_grid">
       <div id="cars_list_container" class="position-relative mt-2">
         <% if @cars.any? %>
+          <%= render "public_collections/gallery", cars: @cars, user: @user %>
+
           <div id="cars_grid_inner" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4 pt-2 grid-view is-public">
             <%= render partial: "cars/car", collection: @cars, locals: { public: true, user: @user } %>
           </div>

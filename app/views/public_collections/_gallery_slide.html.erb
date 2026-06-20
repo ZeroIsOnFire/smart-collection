@@ -1,0 +1,112 @@
+<% display_photo_url = car_display_photo_url(car, user: user) %>
+<% active = local_assigns.fetch(:active, local_assigns.fetch(:car_counter, 0).zero?) %>
+
+<div class="carousel-item public-gallery-slide<%= " active" if active %>"
+     data-public-gallery-car-id="<%= car.id %>"
+     data-controller="photo-lightbox">
+  <div class="public-gallery-feature">
+    <div class="public-gallery-photo">
+      <% if display_photo_url.present? %>
+        <%= image_tag display_photo_url,
+                      loading: active ? "eager" : "lazy",
+                      alt: car.name.presence || t("cars.show.fallback_name") %>
+        <button type="button"
+                class="public-gallery-lightbox-button"
+                data-action="click->photo-lightbox#open"
+                aria-label="<%= t("cars.show.view_full_photo") %>">
+          <i class="bi bi-zoom-in"></i>
+        </button>
+      <% else %>
+        <div class="public-gallery-empty-photo">
+          <i class="bi bi-camera"></i>
+          <span><%= t("cars.card.no_photo") %></span>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="public-gallery-summary">
+      <div class="public-gallery-title-block">
+        <h2><%= car.name.presence || t("cars.show.fallback_name") %></h2>
+      </div>
+
+      <div class="public-gallery-specs">
+        <% if car.brand? %>
+          <div class="public-gallery-spec">
+            <i class="bi bi-bookmark"></i>
+            <span><%= t("activerecord.attributes.car.brand") %></span>
+            <strong><%= car.brand %></strong>
+          </div>
+        <% end %>
+
+        <% if car.year? %>
+          <div class="public-gallery-spec">
+            <i class="bi bi-calendar3"></i>
+            <span><%= t("activerecord.attributes.car.year") %></span>
+            <strong><%= car.year %></strong>
+          </div>
+        <% end %>
+
+        <% if car.size? %>
+          <div class="public-gallery-spec">
+            <i class="bi bi-arrows-fullscreen"></i>
+            <span><%= t("activerecord.attributes.car.size") %></span>
+            <strong><%= car.size %></strong>
+          </div>
+        <% end %>
+
+        <% if car.color? %>
+          <div class="public-gallery-spec">
+            <span class="public-gallery-color" style="background-color:<%= Car::COLORS[car.color] || '#ccc' %>;"></span>
+            <span><%= t("activerecord.attributes.car.color") %></span>
+            <strong><%= car.color %></strong>
+          </div>
+        <% end %>
+
+        <% if car_display_photo_upscaled_by_ai?(car, user: user) %>
+          <div class="public-gallery-spec">
+            <i class="bi bi-stars"></i>
+            <span><%= t("cars.show.photo_upscaled_by_ai_tooltip") %></span>
+            <strong><%= t("cars.show.photo_upscaled_by_ai") %></strong>
+          </div>
+        <% end %>
+
+        <% if car.tags? %>
+          <div class="public-gallery-spec public-gallery-spec-wide">
+            <i class="bi bi-tags"></i>
+            <span><%= t("activerecord.attributes.car.tags") %></span>
+            <strong><%= car.tags.join(", ") %></strong>
+          </div>
+        <% end %>
+
+        <% if car.observations? %>
+          <div class="public-gallery-spec public-gallery-spec-wide public-gallery-notes">
+            <i class="bi bi-card-text"></i>
+            <span><%= t("activerecord.attributes.car.observations") %></span>
+            <strong><%= car.observations %></strong>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <% if display_photo_url.present? %>
+    <div class="photo-lightbox-overlay d-none"
+         data-photo-lightbox-target="overlay"
+         data-action="click->photo-lightbox#close keydown@window->photo-lightbox#closeWithKeyboard"
+         role="dialog"
+         aria-modal="true"
+         aria-label="<%= t("cars.show.view_full_photo") %>">
+      <div class="photo-lightbox-stage" data-action="click->photo-lightbox#keepOpen">
+        <%= image_tag display_photo_url,
+                      class: "photo-lightbox-image rounded-4 shadow-lg",
+                      alt: car.name.presence || t("cars.show.fallback_name") %>
+        <button type="button"
+                class="btn btn-dark btn-sm rounded-circle shadow photo-lightbox-close"
+                data-action="click->photo-lightbox#close"
+                aria-label="<%= t("actions.close") %>">
+          <i class="bi bi-x-lg small"></i>
+        </button>
+      </div>
+    </div>
+  <% end %>
+</div>

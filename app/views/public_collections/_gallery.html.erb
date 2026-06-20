@@ -1,0 +1,37 @@
+<% gallery_id = local_assigns.fetch(:gallery_id, "publicCollectionCarousel") %>
+<% show_controls = local_assigns.fetch(:show_controls, cars.size > 1 || (cars.respond_to?(:total_count) && cars.total_count > 1)) %>
+
+<section class="public-gallery-shell" aria-label="<%= t("public_collections.index.gallery_label") %>">
+  <div id="<%= gallery_id %>" class="carousel slide public-gallery-carousel" data-bs-ride="false" data-bs-touch="true">
+    <div id="public_gallery_slides" class="carousel-inner public-gallery-slides">
+      <%= render partial: "public_collections/gallery_slide",
+                 collection: cars,
+                 as: :car,
+                 locals: { user: user, gallery_id: gallery_id } %>
+    </div>
+
+    <% if show_controls %>
+      <button class="carousel-control-prev public-gallery-control"
+              type="button"
+              data-bs-target="#<%= gallery_id %>"
+              data-bs-slide="prev"
+              aria-label="<%= t("public_collections.index.previous_item") %>">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      </button>
+      <button class="carousel-control-next public-gallery-control"
+              type="button"
+              data-bs-target="#<%= gallery_id %>"
+              data-bs-slide="next"
+              aria-label="<%= t("public_collections.index.next_item") %>">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      </button>
+    <% end %>
+
+    <div id="public_gallery_thumbnails" class="carousel-indicators public-gallery-thumbnails" aria-label="<%= t("public_collections.index.gallery_thumbnails") %>">
+      <%= render partial: "public_collections/gallery_thumbnail",
+                 collection: cars,
+                 as: :car,
+                 locals: { user: user, gallery_id: gallery_id } %>
+    </div>
+  </div>
+</section>
