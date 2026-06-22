@@ -262,6 +262,14 @@ en:
       cataloged_count: "Cataloged vehicles"
       search_placeholder: "Search collection..."
       loading: "Loading..."
+      searching: "Searching..."
+      clear_search: "Clear search"
+      results_count:
+        one: "%{count} result"
+        other: "%{count} results"
+      results_count_filtered:
+        one: "%{count} result for \"%{query}\""
+        other: "%{count} results for \"%{query}\""
       grid_view: "Grid"
       list_view: "List"
       gallery_view: "Gallery"
@@ -280,6 +288,14 @@ en:
       subtitle: "Your personal collection"
       copy_public_link: "Copy public link"
       search_placeholder: "Search by name, brand..."
+      searching: "Searching..."
+      clear_search: "Clear search"
+      results_count:
+        one: "%{count} item"
+        other: "%{count} items"
+      results_count_filtered:
+        one: "%{count} result for \"%{query}\""
+        other: "%{count} results for \"%{query}\""
       grid_view: "Grid"
       list_view: "List"
       secondary_actions: "Actions"

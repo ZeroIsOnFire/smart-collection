@@ -18,6 +18,9 @@
 </div>
 
 <div class="container-fluid app-container public-container mb-5">
+  <% public_results_count = @cars.total_count %>
+  <% search_query = params[:q].to_s.strip %>
+
   <div class="row mb-5 search-wrapper">
     <div class="col-12 col-lg-8 mx-auto">
       <%= form_with url: public_share_path(@user.share_token),
@@ -41,20 +44,40 @@
                              action: "input->search-form#submit"
                            } %>
 
-          <div class="spinner-border spinner-border-sm text-primary position-absolute end-0 top-50 translate-middle-y me-4 d-none"
+          <div class="search-status public-search-status d-none d-flex align-items-center me-2"
                role="status"
+               aria-live="polite"
                data-search-form-target="spinner">
-            <span class="visually-hidden"><%= t("public_collections.index.loading") %></span>
+            <div class="spinner-border spinner-border-sm text-primary" role="status">
+              <span class="visually-hidden"><%= t("public_collections.index.searching") %></span>
+            </div>
+            <span class="search-status-label"><%= t("public_collections.index.searching") %></span>
           </div>
+
+          <% if params[:q].present? %>
+            <%= link_to public_share_path(@user.share_token),
+                        class: "btn border-0 bg-transparent text-muted px-4 d-flex align-items-center search-clear-button",
+                        title: t("public_collections.index.clear_search"),
+                        aria: { label: t("public_collections.index.clear_search") } do %>
+              <i class="bi bi-x-circle"></i>
+            <% end %>
+          <% end %>
         </div>
       <% end %>
     </div>
   </div>
 
+  <turbo-frame id="cars_grid">
   <div data-controller="view-toggle"
        data-view-toggle-storage-key-value="public_collection_view_preference">
     <div class="d-flex justify-content-between align-items-center mb-5">
-      <div class="text-muted small"></div>
+      <div class="collection-results-summary text-muted small" aria-live="polite">
+        <% if search_query.present? %>
+          <%= t("public_collections.index.results_count_filtered", count: public_results_count, query: search_query) %>
+        <% else %>
+          <%= t("public_collections.index.results_count", count: public_results_count) %>
+        <% end %>
+      </div>
       <div class="btn-group shadow-sm bg-white rounded-pill p-1 border public-view-toggle">
         <button type="button" class="btn btn-sm text-primary active rounded-pill px-3 fw-medium d-flex align-items-center gap-2" data-view-toggle-target="gridButton" data-action="click->view-toggle#setGrid">
           <i class="bi bi-grid-fill"></i> <%= t("public_collections.index.grid_view") %>
@@ -68,7 +91,6 @@
       </div>
     </div>
 
-    <turbo-frame id="cars_grid">
       <div id="cars_list_container" class="position-relative mt-2">
         <% if @cars.any? %>
           <%= render "public_collections/gallery", cars: @cars, user: @user %>
@@ -90,6 +112,6 @@
           </div>
         <% end %>
       </div>
-    </turbo-frame>
   </div>
+  </turbo-frame>
 </div>

@@ -37,19 +37,23 @@ export default class extends Controller {
 
   showSearchingState() {
     if (this.hasSpinnerTarget) this.spinnerTarget.classList.remove("d-none")
+    this.inputTarget.setAttribute("aria-busy", "true")
     
     const results = document.getElementById('cars_list_container')
     if (results) {
-      results.style.opacity = '0.6'
+      results.classList.add("is-searching")
+      results.setAttribute("aria-busy", "true")
     }
   }
 
   hideSearchingState() {
     if (this.hasSpinnerTarget) this.spinnerTarget.classList.add("d-none")
+    this.inputTarget.setAttribute("aria-busy", "false")
     
     const results = document.getElementById('cars_list_container')
     if (results) {
-      results.style.opacity = '1'
+      results.classList.remove("is-searching")
+      results.setAttribute("aria-busy", "false")
     }
   }
 }

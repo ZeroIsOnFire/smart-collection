@@ -275,6 +275,14 @@ pt-BR:
       cataloged_count: "Veículos catalogados"
       search_placeholder: "Buscar na coleção..."
       loading: "Carregando..."
+      searching: "Buscando..."
+      clear_search: "Limpar busca"
+      results_count:
+        one: "%{count} resultado"
+        other: "%{count} resultados"
+      results_count_filtered:
+        one: "%{count} resultado para \"%{query}\""
+        other: "%{count} resultados para \"%{query}\""
       grid_view: "Grade"
       list_view: "Lista"
       gallery_view: "Galeria"
@@ -294,6 +302,14 @@ pt-BR:
       subtitle: "Sua coleção pessoal"
       copy_public_link: "Copiar link público"
       search_placeholder: "Buscar por nome, marca..."
+      searching: "Buscando..."
+      clear_search: "Limpar busca"
+      results_count:
+        one: "%{count} item"
+        other: "%{count} itens"
+      results_count_filtered:
+        one: "%{count} resultado para \"%{query}\""
+        other: "%{count} resultados para \"%{query}\""
       grid_view: "Grade"
       list_view: "Lista"
       secondary_actions: "Ações"
