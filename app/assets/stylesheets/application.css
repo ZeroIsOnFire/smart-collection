@@ -453,6 +453,33 @@ body {
   border-color: rgba(245, 158, 11, 0.3);
 }
 
+.flash-toast-region,
+.flash-toast-layer {
+  pointer-events: none;
+}
+
+.flash-toast-layer {
+  z-index: 1100;
+}
+
+.flash-toast-layer .toast {
+  max-width: min(360px, calc(100vw - 2rem));
+  pointer-events: auto;
+}
+
+@media (max-width: 575.98px) {
+  .flash-toast-layer {
+    left: 1rem !important;
+    padding: 0 !important;
+    right: 1rem !important;
+    top: calc(74px + 0.75rem) !important;
+  }
+
+  .flash-toast-layer .toast {
+    width: 100%;
+  }
+}
+
 /* Landing Page Sections */
 .hero-section {
   position: relative;

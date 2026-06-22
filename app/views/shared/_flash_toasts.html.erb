@@ -1,5 +1,5 @@
-<div aria-live="polite" aria-atomic="true" class="position-relative">
-  <div id="flash_toasts" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1100;">
+<div aria-live="polite" aria-atomic="true" class="position-relative flash-toast-region">
+  <div id="flash_toasts" class="toast-container position-fixed top-0 end-0 p-3 flash-toast-layer">
     <% flash.each do |type, message| %>
       <%
         bg_class = case type.to_s
