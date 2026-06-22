@@ -1,27 +1,27 @@
-<% badge_class = local_assigns.fetch(:badge_class, "text-muted small d-flex flex-wrap gap-3") %>
-<% item_class = local_assigns.fetch(:item_class, "d-inline-flex align-items-center gap-1") %>
+<% badge_class = local_assigns.fetch(:badge_class, "metadata-chip-list") %>
+<% item_class = local_assigns.fetch(:item_class, "metadata-chip") %>
 <% photo_upscaled_by_ai = local_assigns.fetch(:photo_upscaled_by_ai, car.photo_upscaled_by_ai?) %>
 
 <% if car.year? || car.size? || car.color? || photo_upscaled_by_ai %>
   <div class="<%= badge_class %>">
     <% if car.year? %>
-      <span class="<%= item_class %>" title="<%= t('activerecord.attributes.car.year') %>" aria-label="<%= t('activerecord.attributes.car.year') %>">
+      <span class="<%= item_class %> metadata-chip-year" title="<%= t('activerecord.attributes.car.year') %>" aria-label="<%= t('activerecord.attributes.car.year') %>">
         <i class="bi bi-calendar"></i><%= car.year %>
       </span>
     <% end %>
     <% if car.size? %>
-      <span class="<%= item_class %>" title="<%= t('activerecord.attributes.car.size') %>" aria-label="<%= t('activerecord.attributes.car.size') %>">
+      <span class="<%= item_class %> metadata-chip-scale" title="<%= t('activerecord.attributes.car.size') %>" aria-label="<%= t('activerecord.attributes.car.size') %>">
         <i class="bi bi-arrows-fullscreen"></i><%= car.size %>
       </span>
     <% end %>
     <% if car.color? %>
-      <span class="<%= item_class %>" title="<%= t('activerecord.attributes.car.color') %>" aria-label="<%= t('activerecord.attributes.car.color') %>">
-        <span class="d-inline-block rounded-circle shadow-sm" style="width:10px; height:10px; background-color:<%= Car::COLORS[car.color] || '#ccc' %>; border: 1px solid #dee2e6;"></span>
+      <span class="<%= item_class %> metadata-chip-color" title="<%= t('activerecord.attributes.car.color') %>" aria-label="<%= t('activerecord.attributes.car.color') %>">
+        <span class="metadata-color-dot" style="background-color:<%= Car::COLORS[car.color] || '#ccc' %>;"></span>
         <%= car.color %>
       </span>
     <% end %>
     <% if photo_upscaled_by_ai %>
-      <span class="<%= item_class %>" title="<%= t('cars.show.photo_upscaled_by_ai_tooltip') %>" aria-label="<%= t('cars.show.photo_upscaled_by_ai_tooltip') %>">
+      <span class="<%= item_class %> metadata-chip-ai" title="<%= t('cars.show.photo_upscaled_by_ai_tooltip') %>" aria-label="<%= t('cars.show.photo_upscaled_by_ai_tooltip') %>">
         <i class="bi bi-stars"></i><%= t('cars.show.photo_upscaled_by_ai') %>
       </span>
     <% end %>
