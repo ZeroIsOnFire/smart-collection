@@ -257,7 +257,7 @@ en:
       title: "%{name}'s Collection"
       subtitle: "Explore a careful curation of exclusive vehicles."
       cataloged_count: "Cataloged vehicles"
-      search_placeholder: "Search %{name}'s collection..."
+      search_placeholder: "Search collection..."
       loading: "Loading..."
       grid_view: "Grid"
       list_view: "List"

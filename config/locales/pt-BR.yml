@@ -270,7 +270,7 @@ pt-BR:
       title: "Coleção de %{name}"
       subtitle: "Explore uma cuidadosa curadoria de veículos exclusivos."
       cataloged_count: "Veículos catalogados"
-      search_placeholder: "Buscar na coleção de %{name}..."
+      search_placeholder: "Buscar na coleção..."
       loading: "Carregando..."
       grid_view: "Grade"
       list_view: "Lista"

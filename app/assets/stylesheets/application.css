@@ -1762,8 +1762,24 @@ body {
 }
 
 @media (max-width: 575.98px) {
+  .hero-gradient {
+    padding-bottom: 2rem !important;
+    padding-top: 2rem !important;
+  }
+
+  .hero-gradient h1 {
+    font-size: 2.25rem;
+    line-height: 1.12;
+  }
+
+  .hero-gradient .lead {
+    font-size: 1.08rem !important;
+    line-height: 1.55;
+  }
+
   .search-wrapper {
-    transform: translateY(-30%);
+    margin-bottom: 1.5rem !important;
+    transform: translateY(-22%);
   }
 
   .public-view-toggle {
