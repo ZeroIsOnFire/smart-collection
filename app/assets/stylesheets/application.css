@@ -224,6 +224,51 @@ body {
   border-color: rgba(255, 255, 255, 0.15);
 }
 
+[data-theme="dark"] .bg-white,
+[data-theme="dark"] .dropdown-menu,
+[data-theme="dark"] .modal-content {
+  background-color: var(--card-bg) !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .bg-light,
+[data-theme="dark"] .form-control.bg-light,
+[data-theme="dark"] .form-select.bg-light,
+[data-theme="dark"] .input-group.premium-search-container {
+  background-color: var(--soft-secondary-bg) !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .text-dark,
+[data-theme="dark"] .link-dark,
+[data-theme="dark"] .dropdown-item {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .dropdown-item:hover,
+[data-theme="dark"] .dropdown-item:focus {
+  background-color: var(--soft-secondary-bg) !important;
+}
+
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-select {
+  background-color: var(--input-bg);
+  border-color: var(--border-color);
+  color: var(--text-main);
+}
+
+[data-theme="dark"] .form-control::placeholder {
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .modal-header,
+[data-theme="dark"] .modal-footer,
+[data-theme="dark"] .border,
+[data-theme="dark"] .border-top,
+[data-theme="dark"] .border-bottom {
+  border-color: var(--border-color) !important;
+}
+
 .collection-brand-badge {
   align-items: center;
   background: rgba(79, 70, 229, 0.1);
