@@ -350,6 +350,61 @@ body {
   min-height: 48px;
 }
 
+.collection-toolbar {
+  row-gap: 1rem;
+}
+
+.collection-primary-actions {
+  align-items: center;
+}
+
+.collection-secondary-menu {
+  min-width: min(320px, calc(100vw - 2rem));
+}
+
+.collection-secondary-menu .btn,
+.collection-secondary-menu form,
+.collection-secondary-menu .btn-group,
+.collection-secondary-menu [id^="export_"] {
+  width: 100%;
+}
+
+.collection-secondary-menu .export-button-group .btn {
+  justify-content: center;
+}
+
+.collection-secondary-menu .export-download-button {
+  min-width: 0;
+}
+
+@media (max-width: 575.98px) {
+  .collection-toolbar {
+    align-items: stretch !important;
+  }
+
+  .collection-toolbar > div,
+  .collection-primary-actions,
+  .collection-primary-actions > *,
+  .collection-primary-actions .dropdown,
+  .collection-primary-actions .dropdown > .btn,
+  .collection-primary-actions .btn {
+    width: 100%;
+  }
+
+  .collection-primary-actions {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .collection-secondary-actions {
+    grid-column: 1 / -1;
+  }
+
+  .collection-secondary-menu {
+    width: 100%;
+  }
+}
+
 .autodetection-thumb {
   flex: 0 0 auto;
   height: 60px;

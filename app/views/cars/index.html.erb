@@ -1,38 +1,59 @@
 <div class="container-fluid py-4 app-container">
   <%= turbo_stream_from "cars_#{current_user.id.to_s}" %>
+  <%= turbo_stream_from "user_#{current_user.id.to_s}_exports" %>
+  <% csv_export = current_user.collection_exports.where(format_type: 'csv').last %>
+  <% pdf_export = current_user.collection_exports.where(format_type: 'pdf').last %>
 
   <!-- Cabeçalho -->
-  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div class="collection-toolbar d-flex justify-content-between align-items-start mb-4 flex-wrap gap-3">
     <div>
       <h1 class="fw-bold mb-0 fs-3"><%= t("nav.my_cars") %></h1>
       <p class="text-muted small mb-0"><%= t("cars.index.subtitle") %></p>
     </div>
-    <div class="d-flex gap-2 flex-wrap">
-      <% if current_user.sharing_enabled? %>
-        <div data-controller="clipboard"
-             data-clipboard-success-content-value="<i class='bi bi-check2 fs-5'></i>"
-             data-clipboard-default-class-value="btn-outline-primary"
-             data-clipboard-success-class-value="btn-primary">
-          <input type="hidden" data-clipboard-target="source" value="<%= public_share_url(current_user.share_token) %>">
-          <button class="btn btn-outline-primary rounded-circle d-flex align-items-center justify-content-center p-0" style="width: 48px; height: 48px;" type="button" data-action="clipboard#copy" data-clipboard-target="button" title="<%= t("cars.index.copy_public_link") %>">
-            <i class="bi bi-share fs-5"></i>
-          </button>
-        </div>
-      <% end %>
-
-      <!-- Export Status CSV -->
-      <%= turbo_stream_from "user_#{current_user.id.to_s}_exports" %>
-      <%= render partial: "collection_exports/export_status", locals: { export: current_user.collection_exports.where(format_type: 'csv').last, format_type: 'csv' } %>
-
-      <!-- Export Status PDF -->
-      <%= render partial: "collection_exports/export_status", locals: { export: current_user.collection_exports.where(format_type: 'pdf').last, format_type: 'pdf' } %>
-
+    <div class="collection-primary-actions d-flex gap-2 flex-wrap justify-content-end">
       <%= render "autodetections/form_button", autodetection: Autodetection.new %>
       <%= link_to new_car_path,
                   class: 'btn btn-premium rounded-pill px-4 d-flex align-items-center gap-2',
                   data: { turbo_frame: "modal" } do %>
         <i class="bi bi-plus-circle"></i> <%= t("items.new") %>
       <% end %>
+
+      <div class="dropdown collection-secondary-actions">
+        <button class="btn btn-soft-secondary rounded-pill px-4 d-flex align-items-center gap-2"
+                type="button"
+                data-bs-toggle="dropdown"
+                data-bs-auto-close="outside"
+                aria-expanded="false">
+          <i class="bi bi-three-dots"></i>
+          <span><%= t("cars.index.secondary_actions") %></span>
+        </button>
+
+        <div class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-4 p-3 collection-secondary-menu">
+          <% if current_user.sharing_enabled? %>
+            <div class="mb-3" data-controller="clipboard"
+                 data-clipboard-success-content-value="<i class='bi bi-check2'></i> <span><%= t("cars.index.public_link_copied") %></span>"
+                 data-clipboard-default-class-value="btn-outline-primary"
+                 data-clipboard-success-class-value="btn-primary">
+              <input type="hidden" data-clipboard-target="source" value="<%= public_share_url(current_user.share_token) %>">
+              <button class="btn btn-outline-primary rounded-pill w-100 d-flex align-items-center justify-content-center gap-2"
+                      type="button"
+                      data-action="clipboard#copy"
+                      data-clipboard-target="button">
+                <i class="bi bi-share"></i>
+                <span><%= t("cars.index.copy_public_link") %></span>
+              </button>
+            </div>
+          <% end %>
+
+          <div class="small fw-bold text-muted text-uppercase mb-2">
+            <%= t("cars.index.export_actions") %>
+          </div>
+          <div class="d-grid gap-2">
+            <%= render partial: "collection_exports/export_status", locals: { export: csv_export, format_type: 'csv' } %>
+            <%= render partial: "collection_exports/export_status", locals: { export: pdf_export, format_type: 'pdf' } %>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
