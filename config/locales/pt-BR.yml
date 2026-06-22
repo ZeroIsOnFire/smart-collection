@@ -29,6 +29,9 @@ pt-BR:
     settings: "Configurações"
     language: "Idioma"
     admin_panel: "Painel Admin"
+    open_menu: "Abrir menu"
+    toggle_theme: "Alternar tema"
+    user_menu: "Menu do usuário"
 
   # ── Ações comuns ───────────────────────────────────────
   actions:
@@ -314,6 +317,7 @@ pt-BR:
       edit_title: "Editar Item"
     card:
       view_details: "Ver Detalhes"
+      actions_menu: "Abrir ações do item"
       no_photo: "Sem foto"
       photo_processing: "Processando foto..."
     show:

@@ -71,7 +71,7 @@
             <div class="small text-truncate" style="max-width: 150px;"><%= display_name(current_user) %></div>
           </div>
           <div class="px-2 mb-3">
-            <button class="btn btn-outline-light btn-sm w-100 rounded-pill d-flex align-items-center justify-content-center gap-2" data-action="click->theme#toggle">
+            <button class="btn btn-outline-light btn-sm w-100 rounded-pill d-flex align-items-center justify-content-center gap-2" data-action="click->theme#toggle" data-theme-target="button" aria-label="<%= t('nav.toggle_theme') %>" aria-pressed="false">
               <i class="bi bi-moon-stars-fill" data-theme-target="icon"></i>
               <span>Alternar Tema</span>
             </button>

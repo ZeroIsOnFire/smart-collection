@@ -35,7 +35,7 @@
           <span class="fw-bold tracking-tight">Smart<span class="text-primary">Collection</span></span>
         <% end %>
 
-        <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+        <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-label="<%= t('nav.open_menu') %>">
           <span class="navbar-toggler-icon"></span>
         </button>
 
@@ -54,7 +54,10 @@
             <!-- Theme Toggle -->
             <button class="btn btn-link text-decoration-none p-2 rounded-circle hover-bg-light theme-toggle-btn"
                     data-action="click->theme#toggle"
-                    title="Alternar tema">
+                    data-theme-target="button"
+                    title="<%= t('nav.toggle_theme') %>"
+                    aria-label="<%= t('nav.toggle_theme') %>"
+                    aria-pressed="false">
               <i class="bi bi-moon-stars-fill fs-5" data-theme-target="icon"></i>
             </button>
 
@@ -64,7 +67,7 @@
             <% if user_signed_in? %>
               <!-- User Dropdown with Initials -->
               <div class="dropdown">
-                <button class="btn border-0 p-0 d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <button class="btn border-0 p-0 d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="<%= t('nav.user_menu') %>">
                   <div class="user-initials-avatar shadow-sm" style="background-color: <%= user_avatar_color(current_user) %>">
                     <%= user_initials(current_user) %>
                   </div>

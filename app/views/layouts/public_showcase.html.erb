@@ -86,7 +86,10 @@
 
         <button class="btn btn-link text-decoration-none p-2 rounded-circle theme-toggle-btn"
                 data-action="click->theme#toggle"
-                title="<%= t("public_collections.layout.toggle_theme") %>">
+                data-theme-target="button"
+                title="<%= t("public_collections.layout.toggle_theme") %>"
+                aria-label="<%= t("public_collections.layout.toggle_theme") %>"
+                aria-pressed="false">
           <i class="bi bi-moon-stars-fill fs-5" data-theme-target="icon"></i>
         </button>
       </div>

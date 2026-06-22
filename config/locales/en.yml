@@ -25,6 +25,9 @@ en:
     sign_up: "Create account"
     settings: "Settings"
     language: "Language"
+    open_menu: "Open menu"
+    toggle_theme: "Toggle theme"
+    user_menu: "User menu"
 
   actions:
     save: "Save"
@@ -300,6 +303,7 @@ en:
       edit_title: "Edit Item"
     card:
       view_details: "View Details"
+      actions_menu: "Open item actions"
       no_photo: "No photo"
       photo_processing: "Processing photo..."
     show:
