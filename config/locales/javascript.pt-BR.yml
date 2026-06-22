@@ -16,7 +16,7 @@ pt-BR:
     selection_adjustment:
       loading: "Salvando..."
       errors:
-        cropper_missing_console: "Cropper.js não encontrado! Verifique se os CDNs no layout estão corretos."
+        cropper_missing_console: "Cropper.js não encontrado! Verifique se os assets locais foram carregados corretamente."
         save_failed: "Erro ao salvar o ajuste. O servidor retornou %{status}."
         save_unexpected_console: "Erro no ajuste de seleção:"
         save_unexpected: "Ocorreu um erro inesperado ao salvar o ajuste: %{message}"

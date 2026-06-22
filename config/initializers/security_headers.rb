@@ -61,12 +61,11 @@ Rails.application.config.content_security_policy do |policy|
   policy.base_uri :self
   policy.child_src :self
   policy.connect_src :self, *websocket_sources
-  policy.font_src :self, :data, 'https://fonts.gstatic.com', 'https://cdn.jsdelivr.net', 'https://cdnjs.cloudflare.com'
+  policy.font_src :self, :data
   policy.form_action :self
   policy.frame_ancestors :self
   policy.img_src :self, :data, :blob
   policy.object_src :none
-  policy.script_src :self, 'https://cdnjs.cloudflare.com'
-  policy.style_src :self, :unsafe_inline, 'https://fonts.googleapis.com', 'https://cdn.jsdelivr.net',
-                   'https://cdnjs.cloudflare.com'
+  policy.script_src :self
+  policy.style_src :self, :unsafe_inline
 end
