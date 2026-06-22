@@ -1741,6 +1741,7 @@ body {
 .view-list .card > a {
   display: flex;
   flex-direction: row;
+  min-width: 0;
   width: 100%;
   text-decoration: none;
   align-items: center;
@@ -1771,6 +1772,7 @@ body {
   padding: 10px 15px 10px 0 !important; /* Balanced with the 15px left margin of the photo */
   flex: 1;
   gap: 15px;
+  min-width: 0;
 }
 
 /* On private views, add extra padding ONLY if needed for the absolute positioned dropdown */
@@ -1803,6 +1805,9 @@ body {
   margin: 0 !important;
   font-size: 1rem;
   flex: 2;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -1817,11 +1822,57 @@ body {
   margin: 0 !important;
   align-items: center;
   gap: 10px;
+  min-width: 0;
 }
 
 @media (max-width: 768px) {
   .view-list .card-text {
     display: none; /* Hide brand on mobile table view to save space */
+  }
+}
+
+@media (max-width: 575.98px) {
+  .view-list .car-photo-container {
+    height: 48px !important;
+    margin: 10px 12px;
+    width: 64px !important;
+  }
+
+  .view-list .card-body {
+    align-items: flex-start;
+    flex-direction: column !important;
+    gap: 0.35rem;
+    justify-content: center;
+    padding: 10px 46px 10px 0 !important;
+  }
+
+  .view-list:not(.is-public) .card-body {
+    padding-right: 46px !important;
+  }
+
+  .is-public .view-list .card-body,
+  .view-list.is-public .card-body,
+  #cars_grid_inner.is-public .card-body {
+    padding-right: 12px !important;
+  }
+
+  .view-list .card-title {
+    flex: 0 1 auto;
+    max-width: 100%;
+  }
+
+  .view-list .card-body > .d-flex {
+    flex-wrap: wrap;
+    gap: 0.35rem 0.55rem;
+    max-width: 100%;
+  }
+
+  .view-list .card-body > .d-flex span {
+    min-width: 0;
+  }
+
+  .view-list .car-action-dropdown {
+    right: 10px !important;
   }
 }
 /* Detected Item Specific Styles */
