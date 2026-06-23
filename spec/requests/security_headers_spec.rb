@@ -14,7 +14,10 @@ RSpec.describe 'Security headers', type: :request do
     expect(response.headers['Cross-Origin-Resource-Policy']).to eq('same-origin')
     expect(response.headers['Referrer-Policy']).to eq('strict-origin-when-cross-origin')
     expect(response.headers['X-Content-Type-Options']).to eq('nosniff')
-    expect(response.body).to include('integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"')
+    expect(response.body).to include('href="/assets/application-')
+    expect(response.body).to include('src="/assets/application-')
+    expect(response.body).not_to include('href="https://')
+    expect(response.body).not_to include('src="https://')
   end
 
   it 'adds hardening headers to public static files served by Rails' do
