@@ -1383,6 +1383,14 @@ body {
     z-index: 8;
   }
 
+  .modal.show .car-form-actions > * {
+    width: 100%;
+  }
+
+  .modal.show .car-form-actions .btn {
+    width: 100%;
+  }
+
   .modal.show .photo-dropzone {
     padding: 2rem 1rem !important;
   }
