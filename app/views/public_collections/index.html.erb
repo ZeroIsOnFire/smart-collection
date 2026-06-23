@@ -70,7 +70,7 @@
   <turbo-frame id="cars_grid">
   <div data-controller="view-toggle"
        data-view-toggle-storage-key-value="public_collection_view_preference">
-    <div class="d-flex justify-content-between align-items-center mb-5">
+    <div class="collection-view-controls d-flex justify-content-between align-items-center">
       <div class="collection-results-summary text-muted small" aria-live="polite">
         <% if search_query.present? %>
           <%= t("public_collections.index.results_count_filtered", count: public_results_count, query: search_query) %>
