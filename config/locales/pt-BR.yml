@@ -377,6 +377,13 @@ pt-BR:
   # ── Autodetecção ───────────────────────────────────────
   autodetections:
     title: "Autodetecção via Foto"
+    panel:
+      title:
+        one: "%{count} autodetecção ativa"
+        other: "%{count} autodetecções ativas"
+      subtitle: "Acompanhe processos em andamento sem ocupar o topo da coleção."
+      view_all: "Ver todos"
+      photo_alt: "Foto enviada para autodetecção"
     form:
       button: "Autodetectar Minis"
       title: "Autodetectar Minis"

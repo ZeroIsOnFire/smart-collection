@@ -362,6 +362,13 @@ en:
 
   autodetections:
     title: "Photo Autodetection"
+    panel:
+      title:
+        one: "%{count} active autodetection"
+        other: "%{count} active autodetections"
+      subtitle: "Track in-progress jobs without filling the top of the collection."
+      view_all: "View all"
+      photo_alt: "Photo uploaded for autodetection"
     form:
       button: "Autodetect Minis"
       title: "Autodetect Minis"

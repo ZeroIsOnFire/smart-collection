@@ -5,6 +5,8 @@
   <% pdf_export = current_user.collection_exports.where(format_type: 'pdf').last %>
   <% cars_results_count = @cars.total_count %>
   <% search_query = params[:q].to_s.strip %>
+  <% active_autodetections_count = @autodetections.size %>
+  <% autodetection_status_counts = @autodetections.group_by(&:status).transform_values(&:size) %>
 
   <!-- Cabeçalho -->
   <div class="collection-toolbar d-flex justify-content-between align-items-start mb-4 flex-wrap gap-3">
@@ -61,10 +63,49 @@
 
   <!-- Autodetections em andamento -->
   <%= turbo_stream_from "autodetections_#{current_user.id.to_s}" %>
-  <div id="autodetections_list" class="mb-4">
+  <div class="collection-autodetections-panel mb-4 <%= 'is-empty' unless @autodetections.any? %>">
     <% if @autodetections.any? %>
-      <%= render partial: "autodetections/autodetection", collection: @autodetections %>
+      <button class="collection-autodetections-summary"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#active_autodetections_panel"
+              aria-expanded="false"
+              aria-controls="active_autodetections_panel">
+        <span class="collection-autodetections-icon">
+          <i class="bi bi-stars"></i>
+        </span>
+        <span class="collection-autodetections-copy">
+          <span class="collection-autodetections-title">
+            <%= t("autodetections.panel.title", count: active_autodetections_count) %>
+          </span>
+          <span class="collection-autodetections-subtitle">
+            <%= t("autodetections.panel.subtitle") %>
+          </span>
+        </span>
+        <span class="collection-autodetections-statuses">
+          <% %w[pending processing to_verify error].each do |status| %>
+            <% count = autodetection_status_counts[status].to_i %>
+            <% next if count.zero? %>
+
+            <span class="autodetection-status-chip autodetection-status-chip-<%= status %>">
+              <%= count %> <%= t("autodetections.status.#{status}") %>
+            </span>
+          <% end %>
+        </span>
+        <span class="collection-autodetections-toggle">
+          <span><%= t("autodetections.panel.view_all") %></span>
+          <i class="bi bi-chevron-down"></i>
+        </span>
+      </button>
     <% end %>
+
+    <div id="active_autodetections_panel" class="collapse <%= 'show' unless @autodetections.any? %>">
+      <div id="autodetections_list" class="collection-autodetections-list">
+        <% if @autodetections.any? %>
+          <%= render partial: "autodetections/autodetection", collection: @autodetections %>
+        <% end %>
+      </div>
+    </div>
   </div>
 
 
