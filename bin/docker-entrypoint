@@ -3,6 +3,11 @@
 # Ensure permissions for file uploads
 mkdir -p public/uploads storage
 
+# Keep development containers in sync when Gemfile.lock changes under a bind mount.
+if [ -f Gemfile ]; then
+  bundle check || bundle install
+fi
+
 # Build JavaScript bundles when running from a mounted development workspace.
 if [ -f package.json ] && command -v npm >/dev/null 2>&1; then
   if [ ! -d node_modules ]; then

@@ -56,6 +56,7 @@ COPY --from=build /rails /rails
 RUN useradd rails --create-home --shell /bin/bash && \
     npx playwright install --with-deps chromium && \
     mkdir -p public/uploads storage && \
+    chown -R rails:rails /usr/local/bundle && \
     chown -R rails:rails /ms-playwright && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives && \
     chown -R rails:rails log tmp public/uploads storage
