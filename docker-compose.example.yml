@@ -21,6 +21,7 @@ services:
     command: bundle exec rails server -b 0.0.0.0
     volumes:
       - .:/rails
+      - bundle_cache_rails:/usr/local/bundle
       - node_modules:/rails/node_modules
     ports:
       - "3000:3000"
@@ -46,6 +47,7 @@ services:
     command: bundle exec sidekiq
     volumes:
       - .:/rails
+      - bundle_cache_rails:/usr/local/bundle
       - node_modules:/rails/node_modules
     depends_on:
       mongodb:
@@ -180,5 +182,5 @@ services:
 volumes:
   mongodb_data:
   redis_data:
-  bundle_cache:
+  bundle_cache_rails:
   node_modules:

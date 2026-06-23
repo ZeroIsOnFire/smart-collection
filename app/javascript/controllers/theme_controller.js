@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["icon", "logo"]
+  static targets = ["button", "icon", "logo"]
 
   connect() {
     this.applyTheme(this.currentTheme)
@@ -32,7 +32,14 @@ export default class extends Controller {
   applyTheme(theme) {
     document.documentElement.setAttribute("data-theme", theme)
     this.updateIcon(theme)
+    this.updateButton(theme)
     this.updateLogos(theme)
+  }
+
+  updateButton(theme) {
+    this.buttonTargets.forEach((button) => {
+      button.setAttribute("aria-pressed", (theme === "dark").toString())
+    })
   }
 
   updateIcon(theme) {

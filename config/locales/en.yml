@@ -25,6 +25,9 @@ en:
     sign_up: "Create account"
     settings: "Settings"
     language: "Language"
+    open_menu: "Open menu"
+    toggle_theme: "Toggle theme"
+    user_menu: "User menu"
 
   actions:
     save: "Save"
@@ -257,8 +260,16 @@ en:
       title: "%{name}'s Collection"
       subtitle: "Explore a careful curation of exclusive vehicles."
       cataloged_count: "Cataloged vehicles"
-      search_placeholder: "Search %{name}'s collection..."
+      search_placeholder: "Search collection..."
       loading: "Loading..."
+      searching: "Searching..."
+      clear_search: "Clear search"
+      results_count:
+        one: "%{count} result"
+        other: "%{count} results"
+      results_count_filtered:
+        one: "%{count} result for \"%{query}\""
+        other: "%{count} results for \"%{query}\""
       grid_view: "Grid"
       list_view: "List"
       gallery_view: "Gallery"
@@ -277,8 +288,19 @@ en:
       subtitle: "Your personal collection"
       copy_public_link: "Copy public link"
       search_placeholder: "Search by name, brand..."
+      searching: "Searching..."
+      clear_search: "Clear search"
+      results_count:
+        one: "%{count} item"
+        other: "%{count} items"
+      results_count_filtered:
+        one: "%{count} result for \"%{query}\""
+        other: "%{count} results for \"%{query}\""
       grid_view: "Grid"
       list_view: "List"
+      secondary_actions: "Actions"
+      export_actions: "Export collection"
+      public_link_copied: "Link copied"
       empty_title: "No items in the collection"
       empty_text: "Add your first car or use photo autodetection."
       add_first_item: "Add First Item"
@@ -297,6 +319,7 @@ en:
       edit_title: "Edit Item"
     card:
       view_details: "View Details"
+      actions_menu: "Open item actions"
       no_photo: "No photo"
       photo_processing: "Processing photo..."
     show:
@@ -339,6 +362,13 @@ en:
 
   autodetections:
     title: "Photo Autodetection"
+    panel:
+      title:
+        one: "%{count} active autodetection"
+        other: "%{count} active autodetections"
+      subtitle: "Track in-progress jobs without filling the top of the collection."
+      view_all: "View all"
+      photo_alt: "Photo uploaded for autodetection"
     form:
       button: "Autodetect Minis"
       title: "Autodetect Minis"

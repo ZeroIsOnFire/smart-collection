@@ -7,15 +7,7 @@
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" integrity="sha384-XGjxtQfXaH2tnPFa9x+ruJTuLE3Aa6LhHSWRr1XeTyhezb4abCG4ccI5AkVDxqC+" crossorigin="anonymous">
-
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" integrity="sha384-oMy41mb/qJnpJlpXOF57hSu2KGi47l/UV9+tPNrBOs7/ap5Vubj/3phrCtjutHMQ" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js" integrity="sha384-r+ljwOAhwY4/kdyzMnuBg7MEVoWpTMp5EYUDntB/E9qzNwL9dAEcNrb2XaV+mJc2" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <%= render "shared/javascript_i18n" %>
     <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
     <link rel="icon" type="image/png" href="/logo/favicon-96x96.png" sizes="96x96" />
@@ -43,7 +35,7 @@
           <span class="fw-bold tracking-tight">Smart<span class="text-primary">Collection</span></span>
         <% end %>
 
-        <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+        <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-label="<%= t('nav.open_menu') %>">
           <span class="navbar-toggler-icon"></span>
         </button>
 
@@ -62,7 +54,10 @@
             <!-- Theme Toggle -->
             <button class="btn btn-link text-decoration-none p-2 rounded-circle hover-bg-light theme-toggle-btn"
                     data-action="click->theme#toggle"
-                    title="Alternar tema">
+                    data-theme-target="button"
+                    title="<%= t('nav.toggle_theme') %>"
+                    aria-label="<%= t('nav.toggle_theme') %>"
+                    aria-pressed="false">
               <i class="bi bi-moon-stars-fill fs-5" data-theme-target="icon"></i>
             </button>
 
@@ -72,7 +67,7 @@
             <% if user_signed_in? %>
               <!-- User Dropdown with Initials -->
               <div class="dropdown">
-                <button class="btn border-0 p-0 d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <button class="btn border-0 p-0 d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="<%= t('nav.user_menu') %>">
                   <div class="user-initials-avatar shadow-sm" style="background-color: <%= user_avatar_color(current_user) %>">
                     <%= user_initials(current_user) %>
                   </div>

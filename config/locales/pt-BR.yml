@@ -29,6 +29,9 @@ pt-BR:
     settings: "Configurações"
     language: "Idioma"
     admin_panel: "Painel Admin"
+    open_menu: "Abrir menu"
+    toggle_theme: "Alternar tema"
+    user_menu: "Menu do usuário"
 
   # ── Ações comuns ───────────────────────────────────────
   actions:
@@ -270,8 +273,16 @@ pt-BR:
       title: "Coleção de %{name}"
       subtitle: "Explore uma cuidadosa curadoria de veículos exclusivos."
       cataloged_count: "Veículos catalogados"
-      search_placeholder: "Buscar na coleção de %{name}..."
+      search_placeholder: "Buscar na coleção..."
       loading: "Carregando..."
+      searching: "Buscando..."
+      clear_search: "Limpar busca"
+      results_count:
+        one: "%{count} resultado"
+        other: "%{count} resultados"
+      results_count_filtered:
+        one: "%{count} resultado para \"%{query}\""
+        other: "%{count} resultados para \"%{query}\""
       grid_view: "Grade"
       list_view: "Lista"
       gallery_view: "Galeria"
@@ -291,8 +302,19 @@ pt-BR:
       subtitle: "Sua coleção pessoal"
       copy_public_link: "Copiar link público"
       search_placeholder: "Buscar por nome, marca..."
+      searching: "Buscando..."
+      clear_search: "Limpar busca"
+      results_count:
+        one: "%{count} item"
+        other: "%{count} itens"
+      results_count_filtered:
+        one: "%{count} resultado para \"%{query}\""
+        other: "%{count} resultados para \"%{query}\""
       grid_view: "Grade"
       list_view: "Lista"
+      secondary_actions: "Ações"
+      export_actions: "Exportar coleção"
+      public_link_copied: "Link copiado"
       empty_title: "Nenhum item na coleção"
       empty_text: "Adicione seu primeiro carro ou use a Autodetecção por foto."
       add_first_item: "Adicionar Primeiro Item"
@@ -311,6 +333,7 @@ pt-BR:
       edit_title: "Editar Item"
     card:
       view_details: "Ver Detalhes"
+      actions_menu: "Abrir ações do item"
       no_photo: "Sem foto"
       photo_processing: "Processando foto..."
     show:
@@ -354,6 +377,13 @@ pt-BR:
   # ── Autodetecção ───────────────────────────────────────
   autodetections:
     title: "Autodetecção via Foto"
+    panel:
+      title:
+        one: "%{count} autodetecção ativa"
+        other: "%{count} autodetecções ativas"
+      subtitle: "Acompanhe processos em andamento sem ocupar o topo da coleção."
+      view_all: "Ver todos"
+      photo_alt: "Foto enviada para autodetecção"
     form:
       button: "Autodetectar Minis"
       title: "Autodetectar Minis"

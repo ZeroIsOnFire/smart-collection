@@ -1,47 +1,111 @@
 <div class="container-fluid py-4 app-container">
   <%= turbo_stream_from "cars_#{current_user.id.to_s}" %>
+  <%= turbo_stream_from "user_#{current_user.id.to_s}_exports" %>
+  <% csv_export = current_user.collection_exports.where(format_type: 'csv').last %>
+  <% pdf_export = current_user.collection_exports.where(format_type: 'pdf').last %>
+  <% cars_results_count = @cars.total_count %>
+  <% search_query = params[:q].to_s.strip %>
+  <% active_autodetections_count = @autodetections.size %>
+  <% autodetection_status_counts = @autodetections.group_by(&:status).transform_values(&:size) %>
 
   <!-- Cabeçalho -->
-  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div class="collection-toolbar d-flex justify-content-between align-items-start mb-4 flex-wrap gap-3">
     <div>
       <h1 class="fw-bold mb-0 fs-3"><%= t("nav.my_cars") %></h1>
       <p class="text-muted small mb-0"><%= t("cars.index.subtitle") %></p>
     </div>
-    <div class="d-flex gap-2 flex-wrap">
-      <% if current_user.sharing_enabled? %>
-        <div data-controller="clipboard"
-             data-clipboard-success-content-value="<i class='bi bi-check2 fs-5'></i>"
-             data-clipboard-default-class-value="btn-outline-primary"
-             data-clipboard-success-class-value="btn-primary">
-          <input type="hidden" data-clipboard-target="source" value="<%= public_share_url(current_user.share_token) %>">
-          <button class="btn btn-outline-primary rounded-circle d-flex align-items-center justify-content-center p-0" style="width: 48px; height: 48px;" type="button" data-action="clipboard#copy" data-clipboard-target="button" title="<%= t("cars.index.copy_public_link") %>">
-            <i class="bi bi-share fs-5"></i>
-          </button>
-        </div>
-      <% end %>
-
-      <!-- Export Status CSV -->
-      <%= turbo_stream_from "user_#{current_user.id.to_s}_exports" %>
-      <%= render partial: "collection_exports/export_status", locals: { export: current_user.collection_exports.where(format_type: 'csv').last, format_type: 'csv' } %>
-
-      <!-- Export Status PDF -->
-      <%= render partial: "collection_exports/export_status", locals: { export: current_user.collection_exports.where(format_type: 'pdf').last, format_type: 'pdf' } %>
-
+    <div class="collection-primary-actions d-flex gap-2 flex-wrap justify-content-end">
       <%= render "autodetections/form_button", autodetection: Autodetection.new %>
       <%= link_to new_car_path,
                   class: 'btn btn-premium rounded-pill px-4 d-flex align-items-center gap-2',
                   data: { turbo_frame: "modal" } do %>
         <i class="bi bi-plus-circle"></i> <%= t("items.new") %>
       <% end %>
+
+      <div class="dropdown collection-secondary-actions">
+        <button class="btn btn-soft-secondary rounded-pill px-4 d-flex align-items-center gap-2"
+                type="button"
+                data-bs-toggle="dropdown"
+                data-bs-auto-close="outside"
+                aria-expanded="false">
+          <i class="bi bi-three-dots"></i>
+          <span><%= t("cars.index.secondary_actions") %></span>
+        </button>
+
+        <div class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-4 p-3 collection-secondary-menu">
+          <% if current_user.sharing_enabled? %>
+            <div class="mb-3" data-controller="clipboard"
+                 data-clipboard-success-content-value="<i class='bi bi-check2'></i> <span><%= t("cars.index.public_link_copied") %></span>"
+                 data-clipboard-default-class-value="btn-outline-primary"
+                 data-clipboard-success-class-value="btn-primary">
+              <input type="hidden" data-clipboard-target="source" value="<%= public_share_url(current_user.share_token) %>">
+              <button class="btn btn-outline-primary rounded-pill w-100 d-flex align-items-center justify-content-center gap-2"
+                      type="button"
+                      data-action="clipboard#copy"
+                      data-clipboard-target="button">
+                <i class="bi bi-share"></i>
+                <span><%= t("cars.index.copy_public_link") %></span>
+              </button>
+            </div>
+          <% end %>
+
+          <div class="small fw-bold text-muted text-uppercase mb-2">
+            <%= t("cars.index.export_actions") %>
+          </div>
+          <div class="d-grid gap-2">
+            <%= render partial: "collection_exports/export_status", locals: { export: csv_export, format_type: 'csv' } %>
+            <%= render partial: "collection_exports/export_status", locals: { export: pdf_export, format_type: 'pdf' } %>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
   <!-- Autodetections em andamento -->
   <%= turbo_stream_from "autodetections_#{current_user.id.to_s}" %>
-  <div id="autodetections_list" class="mb-4">
+  <div class="collection-autodetections-panel mb-4 <%= 'is-empty' unless @autodetections.any? %>">
     <% if @autodetections.any? %>
-      <%= render partial: "autodetections/autodetection", collection: @autodetections %>
+      <button class="collection-autodetections-summary"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#active_autodetections_panel"
+              aria-expanded="false"
+              aria-controls="active_autodetections_panel">
+        <span class="collection-autodetections-icon">
+          <i class="bi bi-stars"></i>
+        </span>
+        <span class="collection-autodetections-copy">
+          <span class="collection-autodetections-title">
+            <%= t("autodetections.panel.title", count: active_autodetections_count) %>
+          </span>
+          <span class="collection-autodetections-subtitle">
+            <%= t("autodetections.panel.subtitle") %>
+          </span>
+        </span>
+        <span class="collection-autodetections-statuses">
+          <% %w[pending processing to_verify error].each do |status| %>
+            <% count = autodetection_status_counts[status].to_i %>
+            <% next if count.zero? %>
+
+            <span class="autodetection-status-chip autodetection-status-chip-<%= status %>">
+              <%= count %> <%= t("autodetections.status.#{status}") %>
+            </span>
+          <% end %>
+        </span>
+        <span class="collection-autodetections-toggle">
+          <span><%= t("autodetections.panel.view_all") %></span>
+          <i class="bi bi-chevron-down"></i>
+        </span>
+      </button>
     <% end %>
+
+    <div id="active_autodetections_panel" class="collapse <%= 'show' unless @autodetections.any? %>">
+      <div id="autodetections_list" class="collection-autodetections-list">
+        <% if @autodetections.any? %>
+          <%= render partial: "autodetections/autodetection", collection: @autodetections %>
+        <% end %>
+      </div>
+    </div>
   </div>
 
 
@@ -70,14 +134,21 @@
                              action: "input->search-form#submit"
                            } %>
 
-          <div class="d-none d-flex align-items-center me-2" data-search-form-target="spinner">
+          <div class="search-status d-none d-flex align-items-center me-2"
+               role="status"
+               aria-live="polite"
+               data-search-form-target="spinner">
             <div class="spinner-border spinner-border-sm text-primary" role="status">
-              <span class="visually-hidden">Loading...</span>
+              <span class="visually-hidden"><%= t("cars.index.searching") %></span>
             </div>
+            <span class="search-status-label"><%= t("cars.index.searching") %></span>
           </div>
 
           <% if params[:q].present? %>
-            <%= link_to cars_path, class: "btn border-0 bg-transparent text-muted px-4 d-flex align-items-center", data: { turbo_stream: true } do %>
+            <%= link_to cars_path,
+                        class: "btn border-0 bg-transparent text-muted px-4 d-flex align-items-center search-clear-button",
+                        title: t("cars.index.clear_search"),
+                        aria: { label: t("cars.index.clear_search") } do %>
               <i class="bi bi-x-circle"></i>
             <% end %>
           <% end %>
@@ -91,10 +162,15 @@
   </div>
 
   <!-- View Toggle Wrapper -->
+  <turbo-frame id="cars_grid">
   <div data-controller="view-toggle">
-    <div class="d-flex justify-content-between align-items-center mb-5">
-      <div class="text-muted small">
-        <!-- Aqui poderia ir um contador de resultados -->
+    <div class="collection-view-controls d-flex justify-content-between align-items-center">
+      <div class="collection-results-summary text-muted small" aria-live="polite">
+        <% if search_query.present? %>
+          <%= t("cars.index.results_count_filtered", count: cars_results_count, query: search_query) %>
+        <% else %>
+          <%= t("cars.index.results_count", count: cars_results_count) %>
+        <% end %>
       </div>
       <div class="btn-group shadow-sm bg-white rounded-pill p-1 border">
         <button type="button" class="btn btn-sm text-primary active rounded-pill px-3 fw-medium d-flex align-items-center gap-2" data-view-toggle-target="gridButton" data-action="click->view-toggle#setGrid">
@@ -107,7 +183,6 @@
     </div>
 
     <!-- Grid de carros -->
-    <turbo-frame id="cars_grid">
       <div id="cars_list_container" class="position-relative">
         <% if @cars.any? || current_user.cars.any? %>
           <div id="cars_grid_inner" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4 mt-2 grid-view">
@@ -136,7 +211,7 @@
           </div>
         <% end %>
       </div>
-    </turbo-frame>
   </div>
+  </turbo-frame>
 
 </div>
