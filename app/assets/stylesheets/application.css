@@ -2135,6 +2135,10 @@ body {
   padding: 0 !important; 
 }
 
+.view-grid #cars_grid_inner.is-public {
+  margin-top: 1.25rem !important;
+}
+
 /* On medium screen ranges, ensure margins are consistent */
 @media (max-width: 991.98px) {
   .view-grid #cars_grid_inner,
