@@ -6,9 +6,9 @@
         <p class="lead fs-4 opacity-75 mb-0 fw-light"><%= t("public_collections.index.subtitle") %></p>
       </div>
       <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
-        <div class="d-inline-flex flex-column align-items-center bg-white bg-opacity-10 rounded-4 p-3 backdrop-blur">
-          <span class="fs-2 fw-bold text-white lh-1"><%= @total_count %></span>
-          <span class="text-white-50 small text-uppercase fw-semibold mt-1">
+        <div class="public-collection-stat d-inline-flex flex-column align-items-center rounded-4 p-3 backdrop-blur">
+          <span class="public-collection-stat-number fs-2 fw-bold lh-1"><%= @total_count %></span>
+          <span class="public-collection-stat-label small text-uppercase fw-semibold mt-1">
             <i class="bi bi-car-front-fill me-1"></i> <%= t("public_collections.index.cataloged_count") %>
           </span>
         </div>

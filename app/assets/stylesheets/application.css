@@ -1663,6 +1663,27 @@ body {
   letter-spacing: 0;
 }
 
+.public-collection-stat {
+  background: rgba(15, 23, 42, 0.9);
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.22);
+  color: #ffffff;
+  min-width: 14rem;
+}
+
+.public-collection-stat-number {
+  color: #ffffff;
+}
+
+.public-collection-stat-label {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+[data-theme="dark"] .public-collection-stat {
+  background: rgba(15, 23, 42, 0.94);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  box-shadow: 0 20px 50px rgba(2, 6, 23, 0.36);
+}
+
 .search-wrapper {
   position: relative;
   transform: translateY(-50%);
