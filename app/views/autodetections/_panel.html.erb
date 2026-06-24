@@ -1,0 +1,50 @@
+<%
+  autodetections = local_assigns.fetch(:autodetections)
+  active_autodetections_count = autodetections.size
+  autodetection_status_counts = autodetections.group_by(&:status).transform_values(&:size)
+%>
+
+<div id="autodetections_panel" class="collection-autodetections-panel mb-4 <%= 'is-empty' unless autodetections.any? %>">
+  <% if autodetections.any? %>
+    <button class="collection-autodetections-summary"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#active_autodetections_panel"
+            aria-expanded="false"
+            aria-controls="active_autodetections_panel">
+      <span class="collection-autodetections-icon">
+        <i class="bi bi-stars"></i>
+      </span>
+      <span class="collection-autodetections-copy">
+        <span class="collection-autodetections-title">
+          <%= t("autodetections.panel.title", count: active_autodetections_count) %>
+        </span>
+        <span class="collection-autodetections-subtitle">
+          <%= t("autodetections.panel.subtitle") %>
+        </span>
+      </span>
+      <span class="collection-autodetections-statuses">
+        <% %w[pending processing to_verify error].each do |status| %>
+          <% count = autodetection_status_counts[status].to_i %>
+          <% next if count.zero? %>
+
+          <span class="autodetection-status-chip autodetection-status-chip-<%= status %>">
+            <%= count %> <%= t("autodetections.status.#{status}") %>
+          </span>
+        <% end %>
+      </span>
+      <span class="collection-autodetections-toggle">
+        <span><%= t("autodetections.panel.view_all") %></span>
+        <i class="bi bi-chevron-down"></i>
+      </span>
+    </button>
+  <% end %>
+
+  <div id="active_autodetections_panel" class="collapse <%= 'show' unless autodetections.any? %>">
+    <div id="autodetections_list" class="collection-autodetections-list">
+      <% if autodetections.any? %>
+        <%= render partial: "autodetections/autodetection", collection: autodetections %>
+      <% end %>
+    </div>
+  </div>
+</div>

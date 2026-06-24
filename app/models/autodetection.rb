@@ -51,33 +51,18 @@ class Autodetection
   end
 
   # Callbacks de broadcast em tempo real
-  after_create :broadcast_new_autodetection
-  after_update :broadcast_update_autodetection
+  after_create :broadcast_autodetections_panel
+  after_update :broadcast_autodetections_panel
+  after_destroy :broadcast_autodetections_panel
 
   private
 
-  def broadcast_new_autodetection
-    Turbo::StreamsChannel.broadcast_prepend_to(
+  def broadcast_autodetections_panel
+    Turbo::StreamsChannel.broadcast_replace_to(
       "autodetections_#{user_id}",
-      target: 'autodetections_list',
-      partial: 'autodetections/autodetection',
-      locals: { autodetection: self }
+      target: 'autodetections_panel',
+      partial: 'autodetections/panel',
+      locals: { autodetections: user.autodetections.active_recent }
     )
-  end
-
-  def broadcast_update_autodetection
-    if status == 'completed'
-      Turbo::StreamsChannel.broadcast_remove_to(
-        "autodetections_#{user_id}",
-        target: "autodetection_#{id}"
-      )
-    else
-      Turbo::StreamsChannel.broadcast_replace_to(
-        "autodetections_#{user_id}",
-        target: "autodetection_#{id}",
-        partial: 'autodetections/autodetection',
-        locals: { autodetection: self }
-      )
-    end
   end
 end
