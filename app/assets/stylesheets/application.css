@@ -1664,24 +1664,34 @@ body {
 }
 
 .public-collection-stat {
-  background: rgba(15, 23, 42, 0.9);
-  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.22);
-  color: #ffffff;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.68);
+  box-shadow: 0 18px 44px rgba(79, 70, 229, 0.2);
+  color: #1e1b4b;
   min-width: 14rem;
 }
 
 .public-collection-stat-number {
-  color: #ffffff;
+  color: #312e81;
 }
 
 .public-collection-stat-label {
-  color: rgba(255, 255, 255, 0.72);
+  color: #4f46e5;
 }
 
 [data-theme="dark"] .public-collection-stat {
   background: rgba(15, 23, 42, 0.94);
   border: 1px solid rgba(148, 163, 184, 0.2);
   box-shadow: 0 20px 50px rgba(2, 6, 23, 0.36);
+  color: #ffffff;
+}
+
+[data-theme="dark"] .public-collection-stat-number {
+  color: #ffffff;
+}
+
+[data-theme="dark"] .public-collection-stat-label {
+  color: rgba(255, 255, 255, 0.72);
 }
 
 .search-wrapper {
