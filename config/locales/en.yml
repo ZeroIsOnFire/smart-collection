@@ -460,8 +460,89 @@ en:
     other: "Other"
 
   admin:
+    layout:
+      short_title: "Admin"
     nav:
+      dashboard: "Dashboard"
+      users: "Users"
       statistics: "Statistics"
+      maintenance: "Maintenance"
+    roles:
+      admin: "Admin"
+      member: "Member"
+    dashboard:
+      title: "Admin dashboard"
+      subtitle: "Operational view of users, registered cars, public sharing and the autodetection queue."
+      cards:
+        users:
+          title: "Registered users"
+          sharing: "with public link enabled"
+        cars:
+          title: "Cars in the catalog"
+          per_user: "user"
+        ai_items:
+          title: "Cars from autodetection"
+          of_total: "of catalog"
+        queue:
+          title: "Autodetection queue"
+          idle: "No queue"
+          active: "In progress"
+      recent_users:
+        title: "Recent users"
+        view_all: "View full list"
+        user: "User"
+        status: "Profile"
+        items: "Cars"
+        created_at: "Registered"
+        empty: "No users have registered yet."
+      quick_actions:
+        title: "Operational shortcuts"
+        manage_users:
+          title: "Open users"
+          description_suffix: "registered users"
+        maintenance:
+          title: "View maintenance"
+          description: "Jobs, storage and temporary cleanup"
+    users:
+      index:
+        title: "Users"
+        subtitle: "Review accounts, admin profile, catalog size and registration date."
+        search_placeholder: "Filter by name or email"
+        user: "User"
+        status: "Profile"
+        collection: "Catalog"
+        created_at: "Registered"
+        actions: "Actions"
+        items_suffix: "cars"
+        details: "Record"
+        delete_confirm: "Removing this user also removes their cars. Continue?"
+        page_info: "Page %{page} of %{total}"
+      show:
+        title: "User record"
+        subtitle: "Account data, admin permission and recent catalog activity."
+        member_since: "Member since %{date}"
+        edit_user: "Edit user"
+        catalog_items: "Cars in catalog"
+        autodetections: "Autodetections"
+        recent_activity: "Latest registered cars"
+        added_on: "Added on"
+        no_items: "This user has not registered cars yet."
+      edit:
+        title: "Edit user"
+        subtitle: "Update name, email and admin permission."
+        name_label: "Full name"
+        name_placeholder: "Ex: Joao Silva"
+        email_label: "Email"
+        email_placeholder: "email@example.com"
+        admin_privileges: "Admin permission"
+        admin_privileges_help: "Allows access to dashboard, users, statistics and maintenance."
+        self_admin_warning: "You cannot remove your own admin permission."
+        submit: "Save user"
+        best_practices:
+          title: "Operation notes"
+          email: "Changing email changes the login used by this account."
+          admin: "Admin permission grants access to operational system data."
+          password: "For password changes, direct the user to the recovery flow on sign-in."
     statistics:
       title: "Usage and AI Statistics"
       subtitle: "Track current system usage and historical counters preserved after deletions or edits."

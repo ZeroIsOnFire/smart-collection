@@ -477,8 +477,89 @@ pt-BR:
     other: "Outra"
 
   admin:
+    layout:
+      short_title: "Admin"
     nav:
+      dashboard: "Painel"
+      users: "Usuarios"
       statistics: "Estatisticas"
+      maintenance: "Manutencao"
+    roles:
+      admin: "Admin"
+      member: "Membro"
+    dashboard:
+      title: "Painel administrativo"
+      subtitle: "Leitura operacional de usuarios, carros cadastrados, compartilhamentos e fila de autodeteccao."
+      cards:
+        users:
+          title: "Usuarios cadastrados"
+          sharing: "com link publico ativo"
+        cars:
+          title: "Carros no catalogo"
+          per_user: "usuario"
+        ai_items:
+          title: "Carros vindos da autodeteccao"
+          of_total: "do catalogo"
+        queue:
+          title: "Fila de autodeteccao"
+          idle: "Sem fila"
+          active: "Em andamento"
+      recent_users:
+        title: "Usuarios recentes"
+        view_all: "Ver lista completa"
+        user: "Usuario"
+        status: "Perfil"
+        items: "Carros"
+        created_at: "Cadastro"
+        empty: "Nenhum usuario cadastrado ainda."
+      quick_actions:
+        title: "Atalhos operacionais"
+        manage_users:
+          title: "Abrir usuarios"
+          description_suffix: "usuarios cadastrados"
+        maintenance:
+          title: "Ver manutencao"
+          description: "Jobs, armazenamento e limpeza temporaria"
+    users:
+      index:
+        title: "Usuarios"
+        subtitle: "Consulte contas, perfil administrativo, tamanho do acervo e data de cadastro."
+        search_placeholder: "Filtrar por nome ou e-mail"
+        user: "Usuario"
+        status: "Perfil"
+        collection: "Acervo"
+        created_at: "Cadastro"
+        actions: "Acoes"
+        items_suffix: "carros"
+        details: "Ficha"
+        delete_confirm: "Remover este usuario tambem remove seus carros. Deseja continuar?"
+        page_info: "Pagina %{page} de %{total}"
+      show:
+        title: "Ficha do usuario"
+        subtitle: "Dados da conta, permissao administrativa e atividade recente no catalogo."
+        member_since: "Membro desde %{date}"
+        edit_user: "Editar usuario"
+        catalog_items: "Carros no catalogo"
+        autodetections: "Autodeteccoes"
+        recent_activity: "Ultimos carros cadastrados"
+        added_on: "Adicionado em"
+        no_items: "Este usuario ainda nao cadastrou carros."
+      edit:
+        title: "Editar usuario"
+        subtitle: "Atualize nome, e-mail e permissao administrativa."
+        name_label: "Nome completo"
+        name_placeholder: "Ex: Joao Silva"
+        email_label: "E-mail"
+        email_placeholder: "email@exemplo.com"
+        admin_privileges: "Permissao administrativa"
+        admin_privileges_help: "Permite acessar painel, usuarios, estatisticas e manutencao."
+        self_admin_warning: "Voce nao pode remover sua propria permissao administrativa."
+        submit: "Salvar usuario"
+        best_practices:
+          title: "Notas de operacao"
+          email: "Alterar e-mail muda o login usado por esta conta."
+          admin: "Permissao administrativa libera acesso a dados operacionais do sistema."
+          password: "Para troca de senha, oriente o usuario a usar o fluxo de recuperacao no login."
     statistics:
       title: "Estatisticas de uso e IA"
       subtitle: "Acompanhe o uso atual do sistema e os contadores historicos preservados mesmo apos exclusoes ou alteracoes."

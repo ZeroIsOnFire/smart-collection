@@ -1,20 +1,20 @@
 <div class="mb-5">
-  <h2 class="fw-bold mb-1 text-dark">Dashboard Administrativo</h2>
-  <p class="text-muted mb-0">Visão geral do sistema e métricas de uso.</p>
+  <h2 class="fw-bold mb-1 text-dark"><%= t('admin.dashboard.title') %></h2>
+  <p class="text-muted mb-0"><%= t('admin.dashboard.subtitle') %></p>
 </div>
 
 <div class="row g-4 mb-5">
-  <!-- Usuários -->
+  <!-- Users -->
   <div class="col-md-6 col-xl-3">
     <%= link_to admin_users_path, class: "text-decoration-none d-block h-100" do %>
-      <div class="card premium-card border-0 rounded-4 p-3 h-100 card-hover-lift">
+      <div class="card premium-card border-0 rounded-3 p-3 h-100 card-hover-lift">
         <div class="card-body">
           <div class="d-flex align-items-center gap-3 mb-3">
             <div class="icon-box bg-indigo-light mb-0 rounded-3" style="width: 48px; height: 48px;">
               <i class="bi bi-people fs-4"></i>
             </div>
             <div>
-              <div class="text-secondary small fw-bold text-uppercase tracking-wider" style="font-size: 0.7rem;">Total de Usuários</div>
+              <div class="text-secondary small fw-bold text-uppercase tracking-wider" style="font-size: 0.7rem;"><%= t('admin.dashboard.cards.users.title') %></div>
               <div class="fs-3 fw-bold text-dark"><%= @stats[:users_count] %></div>
             </div>
           </div>
@@ -22,7 +22,7 @@
             <div class="progress flex-grow-1 me-2" style="height: 4px;">
               <div class="progress-bar bg-primary" role="progressbar" style="width: 100%"></div>
             </div>
-            <span class="extra-small text-muted"><%= @stats[:collections_shared] %> compartilhando</span>
+            <span class="extra-small text-muted"><%= @stats[:collections_shared] %> <%= t('admin.dashboard.cards.users.sharing') %></span>
           </div>
         </div>
       </div>
@@ -31,38 +31,38 @@
 
   <!-- Carros -->
   <div class="col-md-6 col-xl-3">
-    <div class="card premium-card border-0 rounded-4 p-3 h-100">
+    <div class="card premium-card border-0 rounded-3 p-3 h-100">
       <div class="card-body">
         <div class="d-flex align-items-center gap-3 mb-3">
           <div class="icon-box bg-purple-light mb-0 rounded-3" style="width: 48px; height: 48px;">
             <i class="bi bi-car-front fs-4"></i>
           </div>
           <div>
-            <div class="text-secondary small fw-bold text-uppercase tracking-wider" style="font-size: 0.7rem;">Carros no Acervo</div>
+            <div class="text-secondary small fw-bold text-uppercase tracking-wider" style="font-size: 0.7rem;"><%= t('admin.dashboard.cards.cars.title') %></div>
             <div class="fs-3 fw-bold"><%= @stats[:cars_count] %></div>
           </div>
         </div>
         <div class="d-flex justify-content-between align-items-center">
           <div class="progress flex-grow-1 me-2" style="height: 4px;">
-            <div class="progress-bar" role="progressbar" style="width: 100%; background-color: #7c3aed;"></div>
+            <div class="progress-bar" role="progressbar" style="width: 100%; background-color: var(--premium-indigo);"></div>
           </div>
           <% avg = @stats[:users_count].zero? ? 0 : (@stats[:cars_count].to_f / @stats[:users_count]).round(1) %>
-          <span class="extra-small text-muted">~<%= avg %>/usuário</span>
+          <span class="extra-small text-muted">~<%= avg %>/<%= t('admin.dashboard.cards.cars.per_user') %></span>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Itens via IA -->
+  <!-- AI Items -->
   <div class="col-md-6 col-xl-3">
-    <div class="card premium-card border-0 rounded-4 p-3 h-100">
+    <div class="card premium-card border-0 rounded-3 p-3 h-100">
       <div class="card-body">
         <div class="d-flex align-items-center gap-3 mb-3">
           <div class="icon-box bg-emerald-light mb-0 rounded-3" style="width: 48px; height: 48px;">
             <i class="bi bi-robot fs-4"></i>
           </div>
           <div>
-            <div class="text-secondary small fw-bold text-uppercase tracking-wider" style="font-size: 0.7rem;">Itens via IA</div>
+            <div class="text-secondary small fw-bold text-uppercase tracking-wider" style="font-size: 0.7rem;"><%= t('admin.dashboard.cards.ai_items.title') %></div>
             <div class="fs-3 fw-bold"><%= @stats[:ai_cars_count] %></div>
           </div>
         </div>
@@ -70,7 +70,7 @@
           <div class="progress flex-grow-1 me-2" style="height: 4px;">
             <div class="progress-bar bg-success" role="progressbar" style="width: <%= @stats[:ai_cars_percentage] %>%"></div>
           </div>
-          <span class="extra-small text-muted"><%= @stats[:ai_cars_percentage] %>% do total</span>
+          <span class="extra-small text-muted"><%= @stats[:ai_cars_percentage] %>% <%= t('admin.dashboard.cards.ai_items.of_total') %></span>
         </div>
       </div>
     </div>
@@ -78,14 +78,14 @@
 
   <!-- Fila de Processamento -->
   <div class="col-md-6 col-xl-3">
-    <div class="card premium-card border-0 rounded-4 p-3 h-100">
+    <div class="card premium-card border-0 rounded-3 p-3 h-100">
       <div class="card-body">
         <div class="d-flex align-items-center gap-3 mb-3">
           <div class="icon-box mb-0 rounded-3" style="width: 48px; height: 48px; background-color: rgba(255, 193, 7, 0.1); color: #ffc107;">
             <i class="bi bi-clock-history fs-4"></i>
           </div>
           <div>
-            <div class="text-secondary small fw-bold text-uppercase tracking-wider" style="font-size: 0.7rem;">Fila de IA</div>
+            <div class="text-secondary small fw-bold text-uppercase tracking-wider" style="font-size: 0.7rem;"><%= t('admin.dashboard.cards.queue.title') %></div>
             <div class="fs-3 fw-bold"><%= @stats[:pending_autodetections] %></div>
           </div>
         </div>
@@ -94,9 +94,9 @@
             <div class="progress-bar bg-warning" role="progressbar" style="width: 100%"></div>
           </div>
           <% if @stats[:pending_autodetections].zero? %>
-            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2" style="font-size: 0.65rem;">Ocioso</span>
+            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-3 px-2" style="font-size: 0.65rem;"><%= t('admin.dashboard.cards.queue.idle') %></span>
           <% else %>
-            <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-2" style="font-size: 0.65rem;">Ativo</span>
+            <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-3 px-2" style="font-size: 0.65rem;"><%= t('admin.dashboard.cards.queue.active') %></span>
           <% end %>
         </div>
       </div>
@@ -106,12 +106,12 @@
 
 <div class="row g-4">
   <div class="col-lg-8">
-    <div class="card premium-card border-0 rounded-4 overflow-hidden">
+    <div class="card premium-card border-0 rounded-3 overflow-hidden">
       <div class="card-header bg-white border-bottom p-4">
         <div class="d-flex justify-content-between align-items-center">
-          <h5 class="mb-0 fw-bold">Usuários Recentes</h5>
-          <%= link_to admin_users_path, class: "btn btn-soft-secondary btn-sm rounded-pill px-3" do %>
-            Ver todos <i class="bi bi-arrow-right ms-1"></i>
+          <h5 class="mb-0 fw-bold"><%= t('admin.dashboard.recent_users.title') %></h5>
+          <%= link_to admin_users_path, class: "btn btn-soft-secondary btn-sm rounded-3 px-3" do %>
+            <%= t('admin.dashboard.recent_users.view_all') %> <i class="bi bi-arrow-right ms-1"></i>
           <% end %>
         </div>
       </div>
@@ -119,10 +119,10 @@
         <table class="table table-hover align-middle mb-0">
           <thead class="bg-light">
             <tr>
-              <th class="ps-4 py-3 text-secondary small text-uppercase fw-bold">Usuário</th>
-              <th class="py-3 text-secondary small text-uppercase fw-bold text-center">Status</th>
-              <th class="py-3 text-secondary small text-uppercase fw-bold text-center">Itens</th>
-              <th class="pe-4 py-3 text-secondary small text-uppercase fw-bold text-end">Cadastrado em</th>
+              <th class="ps-4 py-3 text-secondary small text-uppercase fw-bold"><%= t('admin.dashboard.recent_users.user') %></th>
+              <th class="py-3 text-secondary small text-uppercase fw-bold text-center"><%= t('admin.dashboard.recent_users.status') %></th>
+              <th class="py-3 text-secondary small text-uppercase fw-bold text-center"><%= t('admin.dashboard.recent_users.items') %></th>
+              <th class="pe-4 py-3 text-secondary small text-uppercase fw-bold text-end"><%= t('admin.dashboard.recent_users.created_at') %></th>
             </tr>
           </thead>
           <tbody>
@@ -142,9 +142,9 @@
                 </td>
                 <td class="text-center">
                   <% if user.admin? %>
-                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2">Admin</span>
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-3 px-2"><%= t('admin.roles.admin') %></span>
                   <% else %>
-                    <span class="badge bg-light text-secondary border rounded-pill px-2">Membro</span>
+                    <span class="badge bg-light text-secondary border rounded-3 px-2"><%= t('admin.roles.member') %></span>
                   <% end %>
                 </td>
                 <td class="text-center fw-semibold"><%= user.cars.count %></td>
@@ -155,7 +155,7 @@
               <tr>
                 <td colspan="4" class="text-center py-5 text-muted">
                   <i class="bi bi-people display-6 d-block mb-2 opacity-25"></i>
-                  Nenhum usuário cadastrado ainda.
+                  <%= t('admin.dashboard.recent_users.empty') %>
                 </td>
               </tr>
             <% end %>
@@ -166,16 +166,16 @@
   </div>
 
   <div class="col-lg-4">
-    <div class="card premium-card border-0 rounded-4 overflow-hidden">
+    <div class="card premium-card border-0 rounded-3 overflow-hidden">
       <div class="card-header bg-white border-bottom p-4">
-        <h5 class="mb-0 fw-bold">Recursos Rápidos</h5>
+        <h5 class="mb-0 fw-bold"><%= t('admin.dashboard.quick_actions.title') %></h5>
       </div>
       <div class="card-body p-4 d-grid gap-2">
         <%= link_to admin_users_path, class: "btn btn-soft-secondary text-start p-3 d-flex align-items-center gap-3 rounded-3" do %>
           <i class="bi bi-people fs-4 text-primary"></i>
           <div>
-            <div class="fw-bold">Gerenciar Usuários</div>
-            <div class="small"><%= @stats[:users_count] %> cadastrados no sistema</div>
+            <div class="fw-bold"><%= t('admin.dashboard.quick_actions.manage_users.title') %></div>
+            <div class="small"><%= @stats[:users_count] %> <%= t('admin.dashboard.quick_actions.manage_users.description_suffix') %></div>
           </div>
         <% end %>
         <%= link_to admin_statistics_path, class: "btn btn-soft-secondary text-start p-3 d-flex align-items-center gap-3 rounded-3" do %>
@@ -188,8 +188,8 @@
         <%= link_to admin_maintenance_path, class: "btn btn-soft-secondary text-start p-3 d-flex align-items-center gap-3 rounded-3" do %>
           <i class="bi bi-tools fs-4 text-warning"></i>
           <div>
-            <div class="fw-bold">Manutenção do Sistema</div>
-            <div class="small">Monitorar jobs e armazenamento</div>
+            <div class="fw-bold"><%= t('admin.dashboard.quick_actions.maintenance.title') %></div>
+            <div class="small"><%= t('admin.dashboard.quick_actions.maintenance.description') %></div>
           </div>
         <% end %>
       </div>

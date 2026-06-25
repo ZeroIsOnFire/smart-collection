@@ -61,7 +61,7 @@
         <% @stats[:autodetections_by_status].each do |status, count| %>
           <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded-3">
             <span class="small fw-medium"><%= t("autodetections.status.#{status}") %></span>
-            <span class="badge bg-white text-dark border shadow-sm rounded-pill"><%= number_with_delimiter(count) %></span>
+            <span class="badge bg-white text-dark border shadow-sm rounded-3"><%= number_with_delimiter(count) %></span>
           </div>
         <% end %>
       </div>
