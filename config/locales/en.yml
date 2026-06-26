@@ -60,6 +60,47 @@ en:
     enable: "Enable Public Link"
     disable: "Disable Sharing"
 
+
+  home:
+    hero:
+      image_alt: "Shelf with cataloged miniature cars"
+      badge: "Miniature car catalog"
+      title: "Register each car with photo, scale, color and notes."
+      subtitle: "Create a record for each miniature, review crops from shelf photos and export the catalog when you need to check, share or print it."
+      open_catalog: "Open my catalog"
+      add_car: "Register car"
+      create_catalog: "Create catalog"
+      see_workflow: "See photo workflow"
+      sample_title: "Record ready for lookup"
+      sample_text: "Photo, brand, model, year, scale, color and notes stay together so you can identify each item later."
+    features:
+      title: "Tools for cataloging the real collection"
+      subtitle: "The workflow is built for miniatures, visual collections and manual review, without loose spreadsheets."
+      cards:
+        - icon: "bi-card-image"
+          icon_bg: "bg-indigo-light"
+          title: "Photo record with technical details"
+          text: "Register brand, model, year, scale, color, notes and main image in the same form."
+        - icon: "bi-bounding-box-circles"
+          icon_bg: "bg-purple-light"
+          title: "Crops for photos with many cars"
+          text: "Upload a shelf photo, review each crop and save only the items that make sense."
+        - icon: "bi-file-earmark-spreadsheet"
+          icon_bg: "bg-emerald-light"
+          title: "PDF, CSV and public link"
+          text: "Export the filtered catalog or share a public showcase with search by name and brand."
+    cta:
+      title: "Start with the car in front of you."
+      subtitle: "A good record starts with the real item: readable photo, correct scale, predominant color and notes that separate variants."
+      create_account: "Create catalog"
+      open_catalog: "Open my cars"
+      items:
+        - "Manual registration for one miniature at a time"
+        - "Local autodetection to review photos with many cars"
+        - "PDF/CSV export for offline reference"
+        - "Controlled public sharing by link"
+    footer:
+      copyright: "(c) %{year} Smart Collection Catalog. All rights reserved."
   initial_setup:
     badge: "Initial setup"
     title: "Before you start"
@@ -254,13 +295,13 @@ en:
     layout:
       title: "%{name}'s Collection"
       toggle_theme: "Toggle theme"
-      footer_text: "Organize, display and share your collection elegantly."
-      create_collection: "Create my free collection"
+      footer_text: "Show cataloged cars with search, photos and item records."
+      create_collection: "Add first car"
     index:
       title: "%{name}'s Collection"
-      subtitle: "Explore a careful curation of exclusive vehicles."
+      subtitle: "Browse cataloged cars, filter by model, brand, year or color, and open the record with photo, scale and notes."
       cataloged_count: "Cataloged vehicles"
-      search_placeholder: "Search collection..."
+      search_placeholder: "Search by model, brand, year or color"
       loading: "Loading..."
       searching: "Searching..."
       clear_search: "Clear search"
@@ -279,15 +320,15 @@ en:
       next_item: "Next item"
       show_gallery_item: "Show %{name} in the gallery"
       empty_title: "No vehicles found"
-      empty_text: "Try searching for another term or clear the search."
+      empty_text: "Try another model or brand, or clear the search to return to the full catalog."
     show:
       back_to_collection: "Back to collection"
 
   cars:
     index:
-      subtitle: "Your personal collection"
+      subtitle: "Catalog records with photo, scale, brand, year, color and notes."
       copy_public_link: "Copy public link"
-      search_placeholder: "Search by name, brand..."
+      search_placeholder: "Search by model, brand, year, scale or tag"
       searching: "Searching..."
       clear_search: "Clear search"
       results_count:
@@ -301,9 +342,9 @@ en:
       secondary_actions: "Actions"
       export_actions: "Export collection"
       public_link_copied: "Link copied"
-      empty_title: "No items in the collection"
-      empty_text: "Add your first car or use photo autodetection."
-      add_first_item: "Add First Item"
+      empty_title: "No cars cataloged yet"
+      empty_text: "Add a miniature manually or send a shelf photo to review detected crops."
+      add_first_item: "Add first car"
       no_results_title: "No results found"
       no_results_text: "Try different terms or clear the filter."
     new:
@@ -326,7 +367,7 @@ en:
       added_at: "Added on %{date}"
       updated_at: "Updated on %{date}"
       collection: "My Collection"
-      fallback_name: "—"
+      fallback_name: "â€”"
       no_photo: "No photo registered"
       view_full_photo: "View full photo"
       view_original_photo: "View original"

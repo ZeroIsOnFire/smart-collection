@@ -66,6 +66,46 @@ pt-BR:
     enable: "Ativar Link Público"
     disable: "Desativar Compartilhamento"
 
+  home:
+    hero:
+      image_alt: "Prateleira com miniaturas catalogadas"
+      badge: "Catalogo de miniaturas e carros"
+      title: "Cadastre cada carro com foto, escala, cor e observacoes."
+      subtitle: "Monte uma ficha para cada miniatura, revise recortes vindos de fotos da prateleira e exporte o acervo quando precisar conferir, compartilhar ou imprimir."
+      open_catalog: "Abrir meu catalogo"
+      add_car: "Cadastrar carro"
+      create_catalog: "Criar catalogo"
+      see_workflow: "Ver fluxo por foto"
+      sample_title: "Ficha pronta para consulta"
+      sample_text: "Foto, marca, modelo, ano, escala, cor e notas ficam juntos para voce reconhecer cada item depois."
+    features:
+      title: "Ferramentas para catalogar o acervo real"
+      subtitle: "O fluxo foi pensado para miniaturas, colecoes visuais e revisao manual, sem depender de planilhas soltas."
+      cards:
+        - icon: "bi-card-image"
+          icon_bg: "bg-indigo-light"
+          title: "Cadastro com foto e ficha tecnica"
+          text: "Registre marca, modelo, ano, escala, cor, observacoes e imagem principal no mesmo formulario."
+        - icon: "bi-bounding-box-circles"
+          icon_bg: "bg-purple-light"
+          title: "Recortes para fotos com varios carros"
+          text: "Envie uma foto da prateleira, revise cada recorte e salve apenas os itens que fazem sentido."
+        - icon: "bi-file-earmark-spreadsheet"
+          icon_bg: "bg-emerald-light"
+          title: "PDF, CSV e link publico"
+          text: "Exporte o catalogo filtrado ou compartilhe uma vitrine publica com busca por nome e marca."
+    cta:
+      title: "Comece pelo carro que esta na sua frente."
+      subtitle: "Uma boa ficha nasce do item real: foto legivel, escala correta, cor predominante e notas que ajudam a diferenciar variantes."
+      create_account: "Criar catalogo"
+      open_catalog: "Acessar meus carros"
+      items:
+        - "Cadastro manual para uma miniatura por vez"
+        - "Autodeteccao local para revisar fotos com varios carros"
+        - "Exportacao PDF/CSV para consulta fora do sistema"
+        - "Compartilhamento publico por link controlado"
+    footer:
+      copyright: "(c) %{year} Smart Collection Catalog. Todos os direitos reservados."
   initial_setup:
     badge: "Configuração inicial"
     title: "Antes de começar"
@@ -267,13 +307,13 @@ pt-BR:
     layout:
       title: "Coleção de %{name}"
       toggle_theme: "Alternar tema"
-      footer_text: "Organize, exiba e compartilhe seu acervo de forma elegante."
-      create_collection: "Criar minha coleção grátis"
+      footer_text: "Mostre os carros cadastrados com busca, foto e ficha do item."
+      create_collection: "Cadastrar primeiro carro"
     index:
       title: "Coleção de %{name}"
-      subtitle: "Explore uma cuidadosa curadoria de veículos exclusivos."
+      subtitle: "Navegue pelos carros cadastrados, filtre por modelo, marca, ano ou cor e abra a ficha com foto, escala e observacoes."
       cataloged_count: "Veículos catalogados"
-      search_placeholder: "Buscar na coleção..."
+      search_placeholder: "Buscar por modelo, marca, ano ou cor"
       loading: "Carregando..."
       searching: "Buscando..."
       clear_search: "Limpar busca"
@@ -292,16 +332,16 @@ pt-BR:
       next_item: "Próximo item"
       show_gallery_item: "Mostrar %{name} na galeria"
       empty_title: "Nenhum veículo encontrado"
-      empty_text: "Tente buscar por outro termo ou limpe a pesquisa."
+      empty_text: "Tente outro modelo, marca ou limpe a busca para voltar ao acervo completo."
     show:
       back_to_collection: "Voltar para a coleção"
 
   # ── Carros ─────────────────────────────────────────────
   cars:
     index:
-      subtitle: "Sua coleção pessoal"
+      subtitle: "Ficha do acervo com foto, escala, marca, ano, cor e observacoes."
       copy_public_link: "Copiar link público"
-      search_placeholder: "Buscar por nome, marca..."
+      search_placeholder: "Buscar por modelo, marca, ano, escala ou tag"
       searching: "Buscando..."
       clear_search: "Limpar busca"
       results_count:
@@ -315,9 +355,9 @@ pt-BR:
       secondary_actions: "Ações"
       export_actions: "Exportar coleção"
       public_link_copied: "Link copiado"
-      empty_title: "Nenhum item na coleção"
-      empty_text: "Adicione seu primeiro carro ou use a Autodetecção por foto."
-      add_first_item: "Adicionar Primeiro Item"
+      empty_title: "Nenhum carro cadastrado ainda"
+      empty_text: "Cadastre manualmente uma miniatura ou envie uma foto da prateleira para revisar recortes."
+      add_first_item: "Cadastrar primeiro carro"
       no_results_title: "Nenhum resultado encontrado"
       no_results_text: "Tente buscar por termos diferentes ou limpe o filtro."
     new:

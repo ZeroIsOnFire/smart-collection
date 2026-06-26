@@ -862,6 +862,23 @@ body {
   padding: 3rem;
 }
 
+.catalog-sample-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  box-shadow: var(--card-shadow);
+  color: var(--text-main);
+}
+
+.catalog-sample-photo {
+  align-items: center;
+  aspect-ratio: 4 / 3;
+  background: var(--soft-secondary-bg);
+  border: 1px solid var(--border-color);
+  display: flex;
+  justify-content: center;
+}
+
 /* Feature Cards */
 .feature-card {
   padding: 2.5rem;
