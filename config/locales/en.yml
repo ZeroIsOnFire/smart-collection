@@ -78,11 +78,11 @@ en:
       subtitle: "The workflow is built for miniatures, visual collections and manual review, without loose spreadsheets."
       cards:
         - icon: "bi-card-image"
-          icon_bg: "bg-indigo-light"
+          icon_bg: "bg-teal-soft"
           title: "Photo record with technical details"
           text: "Register brand, model, year, scale, color, notes and main image in the same form."
         - icon: "bi-bounding-box-circles"
-          icon_bg: "bg-purple-light"
+          icon_bg: "bg-amber-soft"
           title: "Crops for photos with many cars"
           text: "Upload a shelf photo, review each crop and save only the items that make sense."
         - icon: "bi-file-earmark-spreadsheet"

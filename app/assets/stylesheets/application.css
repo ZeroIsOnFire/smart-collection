@@ -855,13 +855,6 @@ body {
   z-index: 2;
 }
 
-.glass-card {
-  background: var(--card-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 0.75rem;
-  padding: 3rem;
-}
-
 .catalog-sample-card {
   background: var(--card-bg);
   border: 1px solid var(--border-color);
@@ -909,8 +902,8 @@ body {
   font-size: 1.75rem;
 }
 
-.bg-indigo-light { background-color: rgba(47, 111, 104, 0.1); color: var(--premium-indigo); }
-.bg-purple-light { background-color: rgba(124, 79, 34, 0.12); color: #7c4f22; }
+.bg-teal-soft { background-color: rgba(47, 111, 104, 0.1); color: var(--premium-indigo); }
+.bg-amber-soft { background-color: rgba(124, 79, 34, 0.12); color: #7c4f22; }
 .bg-emerald-light { background-color: rgba(16, 185, 129, 0.1); color: #10b981; }
 
 /* Loading state for detected items */

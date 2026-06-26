@@ -83,11 +83,11 @@ pt-BR:
       subtitle: "O fluxo foi pensado para miniaturas, colecoes visuais e revisao manual, sem depender de planilhas soltas."
       cards:
         - icon: "bi-card-image"
-          icon_bg: "bg-indigo-light"
+          icon_bg: "bg-teal-soft"
           title: "Cadastro com foto e ficha tecnica"
           text: "Registre marca, modelo, ano, escala, cor, observacoes e imagem principal no mesmo formulario."
         - icon: "bi-bounding-box-circles"
-          icon_bg: "bg-purple-light"
+          icon_bg: "bg-amber-soft"
           title: "Recortes para fotos com varios carros"
           text: "Envie uma foto da prateleira, revise cada recorte e salve apenas os itens que fazem sentido."
         - icon: "bi-file-earmark-spreadsheet"

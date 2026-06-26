@@ -54,7 +54,7 @@
             <%= button_to autodetection_path(autodetection), method: :delete, class: "btn btn-soft-danger btn-sm rounded-circle d-inline-flex align-items-center justify-content-center autodetection-icon-button", form: { data: { turbo_confirm: t('autodetections.actions.delete_confirm') } }, title: t('actions.delete'), aria: { label: t('actions.delete') } do %>
               <i class="bi bi-x-lg"></i>
             <% end %>
-            <%= link_to autodetection_path(autodetection), class: "btn btn-sm #{autodetection.status == 'to_verify' ? 'btn-premium' : 'btn-soft-secondary'} rounded-pill px-3 d-inline-flex align-items-center gap-2", data: { turbo: false } do %>
+            <%= link_to autodetection_path(autodetection), class: "btn btn-sm #{autodetection.status == 'to_verify' ? 'btn-premium' : 'btn-soft-secondary'} rounded-3 px-3 d-inline-flex align-items-center gap-2", data: { turbo: false } do %>
               <i class="bi bi-eye"></i>
               <%= t('autodetections.actions.verify_items') %>
             <% end %>
@@ -66,7 +66,7 @@
               <%= button_to autodetection_path(autodetection), method: :delete, class: "btn btn-soft-danger btn-sm rounded-circle d-inline-flex align-items-center justify-content-center autodetection-icon-button", form: { data: { turbo_confirm: t('autodetections.actions.cancel_confirm') } }, title: t('actions.delete'), aria: { label: t('actions.delete') } do %>
                 <i class="bi bi-x-lg"></i>
               <% end %>
-              <%= button_to retry_autodetection_path(autodetection), method: :patch, class: "btn btn-sm btn-premium rounded-pill px-3 d-inline-flex align-items-center gap-2" do %>
+              <%= button_to retry_autodetection_path(autodetection), method: :patch, class: "btn btn-sm btn-premium rounded-3 px-3 d-inline-flex align-items-center gap-2" do %>
                 <i class="bi bi-arrow-clockwise"></i>
                 <%= t('autodetections.actions.retry') %>
               <% end %>
@@ -74,7 +74,7 @@
           </div>
         <% else %>
           <!-- pending ou processing -->
-          <%= button_to autodetection_path(autodetection), method: :delete, class: "btn btn-soft-danger btn-sm rounded-pill px-3 d-inline-flex align-items-center gap-2", form: { data: { turbo_confirm: t('autodetections.actions.stop_confirm') } } do %>
+          <%= button_to autodetection_path(autodetection), method: :delete, class: "btn btn-soft-danger btn-sm rounded-3 px-3 d-inline-flex align-items-center gap-2", form: { data: { turbo_confirm: t('autodetections.actions.stop_confirm') } } do %>
             <i class="bi bi-x-circle me-1"></i> <%= t('autodetections.actions.stop') %>
           <% end %>
         <% end %>

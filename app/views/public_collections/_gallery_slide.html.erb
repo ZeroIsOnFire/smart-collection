@@ -98,7 +98,7 @@
          aria-label="<%= t("cars.show.view_full_photo") %>">
       <div class="photo-lightbox-stage" data-action="click->photo-lightbox#keepOpen">
         <%= image_tag display_photo_url,
-                      class: "photo-lightbox-image rounded-4 shadow-lg",
+                      class: "photo-lightbox-image rounded-3 shadow-lg",
                       alt: car.name.presence || t("cars.show.fallback_name") %>
         <button type="button"
                 class="btn btn-dark btn-sm rounded-circle shadow photo-lightbox-close"
