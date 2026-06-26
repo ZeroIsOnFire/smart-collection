@@ -118,7 +118,7 @@ pt-BR:
       description: "Melhora imagens pequenas adicionadas daqui em diante, quando o serviço estiver disponível."
       unavailable: "O serviço de upscale por IA não está configurado neste ambiente."
     actions:
-      finish: "Salvar e ir para a coleção"
+      finish: "Salvar e abrir meu acervo"
     messages:
       completed: "Configuração inicial salva com sucesso."
 

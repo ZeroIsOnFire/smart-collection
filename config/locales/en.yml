@@ -113,7 +113,7 @@ en:
       description: "Improves small images added from now on when the service is available."
       unavailable: "The AI upscaling service is not configured in this environment."
     actions:
-      finish: "Save and go to collection"
+      finish: "Save and open my catalog"
     messages:
       completed: "Initial setup saved successfully."
 

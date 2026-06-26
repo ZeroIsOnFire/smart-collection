@@ -30,7 +30,7 @@
           <span><%= t("cars.index.secondary_actions") %></span>
         </button>
 
-        <div class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-4 p-3 collection-secondary-menu">
+        <div class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-3 p-3 collection-secondary-menu">
           <% if current_user.sharing_enabled? %>
             <div class="mb-3" data-controller="clipboard"
                  data-clipboard-success-content-value="<i class='bi bi-check2'></i> <span><%= t("cars.index.public_link_copied") %></span>"
