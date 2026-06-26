@@ -15,6 +15,16 @@ function rubyString(value) {
   return value.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
 }
 
+function rgbChannels(color) {
+  return color.match(/\d+(\.\d+)?/g).slice(0, 3).map(Number);
+}
+
+function isPurpleOrBlue(color) {
+  const [red, green, blue] = rgbChannels(color);
+
+  return blue > red + 20 && blue > green + 10;
+}
+
 test.describe("autodetections panel", () => {
   test.setTimeout(90_000);
 
@@ -72,6 +82,33 @@ test.describe("autodetections panel", () => {
     await page.fill("#user_password_login", PASSWORD);
     await page.click("#sign_in_submit");
     await expect(page).toHaveURL(/\/cars/);
+
+    await page.getByRole("button", { name: /Autodetectar Minis/i }).click();
+    await expect(page.locator("#autodetectModal")).toBeVisible();
+
+    const autodetectionFormStyles = await page.evaluate(() => {
+      const modal = document.querySelector("#autodetectModal .modal-content");
+      const dropzone = document.querySelector("#autodetectModal .dropzone-area");
+      const backdrop = document.querySelector(".modal-backdrop");
+      const camera = document.querySelector("#autodetectModal .camera-preview-container");
+
+      return {
+        modalBackground: getComputedStyle(modal).backgroundColor,
+        dropzoneBackground: getComputedStyle(dropzone).backgroundColor,
+        dropzoneBorder: getComputedStyle(dropzone).borderColor,
+        backdropBackground: getComputedStyle(backdrop).backgroundColor,
+        cameraBackground: getComputedStyle(camera).backgroundColor,
+      };
+    });
+
+    expect(isPurpleOrBlue(autodetectionFormStyles.modalBackground)).toBe(false);
+    expect(isPurpleOrBlue(autodetectionFormStyles.dropzoneBackground)).toBe(false);
+    expect(isPurpleOrBlue(autodetectionFormStyles.dropzoneBorder)).toBe(false);
+    expect(isPurpleOrBlue(autodetectionFormStyles.backdropBackground)).toBe(false);
+    expect(isPurpleOrBlue(autodetectionFormStyles.cameraBackground)).toBe(false);
+
+    await page.locator("#autodetectModal .btn-close").click();
+    await expect(page.locator("#autodetectModal")).toBeHidden();
 
     const panel = page.locator("#autodetections_panel");
     await expect(panel).toContainText(/2 autodetec/);

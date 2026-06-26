@@ -78,8 +78,8 @@ test.describe("public catalog anti slop pass", () => {
     await page.addInitScript(() => localStorage.setItem("theme", "light"));
 
     await page.goto(BASE_URL);
-    await expect(page.getByText("Cadastre cada carro com foto, escala, cor e observacoes.")).toBeVisible();
-    await expect(page.getByRole("link", { name: /Criar catalogo/i }).first()).toBeVisible();
+    await expect(page.getByText("Cadastre cada carro com foto, escala, cor e observações.")).toBeVisible();
+    await expect(page.getByRole("link", { name: /Criar catálogo/i }).first()).toBeVisible();
     await expect(page.getByText(/Registre marca, modelo, ano, escala, cor/i)).toBeVisible();
     await expect(page.getByText(/Sua colecao elevada/i)).toHaveCount(0);
     await expect(page.getByText(/IA avancada/i)).toHaveCount(0);
@@ -135,6 +135,40 @@ test.describe("public catalog anti slop pass", () => {
     expect(publicStyles.searchRadius).toBeLessThanOrEqual(8);
     expect(publicStyles.toggleRadius).toBeLessThanOrEqual(8);
     expect(publicStyles.statRadius).toBeLessThanOrEqual(8);
+
+    await page.getByRole("button", { name: /Galeria/i }).click();
+    const galleryMediaStyles = await page.evaluate(() => {
+      const photo = document.querySelector(".public-gallery-photo");
+      const control = document.querySelector(".public-gallery-control");
+      const overlay = document.createElement("div");
+      const stage = document.createElement("div");
+      const image = document.createElement("div");
+
+      overlay.className = "photo-lightbox-overlay";
+      stage.className = "photo-lightbox-stage";
+      image.className = "photo-lightbox-image";
+      document.body.append(overlay, stage, image);
+
+      const styles = {
+        photoBackground: getComputedStyle(photo).backgroundColor,
+        controlBackground: control ? getComputedStyle(control).backgroundColor : getComputedStyle(photo).backgroundColor,
+        overlayBackground: getComputedStyle(overlay).backgroundColor,
+        stageBackground: getComputedStyle(stage).backgroundColor,
+        imageBackground: getComputedStyle(image).backgroundColor,
+      };
+
+      overlay.remove();
+      stage.remove();
+      image.remove();
+
+      return styles;
+    });
+
+    expect(isPurpleOrBlue(galleryMediaStyles.photoBackground)).toBe(false);
+    expect(isPurpleOrBlue(galleryMediaStyles.controlBackground)).toBe(false);
+    expect(isPurpleOrBlue(galleryMediaStyles.overlayBackground)).toBe(false);
+    expect(isPurpleOrBlue(galleryMediaStyles.stageBackground)).toBe(false);
+    expect(isPurpleOrBlue(galleryMediaStyles.imageBackground)).toBe(false);
 
     await page.goto(`${BASE_URL}/users/sign_in`);
     await page.fill("#user_email_login", email);

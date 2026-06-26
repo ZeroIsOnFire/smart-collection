@@ -62,8 +62,8 @@ test.describe("car form visual identity", () => {
 
     await page.goto(`${BASE_URL}/cars/new`);
 
-    await expect(page.getByRole("heading", { name: /Cadastrar carro na colecao/i })).toBeVisible();
-    await expect(page.getByText(/Registre foto, marca, modelo, ano, escala, cor e observacoes/i)).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Cadastrar carro na coleção/i })).toBeVisible();
+    await expect(page.getByText(/Registre foto, marca, modelo, ano, escala, cor e observações/i)).toBeVisible();
     await expect(page.getByRole("heading", { name: /Foto da miniatura/i })).toBeVisible();
     await expect(page.getByText("Adicionar foto do carro")).toBeVisible();
     await expect(page.getByText("Escala, ano e cor")).toBeVisible();
@@ -107,5 +107,20 @@ test.describe("car form visual identity", () => {
     expect(styles.brandFocusShadow).not.toContain("13, 110, 253");
     expect(isPurpleOrBlue(styles.brandFocusBorder)).toBe(false);
     expect(styles.horizontalOverflow).toBe(false);
+
+    const toggleStyles = await page.evaluate(() => {
+      const toggle = document.querySelector(".form-check-input");
+      toggle.click();
+
+      const checkedStyles = getComputedStyle(toggle);
+
+      return {
+        checkedBackground: checkedStyles.backgroundColor,
+        checkedBorder: checkedStyles.borderColor,
+      };
+    });
+
+    expect(isPurpleOrBlue(toggleStyles.checkedBackground)).toBe(false);
+    expect(isPurpleOrBlue(toggleStyles.checkedBorder)).toBe(false);
   });
 });

@@ -27,6 +27,10 @@ function contrastRatio(foreground, background) {
   return (lighter + 0.05) / (darker + 0.05);
 }
 
+function normalizeRgb(color) {
+  return color.match(/\d+(\.\d+)?/g).slice(0, 3).map((channel) => Math.round(Number(channel))).join(",");
+}
+
 test.describe("public collection stat", () => {
   let shareToken;
 
@@ -73,12 +77,14 @@ test.describe("public collection stat", () => {
 
     const lightContrast = await stat.evaluate((element) => {
       const numberStyles = getComputedStyle(element.querySelector(".public-collection-stat-number"));
+      const labelStyles = getComputedStyle(element.querySelector(".public-collection-stat-label"));
       const background = getComputedStyle(element).backgroundColor;
 
-      return { color: numberStyles.color, background };
+      return { color: numberStyles.color, labelColor: labelStyles.color, background };
     });
 
     expect(contrastRatio(lightContrast.color, lightContrast.background)).toBeGreaterThanOrEqual(4.5);
+    expect(normalizeRgb(lightContrast.color)).toBe(normalizeRgb(lightContrast.labelColor));
 
     await page.screenshot({ path: "test-results/public-collection-stat-light.png", fullPage: false });
 
