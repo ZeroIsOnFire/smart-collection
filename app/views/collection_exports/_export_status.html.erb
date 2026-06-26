@@ -5,20 +5,20 @@
   <% if export.nil? %>
     <%= button_to collection_exports_path(format_type: format_type),
                   method: :post,
-                  class: "btn btn-export-action rounded-pill px-3 d-flex align-items-center gap-2",
+                  class: "btn btn-export-action rounded-3 px-3 d-flex align-items-center gap-2",
                   data: { turbo_stream: true } do %>
       <i class="bi <%= format_type == 'csv' ? 'bi-filetype-csv' : 'bi-file-earmark-pdf' %>"></i>
       <%= t("collection_exports.actions.generate", file_format: format_type.upcase) %>
     <% end %>
   <% elsif export.status == 'pending' || export.status == 'processing' %>
-    <button class="btn btn-export-processing rounded-pill px-3 d-flex align-items-center gap-2" disabled>
+    <button class="btn btn-export-processing rounded-3 px-3 d-flex align-items-center gap-2" disabled>
       <span class="spinner-border spinner-border-sm text-secondary" role="status" aria-hidden="true"></span>
       <%= t("collection_exports.status.processing", file_format: format_type.upcase) %>
     </button>
   <% elsif export.status == 'completed' %>
-    <div class="btn-group shadow-sm rounded-pill export-button-group">
+    <div class="btn-group shadow-sm rounded-3 export-button-group">
       <%= link_to export.file.url,
-                  class: "btn btn-success rounded-start-pill px-3 d-flex align-items-center gap-2 export-download-button",
+                  class: "btn btn-success rounded-start-3 px-3 d-flex align-items-center gap-2 export-download-button",
                   target: "_blank",
                   data: { turbo: false } do %>
         <i class="bi bi-download"></i>
@@ -34,7 +34,7 @@
       <% end %>
       <%= button_to collection_exports_path(format_type: format_type),
                     method: :post,
-                    class: "btn btn-outline-success rounded-end-pill px-3 d-flex align-items-center border-start-0 export-regenerate-button",
+                    class: "btn btn-outline-success rounded-end-3 px-3 d-flex align-items-center border-start-0 export-regenerate-button",
                     form: { class: "export-regenerate-form" },
                     data: { turbo_stream: true },
                     title: t("collection_exports.actions.regenerate") do %>
@@ -42,14 +42,14 @@
       <% end %>
     </div>
   <% elsif export.status == 'failed' %>
-    <div class="btn-group shadow-sm rounded-pill export-button-group">
-      <button class="btn btn-outline-danger rounded-start-pill px-3 d-flex align-items-center gap-2" disabled title="<%= export.error_message %>">
+    <div class="btn-group shadow-sm rounded-3 export-button-group">
+      <button class="btn btn-outline-danger rounded-start-3 px-3 d-flex align-items-center gap-2" disabled title="<%= export.error_message %>">
         <i class="bi bi-exclamation-triangle"></i>
         <%= t("collection_exports.status.failed") %>
       </button>
       <%= button_to collection_exports_path(format_type: format_type),
                     method: :post,
-                    class: "btn btn-outline-danger rounded-end-pill px-3 d-flex align-items-center border-start-0 export-regenerate-button",
+                    class: "btn btn-outline-danger rounded-end-3 px-3 d-flex align-items-center border-start-0 export-regenerate-button",
                     form: { class: "export-regenerate-form" },
                     data: { turbo_stream: true },
                     title: t("collection_exports.actions.retry") do %>

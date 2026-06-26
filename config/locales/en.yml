@@ -253,9 +253,9 @@ en:
 
   collection_exports:
     actions:
-      generate: "Generate %{file_format}"
+      generate: "Export %{file_format}"
       download: "Download %{file_format}"
-      regenerate: "Generate again"
+      regenerate: "Update file"
       retry: "Try again"
     status:
       processing: "Generating %{file_format}..."

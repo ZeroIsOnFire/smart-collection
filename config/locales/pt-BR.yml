@@ -264,9 +264,9 @@ pt-BR:
 
   collection_exports:
     actions:
-      generate: "Gerar %{file_format}"
+      generate: "Exportar %{file_format}"
       download: "Baixar %{file_format}"
-      regenerate: "Gerar novamente"
+      regenerate: "Atualizar arquivo"
       retry: "Tentar novamente"
     status:
       processing: "Gerando %{file_format}..."
