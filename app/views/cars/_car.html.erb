@@ -9,7 +9,7 @@
 
 <div id="car_<%= car_dom_id %>" class="col animate-fade-in car-card-wrapper" data-car-card-id="<%= car_dom_id %>">
   <% cache [car, I18n.locale, public_view, :card_actions_v4, car_photo_cache_key(car, user: display_user, public_view: public_view)] do %>
-    <div class="card premium-card h-100 shadow-sm border-0 position-relative rounded-4 overflow-hidden" style="transition: transform 0.2s ease, box-shadow 0.2s ease;">
+    <div class="card premium-card h-100 shadow-sm border-0 position-relative rounded-3 overflow-hidden" style="transition: transform 0.2s ease, box-shadow 0.2s ease;">
       <% unless public_view %>
         <!-- Menu Dropdown (Hiden on public views) -->
         <div class="position-absolute top-0 end-0 p-2 z-3 car-action-dropdown">
