@@ -19,6 +19,7 @@ if [ -f package.json ] && command -v npm >/dev/null 2>&1; then
   fi
 
   npm run build
+  npm run build:css --if-present
 fi
 
 # Remove a potentially pre-existing server.pid for Rails.

@@ -33,8 +33,8 @@ RUN npm ci
 # Copy application code
 COPY . .
 
-# Build JavaScript assets
-RUN npm run build
+# Build JavaScript and CSS assets
+RUN npm run build && npm run build:css
 
 # Precompile bootsnap code for faster boot times
 RUN bundle exec bootsnap precompile app/ lib/

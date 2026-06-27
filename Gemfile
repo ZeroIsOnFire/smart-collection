@@ -33,6 +33,7 @@ gem 'bootsnap', require: false
 
 gem 'carrierwave', '~> 3.0'
 gem 'carrierwave-mongoid'
+gem 'cssbundling-rails'
 gem 'devise'
 gem 'jsbundling-rails'
 gem 'kaminari-actionview'
