@@ -79,7 +79,7 @@ RSpec.describe 'Admin::Maintenance', type: :request do
 
         expect(response).to redirect_to(admin_maintenance_path)
         follow_redirect!
-        expect(response.body).to include('Limpeza de arquivos temporarios disparada com sucesso.')
+        expect(response.body).to include(I18n.t('admin.maintenance.cleanup.notice'))
       end
     end
 

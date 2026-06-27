@@ -14,11 +14,11 @@ RSpec.describe 'Admin::Dashboard', type: :request do
         get admin_dashboard_path
 
         expect(response).to have_http_status(:success)
-        expect(response.body).to include('Dashboard Administrativo')
-        expect(response.body).to include('Total de Usuários')
-        expect(response.body).to include('Carros no Acervo')
-        expect(response.body).to include('Itens via IA')
-        expect(response.body).to include('Fila de IA')
+        expect(response.body).to include(I18n.t('admin.dashboard.title'))
+        expect(response.body).to include(I18n.t('admin.dashboard.cards.users.title'))
+        expect(response.body).to include(I18n.t('admin.dashboard.cards.cars.title'))
+        expect(response.body).to include(I18n.t('admin.dashboard.cards.ai_items.title'))
+        expect(response.body).to include(I18n.t('admin.dashboard.cards.queue.title'))
       end
 
       it 'exibe os links de recursos rápidos funcionais' do

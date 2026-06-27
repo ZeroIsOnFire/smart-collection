@@ -8,7 +8,7 @@ if [ -f Gemfile ]; then
   bundle check || bundle install
 fi
 
-# Build JavaScript bundles when running from a mounted development workspace.
+# Build JavaScript and CSS bundles when running from a mounted development workspace.
 if [ -f package.json ] && command -v npm >/dev/null 2>&1; then
   if [ ! -d node_modules ]; then
     if [ -f package-lock.json ]; then

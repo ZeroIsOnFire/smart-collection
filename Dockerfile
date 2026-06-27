@@ -33,7 +33,7 @@ RUN npm ci
 # Copy application code
 COPY . .
 
-# Build JavaScript assets
+# Build JavaScript and CSS assets
 RUN npm run build
 
 # Precompile bootsnap code for faster boot times
