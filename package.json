@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "esbuild app/javascript/application.js --bundle --format=esm --minify --legal-comments=none --outdir=app/assets/builds --public-path=/assets",
-    "build:css": "esbuild app/assets/stylesheets/application.css --bundle --minify --legal-comments=none --outfile=app/assets/builds/application.css --public-path=/assets --asset-names=[name]-[hash] --loader:.woff=file --loader:.woff2=file",
+    "build:css": "esbuild app/assets/stylesheets/application.css --bundle --minify --legal-comments=none --outfile=app/assets/builds/application.css --asset-names=[name]-[hash] --loader:.woff=file --loader:.woff2=file",
     "lint": "eslint \"app/javascript/**/*.js\"",
     "lint:fix": "eslint \"app/javascript/**/*.js\" --fix",
     "test:e2e": "playwright test"
