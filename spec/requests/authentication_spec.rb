@@ -90,7 +90,7 @@ RSpec.describe 'Authentications', type: :request do
 
       expect(response.body).to include(':-webkit-autofill')
       expect(response.body).to include(':-webkit-autofill:active')
-      expect(response.body).to include('-webkit-text-fill-color: #f1f5f9')
+      expect(response.body).to include('-webkit-text-fill-color: #f7f1e8')
       expect(global_css).to include('[data-theme="dark"] .form-control:-webkit-autofill:active')
       expect(global_css).to include('-webkit-box-shadow: 0 0 0 1000px var(--input-bg) inset !important')
     end
@@ -197,7 +197,7 @@ RSpec.describe 'Authentications', type: :request do
       sign_in admin
       get admin_dashboard_path
       expect(response).to have_http_status(:success)
-      expect(response.body).to include('Dashboard Administrativo')
+      expect(response.body).to include(I18n.t('admin.dashboard.title'))
     end
   end
 end
