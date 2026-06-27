@@ -66,9 +66,6 @@ class ExportPdfService
 
       pdf.fill_color COLORS[:gold]
       pdf.fill_rectangle [pdf.bounds.left, pdf.bounds.top - 276], pdf.bounds.width, 3
-
-      pdf.fill_color COLORS[:teal_soft]
-      pdf.fill_rectangle [pdf.bounds.left, pdf.bounds.bottom + 54], pdf.bounds.width, 92
     end
   end
 
