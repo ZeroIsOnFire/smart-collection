@@ -92,6 +92,14 @@ RSpec.describe 'Authentications', type: :request do
   end
 
   describe 'POST /users/sign_in' do
+    it 'shows the unauthenticated warning in Portuguese' do
+      get cars_path
+
+      expect(response).to redirect_to(new_user_session_path)
+      expect(flash[:alert]).to eq(I18n.t('devise.failure.unauthenticated'))
+      expect(flash[:alert]).not_to include('You need to sign in')
+    end
+
     it 'renders dark autofill overrides for the email field' do
       get new_user_session_path
       global_css = Rails.root.join('app/assets/stylesheets/application.css').read

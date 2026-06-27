@@ -69,6 +69,7 @@ pt-BR:
           destroy_account: "Excluir minha conta"
           destroy_confirm: "Tem certeza que deseja excluir sua conta?"
     failure:
+      unauthenticated: "Você precisa entrar ou criar uma conta antes de continuar."
       invalid: "E-mail ou senha inválidos."
       unconfirmed: "Você precisa confirmar sua conta antes de continuar."
       locked: "Sua conta está bloqueada."

@@ -69,6 +69,7 @@ en:
           destroy_account: "Delete my account"
           destroy_confirm: "Are you sure you want to delete your account?"
     failure:
+      unauthenticated: "You need to sign in or sign up before continuing."
       invalid: "Invalid email or password."
       unconfirmed: "You need to confirm your account before continuing."
       locked: "Your account is locked."
