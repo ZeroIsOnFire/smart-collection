@@ -74,19 +74,36 @@ pt-BR:
       unconfirmed: "Você precisa confirmar sua conta antes de continuar."
       locked: "Sua conta está bloqueada."
       last_attempt: "Você tem mais uma tentativa antes de sua conta ser bloqueada."
+      not_found_in_database: "E-mail ou senha inválidos."
       timeout: "Sua sessão expirou. Faça login novamente para continuar."
       inactive: "Sua conta ainda não foi ativada."
       already_authenticated: "Você já está autenticado."
+    mailer:
+      confirmation_instructions:
+        subject: "Instruções de confirmação"
+      reset_password_instructions:
+        subject: "Instruções para redefinir senha"
+      unlock_instructions:
+        subject: "Instruções de desbloqueio"
+      email_changed:
+        subject: "E-mail alterado"
+      password_change:
+        subject: "Senha alterada"
     sessions:
       signed_in: "Login efetuado com sucesso."
       signed_out: "Logout efetuado com sucesso."
+      already_signed_out: "Logout efetuado com sucesso."
     registrations:
       signed_up: "Conta criada com sucesso."
       signed_up_but_inactive: "Sua conta foi criada com sucesso, mas precisa ser ativada antes de continuar."
+      signed_up_but_locked: "Sua conta foi criada com sucesso, mas está bloqueada."
       signed_up_but_unconfirmed: "Sua conta foi criada com sucesso, mas você precisa confirmar seu e-mail antes de continuar."
+      update_needs_confirmation: "Sua conta foi atualizada com sucesso, mas precisamos confirmar seu novo e-mail. Verifique sua caixa de entrada."
       updated: "Conta atualizada com sucesso."
+      updated_but_not_signed_in: "Sua conta foi atualizada com sucesso, mas você precisa entrar novamente."
       destroyed: "Sua conta foi excluída com sucesso."
     passwords:
+      no_token: "Você não pode acessar esta página sem vir de um e-mail de redefinição de senha. Se você veio desse e-mail, confira se usou a URL completa."
       send_instructions: "Você receberá um e-mail com instruções para redefinir sua senha em alguns minutos."
       send_paranoid_instructions: "Se seu e-mail estiver em nossa base, você receberá um e-mail com instruções para redefinir sua senha em alguns minutos."
       updated: "Sua senha foi alterada com sucesso."
@@ -101,3 +118,11 @@ pt-BR:
       unlocked: "Sua conta foi desbloqueada com sucesso."
     omniauth_callbacks:
       success: "Autenticado com sucesso via %{kind}."
+      failure: "Não foi possível autenticar via %{kind}: %{reason}."
+  errors:
+    messages:
+      already_confirmed: "já foi confirmado, tente entrar"
+      confirmation_period_expired: "precisa ser confirmado dentro de %{period}; solicite uma nova confirmação"
+      expired: "expirou; solicite um novo"
+      not_found: "não encontrado"
+      not_locked: "não estava bloqueado"

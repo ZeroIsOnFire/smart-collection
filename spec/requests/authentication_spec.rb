@@ -142,6 +142,20 @@ RSpec.describe 'Authentications', type: :request do
       expect(response).to redirect_to(cars_path)
     end
 
+    it 'shows invalid credentials warning in Portuguese for a wrong password' do
+      post user_session_path, params: { user: { email: user.email, password: 'wrong-password' } }
+
+      expect(flash[:alert]).to eq(I18n.t('devise.failure.invalid'))
+      expect(flash[:alert]).not_to include('Invalid')
+    end
+
+    it 'shows invalid credentials warning in Portuguese for an unknown email' do
+      post user_session_path, params: { user: { email: 'missing@example.com', password: 'password123' } }
+
+      expect(flash[:alert]).to eq(I18n.t('devise.failure.not_found_in_database'))
+      expect(flash[:alert]).not_to include('Invalid')
+    end
+
     it 'redirects a user with pending setup to initial setup' do
       user.update!(initial_setup_completed: false)
 
