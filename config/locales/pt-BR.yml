@@ -324,9 +324,9 @@ pt-BR:
       create_collection: "Cadastrar primeiro carro"
     index:
       title: "Coleção de %{name}"
-      subtitle: "Navegue pelos carros cadastrados, filtre por modelo, marca, ano ou cor e abra a ficha com foto, escala e observações."
+      subtitle: "Navegue pelos carros cadastrados, filtre por modelo, marca, ano, escala ou cor e abra a ficha com foto, escala e observações."
       cataloged_count: "Veículos catalogados"
-      search_placeholder: "Buscar por modelo, marca, ano ou cor"
+      search_placeholder: "Buscar por modelo, marca, ano, escala ou cor"
       loading: "Carregando..."
       searching: "Buscando..."
       clear_search: "Limpar busca"

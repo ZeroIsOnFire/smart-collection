@@ -164,6 +164,33 @@ RSpec.describe 'Cars', type: :request do
         get cars_path, params: { q: 'match' }
         expect(response.body).to include('Searchable Car')
       end
+
+      it 'filters cars by scale' do
+        car_matching.update!(size: '1:64')
+
+        get cars_path, params: { q: '1:64' }
+
+        expect(response.body).to include('Searchable Car')
+        expect(response.body).not_to include('Other Car')
+      end
+
+      it 'filters cars by color' do
+        car_matching.update!(color: 'Azul')
+
+        get cars_path, params: { q: 'azul' }
+
+        expect(response.body).to include('Searchable Car')
+        expect(response.body).not_to include('Other Car')
+      end
+
+      it 'filters cars by year' do
+        car_matching.update!(year: 1988)
+
+        get cars_path, params: { q: '1988' }
+
+        expect(response.body).to include('Searchable Car')
+        expect(response.body).not_to include('Other Car')
+      end
     end
   end
 

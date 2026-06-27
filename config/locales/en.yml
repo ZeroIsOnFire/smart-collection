@@ -312,9 +312,9 @@ en:
       create_collection: "Add first car"
     index:
       title: "%{name}'s Collection"
-      subtitle: "Browse cataloged cars, filter by model, brand, year or color, and open the record with photo, scale and notes."
+      subtitle: "Browse cataloged cars, filter by model, brand, year, scale or color, and open the record with photo, scale and notes."
       cataloged_count: "Cataloged vehicles"
-      search_placeholder: "Search by model, brand, year or color"
+      search_placeholder: "Search by model, brand, year, scale or color"
       loading: "Loading..."
       searching: "Searching..."
       clear_search: "Clear search"

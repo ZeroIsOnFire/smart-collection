@@ -358,6 +358,33 @@ RSpec.describe CarService do
       expect(results).to include(car2)
     end
 
+    it 'returns cars matching the query in scale' do
+      car1.update!(size: '1:64')
+
+      results = described_class.new(user).search('1:64')
+
+      expect(results).to include(car1)
+      expect(results).not_to include(car2)
+    end
+
+    it 'returns cars matching the query in color' do
+      car2.update!(color: 'Azul')
+
+      results = described_class.new(user).search('azul')
+
+      expect(results).to include(car2)
+      expect(results).not_to include(car1)
+    end
+
+    it 'returns cars matching the query in year' do
+      car1.update!(year: 1988)
+
+      results = described_class.new(user).search('1988')
+
+      expect(results).to include(car1)
+      expect(results).not_to include(car2)
+    end
+
     it 'does not return cars from other users' do
       results = described_class.new(user).search('Ferrari')
       expect(results).to include(car1)
