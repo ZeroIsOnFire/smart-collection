@@ -4,6 +4,14 @@
 
 Servico Rails premium para registro e gerenciamento de colecoes: itens, fotos, autodeteccao local via YOLO, recorte manual, upscale local, compartilhamento publico seguro e exportacao PDF/CSV. Stack principal: Rails 8.1, Ruby 3.3.10, MongoDB/Mongoid, Devise, Hotwire/Turbo/Stimulus, Bootstrap 5, CarrierWave/MiniMagick, Sidekiq/Redis, RSpec e Docker Compose.
 
+## Uso de Contexto
+
+- Antes de abrir arquivos grandes, use `rg` com padroes especificos e leia apenas faixas de linhas relevantes.
+- Evite abrir artefatos gerados, minificados, compilados, logs extensos ou dumps completos quando uma busca focada resolver.
+- Resuma outputs grandes antes de continuar a investigacao.
+- Ao repetir comando que falhou, mude a hipotese, o escopo ou o ambiente e registre a causa provavel da falha.
+- Prefira comandos filtrados para validar o sintoma observado; aumente timeout apenas quando houver motivo concreto.
+
 ## Prioridades Inviolaveis
 
 - Seguranca e segregacao de dados vem primeiro: dados de usuario sempre escopados por `current_user` ou pelo dono publico validado. Nunca use busca global para recursos privados.
@@ -36,12 +44,7 @@ Servico Rails premium para registro e gerenciamento de colecoes: itens, fotos, a
 - Comandos Rails, RSpec e RuboCop devem rodar no container `web`.
 - Testes Playwright devem rodar dentro do Docker, no container `web`, com `docker compose exec web npm run test:e2e -- caminho/do/teste.spec.js --browser=chromium`. Use `http://127.0.0.1:3000` quando o teste roda no proprio container `web`.
 - RSpec deve usar `docker compose exec web bin/safe_rspec`; nunca rode `bundle exec rspec` direto. O wrapper valida `Rails.env=test` e banco Mongoid com `test` no nome.
-- Se `bin/safe_rspec` ou `bin/qa` falhar no container com mensagens como `$'\r': command not found` ou `cannot execute: required file not found`, o problema costuma ser CRLF nos scripts. Use o workaround sem alterar arquivos: `docker compose exec web sh -lc "tr -d '\r' < bin/safe_rspec | bash -s -- spec/caminho_spec.rb"` para specs focados, `docker compose exec web sh -lc "tr -d '\r' < bin/safe_rspec | bash"` para a suite completa e `docker compose exec web sh -lc "tr -d '\r' < bin/qa | bash"` para QA amplo.
-- O `bin/qa` com CRLF removido em memoria pode ainda falhar na etapa final porque chama `bin/safe_rspec` diretamente. Quando isso acontecer, registre o resultado parcial do QA e rode a suite separadamente com o workaround acima.
-- O `bin/qa` com CRLF removido em memoria tambem pode estourar timeout da ferramenta antes de devolver saida util. Nesse caso, divida o QA em etapas: RuboCop focado nos arquivos alterados, specs focados, `rails_best_practices`, `flay app/`, suite completa via `bin/safe_rspec` com workaround, e registre qualquer etapa que ficou com timeout.
-- Se um lote grande de specs estourar timeout da ferramenta, divida em lotes menores por area alterada antes de repetir a suite completa.
-- O RuboCop amplo pode reportar `Layout/EndOfLine` em arquivos preexistentes com CRLF. Corrija line endings apenas nos arquivos realmente tocados pela tarefa, salvo pedido explicito para normalizacao global.
-- Quando RuboCop focado acusar `Layout/EndOfLine` em arquivos tocados no Windows, normalize somente esses arquivos dentro do container com `docker compose exec web perl -pi -e 's/\r$//' caminho1 caminho2` e rode RuboCop focado novamente.
+- Em falhas de CRLF, timeout ou `Layout/EndOfLine`, aplique o workaround focado documentado em `$quality-check-rails` e registre o resultado parcial sem repetir a mesma etapa indefinidamente.
 - Durante a implementacao, rode specs focados no que foi alterado. No fechamento de tarefa Rails relevante, rode a suite suficiente para dar confianca; QA amplo/lint/audit fica para o final do processo ou quando o usuario pedir.
 - TDD e esperado: teste antes da implementacao quando houver mudanca de comportamento. Use RSpec, FactoryBot, Shoulda e VCR para HTTP externo.
 
@@ -95,3 +98,8 @@ Servico Rails premium para registro e gerenciamento de colecoes: itens, fotos, a
 - CI de PR para `main`: build Docker, RSpec, RuboCop e Bundler Audit. PR com CI vermelho nao deve ser mergeado.
 - PRs devem ser pequenos e focados, com descricao do que foi feito, por que e como testar. Ao fechar plano/goal, atualize/crie um arquivo local em `docs/` com resumo, testes, riscos, timeouts e QA parcial antes do commit.
 - Checklist de review: escopo por usuario, testes adequados, arquitetura preservada, sem duplicacao desnecessaria, sem secrets e sem dependencias nao autorizadas.
+
+## Fechamento
+
+- Informe testes executados, comandos inconclusivos e riscos restantes de forma objetiva, sem colar saidas longas.
+- Mantenha o resumo final curto e priorize mudancas feitas, validacao e bloqueios reais.

@@ -9,6 +9,7 @@ Assume the Smart Collection JavaScript QA role. Keep the esbuild bundle valid, S
 
 ## Scope Detection
 
+- For focused JavaScript changes, run the smallest relevant import/build/lint/browser check before the full workflow.
 - If `package.json` or `package-lock.json` changed, verify dependencies with npm inside the `web` container.
 - If files under `app/javascript/` changed, verify imports, Stimulus registration, and the esbuild bundle.
 - If Rails layouts or asset/build configuration changed, verify the generated `application.js` asset is resolvable by Propshaft.
@@ -49,6 +50,19 @@ docker compose exec web npm run lint
 ```
 
 Do not add ESLint, Prettier, TypeScript, or other JavaScript tools unless the user explicitly authorizes the new dependency.
+
+## Browser And Playwright Checks
+
+- For visible frontend behavior, first validate the smallest affected route, component, selector, console error, HTTP status, or asset request that can confirm the bug.
+- Prefer short temporary checks for assets, fonts, icons, Stimulus registration, Turbo events, or console errors before capturing large HTML or broad screenshots.
+- Run focused Playwright specs inside the `web` container when browser behavior changes:
+
+```bash
+docker compose exec web npm run test:e2e -- path/to/test.spec.js --browser=chromium
+```
+
+- Use `http://127.0.0.1:3000` when the test runs from inside the `web` container.
+- Remove or ignore temporary diagnostic artifacts after verification.
 
 ## Fixing Issues
 
