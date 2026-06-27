@@ -43,6 +43,8 @@
   --switch-off-bg: #d8cbbb;
   --switch-off-border: #b9a993;
   --switch-knob-bg: #fffdfa;
+  --switch-on-bg: var(--premium-indigo);
+  --switch-on-border: var(--premium-indigo);
   --bs-primary: var(--premium-indigo);
   --bs-primary-rgb: 47, 111, 104;
   --bs-primary-bg-subtle: rgba(47, 111, 104, 0.12);
@@ -78,6 +80,8 @@
   --switch-off-bg: #3c3329;
   --switch-off-border: #6e5d47;
   --switch-knob-bg: #f7f1e8;
+  --switch-on-bg: var(--premium-indigo);
+  --switch-on-border: var(--premium-indigo);
   
   /* Bootstrap Overrides */
   --bs-body-bg: var(--premium-background);
@@ -116,8 +120,16 @@
 }
 
 .form-check-input:checked {
-  background-color: var(--premium-indigo);
-  border-color: var(--premium-indigo);
+  background-color: var(--switch-on-bg);
+  border-color: var(--switch-on-border);
+}
+
+.form-switch .form-check-input {
+  background-position: left center;
+  background-size: contain;
+  cursor: pointer;
+  height: 1.35rem;
+  width: 2.5rem;
 }
 
 .form-switch .form-check-input:not(:checked) {
@@ -368,8 +380,8 @@ body {
 }
 
 .metadata-chip-ai {
-  background: rgba(47, 111, 104, 0.11);
-  border-color: rgba(47, 111, 104, 0.24);
+  background: transparent;
+  border-color: transparent;
   color: var(--premium-indigo);
 }
 
@@ -384,13 +396,18 @@ body {
 
 [data-theme="dark"] .collection-brand-badge,
 [data-theme="dark"] .metadata-chip-ai {
-  background: rgba(120, 166, 160, 0.14);
-  border-color: rgba(120, 166, 160, 0.28);
+  background: transparent;
+  border-color: transparent;
 }
 
 [data-theme="dark"] .metadata-chip {
   background: rgba(148, 163, 184, 0.1);
   border-color: rgba(148, 163, 184, 0.22);
+}
+
+[data-theme="dark"] .metadata-chip-ai {
+  background: transparent;
+  border-color: transparent;
 }
 
 [data-theme="dark"] .metadata-color-dot {
@@ -547,6 +564,9 @@ body {
 }
 
 .export-button-group {
+  background: var(--premium-indigo);
+  border: 1px solid var(--premium-indigo);
+  border-radius: 0.5rem;
   display: grid !important;
   grid-template-columns: minmax(0, 1fr) auto;
   overflow: hidden;
@@ -559,14 +579,30 @@ body {
   min-width: 0;
 }
 
+.export-button-group > .btn {
+  border: 0 !important;
+  border-radius: 0 !important;
+}
+
 .export-regenerate-form {
   display: contents;
 }
 
 .export-regenerate-button {
+  background-color: var(--card-bg) !important;
+  border: 0 !important;
+  border-left: 1px solid var(--premium-indigo) !important;
+  border-radius: 0 !important;
+  color: var(--premium-indigo) !important;
   justify-content: center !important;
   min-width: 48px !important;
   width: 48px;
+}
+
+.export-regenerate-button:hover,
+.export-regenerate-button:focus {
+  background-color: var(--soft-secondary-bg) !important;
+  color: var(--premium-indigo) !important;
 }
 
 .export-download-button > span {
@@ -1745,13 +1781,8 @@ body {
 }
 
 .record-upscaler-toggle .form-check-input {
-  background-position: left center;
-  background-size: contain;
-  cursor: pointer;
   flex: 0 0 auto;
-  height: 1.35rem;
   margin: 0;
-  width: 2.5rem;
 }
 
 .record-upscaler-toggle .form-check-label {
@@ -1765,9 +1796,9 @@ body {
 }
 
 .record-upscaler-toggle .form-check-input:checked {
-  background-color: var(--premium-indigo);
+  background-color: var(--switch-on-bg);
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23ffffff'/%3e%3c/svg%3e");
-  border-color: var(--premium-indigo);
+  border-color: var(--switch-on-border);
 }
 
 [data-theme="dark"] .record-upscaler-toggle .form-check-input:not(:checked) {

@@ -34,7 +34,7 @@
       <% end %>
       <%= button_to collection_exports_path(format_type: format_type),
                     method: :post,
-                    class: "btn btn-outline-success rounded-end-3 px-3 d-flex align-items-center border-start-0 export-regenerate-button",
+                    class: "btn btn-outline-success rounded-end-3 px-3 d-flex align-items-center export-regenerate-button",
                     form: { class: "export-regenerate-form" },
                     data: { turbo_stream: true },
                     title: t("collection_exports.actions.regenerate") do %>
@@ -49,7 +49,7 @@
       </button>
       <%= button_to collection_exports_path(format_type: format_type),
                     method: :post,
-                    class: "btn btn-outline-danger rounded-end-3 px-3 d-flex align-items-center border-start-0 export-regenerate-button",
+                    class: "btn btn-outline-danger rounded-end-3 px-3 d-flex align-items-center export-regenerate-button",
                     form: { class: "export-regenerate-form" },
                     data: { turbo_stream: true },
                     title: t("collection_exports.actions.retry") do %>

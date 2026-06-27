@@ -53,9 +53,13 @@ test.describe("car detail records visual identity", () => {
         password: '${PASSWORD}',
         password_confirmation: '${PASSWORD}',
         initial_setup_completed: true,
+        ai_upscaling_enabled: true,
         sharing_enabled: true,
         share_token: '${rubyString(shareToken)}'
       )
+
+      small_photo_path = Rails.root.join('tmp', "playwright-small-ai-#{Time.now.to_i}.jpg")
+      MiniMagick::Image.open(Rails.root.join('spec/fixtures/files/car_sample.jpg')).resize('240x240').write(small_photo_path)
 
       car = user.cars.create!(
         name: 'Datsun 240Z Rally',
@@ -63,8 +67,14 @@ test.describe("car detail records visual identity", () => {
         color: 'Vermelho',
         year: 1972,
         size: '1:64',
-        observations: 'Ficha com pintura de corrida, escala pequena e detalhes do lote.'
+        observations: 'Ficha com pintura de corrida, escala pequena e detalhes do lote.',
+        photo_upscale_strategy: 'ai'
       )
+
+      File.open(small_photo_path) { |file| car.original_photo = file }
+      File.open(Rails.root.join('spec/fixtures/files/car_sample.jpg')) { |file| car.enhanced_photo = file }
+      car.photo_variant = 'ai'
+      car.save!
 
       puts car.id.to_s
     `);
@@ -98,19 +108,23 @@ test.describe("car detail records visual identity", () => {
       const edit = document.querySelector("[id^='car_details_'] .btn-premium");
       const danger = document.querySelector("[id^='car_details_'] .btn-outline-danger");
       const brand = document.querySelector(".car-details-card .badge.text-primary");
+      const aiChip = document.querySelector(".metadata-chip-ai");
       const photo = document.querySelector(".car-details-empty-photo");
       const cardStyles = getComputedStyle(card);
       const editStyles = getComputedStyle(edit);
       const dangerStyles = getComputedStyle(danger);
       const brandStyles = getComputedStyle(brand);
-      const photoStyles = getComputedStyle(photo);
+      const aiChipStyles = getComputedStyle(aiChip);
+      const photoStyles = photo ? getComputedStyle(photo) : null;
 
       return {
         cardRadius: Number.parseFloat(cardStyles.borderTopLeftRadius),
         editRadius: Number.parseFloat(editStyles.borderTopLeftRadius),
         dangerRadius: Number.parseFloat(dangerStyles.borderTopLeftRadius),
         brandRadius: Number.parseFloat(brandStyles.borderTopLeftRadius),
-        photoBackground: photoStyles.backgroundColor,
+        aiChipBackground: aiChipStyles.backgroundColor,
+        aiChipBorder: aiChipStyles.borderColor,
+        photoBackground: photoStyles?.backgroundColor,
         editBackground: editStyles.backgroundColor,
         horizontalOverflow: document.documentElement.scrollWidth > window.innerWidth,
       };
@@ -120,6 +134,8 @@ test.describe("car detail records visual identity", () => {
     expect(privateStyles.editRadius).toBeLessThanOrEqual(8);
     expect(privateStyles.dangerRadius).toBeLessThanOrEqual(8);
     expect(privateStyles.brandRadius).toBeLessThanOrEqual(8);
+    expect(privateStyles.aiChipBackground).toBe("rgba(0, 0, 0, 0)");
+    expect(privateStyles.aiChipBorder).toBe("rgba(0, 0, 0, 0)");
     expect(isPurpleOrBlue(privateStyles.editBackground)).toBe(false);
     expect(privateStyles.horizontalOverflow).toBe(false);
 
@@ -137,7 +153,7 @@ test.describe("car detail records visual identity", () => {
       return {
         cardRadii: cards.map((card) => Number.parseFloat(getComputedStyle(card).borderTopLeftRadius)),
         brandRadius: Number.parseFloat(getComputedStyle(brand).borderTopLeftRadius),
-        photoBackground: getComputedStyle(photo).backgroundColor,
+        photoBackground: photo ? getComputedStyle(photo).backgroundColor : null,
         hasBackdropBlurClass: Boolean(document.querySelector(".backdrop-blur")),
         horizontalOverflow: document.documentElement.scrollWidth > window.innerWidth,
       };

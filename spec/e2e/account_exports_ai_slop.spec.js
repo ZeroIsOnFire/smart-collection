@@ -43,6 +43,8 @@ test.describe("account and export controls visual identity", () => {
     email = `playwright-account-export-${Date.now()}@example.com`;
 
     runRails(`
+      require 'fileutils'
+
       user = User.create!(
         name: 'Conta Exportacao',
         email: '${rubyString(email)}',
@@ -60,6 +62,23 @@ test.describe("account and export controls visual identity", () => {
         size: '1:64',
         observations: 'Miniatura cadastrada para validar exportacao.'
       )
+
+      exports_dir = Rails.root.join('tmp', 'playwright_exports')
+      FileUtils.mkdir_p(exports_dir)
+
+      export_prefix = '${rubyString(email)}'.parameterize
+      csv_path = exports_dir.join("#{export_prefix}-catalogo.csv")
+      pdf_path = exports_dir.join("#{export_prefix}-catalogo.pdf")
+      File.write(csv_path, "modelo,marca\\nFord Escort RS,Matchbox\\n")
+      File.binwrite(pdf_path, "%PDF-1.4\\n% Playwright export fixture\\n")
+
+      File.open(csv_path) do |file|
+        user.collection_exports.create!(format_type: 'csv', status: 'completed', file: file)
+      end
+
+      File.open(pdf_path) do |file|
+        user.collection_exports.create!(format_type: 'pdf', status: 'completed', file: file)
+      end
     `);
   });
 
@@ -81,9 +100,9 @@ test.describe("account and export controls visual identity", () => {
 
     await page.goto(`${BASE_URL}/users/edit`);
     await expect(page.getByRole("heading", { name: "Dados da conta" })).toBeVisible();
-    await expect(page.getByText(/Atualize login, senha, link publico/i)).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Login e seguranca" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Link publico do acervo" })).toBeVisible();
+    await expect(page.getByText(/Atualize login, senha, link público/i)).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Login e segurança" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Link público do acervo" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Salvar dados da conta" })).toBeVisible();
     await expect(page.getByText(/Configurações de Conta|Perfil e Segurança|Visão Pública|Salvar Alterações/i)).toHaveCount(0);
 
@@ -116,21 +135,39 @@ test.describe("account and export controls visual identity", () => {
     await page.goto(`${BASE_URL}/cars`);
     await page.locator(".collection-secondary-actions > button").click();
     await expect(page.getByText("Exportar coleção")).toBeVisible();
-    await expect(page.getByRole("button", { name: /Exportar CSV/i })).toBeVisible();
-    await expect(page.getByRole("button", { name: /Exportar PDF/i })).toBeVisible();
+    await expect(page.getByRole("link", { name: /Baixar CSV/i })).toBeVisible();
+    await expect(page.getByRole("link", { name: /Baixar PDF/i })).toBeVisible();
 
     const exportStyles = await page.evaluate(() => {
-      const buttons = [...document.querySelectorAll(".collection-secondary-menu .btn-export-action")];
+      const groups = [...document.querySelectorAll(".collection-secondary-menu .export-button-group")];
+      const downloadButtons = [...document.querySelectorAll(".collection-secondary-menu .export-download-button")];
+      const regenerateButtons = [...document.querySelectorAll(".collection-secondary-menu .export-regenerate-button")];
 
       return {
-        buttonRadii: buttons.map((button) => Number.parseFloat(getComputedStyle(button).borderTopLeftRadius)),
-        buttonBackgrounds: buttons.map((button) => getComputedStyle(button).backgroundColor),
+        groupRadii: groups.map((group) => Number.parseFloat(getComputedStyle(group).borderTopLeftRadius)),
+        groupOverflows: groups.map((group) => getComputedStyle(group).overflow),
+        downloadRadii: downloadButtons.map((button) => [
+          Number.parseFloat(getComputedStyle(button).borderTopLeftRadius),
+          Number.parseFloat(getComputedStyle(button).borderTopRightRadius),
+        ]),
+        regenerateRadii: regenerateButtons.map((button) => [
+          Number.parseFloat(getComputedStyle(button).borderTopLeftRadius),
+          Number.parseFloat(getComputedStyle(button).borderTopRightRadius),
+        ]),
+        regenerateBorderLefts: regenerateButtons.map((button) => getComputedStyle(button).borderLeftWidth),
+        downloadBackgrounds: downloadButtons.map((button) => getComputedStyle(button).backgroundColor),
+        regenerateBackgrounds: regenerateButtons.map((button) => getComputedStyle(button).backgroundColor),
         horizontalOverflow: document.documentElement.scrollWidth > window.innerWidth,
       };
     });
 
-    expect(exportStyles.buttonRadii.every((radius) => radius <= 8)).toBe(true);
-    expect(exportStyles.buttonBackgrounds.every((color) => !isPurpleOrBlue(color))).toBe(true);
+    expect(exportStyles.groupRadii.every((radius) => radius <= 8)).toBe(true);
+    expect(exportStyles.groupOverflows.every((overflow) => overflow === "hidden")).toBe(true);
+    expect(exportStyles.downloadRadii.every(([left, right]) => left === 0 && right === 0)).toBe(true);
+    expect(exportStyles.regenerateRadii.every(([left, right]) => left === 0 && right === 0)).toBe(true);
+    expect(exportStyles.regenerateBorderLefts.every((width) => width === "1px")).toBe(true);
+    expect(exportStyles.downloadBackgrounds.every((color) => !isPurpleOrBlue(color))).toBe(true);
+    expect(exportStyles.regenerateBackgrounds.every((color) => !isPurpleOrBlue(color))).toBe(true);
     expect(exportStyles.horizontalOverflow).toBe(false);
   });
 });
