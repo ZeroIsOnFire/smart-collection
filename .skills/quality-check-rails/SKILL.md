@@ -43,6 +43,24 @@ docker compose exec web bin/safe_rspec
 
 Never finish a Rails QA task with failing tests unless you clearly report the blocker.
 
+## Docker And Windows Failures
+
+- If `bin/safe_rspec` or `bin/qa` fails with messages like `$'\r': command not found` or `cannot execute: required file not found`, treat CRLF in scripts as the likely cause and use an in-memory workaround without editing the script:
+
+```bash
+docker compose exec web sh -lc "tr -d '\r' < bin/safe_rspec | bash -s -- spec/path_spec.rb"
+docker compose exec web sh -lc "tr -d '\r' < bin/safe_rspec | bash"
+docker compose exec web sh -lc "tr -d '\r' < bin/qa | bash"
+```
+
+- If `bin/qa` with CRLF removed in memory fails at the final RSpec step because it calls `bin/safe_rspec` directly, record the partial QA result and run the suite separately with the workaround above.
+- If broad QA or a large spec batch times out before useful output, split the run into focused steps: RuboCop for changed files, focused specs, `rails_best_practices`, `flay app/`, and then the full suite when practical.
+- If RuboCop reports `Layout/EndOfLine` on changed files in Windows, normalize only those files inside the container and rerun the focused RuboCop check:
+
+```bash
+docker compose exec web perl -pi -e 's/\r$//' path/to/file.rb
+```
+
 ## Safety Rules
 
 - Never remove user data segregation. Queries and controller actions must stay scoped through `current_user` whenever user-owned data is involved.
