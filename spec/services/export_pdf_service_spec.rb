@@ -33,6 +33,7 @@ RSpec.describe ExportPdfService do
       expect(service).to receive(:draw_cover_page).ordered.and_call_original
       expect(service).to receive(:draw_catalog_pages).ordered.and_call_original
       expect(service).to receive(:draw_collection_summary).and_call_original
+      expect(service).to receive(:draw_cover_photo_strip).and_call_original
 
       service.generate
     end
@@ -43,12 +44,7 @@ RSpec.describe ExportPdfService do
 
       metrics = service.send(:collection_metrics)
 
-      expect(metrics).to include(
-        { label: I18n.t('export_pdf.summary.items'), value: '3' },
-        { label: I18n.t('export_pdf.summary.brands'), value: '2' },
-        { label: I18n.t('export_pdf.summary.years'), value: '1970-1980' },
-        { label: I18n.t('export_pdf.summary.ai_photos'), value: '0' }
-      )
+      expect(metrics).to eq([{ label: I18n.t('export_pdf.summary.items'), value: '3' }])
     end
 
     it 'marks photos displayed with the AI-enhanced variant' do

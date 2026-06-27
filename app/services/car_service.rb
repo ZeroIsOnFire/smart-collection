@@ -88,11 +88,20 @@ class CarService
     words = query.to_s.strip
     return user.cars if words.empty?
 
-    self.class.ensure_text_search_index!
-    user.cars.where('$text' => { '$search' => words })
+    user.cars.any_of(*search_conditions(words))
   end
 
   private
+
+  def search_conditions(words)
+    pattern = /#{Regexp.escape(words)}/i
+    conditions = %i[name brand size color observations tags].map do |field|
+      { field => pattern }
+    end
+
+    conditions << { year: words.to_i } if words.match?(/\A\d+\z/)
+    conditions
+  end
 
   def car_image_minimum_side
     ImageUpscalerService.default_minimum_side

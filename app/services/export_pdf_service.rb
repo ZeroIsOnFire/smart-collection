@@ -8,14 +8,16 @@ class ExportPdfService
   CARD_HEIGHT = 265
   CARD_IMAGE_HEIGHT = 150
   COLORS = {
-    navy: '0F172A',
-    slate: '1E293B',
-    muted: '64748B',
-    soft: 'F8FAFC',
-    line: 'E2E8F0',
-    gold: 'D4AF37',
-    blue: '2563EB',
-    indigo: '4F46E5',
+    navy: '1F2933',
+    teal: '2F6F68',
+    teal_dark: '214F4A',
+    teal_soft: 'E8F1EF',
+    muted: '6B7280',
+    text_muted: '6F6256',
+    text_soft: '8E8174',
+    soft: 'F6F1E8',
+    line: 'D7C7B2',
+    gold: 'A56D32',
     white: 'FFFFFF'
   }.freeze
 
@@ -46,95 +48,174 @@ class ExportPdfService
 
   def draw_cover_page(pdf)
     draw_cover_background(pdf)
-
-    pdf.fill_color COLORS[:white]
-    pdf.move_down 46
-    pdf.text(
-      safe_text(I18n.t('export_pdf.eyebrow')),
-      size: 9,
-      style: :bold,
-      align: :center,
-      character_spacing: 2
-    )
-    pdf.move_down 10
-    pdf.text(
-      safe_text(I18n.t('export_pdf.title')),
-      size: 30,
-      style: :bold,
-      align: :center,
-      leading: 2
-    )
-    pdf.move_down 8
-    pdf.fill_color 'CBD5E1'
-    pdf.text safe_text(collection_owner_name), size: 14, align: :center
-    pdf.move_down 22
-
-    draw_cover_divider(pdf)
-    draw_collection_summary(pdf)
+    draw_cover_card(pdf)
+    draw_cover_photo_strip(pdf)
     draw_cover_highlights(pdf)
   end
 
   def draw_cover_background(pdf)
     pdf.canvas do
-      pdf.fill_color COLORS[:navy]
+      pdf.fill_color COLORS[:soft]
       pdf.fill_rectangle [pdf.bounds.left, pdf.bounds.top], pdf.bounds.width, pdf.bounds.height
 
-      pdf.fill_color '172554'
-      pdf.transparent(0.28) do
-        pdf.fill_circle [pdf.bounds.right - 64, pdf.bounds.top - 72], 140
-        pdf.fill_circle [pdf.bounds.left + 24, pdf.bounds.bottom + 68], 110
-      end
+      pdf.fill_color COLORS[:teal_dark]
+      pdf.fill_rectangle [pdf.bounds.left, pdf.bounds.top], pdf.bounds.width, 250
+
+      pdf.fill_color COLORS[:teal]
+      pdf.fill_rectangle [pdf.bounds.left, pdf.bounds.top - 250], pdf.bounds.width, 26
+
+      pdf.fill_color COLORS[:gold]
+      pdf.fill_rectangle [pdf.bounds.left, pdf.bounds.top - 276], pdf.bounds.width, 3
     end
   end
 
-  def draw_cover_divider(pdf)
-    x = (pdf.bounds.width - 130) / 2
+  def draw_cover_card(pdf)
+    card_x = 34
+    card_y = pdf.bounds.top - 112
+    card_width = pdf.bounds.width - 68
+    card_height = 260
+
+    pdf.fill_color 'C8B99F'
+    pdf.transparent(0.25) do
+      pdf.fill_rounded_rectangle [card_x + 5, card_y - 5], card_width, card_height, 8
+    end
+
+    pdf.fill_color COLORS[:white]
+    pdf.fill_rounded_rectangle [card_x, card_y], card_width, card_height, 8
+
+    pdf.stroke_color COLORS[:line]
+    pdf.line_width = 0.8
+    pdf.stroke_rounded_rectangle [card_x, card_y], card_width, card_height, 8
+
+    content_x = card_x + 28
+    content_y = card_y - 30
+    content_width = card_width - 56
+    summary_width = 132
+    gap = 28
+
+    pdf.bounding_box([content_x, content_y], width: content_width - summary_width - gap, height: card_height - 52) do
+      draw_cover_title_block(pdf)
+    end
+
+    pdf.bounding_box([content_x + content_width - summary_width, content_y - 32],
+                     width: summary_width,
+                     height: 96) do
+      draw_collection_summary(pdf)
+    end
+  end
+
+  def draw_cover_title_block(pdf)
+    pdf.fill_color COLORS[:gold]
+    pdf.text safe_text(I18n.t('export_pdf.eyebrow')),
+             size: 8.5,
+             style: :bold,
+             character_spacing: 1.8
+    pdf.move_down 12
+
+    pdf.fill_color COLORS[:teal_dark]
+    pdf.text safe_text(I18n.t('export_pdf.title')),
+             size: 28,
+             style: :bold,
+             leading: 2
+    pdf.move_down 8
+
+    pdf.fill_color COLORS[:muted]
+    pdf.text safe_text(collection_owner_name), size: 12
+    pdf.move_down 18
+
     pdf.stroke_color COLORS[:gold]
-    pdf.line_width = 1.4
-    pdf.stroke_horizontal_line x, x + 130, at: pdf.cursor
-    pdf.move_down 28
+    pdf.line_width = 1.2
+    pdf.stroke_horizontal_line 0, 120, at: pdf.cursor
   end
 
   def draw_collection_summary(pdf)
-    metrics = collection_metrics
-    card_width = (pdf.bounds.width - 24) / 4
+    metric = collection_metrics.first
+    card_width = pdf.bounds.width
+    card_height = pdf.bounds.height
 
-    pdf.bounding_box([0, pdf.cursor], width: pdf.bounds.width, height: 86) do
-      metrics.each_with_index do |metric, index|
-        x = index * (card_width + 8)
-        pdf.bounding_box([x, pdf.bounds.top], width: card_width, height: 72) do
-          pdf.fill_color 'FFFFFF'
-          pdf.transparent(0.1) do
-            pdf.fill_rounded_rectangle [0, pdf.bounds.top], card_width, 72, 8
-          end
-          pdf.stroke_color '334155'
-          pdf.line_width = 0.5
-          pdf.stroke_rounded_rectangle [0, pdf.bounds.top], card_width, 72, 8
+    pdf.bounding_box([0, pdf.cursor], width: card_width, height: card_height) do
+      pdf.fill_color COLORS[:teal_soft]
+      pdf.fill_rounded_rectangle [0, pdf.bounds.top], card_width, card_height, 8
+      pdf.stroke_color 'B7D1CC'
+      pdf.line_width = 0.6
+      pdf.stroke_rounded_rectangle [0, pdf.bounds.top], card_width, card_height, 8
 
-          pdf.move_down 13
-          pdf.fill_color COLORS[:white]
-          pdf.text safe_text(metric[:value]), size: 15, style: :bold, align: :center
-          pdf.move_down 5
-          pdf.fill_color 'CBD5E1'
-          pdf.text safe_text(metric[:label]), size: 7.5, align: :center, character_spacing: 0.5
-        end
+      pdf.move_down 18
+      pdf.fill_color COLORS[:teal_dark]
+      pdf.text safe_text(metric[:value]), size: 26, style: :bold, align: :center
+      pdf.move_down 4
+      pdf.fill_color COLORS[:muted]
+      pdf.text safe_text(metric[:label]), size: 8, align: :center, character_spacing: 0.6
+    end
+  end
+
+  def draw_cover_photo_strip(pdf)
+    strip_y = pdf.bounds.top - 405
+    strip_x = 54
+    strip_width = pdf.bounds.width - 108
+    strip_height = 126
+    images = @cars.first(3).filter_map { |car| prepared_photo(car) }
+
+    pdf.fill_color COLORS[:white]
+    pdf.fill_rounded_rectangle [strip_x, strip_y], strip_width, strip_height, 8
+    pdf.stroke_color COLORS[:line]
+    pdf.line_width = 0.7
+    pdf.stroke_rounded_rectangle [strip_x, strip_y], strip_width, strip_height, 8
+
+    return draw_cover_empty_strip(pdf, strip_x, strip_y, strip_width, strip_height) if images.empty?
+
+    gap = 10
+    image_width = (strip_width - 36 - (gap * 2)) / 3
+    image_height = strip_height - 32
+    image_y = strip_y - 16
+
+    images.each_with_index do |image_data, index|
+      image_x = strip_x + 18 + (index * (image_width + gap))
+      pdf.bounding_box([image_x, image_y], width: image_width, height: image_height) do
+        pdf.fill_color COLORS[:soft]
+        pdf.fill_rounded_rectangle [0, pdf.bounds.top], image_width, image_height, 6
+        pdf.image image_data[:path],
+                  fit: [image_width - 12, image_height - 12],
+                  position: :center,
+                  vposition: :center,
+                  type: image_data[:type]
+      rescue StandardError
+        draw_cover_photo_placeholder(pdf, image_width, image_height)
       end
     end
+  end
 
-    pdf.move_down 18
+  def draw_cover_empty_strip(pdf, strip_x, strip_y, strip_width, strip_height)
+    pdf.bounding_box([strip_x + 18, strip_y - 26], width: strip_width - 36, height: strip_height - 40) do
+      pdf.fill_color COLORS[:teal_soft]
+      pdf.fill_rounded_rectangle [0, pdf.bounds.top], pdf.bounds.width, pdf.bounds.height, 6
+      pdf.move_down 28
+      pdf.fill_color COLORS[:muted]
+      pdf.text safe_text(I18n.t('export_pdf.empty_collection')), size: 10, align: :center
+    end
+  end
+
+  def draw_cover_photo_placeholder(pdf, image_width, image_height)
+    pdf.fill_color COLORS[:soft]
+    pdf.fill_rounded_rectangle [0, pdf.bounds.top], image_width, image_height, 6
+    pdf.move_down (image_height / 2) - 8
+    pdf.fill_color COLORS[:muted]
+    pdf.text safe_text(I18n.t('export_pdf.no_photo')), size: 8, align: :center
   end
 
   def draw_cover_highlights(pdf)
-    pdf.fill_color 'CBD5E1'
-    pdf.text safe_text(I18n.t('export_pdf.cover_description')), size: 10, align: :center, leading: 3
-    pdf.move_down 18
-    pdf.fill_color COLORS[:gold]
-    pdf.text safe_text(I18n.t('export_pdf.generated_at',
-                              date: I18n.l(@generated_at, format: :export_timestamp))),
-             size: 8.5,
-             style: :bold,
-             align: :center,
-             character_spacing: 1
+    pdf.bounding_box([54, pdf.bounds.bottom + 178], width: pdf.bounds.width - 108, height: 74) do
+      pdf.fill_color COLORS[:teal_dark]
+      pdf.text safe_text(I18n.t('export_pdf.cover_description')), size: 10, align: :center, leading: 4
+      pdf.move_down 14
+      pdf.fill_color COLORS[:gold]
+      pdf.text safe_text(I18n.t('export_pdf.generated_at',
+                                date: I18n.l(@generated_at, format: :export_timestamp))),
+               size: 8.5,
+               style: :bold,
+               align: :center,
+               character_spacing: 1
+    end
   end
 
   def draw_catalog_pages(pdf)
@@ -177,7 +258,7 @@ class ExportPdfService
 
   def draw_empty_catalog(pdf)
     pdf.move_down 110
-    pdf.fill_color 'CBD5E1'
+    pdf.fill_color 'D7C7B2'
     pdf.fill_circle [pdf.bounds.width / 2, pdf.cursor], 34
     pdf.move_down 48
     pdf.fill_color COLORS[:muted]
@@ -221,12 +302,12 @@ class ExportPdfService
         draw_ai_photo_badge(pdf, col_width) if car.photo_upscaled_by_ai?
       else
         pdf.move_down (CARD_IMAGE_HEIGHT / 2) - 8
-        pdf.fill_color '94A3B8'
+        pdf.fill_color COLORS[:text_soft]
         pdf.text safe_text(I18n.t('export_pdf.no_photo')), align: :center, size: 8.5
       end
     rescue StandardError
       pdf.move_down (CARD_IMAGE_HEIGHT / 2) - 8
-      pdf.fill_color '94A3B8'
+      pdf.fill_color COLORS[:text_soft]
       pdf.text safe_text(I18n.t('export_pdf.no_image')), align: :center, size: 8.5
     end
   end
@@ -235,7 +316,7 @@ class ExportPdfService
     pdf.bounding_box([12, pdf.bounds.top - CARD_IMAGE_HEIGHT - 12],
                      width: col_width - 24,
                      height: CARD_HEIGHT - CARD_IMAGE_HEIGHT - 18) do
-      pdf.fill_color COLORS[:navy]
+      pdf.fill_color COLORS[:teal_dark]
       pdf.text safe_text(car.name), size: 11, style: :bold, overflow: :truncate
       pdf.move_down 8
 
@@ -247,7 +328,7 @@ class ExportPdfService
       return unless car.observations?
 
       pdf.move_down 7
-      pdf.fill_color '94A3B8'
+      pdf.fill_color COLORS[:text_soft]
       pdf.text_box safe_text(car.observations.to_s.squish),
                    at: [0, pdf.cursor],
                    width: pdf.bounds.width,
@@ -260,10 +341,10 @@ class ExportPdfService
   end
 
   def draw_metadata_row(pdf, label, value)
-    pdf.fill_color COLORS[:muted]
+    pdf.fill_color COLORS[:text_muted]
     pdf.formatted_text [
-      { text: "#{safe_text(label)}: ", styles: [:bold] },
-      { text: safe_text(value) }
+      { text: "#{safe_text(label)}: ", styles: [:bold], color: COLORS[:teal_dark] },
+      { text: safe_text(value), color: COLORS[:text_muted] }
     ], size: 8, leading: 1
   end
 
@@ -272,7 +353,7 @@ class ExportPdfService
     prawn_color = color_hex.delete('#')
     y = pdf.cursor - 4
 
-    pdf.fill_color COLORS[:muted]
+    pdf.fill_color COLORS[:teal_dark]
     pdf.draw_text "#{safe_text(I18n.t('export_pdf.metadata.color'))}:",
                   at: [0, y - 2],
                   size: 8,
@@ -281,11 +362,11 @@ class ExportPdfService
     label_width = pdf.width_of("#{safe_text(I18n.t('export_pdf.metadata.color'))}:", size: 8, style: :bold)
     pdf.fill_color prawn_color
     pdf.fill_circle [label_width + 9, y], 4
-    pdf.stroke_color 'CBD5E1'
+    pdf.stroke_color COLORS[:line]
     pdf.line_width = 0.5
     pdf.stroke_circle [label_width + 9, y], 4
 
-    pdf.fill_color COLORS[:muted]
+    pdf.fill_color COLORS[:text_muted]
     pdf.draw_text safe_text(car.color), at: [label_width + 18, y - 3], size: 8
     pdf.move_down 14
   end
@@ -326,14 +407,14 @@ class ExportPdfService
         pdf.fill_color '94A3B8'
         pdf.draw_text 'SmartCollection', at: [pdf.bounds.left + 32, -26], size: 8, style: :bold
       else
-        pdf.fill_color COLORS[:blue]
+        pdf.fill_color COLORS[:teal]
         pdf.fill_circle [pdf.bounds.left + 10, -20.5], 4
-        pdf.fill_color '1D4ED8'
+        pdf.fill_color COLORS[:gold]
         pdf.fill_circle [pdf.bounds.left + 15, -24.5], 4
 
         pdf.fill_color '94A3B8'
         pdf.draw_text 'Smart', at: [pdf.bounds.left + 25, -25], size: 8, style: :bold
-        pdf.fill_color COLORS[:blue]
+        pdf.fill_color COLORS[:teal]
         pdf.draw_text 'Collection', at: [pdf.bounds.left + 48, -25], size: 8, style: :bold
       end
     end
@@ -357,7 +438,7 @@ class ExportPdfService
     text_width = pdf.width_of(badge_label, size: 7, style: :bold)
     text_x_position = x_position + ((badge_width - text_width) / 2)
 
-    pdf.fill_color COLORS[:indigo]
+    pdf.fill_color COLORS[:teal]
     pdf.transparent(0.78) do
       pdf.fill_rounded_rectangle [x_position, y_position], badge_width, badge_height, 4
     end
@@ -370,22 +451,8 @@ class ExportPdfService
 
   def collection_metrics
     [
-      { label: I18n.t('export_pdf.summary.items'), value: @cars.count.to_s },
-      { label: I18n.t('export_pdf.summary.brands'), value: distinct_count(:brand).to_s },
-      { label: I18n.t('export_pdf.summary.years'), value: year_range },
-      { label: I18n.t('export_pdf.summary.ai_photos'), value: @cars.count(&:photo_upscaled_by_ai?).to_s }
+      { label: I18n.t('export_pdf.summary.items'), value: @cars.count.to_s }
     ]
-  end
-
-  def distinct_count(attribute)
-    @cars.filter_map { |car| car.public_send(attribute).presence }.uniq.count
-  end
-
-  def year_range
-    years = @cars.filter_map(&:year)
-    return I18n.t('export_pdf.summary.not_available') if years.empty?
-
-    years.min == years.max ? years.first.to_s : "#{years.min}-#{years.max}"
   end
 
   def collection_owner_name

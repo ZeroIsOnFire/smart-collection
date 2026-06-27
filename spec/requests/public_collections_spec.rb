@@ -30,6 +30,32 @@ RSpec.describe 'Public Collections', type: :request do
       expect(stat_label['class']).not_to include('text-white')
     end
 
+    it 'uses the same search placeholder as the private catalog' do
+      get public_share_path(user.share_token)
+
+      document = Nokogiri::HTML(response.body)
+      search_input = document.at_css('input[name="q"]')
+
+      expect(search_input['placeholder']).to eq(I18n.t('cars.index.search_placeholder'))
+    end
+
+    it 'filters public cars by scale, color and year' do
+      car.update!(name: 'Filtered Public Car', size: '1:64', color: 'Azul', year: 1988)
+      create(:car, user: user, name: 'Other Public Car', size: '1:18', color: 'Vermelho', year: 1970)
+
+      get public_share_path(user.share_token), params: { q: '1:64' }
+      expect(response.body).to include('Filtered Public Car')
+      expect(response.body).not_to include('Other Public Car')
+
+      get public_share_path(user.share_token), params: { q: 'azul' }
+      expect(response.body).to include('Filtered Public Car')
+      expect(response.body).not_to include('Other Public Car')
+
+      get public_share_path(user.share_token), params: { q: '1988' }
+      expect(response.body).to include('Filtered Public Car')
+      expect(response.body).not_to include('Other Public Car')
+    end
+
     it 'renders public view modes with a premium gallery carousel and opens public cards in a modal' do
       car.update!(
         brand: 'Porsche',

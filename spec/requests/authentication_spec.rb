@@ -70,6 +70,10 @@ RSpec.describe 'Authentications', type: :request do
           }
         end.not_to change(User, :count)
         expect(response).to have_http_status(:unprocessable_entity)
+        error_text = Nokogiri::HTML(response.body).at_css('#error_explanation').text.squish
+
+        expect(error_text).to include(I18n.t('errors.messages.too_short.other', count: 6))
+        expect(error_text).not_to include('is too short')
       end
 
       it 'does not create a user with mismatched passwords' do
@@ -79,11 +83,23 @@ RSpec.describe 'Authentications', type: :request do
           }
         end.not_to change(User, :count)
         expect(response).to have_http_status(:unprocessable_entity)
+        error_text = Nokogiri::HTML(response.body).at_css('#error_explanation').text.squish
+
+        expect(error_text).to include(I18n.t('errors.messages.confirmation', attribute: User.human_attribute_name(:password)))
+        expect(error_text).not_to include("doesn't match")
       end
     end
   end
 
   describe 'POST /users/sign_in' do
+    it 'shows the unauthenticated warning in Portuguese' do
+      get cars_path
+
+      expect(response).to redirect_to(new_user_session_path)
+      expect(flash[:alert]).to eq(I18n.t('devise.failure.unauthenticated'))
+      expect(flash[:alert]).not_to include('You need to sign in')
+    end
+
     it 'renders dark autofill overrides for the email field' do
       get new_user_session_path
       global_css = Rails.root.join('app/assets/stylesheets/application.css').read
@@ -124,6 +140,20 @@ RSpec.describe 'Authentications', type: :request do
     it 'redirects a normal user to the collection' do
       post user_session_path, params: { user: { email: user.email, password: 'password123' } }
       expect(response).to redirect_to(cars_path)
+    end
+
+    it 'shows invalid credentials warning in Portuguese for a wrong password' do
+      post user_session_path, params: { user: { email: user.email, password: 'wrong-password' } }
+
+      expect(flash[:alert]).to eq(I18n.t('devise.failure.invalid'))
+      expect(flash[:alert]).not_to include('Invalid')
+    end
+
+    it 'shows invalid credentials warning in Portuguese for an unknown email' do
+      post user_session_path, params: { user: { email: 'missing@example.com', password: 'password123' } }
+
+      expect(flash[:alert]).to eq(I18n.t('devise.failure.not_found_in_database'))
+      expect(flash[:alert]).not_to include('Invalid')
     end
 
     it 'redirects a user with pending setup to initial setup' do
