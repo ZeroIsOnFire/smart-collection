@@ -1,6 +1,6 @@
 <div data-controller="autodetection-upload">
   <button type="button"
-          class="btn btn-premium rounded-pill px-4 d-flex align-items-center gap-2"
+          class="btn btn-premium rounded-3 px-4 d-flex align-items-center gap-2"
           data-bs-toggle="modal"
           data-bs-target="#autodetectModal">
     <i class="bi bi-magic"></i> <span><%= t('autodetections.form.button') %></span>
@@ -8,7 +8,7 @@
 
   <div class="modal fade" id="autodetectModal" tabindex="-1" aria-labelledby="autodetectModalLabel" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-lg modal-dialog-centered">
-      <div class="modal-content border-0 shadow">
+      <div class="modal-content border-0 shadow rounded-3">
         <div class="modal-header border-0 pb-0">
           <h5 class="modal-title fw-bold" id="autodetectModalLabel"><%= t('autodetections.form.title') %></h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="<%= t('actions.close') %>" data-action="click->autodetection-upload#stopCamera"></button>
@@ -51,13 +51,13 @@
 
               <div class="row g-3">
                 <div class="col-6">
-                  <button type="button" class="btn btn-premium rounded-pill w-100 py-3 d-flex align-items-center justify-content-center gap-2" data-action="click->autodetection-upload#openCamera">
+                  <button type="button" class="btn btn-premium rounded-3 w-100 py-3 d-flex align-items-center justify-content-center gap-2" data-action="click->autodetection-upload#openCamera">
                     <i class="bi bi-camera-fill d-block fs-4 mb-1"></i>
                     <span><%= t('autodetections.form.camera') %></span>
                   </button>
                 </div>
                 <div class="col-6">
-                  <button type="button" class="btn btn-soft-secondary rounded-pill w-100 py-3 d-flex align-items-center justify-content-center gap-2" data-action="click->autodetection-upload#selectFile">
+                  <button type="button" class="btn btn-soft-secondary rounded-3 w-100 py-3 d-flex align-items-center justify-content-center gap-2" data-action="click->autodetection-upload#selectFile">
                     <i class="bi bi-images d-block fs-4 mb-1"></i>
                     <span><%= t('autodetections.form.gallery') %></span>
                   </button>
@@ -74,7 +74,7 @@
                   </button>
                 </div>
               </div>
-              <button type="button" class="btn btn-sm btn-soft-secondary rounded-pill w-100 d-inline-flex align-items-center justify-content-center gap-2" data-action="click->autodetection-upload#closeCamera">
+              <button type="button" class="btn btn-sm btn-soft-secondary rounded-3 w-100 d-inline-flex align-items-center justify-content-center gap-2" data-action="click->autodetection-upload#closeCamera">
                 <i class="bi bi-arrow-left"></i>
                 <span><%= t('autodetections.form.back_to_upload') %></span>
               </button>
@@ -87,12 +87,12 @@
 
               <div class="row g-2">
                 <div class="col-6">
-                  <button type="button" class="btn btn-soft-secondary rounded-pill w-100 py-2 d-flex align-items-center justify-content-center gap-2" data-action="click->autodetection-upload#reset">
+                  <button type="button" class="btn btn-soft-secondary rounded-3 w-100 py-2 d-flex align-items-center justify-content-center gap-2" data-action="click->autodetection-upload#reset">
                     <i class="bi bi-arrow-left"></i> <span><%= t('actions.cancel') %></span>
                   </button>
                 </div>
                 <div class="col-6">
-                  <button type="submit" id="autodetection_submit_btn" class="btn btn-premium rounded-pill w-100 py-2 d-flex align-items-center justify-content-center gap-2">
+                  <button type="submit" id="autodetection_submit_btn" class="btn btn-premium rounded-3 w-100 py-2 d-flex align-items-center justify-content-center gap-2">
                     <i class="bi bi-magic"></i> <span id="autodetection_submit_text"><%= t('actions.confirm') %></span>
                   </button>
                 </div>

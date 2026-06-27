@@ -3,34 +3,34 @@
     <i class="bi bi-arrow-left fs-5"></i>
   <% end %>
   <div>
-    <h2 class="fw-bold mb-1 text-dark">Editar Usuário</h2>
-    <p class="text-muted mb-0">Altere informações básicas e privilégios de acesso.</p>
+    <h2 class="fw-bold mb-1 text-dark"><%= t('admin.users.edit.title') %></h2>
+    <p class="text-muted mb-0"><%= t('admin.users.edit.subtitle') %></p>
   </div>
 </div>
 
 <div class="row">
   <div class="col-lg-6">
-    <div class="card premium-card border-0 rounded-4 p-5">
+    <div class="card premium-card border-0 rounded-3 p-5">
       <%= simple_form_for([:admin, @user]) do |f| %>
         <div class="mb-4">
           <%= f.input :name,
-                label: "Nome Completo",
+                label: t('admin.users.edit.name_label'),
                 input_html: { class: "form-control-lg rounded-3" },
-                placeholder: "Ex: João Silva" %>
+                placeholder: t('admin.users.edit.name_placeholder') %>
         </div>
 
         <div class="mb-4">
           <%= f.input :email,
-                label: "E-mail",
+                label: t('admin.users.edit.email_label'),
                 input_html: { class: "form-control-lg rounded-3" },
-                placeholder: "email@exemplo.com" %>
+                placeholder: t('admin.users.edit.email_placeholder') %>
         </div>
 
-        <div class="mb-5 p-4 bg-light rounded-4 border">
+        <div class="mb-5 p-4 bg-light rounded-3 border">
           <div class="d-flex align-items-center justify-content-between">
             <div>
-              <div class="fw-bold text-dark">Privilégios Administrativos</div>
-              <div class="small text-muted">Permite acesso ao painel de controle global.</div>
+              <div class="fw-bold text-dark"><%= t('admin.users.edit.admin_privileges') %></div>
+              <div class="small text-muted"><%= t('admin.users.edit.admin_privileges_help') %></div>
             </div>
             <div class="form-check form-switch fs-4">
               <%= f.check_box :admin, class: "form-check-input", role: "switch", disabled: (@user == current_user) %>
@@ -38,26 +38,26 @@
           </div>
           <% if @user == current_user %>
             <div class="mt-2 extra-small text-warning">
-              <i class="bi bi-exclamation-triangle me-1"></i> Você não pode remover seus próprios privilégios.
+              <i class="bi bi-exclamation-triangle me-1"></i> <%= t('admin.users.edit.self_admin_warning') %>
             </div>
           <% end %>
         </div>
 
         <div class="d-flex gap-2 pt-3">
-          <%= f.button :submit, "Salvar Alterações", class: "btn btn-primary rounded-pill px-5 py-3 fw-bold flex-grow-1" %>
-          <%= link_to "Cancelar", admin_user_path(@user), class: "btn btn-soft-secondary rounded-pill px-4 d-flex align-items-center" %>
+          <%= f.button :submit, t('admin.users.edit.submit'), class: "btn btn-primary rounded-3 px-5 py-3 fw-bold flex-grow-1" %>
+          <%= link_to t('actions.cancel'), admin_user_path(@user), class: "btn btn-soft-secondary rounded-3 px-4 d-flex align-items-center" %>
         </div>
       <% end %>
     </div>
   </div>
 
   <div class="col-lg-6">
-    <div class="alert alert-info border-0 rounded-4 p-4 shadow-sm">
-      <h5 class="fw-bold"><i class="bi bi-info-circle me-2"></i> Boas Práticas</h5>
+    <div class="alert alert-info border-0 rounded-3 p-4 shadow-sm">
+      <h5 class="fw-bold"><i class="bi bi-info-circle me-2"></i> <%= t('admin.users.edit.best_practices.title') %></h5>
       <ul class="mb-0 mt-2 small">
-        <li>Alterar o e-mail do usuário pode afetar o login dele.</li>
-        <li>Promover um usuário a admin dá acesso total a todos os dados do sistema.</li>
-        <li>Para trocar a senha de um usuário, oriente-o a usar a função "Esqueci minha senha" na tela de login.</li>
+        <li><%= t('admin.users.edit.best_practices.email') %></li>
+        <li><%= t('admin.users.edit.best_practices.admin') %></li>
+        <li><%= t('admin.users.edit.best_practices.password') %></li>
       </ul>
     </div>
   </div>

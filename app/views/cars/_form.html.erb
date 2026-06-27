@@ -21,7 +21,7 @@
     </div>
   <% end %>
 
-  <div class="<%= modal ? 'modal-form-shell' : 'card border-0 shadow-sm rounded-4 overflow-hidden mb-4' %>">
+  <div class="<%= modal ? 'modal-form-shell' : 'card border-0 shadow-sm rounded-3 overflow-hidden mb-4' %>">
     <div class="<%= modal ? 'p-0' : 'card-body p-4 p-md-5' %>">
 
       <!-- Foto Principal -->
@@ -69,8 +69,8 @@
         <% end %>
 
         <!-- Drop zone / Upload prompt -->
-        <div class="position-relative border rounded-4 p-5 text-center bg-light photo-dropzone"
-             style="border-style: dashed !important; border-width: 2px !important; border-color: #dee2e6 !important; cursor: pointer;"
+        <div class="position-relative border rounded-3 p-5 text-center bg-light photo-dropzone"
+             style="border-style: dashed !important; border-width: 2px !important; border-color: var(--border-color) !important; cursor: pointer;"
              data-photo-upload-target="dropzone"
              data-action="click->photo-upload#openFilePicker">
 
@@ -199,7 +199,7 @@
         <!-- Modal de Cropper -->
         <div class="modal fade image-crop-modal" id="cropperModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
           <div class="modal-dialog modal-xl modal-dialog-centered image-crop-modal-dialog">
-            <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-content border-0 shadow-lg rounded-3">
               <div class="modal-header border-0 pb-0">
                 <h5 class="modal-title fw-bold"><i class="bi bi-crop me-2 text-primary"></i> <%= t('cars.form.adjust_photo') %></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -211,8 +211,8 @@
                 </div>
               </div>
               <div class="modal-footer border-0 p-4 pt-0">
-                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal"><%= t('actions.cancel') %></button>
-                <button type="button" class="btn btn-premium rounded-pill px-4" data-action="click->image-cropper#save"><%= t('cars.form.save_crop') %></button>
+                <button type="button" class="btn btn-light rounded-3 px-4" data-bs-dismiss="modal"><%= t('actions.cancel') %></button>
+                <button type="button" class="btn btn-premium rounded-3 px-4" data-action="click->image-cropper#save"><%= t('cars.form.save_crop') %></button>
               </div>
             </div>
           </div>
@@ -317,7 +317,7 @@
     <div class="<%= modal ? 'car-form-actions pt-4 d-flex flex-column flex-sm-row justify-content-end align-items-stretch align-items-sm-center gap-2 border-top' : 'card-footer bg-light border-0 p-4 p-md-5 d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-3' %>">
       <div>
         <% if modal %>
-          <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal"><%= t('actions.cancel') %></button>
+          <button type="button" class="btn btn-light rounded-3 px-4" data-bs-dismiss="modal"><%= t('actions.cancel') %></button>
         <% else %>
           <%= link_to cars_path, class: "btn btn-link text-secondary text-decoration-none fw-semibold px-0" do %>
             <i class="bi bi-arrow-left me-2"></i><%= t('actions.back') %>
@@ -331,24 +331,24 @@
                          type: :submit,
                          name: :commit_action,
                          value: :create_another,
-                         class: modal ? "btn btn-outline-primary rounded-pill px-4 fw-bold" : "btn btn-outline-primary btn-lg rounded-pill px-4 fw-bold",
+                         class: modal ? "btn btn-outline-primary rounded-3 px-4 fw-bold" : "btn btn-outline-primary btn-lg rounded-3 px-4 fw-bold",
                          data: { disable_with: t('cars.form.create_another') } %>
         <% end %>
 
         <%= f.button :submit,
                      car.persisted? ? t('actions.save') : t('actions.create'),
-                     class: modal ? "btn-primary rounded-pill px-4 fw-bold shadow-sm" : "btn-primary btn-lg rounded-pill px-5 fw-bold shadow-sm" %>
+                     class: modal ? "btn-primary rounded-3 px-4 fw-bold shadow-sm" : "btn-primary btn-lg rounded-3 px-5 fw-bold shadow-sm" %>
       </div>
     </div>
   </div>
 <% end %>
 
 <style>
-  .tracking-wide { letter-spacing: 0.05em; }
+  .tracking-wide { letter-spacing: 0; }
   .form-control { transition: all 0.2s ease-in-out; }
   .form-control:focus {
     background-color: var(--input-bg) !important;
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1) !important;
+    box-shadow: 0 0 0 0.25rem rgba(47, 111, 104, 0.14) !important;
     border: 1px solid var(--premium-indigo) !important;
   }
   .photo-dropzone {
@@ -382,15 +382,6 @@
   }
   .car-upscaler-toggle.d-none {
     display: none !important;
-  }
-  .car-upscaler-toggle .form-check-input {
-    background-position: left center;
-    background-size: contain;
-    cursor: pointer;
-    flex: 0 0 auto;
-    height: 1.35rem;
-    margin: 0;
-    width: 2.5rem;
   }
   .car-upscaler-toggle .form-check-label {
     line-height: 1.35rem;
@@ -474,21 +465,6 @@
       grid-template-columns: 1fr;
     }
   }
-  .car-upscaler-toggle .form-check-input:not(:checked) {
-    background-color: #cbd5e1;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23ffffff'/%3e%3c/svg%3e");
-    border-color: #94a3b8;
-  }
-  .car-upscaler-toggle .form-check-input:checked {
-    background-color: var(--premium-indigo);
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23ffffff'/%3e%3c/svg%3e");
-    border-color: var(--premium-indigo);
-  }
-  [data-theme="dark"] .car-upscaler-toggle .form-check-input:not(:checked) {
-    background-color: #334155;
-    border-color: #64748b;
-  }
-
   /* Cropper Customization */
   .cropper-view-box, .cropper-face {
     border-radius: 0;

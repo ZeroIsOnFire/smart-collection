@@ -14,6 +14,22 @@ RSpec.describe 'Public Collections', type: :request do
       expect(response.body).to include('Public Car')
     end
 
+    it 'renders the cataloged count with theme-safe contrast classes' do
+      get public_share_path(user.share_token)
+
+      document = Nokogiri::HTML(response.body)
+      stat = document.at_css('.public-collection-stat')
+      stat_number = stat.at_css('.public-collection-stat-number')
+      stat_label = stat.at_css('.public-collection-stat-label')
+
+      expect(stat).to be_present
+      expect(stat_number.text.squish).to eq('1')
+      expect(stat_label.text.squish).to include(I18n.t('public_collections.index.cataloged_count'))
+      expect(stat['class']).not_to include('bg-white')
+      expect(stat_number['class']).not_to include('text-white')
+      expect(stat_label['class']).not_to include('text-white')
+    end
+
     it 'renders public view modes with a premium gallery carousel and opens public cards in a modal' do
       car.update!(
         brand: 'Porsche',

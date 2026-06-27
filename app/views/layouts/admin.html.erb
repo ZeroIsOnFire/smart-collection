@@ -33,7 +33,7 @@
         <div class="p-4 border-bottom border-secondary mb-3">
           <%= link_to admin_dashboard_path, class: "text-white text-decoration-none d-flex align-items-center gap-2" do %>
             <%= image_tag "/logo/logo-dark.png", alt: "SCC Admin", height: 32, class: "theme-logo", style: "mix-blend-mode: lighten;" %>
-            <span class="fw-bold fs-5 tracking-tight">Admin</span>
+            <span class="fw-bold fs-5 tracking-tight"><%= t('admin.layout.short_title') %></span>
           <% end %>
         </div>
 
@@ -41,12 +41,12 @@
           <ul class="nav nav-pills flex-column gap-2">
             <li class="nav-item">
               <%= link_to admin_dashboard_path, class: "nav-link text-white #{'active' if controller_name == 'dashboard'}" do %>
-                <i class="bi bi-speedometer2 me-2"></i> Dashboard
+                <i class="bi bi-speedometer2 me-2"></i> <%= t('admin.nav.dashboard') %>
               <% end %>
             </li>
             <li class="nav-item">
               <%= link_to admin_users_path, class: "nav-link text-white #{'active' if controller_name == 'users'}" do %>
-                <i class="bi bi-people me-2"></i> Usuários
+                <i class="bi bi-people me-2"></i> <%= t('admin.nav.users') %>
               <% end %>
             </li>
             <li class="nav-item">
@@ -56,7 +56,7 @@
             </li>
             <li class="nav-item">
               <%= link_to admin_maintenance_path, class: "nav-link text-white #{'active' if controller_name == 'maintenance'}" do %>
-                <i class="bi bi-tools me-2"></i> Manutenção
+                <i class="bi bi-tools me-2"></i> <%= t('admin.nav.maintenance') %>
               <% end %>
             </li>
           </ul>
@@ -71,13 +71,13 @@
             <div class="small text-truncate" style="max-width: 150px;"><%= display_name(current_user) %></div>
           </div>
           <div class="px-2 mb-3">
-            <button class="btn btn-outline-light btn-sm w-100 rounded-pill d-flex align-items-center justify-content-center gap-2" data-action="click->theme#toggle" data-theme-target="button" aria-label="<%= t('nav.toggle_theme') %>" aria-pressed="false">
+            <button class="btn btn-outline-light btn-sm w-100 rounded-3 d-flex align-items-center justify-content-center gap-2" data-action="click->theme#toggle" data-theme-target="button" aria-label="<%= t('nav.toggle_theme') %>" aria-pressed="false">
               <i class="bi bi-moon-stars-fill" data-theme-target="icon"></i>
-              <span>Alternar Tema</span>
+              <span><%= t('nav.toggle_theme') %></span>
             </button>
           </div>
-          <%= link_to destroy_user_session_path, data: { turbo_method: :delete }, class: "btn btn-outline-danger btn-sm w-100 rounded-pill" do %>
-            <i class="bi bi-box-arrow-right me-1"></i> Sair
+          <%= link_to destroy_user_session_path, data: { turbo_method: :delete }, class: "btn btn-outline-danger btn-sm w-100 rounded-3" do %>
+            <i class="bi bi-box-arrow-right me-1"></i> <%= t('nav.sign_out') %>
           <% end %>
         </div>
       </aside>
@@ -108,8 +108,8 @@
         background-color: rgba(255, 255, 255, 0.1);
       }
       .admin-sidebar .nav-link.active {
-        background: var(--primary-gradient);
-        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        background: #7c4f22;
+        box-shadow: 0 4px 12px rgba(124, 79, 34, 0.22);
       }
       .cursor-not-allowed {
         cursor: not-allowed;

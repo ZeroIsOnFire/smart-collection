@@ -15,8 +15,7 @@ class AutodetectionsController < ApplicationController
       # Pode retornar sucesso no Turbo pra não recarregar a página
       respond_to do |format|
         format.turbo_stream do
-          render turbo_stream: turbo_stream.prepend('autodetections_list', partial: 'autodetections/autodetection',
-                                                                           locals: { autodetection: @autodetection }) +
+          render turbo_stream: autodetections_panel_stream +
                                turbo_stream.append('flash_toasts', partial: 'shared/toast',
                                                                    locals: { type: :notice, message: t('autodetections.messages.started') })
         end
@@ -53,8 +52,6 @@ class AutodetectionsController < ApplicationController
 
   def destroy
     is_from_show_page = params[:redirect_to_cars].present?
-    autodetection_dom_id = "autodetection_#{@autodetection.id}"
-
     @autodetection.destroy
 
     respond_to do |format|
@@ -62,7 +59,7 @@ class AutodetectionsController < ApplicationController
         if is_from_show_page
           redirect_to cars_path, status: :see_other, notice: t('autodetections.messages.removed')
         else
-          render turbo_stream: turbo_stream.remove(autodetection_dom_id) +
+          render turbo_stream: autodetections_panel_stream +
                                turbo_stream.append('flash_toasts', partial: 'shared/toast',
                                                                    locals: { type: :notice, message: t('autodetections.messages.deleted') })
         end
@@ -108,5 +105,13 @@ class AutodetectionsController < ApplicationController
 
   def autodetection_params
     params.fetch(:autodetection, {}).permit(:photo)
+  end
+
+  def autodetections_panel_stream
+    turbo_stream.replace(
+      'autodetections_panel',
+      partial: 'autodetections/panel',
+      locals: { autodetections: current_user.autodetections.active_recent }
+    )
   end
 end
