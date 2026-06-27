@@ -9,6 +9,8 @@ Servico Rails premium para registro e gerenciamento de colecoes: itens, fotos, a
 - Antes de abrir arquivos grandes, use `rg` com padroes especificos e leia apenas faixas de linhas relevantes.
 - Evite abrir artefatos gerados, minificados, compilados, logs extensos ou dumps completos quando uma busca focada resolver.
 - Resuma outputs grandes antes de continuar a investigacao.
+- Ao repetir comando que falhou, mude a hipotese, o escopo ou o ambiente e registre a causa provavel da falha.
+- Prefira comandos filtrados para validar o sintoma observado; aumente timeout apenas quando houver motivo concreto.
 
 ## Prioridades Inviolaveis
 
