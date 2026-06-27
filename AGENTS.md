@@ -98,3 +98,8 @@ Servico Rails premium para registro e gerenciamento de colecoes: itens, fotos, a
 - CI de PR para `main`: build Docker, RSpec, RuboCop e Bundler Audit. PR com CI vermelho nao deve ser mergeado.
 - PRs devem ser pequenos e focados, com descricao do que foi feito, por que e como testar. Ao fechar plano/goal, atualize/crie um arquivo local em `docs/` com resumo, testes, riscos, timeouts e QA parcial antes do commit.
 - Checklist de review: escopo por usuario, testes adequados, arquitetura preservada, sem duplicacao desnecessaria, sem secrets e sem dependencias nao autorizadas.
+
+## Fechamento
+
+- Informe testes executados, comandos inconclusivos e riscos restantes de forma objetiva, sem colar saidas longas.
+- Mantenha o resumo final curto e priorize mudancas feitas, validacao e bloqueios reais.
