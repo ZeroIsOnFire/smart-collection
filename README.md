@@ -56,9 +56,7 @@ Smart Collection Catalog is a premium Rails service for registering and managing
 
 ## Locale
 
-The application ships with Portuguese (`pt-BR`) and English (`en`) locales. Portuguese is currently the default locale in `config/initializers/locale.rb`.
-
-To use the system in English during development, open pages with `?locale=en` when the controller flow supports locale switching, or set the default locale to `:en` in `config/initializers/locale.rb` for an English-first local environment.
+The application ships with Portuguese (`pt-BR`) and English (`en`) locale files. Portuguese is currently the default runtime locale in `config/initializers/locale.rb`.
 
 ## Main Features
 
