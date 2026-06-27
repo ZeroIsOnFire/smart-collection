@@ -26,6 +26,8 @@ function isPurpleOrBlue(color) {
 }
 
 test.describe("autodetection review visual identity", () => {
+  test.setTimeout(90_000);
+
   let email;
   let autodetectionId;
 
@@ -102,21 +104,50 @@ test.describe("autodetection review visual identity", () => {
     const styles = await page.evaluate(() => {
       const buttonElement = document.querySelector(".btn-premium");
       const cardElement = document.querySelector(".detected-item-card");
+      const inputElement = document.querySelector(".detected-item-form .form-control");
+      const selectElement = document.querySelector(".detected-item-form .form-select");
+      const loaderElement = document.querySelector(".detected-item-loader");
+      const loaderContentElement = document.querySelector(".detected-item-loader-content");
       const buttonStyles = getComputedStyle(buttonElement);
       const buttonAfter = getComputedStyle(buttonElement, "::after");
       const cardStyles = getComputedStyle(cardElement);
+      const inputStyles = getComputedStyle(inputElement);
+      const selectStyles = getComputedStyle(selectElement);
+      const loaderStyles = getComputedStyle(loaderElement);
+      const loaderContentStyles = getComputedStyle(loaderContentElement);
+      const loadingOverlay = document.createElement("div");
+      const loadingContent = document.createElement("div");
 
-      return {
+      loadingOverlay.className = "turbo-loading-overlay";
+      loadingContent.className = "turbo-loading-content rounded-3";
+      document.body.append(loadingOverlay, loadingContent);
+
+      const result = {
         buttonBackgroundImage: buttonStyles.backgroundImage,
         buttonBackgroundColor: buttonStyles.backgroundColor,
         buttonAfterContent: buttonAfter.content,
         buttonRadius: Number.parseFloat(buttonStyles.borderTopLeftRadius),
         cardRadius: Number.parseFloat(cardStyles.borderTopLeftRadius),
+        cardBackground: cardStyles.backgroundColor,
+        inputBackground: inputStyles.backgroundColor,
+        inputBorder: inputStyles.borderColor,
+        inputRadius: Number.parseFloat(inputStyles.borderTopLeftRadius),
+        selectBackground: selectStyles.backgroundColor,
+        selectBorder: selectStyles.borderColor,
+        loaderBackground: loaderStyles.backgroundColor,
+        loaderContentBackground: loaderContentStyles.backgroundColor,
+        loadingOverlayBackground: getComputedStyle(loadingOverlay).backgroundColor,
+        loadingContentRadius: Number.parseFloat(getComputedStyle(loadingContent).borderTopLeftRadius),
         hasLegacyInlineGradient: Array.from(document.querySelectorAll("style")).some((style) =>
           style.textContent.includes("linear-gradient(135deg, #0d6efd"),
         ),
         horizontalOverflow: document.documentElement.scrollWidth > window.innerWidth,
       };
+
+      loadingOverlay.remove();
+      loadingContent.remove();
+
+      return result;
     });
 
     expect(styles.buttonBackgroundImage).toBe("none");
@@ -124,6 +155,16 @@ test.describe("autodetection review visual identity", () => {
     expect(isPurpleOrBlue(styles.buttonBackgroundColor)).toBe(false);
     expect(styles.buttonRadius).toBeLessThanOrEqual(8);
     expect(styles.cardRadius).toBeLessThanOrEqual(8);
+    expect(styles.inputRadius).toBeLessThanOrEqual(8);
+    expect(styles.loadingContentRadius).toBeLessThanOrEqual(8);
+    expect(isPurpleOrBlue(styles.cardBackground)).toBe(false);
+    expect(isPurpleOrBlue(styles.inputBackground)).toBe(false);
+    expect(isPurpleOrBlue(styles.inputBorder)).toBe(false);
+    expect(isPurpleOrBlue(styles.selectBackground)).toBe(false);
+    expect(isPurpleOrBlue(styles.selectBorder)).toBe(false);
+    expect(isPurpleOrBlue(styles.loaderBackground)).toBe(false);
+    expect(isPurpleOrBlue(styles.loaderContentBackground)).toBe(false);
+    expect(isPurpleOrBlue(styles.loadingOverlayBackground)).toBe(false);
     expect(styles.hasLegacyInlineGradient).toBe(false);
     expect(styles.horizontalOverflow).toBe(false);
   });
