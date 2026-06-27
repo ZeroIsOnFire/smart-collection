@@ -5,8 +5,8 @@
 
 <div class="row g-4 mb-5">
   <% [
-       [:users_count, 'bi-people', 'bg-indigo-light'],
-       [:cars_count, 'bi-car-front', 'bg-purple-light'],
+       [:users_count, 'bi-people', 'bg-teal-soft'],
+       [:cars_count, 'bi-car-front', 'bg-amber-soft'],
        [:ai_cars_count, 'bi-robot', 'bg-emerald-light'],
        [:detected_items_count, 'bi-bounding-box-circles', 'bg-warning-light']
      ].each do |key, icon, color_class| %>
@@ -61,7 +61,7 @@
         <% @stats[:autodetections_by_status].each do |status, count| %>
           <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded-3">
             <span class="small fw-medium"><%= t("autodetections.status.#{status}") %></span>
-            <span class="badge bg-white text-dark border shadow-sm rounded-pill"><%= number_with_delimiter(count) %></span>
+            <span class="badge bg-white text-dark border shadow-sm rounded-3"><%= number_with_delimiter(count) %></span>
           </div>
         <% end %>
       </div>

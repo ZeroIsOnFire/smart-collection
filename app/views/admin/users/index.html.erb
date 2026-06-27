@@ -1,25 +1,25 @@
 <div class="d-flex justify-content-between align-items-center mb-5">
   <div>
-    <h2 class="fw-bold mb-1 text-dark">Gestão de Usuários</h2>
-    <p class="text-muted mb-0">Visualize e gerencie todos os usuários do sistema.</p>
+    <h2 class="fw-bold mb-1 text-dark"><%= t('admin.users.index.title') %></h2>
+    <p class="text-muted mb-0"><%= t('admin.users.index.subtitle') %></p>
   </div>
 </div>
 
-<div class="card premium-card border-0 rounded-4 overflow-hidden mb-4">
+<div class="card premium-card border-0 rounded-3 overflow-hidden mb-4">
   <div class="card-header bg-white border-bottom p-4">
     <div class="row g-3 align-items-center">
       <div class="col-md-6">
         <%= form_with url: admin_users_path, method: :get, class: "d-flex gap-2" do |f| %>
           <div class="input-group">
-            <span class="input-group-text bg-light border-end-0 rounded-start-pill ps-3">
+            <span class="input-group-text bg-light border-end-0 rounded-start-3 ps-3">
               <i class="bi bi-search text-muted"></i>
             </span>
             <%= f.text_field :q,
                   value: params[:q],
-                  placeholder: "Buscar por nome ou e-mail...",
-                  class: "form-control bg-light border-start-0 rounded-end-pill py-2" %>
+                  placeholder: t('admin.users.index.search_placeholder'),
+                  class: "form-control bg-light border-start-0 rounded-end-3 py-2" %>
           </div>
-          <%= f.submit "Buscar", class: "btn btn-primary rounded-pill px-4" %>
+          <%= f.submit t('actions.search'), class: "btn btn-primary rounded-3 px-4" %>
         <% end %>
       </div>
     </div>
@@ -29,11 +29,11 @@
     <table class="table table-hover align-middle mb-0">
       <thead class="bg-light">
         <tr>
-          <th class="ps-4 py-3 text-secondary small text-uppercase fw-bold">Usuário</th>
-          <th class="py-3 text-secondary small text-uppercase fw-bold text-center">Status</th>
-          <th class="py-3 text-secondary small text-uppercase fw-bold text-center">Acervo</th>
-          <th class="py-3 text-secondary small text-uppercase fw-bold text-center">Cadastrado em</th>
-          <th class="pe-4 py-3 text-end text-secondary small text-uppercase fw-bold">Ações</th>
+          <th class="ps-4 py-3 text-secondary small text-uppercase fw-bold"><%= t('admin.users.index.user') %></th>
+          <th class="py-3 text-secondary small text-uppercase fw-bold text-center"><%= t('admin.users.index.status') %></th>
+          <th class="py-3 text-secondary small text-uppercase fw-bold text-center"><%= t('admin.users.index.collection') %></th>
+          <th class="py-3 text-secondary small text-uppercase fw-bold text-center"><%= t('admin.users.index.created_at') %></th>
+          <th class="pe-4 py-3 text-end text-secondary small text-uppercase fw-bold"><%= t('admin.users.index.actions') %></th>
         </tr>
       </thead>
       <tbody>
@@ -53,14 +53,14 @@
             </td>
             <td class="text-center">
               <% if user.admin? %>
-                <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3">Admin</span>
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-3 px-3"><%= t('admin.roles.admin') %></span>
               <% else %>
-                <span class="badge bg-light text-secondary border rounded-pill px-3">Membro</span>
+                <span class="badge bg-light text-secondary border rounded-3 px-3"><%= t('admin.roles.member') %></span>
               <% end %>
             </td>
             <td class="text-center">
               <span class="fw-semibold"><%= user.cars.count %></span>
-              <span class="text-muted small ms-1">itens</span>
+              <span class="text-muted small ms-1"><%= t('admin.users.index.items_suffix') %></span>
             </td>
             <td class="text-center text-muted small">
               <%= user.created_at.strftime("%d/%m/%Y") %>
@@ -73,19 +73,19 @@
                 <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-3">
                   <li>
                     <%= link_to admin_user_path(user), class: "dropdown-item d-flex align-items-center py-2" do %>
-                      <i class="bi bi-eye me-2 text-primary"></i> Detalhes
+                      <i class="bi bi-eye me-2 text-primary"></i> <%= t('admin.users.index.details') %>
                     <% end %>
                   </li>
                   <li>
                     <%= link_to edit_admin_user_path(user), class: "dropdown-item d-flex align-items-center py-2" do %>
-                      <i class="bi bi-pencil me-2 text-secondary"></i> Editar
+                      <i class="bi bi-pencil me-2 text-secondary"></i> <%= t('actions.edit') %>
                     <% end %>
                   </li>
                   <% if user != current_user %>
                     <li><hr class="dropdown-divider opacity-50"></li>
                     <li>
-                      <%= button_to admin_user_path(user), method: :delete, class: "dropdown-item d-flex align-items-center py-2 text-danger", data: { turbo_confirm: "Tem certeza que deseja remover este usuário permanentemente? Todos os seus carros e coleções serão deletados." } do %>
-                        <i class="bi bi-trash3 me-2"></i> Excluir
+                      <%= button_to admin_user_path(user), method: :delete, class: "dropdown-item d-flex align-items-center py-2 text-danger", data: { turbo_confirm: t('admin.users.index.delete_confirm') } do %>
+                        <i class="bi bi-trash3 me-2"></i> <%= t('actions.delete') %>
                       <% end %>
                     </li>
                   <% end %>
@@ -100,7 +100,7 @@
 
   <div class="card-footer bg-white border-top p-4 d-flex justify-content-between align-items-center">
     <div class="text-muted small">
-      Página <%= @page %> de <%= @users.total_pages %>
+      <%= t('admin.users.index.page_info', page: @page, total: @users.total_pages) %>
     </div>
     <div>
       <%= paginate @users, params: request.query_parameters.except(:page) %>

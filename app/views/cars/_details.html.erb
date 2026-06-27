@@ -9,14 +9,14 @@
 <div id="car_details_<%= car_dom_id %>">
 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
   <% unless modal %>
-    <%= link_to cars_path, class: "btn btn-outline-secondary rounded-pill px-4 d-inline-flex align-items-center" do %>
+    <%= link_to cars_path, class: "btn btn-outline-secondary rounded-3 px-4 d-inline-flex align-items-center" do %>
       <i class="bi bi-arrow-left me-2"></i> <%= t("cars.show.collection") %>
     <% end %>
   <% end %>
 
   <div class="d-flex align-items-center gap-2 ms-auto">
     <%= link_to edit_car_path(car),
-                class: "btn btn-premium rounded-pill d-inline-flex align-items-center justify-content-center",
+                class: "btn btn-premium rounded-3 d-inline-flex align-items-center justify-content-center",
                 style: "min-width: 112px;",
                 data: { turbo_frame: modal ? "modal" : "_top" } do %>
       <i class="bi bi-pencil me-2"></i><%= t("actions.edit") %>
@@ -35,7 +35,7 @@
                     car_removal_car_id: car_dom_id,
                     car_removal_confirm_message: t("items.delete_confirm")
                   },
-                  class: "btn btn-outline-danger rounded-pill d-inline-flex align-items-center justify-content-center",
+                  class: "btn btn-outline-danger rounded-3 d-inline-flex align-items-center justify-content-center",
                   style: "padding: 0.65rem 1.5rem; min-width: 112px;" do %>
       <i class="bi bi-trash3 me-2"></i><%= t("actions.delete") %>
     <% end %>
@@ -43,7 +43,7 @@
 </div>
 
 <% cache [car, modal ? :modal : :page, car_photo_cache_key(car, user: display_user)] do %>
-  <div class="card premium-card car-details-card shadow-sm rounded-4 overflow-hidden mb-3 <%= "car-details-card-modal" if modal %>"
+  <div class="card premium-card car-details-card shadow-sm rounded-3 overflow-hidden mb-3 <%= "car-details-card-modal" if modal %>"
        data-controller="photo-lightbox<%= ' photo-variant-toggle' if variant_toggle_available %>"
        <% if variant_toggle_available %>
          data-photo-variant-toggle-ai-url-value="<%= display_photo_url %>"
@@ -60,14 +60,14 @@
                       style: "width: 100%; height: 100%; object-fit: cover; display: block;",
                       data: { "photo-variant-toggle-target": "image" } %>
         <div class="position-absolute bottom-0 end-0 m-3">
-          <span class="badge bg-dark bg-opacity-60 rounded-pill px-3 py-2 text-white">
+          <span class="badge bg-dark bg-opacity-60 rounded-3 px-3 py-2 text-white">
             <i class="bi bi-zoom-in me-1"></i> <%= t("cars.show.view_full_photo") %>
           </span>
         </div>
       </button>
       <% if variant_toggle_available %>
         <button type="button"
-                class="position-absolute bottom-0 start-0 m-3 badge bg-light text-dark rounded-pill px-3 py-2 text-decoration-none shadow-sm border-0"
+                class="position-absolute bottom-0 start-0 m-3 badge bg-light text-dark rounded-3 px-3 py-2 text-decoration-none shadow-sm border-0"
                 data-action="click->photo-variant-toggle#toggle">
           <i class="bi bi-image me-1"></i>
           <span data-photo-variant-toggle-target="buttonLabel"><%= t("cars.show.view_original_photo") %></span>
@@ -82,7 +82,7 @@
            aria-label="<%= t("cars.show.view_full_photo") %>">
         <div class="photo-lightbox-stage" data-action="click->photo-lightbox#keepOpen">
           <%= image_tag display_photo_url,
-                class: "photo-lightbox-image rounded-4 shadow-lg",
+                class: "photo-lightbox-image rounded-3 shadow-lg",
                 alt: car.name.presence || t("cars.show.fallback_name"),
                 data: { "photo-variant-toggle-target": "lightboxImage" } %>
           <button type="button"
@@ -107,7 +107,7 @@
         <div>
           <h1 class="<%= modal ? "h4" : "h2" %> fw-bold mb-1"><%= car.name.presence || t("cars.show.fallback_name") %></h1>
           <% if car.brand? %>
-            <span class="badge bg-primary bg-opacity-10 text-primary fw-semibold fs-6 rounded-pill"><%= car.brand %></span>
+            <span class="badge bg-primary bg-opacity-10 text-primary fw-semibold fs-6 rounded-3"><%= car.brand %></span>
           <% end %>
         </div>
       </div>

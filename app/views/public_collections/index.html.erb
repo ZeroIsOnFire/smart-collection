@@ -6,9 +6,9 @@
         <p class="lead fs-4 opacity-75 mb-0 fw-light"><%= t("public_collections.index.subtitle") %></p>
       </div>
       <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
-        <div class="d-inline-flex flex-column align-items-center bg-white bg-opacity-10 rounded-4 p-3 backdrop-blur">
-          <span class="fs-2 fw-bold text-white lh-1"><%= @total_count %></span>
-          <span class="text-white-50 small text-uppercase fw-semibold mt-1">
+        <div class="public-collection-stat d-inline-flex flex-column align-items-center rounded-3 p-3">
+          <span class="public-collection-stat-number fs-2 fw-bold lh-1"><%= @total_count %></span>
+          <span class="public-collection-stat-label small text-uppercase fw-semibold mt-1">
             <i class="bi bi-car-front-fill me-1"></i> <%= t("public_collections.index.cataloged_count") %>
           </span>
         </div>
@@ -30,7 +30,7 @@
                       controller: "search-form",
                       turbo_frame: "cars_grid"
                     } do |f| %>
-        <div class="input-group input-group-lg premium-search-container shadow-sm border border-light border-opacity-50 rounded-pill overflow-hidden bg-white">
+        <div class="input-group input-group-lg premium-search-container shadow-sm border border-light border-opacity-50 rounded-3 overflow-hidden bg-white">
           <span class="input-group-text border-0 bg-transparent ps-4 pe-2">
             <i class="bi bi-search text-muted fs-5"></i>
           </span>
@@ -78,14 +78,14 @@
           <%= t("public_collections.index.results_count", count: public_results_count) %>
         <% end %>
       </div>
-      <div class="btn-group shadow-sm bg-white rounded-pill p-1 border public-view-toggle">
-        <button type="button" class="btn btn-sm text-primary active rounded-pill px-3 fw-medium d-flex align-items-center gap-2" data-view-toggle-target="gridButton" data-action="click->view-toggle#setGrid">
+      <div class="btn-group shadow-sm bg-white rounded-3 p-1 border public-view-toggle">
+        <button type="button" class="btn btn-sm text-primary active rounded-3 px-3 fw-medium d-flex align-items-center gap-2" data-view-toggle-target="gridButton" data-action="click->view-toggle#setGrid">
           <i class="bi bi-grid-fill"></i> <%= t("public_collections.index.grid_view") %>
         </button>
-        <button type="button" class="btn btn-sm text-muted rounded-pill px-3 fw-medium d-flex align-items-center gap-2" data-view-toggle-target="listButton" data-action="click->view-toggle#setList">
+        <button type="button" class="btn btn-sm text-muted rounded-3 px-3 fw-medium d-flex align-items-center gap-2" data-view-toggle-target="listButton" data-action="click->view-toggle#setList">
           <i class="bi bi-list-ul"></i> <%= t("public_collections.index.list_view") %>
         </button>
-        <button type="button" class="btn btn-sm text-muted rounded-pill px-3 fw-medium d-flex align-items-center gap-2" data-view-toggle-target="galleryButton" data-action="click->view-toggle#setGallery">
+        <button type="button" class="btn btn-sm text-muted rounded-3 px-3 fw-medium d-flex align-items-center gap-2" data-view-toggle-target="galleryButton" data-action="click->view-toggle#setGallery">
           <i class="bi bi-images"></i> <%= t("public_collections.index.gallery_view") %>
         </button>
       </div>

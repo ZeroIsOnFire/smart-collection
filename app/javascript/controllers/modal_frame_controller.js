@@ -194,7 +194,7 @@ export default class extends Controller {
     return `
       <div class="turbo-loading-overlay" id="turboLoadingModal" role="dialog" aria-modal="true" aria-labelledby="turboLoadingModalLabel" data-loading-locked="${locked ? "true" : "false"}">
         <div class="turbo-loading-dialog turbo-car-modal-dialog">
-          <div class="turbo-loading-content border-0 shadow-lg rounded-4 overflow-hidden">
+          <div class="turbo-loading-content border-0 shadow-lg rounded-3 overflow-hidden">
             ${error ? this.loadingErrorTemplate() : this.loadingContentTemplate()}
           </div>
         </div>

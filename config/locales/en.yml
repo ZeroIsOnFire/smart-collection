@@ -60,6 +60,47 @@ en:
     enable: "Enable Public Link"
     disable: "Disable Sharing"
 
+
+  home:
+    hero:
+      image_alt: "Shelf with cataloged miniature cars"
+      badge: "Miniature car catalog"
+      title: "Register each car with photo, scale, color and notes."
+      subtitle: "Create a record for each miniature, review crops from shelf photos and export the catalog when you need to check, share or print it."
+      open_catalog: "Open my catalog"
+      add_car: "Register car"
+      create_catalog: "Create catalog"
+      see_workflow: "See photo workflow"
+      sample_title: "Record ready for lookup"
+      sample_text: "Photo, brand, model, year, scale, color and notes stay together so you can identify each item later."
+    features:
+      title: "Tools for cataloging the real collection"
+      subtitle: "The workflow is built for miniatures, visual collections and manual review, without loose spreadsheets."
+      cards:
+        - icon: "bi-card-image"
+          icon_bg: "bg-teal-soft"
+          title: "Photo record with technical details"
+          text: "Register brand, model, year, scale, color, notes and main image in the same form."
+        - icon: "bi-bounding-box-circles"
+          icon_bg: "bg-amber-soft"
+          title: "Crops for photos with many cars"
+          text: "Upload a shelf photo, review each crop and save only the items that make sense."
+        - icon: "bi-file-earmark-spreadsheet"
+          icon_bg: "bg-emerald-light"
+          title: "PDF, CSV and public link"
+          text: "Export the filtered catalog or share a public showcase with search by name and brand."
+    cta:
+      title: "Start with the car in front of you."
+      subtitle: "A good record starts with the real item: readable photo, correct scale, predominant color and notes that separate variants."
+      create_account: "Create catalog"
+      open_catalog: "Open my cars"
+      items:
+        - "Manual registration for one miniature at a time"
+        - "Local autodetection to review photos with many cars"
+        - "PDF/CSV export for offline reference"
+        - "Controlled public sharing by link"
+    footer:
+      copyright: "(c) %{year} Smart Collection Catalog. All rights reserved."
   initial_setup:
     badge: "Initial setup"
     title: "Before you start"
@@ -72,7 +113,7 @@ en:
       description: "Improves small images added from now on when the service is available."
       unavailable: "The AI upscaling service is not configured in this environment."
     actions:
-      finish: "Save and go to collection"
+      finish: "Save and open my catalog"
     messages:
       completed: "Initial setup saved successfully."
 
@@ -212,9 +253,9 @@ en:
 
   collection_exports:
     actions:
-      generate: "Generate %{file_format}"
+      generate: "Export %{file_format}"
       download: "Download %{file_format}"
-      regenerate: "Generate again"
+      regenerate: "Update file"
       retry: "Try again"
     status:
       processing: "Generating %{file_format}..."
@@ -254,13 +295,13 @@ en:
     layout:
       title: "%{name}'s Collection"
       toggle_theme: "Toggle theme"
-      footer_text: "Organize, display and share your collection elegantly."
-      create_collection: "Create my free collection"
+      footer_text: "Show cataloged cars with search, photos and item records."
+      create_collection: "Add first car"
     index:
       title: "%{name}'s Collection"
-      subtitle: "Explore a careful curation of exclusive vehicles."
+      subtitle: "Browse cataloged cars, filter by model, brand, year or color, and open the record with photo, scale and notes."
       cataloged_count: "Cataloged vehicles"
-      search_placeholder: "Search collection..."
+      search_placeholder: "Search by model, brand, year or color"
       loading: "Loading..."
       searching: "Searching..."
       clear_search: "Clear search"
@@ -279,15 +320,15 @@ en:
       next_item: "Next item"
       show_gallery_item: "Show %{name} in the gallery"
       empty_title: "No vehicles found"
-      empty_text: "Try searching for another term or clear the search."
+      empty_text: "Try another model or brand, or clear the search to return to the full catalog."
     show:
       back_to_collection: "Back to collection"
 
   cars:
     index:
-      subtitle: "Your personal collection"
+      subtitle: "Catalog records with photo, scale, brand, year, color and notes."
       copy_public_link: "Copy public link"
-      search_placeholder: "Search by name, brand..."
+      search_placeholder: "Search by model, brand, year, scale or tag"
       searching: "Searching..."
       clear_search: "Clear search"
       results_count:
@@ -301,59 +342,59 @@ en:
       secondary_actions: "Actions"
       export_actions: "Export collection"
       public_link_copied: "Link copied"
-      empty_title: "No items in the collection"
-      empty_text: "Add your first car or use photo autodetection."
-      add_first_item: "Add First Item"
+      empty_title: "No cars cataloged yet"
+      empty_text: "Add a miniature manually or send a shelf photo to review detected crops."
+      add_first_item: "Add first car"
       no_results_title: "No results found"
       no_results_text: "Try different terms or clear the filter."
     new:
-      badge: "New Record"
-      title: "Add to Collection"
-      subtitle: "Fill in the details of your new model carefully."
+      badge: "Miniature record"
+      title: "Add a car to the catalog"
+      subtitle: "Register photo, brand, model, year, scale, color and notes in one record."
     edit:
-      badge: "Edit"
+      badge: "Record review"
       title: "Update %{name}"
-      subtitle: "Change the specifications of the existing item in your collection."
+      subtitle: "Adjust photo, scale, color and notes without recreating the item."
     modal:
       new_title: "New Item"
       edit_title: "Edit Item"
     card:
-      view_details: "View Details"
+      view_details: "Open record"
       actions_menu: "Open item actions"
       no_photo: "No photo"
       photo_processing: "Processing photo..."
     show:
       added_at: "Added on %{date}"
       updated_at: "Updated on %{date}"
-      collection: "My Collection"
-      fallback_name: "—"
+      collection: "Back to catalog"
+      fallback_name: "â€”"
       no_photo: "No photo registered"
-      view_full_photo: "View full photo"
-      view_original_photo: "View original"
-      view_ai_photo: "View AI"
+      view_full_photo: "Enlarge photo"
+      view_original_photo: "Original photo"
+      view_ai_photo: "Processed photo"
       photo_upscaled_by_ai: "AI"
       photo_upscaled_by_ai_tooltip: "Photo processed by AI"
     form:
-      main_photo: "Main Photo"
-      upload_prompt: "Click or drag image here"
+      main_photo: "Miniature photo"
+      upload_prompt: "Add a car photo"
       ai_upscaling_notice: "If the image is below %{minimum_side}px, it may be upscaled by AI."
-      upload_limits: "JPG, PNG or GIF — max. 5 MB"
+      upload_limits: "Use a miniature photo in JPG, PNG or GIF - max. 5 MB"
       crop_button: "Crop"
       replace_button: "Replace Photo"
       remove_button: "Remove Photo"
-      basic_info: "Basic Information"
-      specifications: "Specifications"
-      select_scale: "Select scale..."
-      select_color: "Select color..."
-      adjust_photo: "Adjust Photo"
-      save_crop: "Save Crop"
-      create_another: "Save and add another"
-      predominant_color: "Predominant Color"
+      basic_info: "Identification"
+      specifications: "Scale, year and color"
+      select_scale: "Choose the miniature scale..."
+      select_color: "Choose the predominant color..."
+      adjust_photo: "Adjust photo crop"
+      save_crop: "Save crop"
+      create_another: "Save and add another car"
+      predominant_color: "Predominant miniature color"
       validation_error_title: "Review the highlighted fields"
       brand_placeholder: "Ex: Hot Wheels, Matchbox, Maisto"
       name_placeholder: "Ex: Porsche 911 Carrera, Ford Mustang GT, Ferrari LaFerrari"
       year_placeholder: "Ex: 1998"
-      observations_placeholder: "Write details about the condition..."
+      observations_placeholder: "Note variation, condition, packaging, lot or details that help identify this car."
       skip_upscaler: "Do not use upscaler for this record"
       skip_upscaler_existing: "Show the original non-AI version for this record"
       original_photo: "Original without AI"
@@ -460,8 +501,89 @@ en:
     other: "Other"
 
   admin:
+    layout:
+      short_title: "Admin"
     nav:
+      dashboard: "Dashboard"
+      users: "Users"
       statistics: "Statistics"
+      maintenance: "Maintenance"
+    roles:
+      admin: "Admin"
+      member: "Member"
+    dashboard:
+      title: "Admin dashboard"
+      subtitle: "Operational view of users, registered cars, public sharing and the autodetection queue."
+      cards:
+        users:
+          title: "Registered users"
+          sharing: "with public link enabled"
+        cars:
+          title: "Cars in the catalog"
+          per_user: "user"
+        ai_items:
+          title: "Cars from autodetection"
+          of_total: "of catalog"
+        queue:
+          title: "Autodetection queue"
+          idle: "No queue"
+          active: "In progress"
+      recent_users:
+        title: "Recent users"
+        view_all: "View full list"
+        user: "User"
+        status: "Profile"
+        items: "Cars"
+        created_at: "Registered"
+        empty: "No users have registered yet."
+      quick_actions:
+        title: "Operational shortcuts"
+        manage_users:
+          title: "Open users"
+          description_suffix: "registered users"
+        maintenance:
+          title: "View maintenance"
+          description: "Jobs, storage and temporary cleanup"
+    users:
+      index:
+        title: "Users"
+        subtitle: "Review accounts, admin profile, catalog size and registration date."
+        search_placeholder: "Filter by name or email"
+        user: "User"
+        status: "Profile"
+        collection: "Catalog"
+        created_at: "Registered"
+        actions: "Actions"
+        items_suffix: "cars"
+        details: "Record"
+        delete_confirm: "Removing this user also removes their cars. Continue?"
+        page_info: "Page %{page} of %{total}"
+      show:
+        title: "User record"
+        subtitle: "Account data, admin permission and recent catalog activity."
+        member_since: "Member since %{date}"
+        edit_user: "Edit user"
+        catalog_items: "Cars in catalog"
+        autodetections: "Autodetections"
+        recent_activity: "Latest registered cars"
+        added_on: "Added on"
+        no_items: "This user has not registered cars yet."
+      edit:
+        title: "Edit user"
+        subtitle: "Update name, email and admin permission."
+        name_label: "Full name"
+        name_placeholder: "Ex: Joao Silva"
+        email_label: "Email"
+        email_placeholder: "email@example.com"
+        admin_privileges: "Admin permission"
+        admin_privileges_help: "Allows access to dashboard, users, statistics and maintenance."
+        self_admin_warning: "You cannot remove your own admin permission."
+        submit: "Save user"
+        best_practices:
+          title: "Operation notes"
+          email: "Changing email changes the login used by this account."
+          admin: "Admin permission grants access to operational system data."
+          password: "For password changes, direct the user to the recovery flow on sign-in."
     statistics:
       title: "Usage and AI Statistics"
       subtitle: "Track current system usage and historical counters preserved after deletions or edits."

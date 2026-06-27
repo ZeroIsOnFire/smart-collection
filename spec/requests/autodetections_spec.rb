@@ -20,6 +20,8 @@ RSpec.describe 'Autodetections', type: :request do
       end.to change(Autodetection, :count).by(1)
                                           .and enqueue_job(AutodetectJob)
       expect(response).to be_successful
+      expect(response.body).to include('turbo-stream action="replace" target="autodetections_panel"')
+      expect(response.body).not_to include('turbo-stream action="prepend" target="autodetections_list"')
     end
 
     it 'ignores the legacy upscaler preference for the autodetection' do
@@ -95,6 +97,30 @@ RSpec.describe 'Autodetections', type: :request do
       expect(upload_controller['data-autodetection-upload-minimum-side-value']).to be_nil
       expect(upload_toggle).to be_nil
     end
+
+    it 'renders active autodetection counts by status' do
+      create(:autodetection, user: user, status: 'pending')
+      create(:autodetection, user: user, status: 'processing')
+      create(:autodetection, user: user, status: 'to_verify')
+      create(:autodetection, user: user, status: 'error', error_message: 'Falha')
+      create(:autodetection, user: user, status: 'completed')
+      create(:autodetection, user: create(:user), status: 'to_verify')
+
+      get cars_path
+
+      document = Nokogiri::HTML(response.body)
+      panel = document.at_css('#autodetections_panel')
+      panel_text = panel.text.squish
+
+      expect(response).to be_successful
+      expect(panel).to be_present
+      expect(panel_text).to include(I18n.t('autodetections.panel.title', count: 4))
+      expect(panel_text).to include("1 #{I18n.t('autodetections.status.pending')}")
+      expect(panel_text).to include("1 #{I18n.t('autodetections.status.processing')}")
+      expect(panel_text).to include("1 #{I18n.t('autodetections.status.to_verify')}")
+      expect(panel_text).to include("1 #{I18n.t('autodetections.status.error')}")
+      expect(panel_text).not_to include(I18n.t('autodetections.status.completed'))
+    end
   end
 
   describe 'PATCH /retry' do
@@ -119,7 +145,8 @@ RSpec.describe 'Autodetections', type: :request do
       end.to change(Autodetection, :count).by(-1)
 
       expect(response).to be_successful
-      expect(response.body).to include("turbo-stream action=\"remove\" target=\"autodetection_#{autodetection.id}\"")
+      expect(response.body).to include('turbo-stream action="replace" target="autodetections_panel"')
+      expect(response.body).not_to include("turbo-stream action=\"remove\" target=\"autodetection_#{autodetection.id}\"")
     end
 
     it 'redirects if format is html' do

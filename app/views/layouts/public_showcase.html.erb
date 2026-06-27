@@ -25,19 +25,19 @@
 
     <style>
       :root {
-        --public-primary: #4F46E5;
-        --public-primary-dark: #4338CA;
-        --public-bg: #F9FAFB;
-        --public-surface: #FFFFFF;
-        --public-text: #111827;
-        --public-text-muted: #6B7280;
+        --public-primary: #2f6f68;
+        --public-primary-dark: #214f4a;
+        --public-bg: #f6f1e8;
+        --public-surface: #fffdfa;
+        --public-text: #1f2933;
+        --public-text-muted: #68737d;
       }
       [data-theme="dark"] {
-        --public-primary: #818cf8;
-        --public-bg: #020617;
-        --public-surface: #0f172a;
-        --public-text: #f1f5f9;
-        --public-text-muted: #94a3b8;
+        --public-primary: #78a6a0;
+        --public-bg: #111518;
+        --public-surface: #15191c;
+        --public-text: #f7f1e8;
+        --public-text-muted: #b7aea3;
       }
       body {
         font-family: 'Outfit', 'Inter', sans-serif;
@@ -48,10 +48,8 @@
         min-height: 100vh;
       }
       .navbar-glass {
-        background: var(--glass-bg) !important;
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border-bottom: 1px solid var(--glass-border) !important;
+        background: var(--public-surface) !important;
+        border-bottom: 1px solid var(--border-color) !important;
       }
       .brand-text {
         font-weight: 800;
@@ -61,17 +59,13 @@
       .brand-icon {
         color: var(--public-primary);
         font-size: 1.75rem;
-        transition: transform 0.3s ease;
-      }
-      .navbar-brand:hover .brand-icon {
-        transform: rotate(15deg);
       }
       main {
         flex: 1;
       }
       .footer-glass {
         background: var(--public-surface);
-        border-top: 1px solid var(--glass-border);
+        border-top: 1px solid var(--border-color);
       }
     </style>
   </head>
@@ -109,7 +103,7 @@
         </div>
         <p class="text-muted small mb-4" style="color: var(--public-text-muted) !important;"><%= t("public_collections.layout.footer_text") %></p>
         <div>
-          <%= link_to t("public_collections.layout.create_collection"), new_user_registration_path, class: "btn text-white fw-medium rounded-pill px-5 py-2 hover-lift shadow-sm", style: "background-color: var(--public-primary);" %>
+          <%= link_to t("public_collections.layout.create_collection"), new_user_registration_path, class: "btn text-white fw-medium rounded-3 px-5 py-2 hover-lift shadow-sm", style: "background-color: var(--public-primary);" %>
         </div>
       </div>
     </footer>

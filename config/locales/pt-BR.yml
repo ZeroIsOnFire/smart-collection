@@ -66,6 +66,46 @@ pt-BR:
     enable: "Ativar Link Público"
     disable: "Desativar Compartilhamento"
 
+  home:
+    hero:
+      image_alt: "Prateleira com miniaturas catalogadas"
+      badge: "Catálogo de miniaturas e carros"
+      title: "Cadastre cada carro com foto, escala, cor e observações."
+      subtitle: "Monte uma ficha para cada miniatura, revise recortes vindos de fotos da prateleira e exporte o acervo quando precisar conferir, compartilhar ou imprimir."
+      open_catalog: "Abrir meu catálogo"
+      add_car: "Cadastrar carro"
+      create_catalog: "Criar catálogo"
+      see_workflow: "Ver fluxo por foto"
+      sample_title: "Ficha pronta para consulta"
+      sample_text: "Foto, marca, modelo, ano, escala, cor e notas ficam juntos para você reconhecer cada item depois."
+    features:
+      title: "Ferramentas para catalogar o acervo real"
+      subtitle: "O fluxo foi pensado para miniaturas, coleções visuais e revisão manual, sem depender de planilhas soltas."
+      cards:
+        - icon: "bi-card-image"
+          icon_bg: "bg-teal-soft"
+          title: "Cadastro com foto e ficha técnica"
+          text: "Registre marca, modelo, ano, escala, cor, observações e imagem principal no mesmo formulário."
+        - icon: "bi-bounding-box-circles"
+          icon_bg: "bg-amber-soft"
+          title: "Recortes para fotos com vários carros"
+          text: "Envie uma foto da prateleira, revise cada recorte e salve apenas os itens que fazem sentido."
+        - icon: "bi-file-earmark-spreadsheet"
+          icon_bg: "bg-emerald-light"
+          title: "PDF, CSV e link público"
+          text: "Exporte o catálogo filtrado ou compartilhe uma vitrine pública com busca por nome e marca."
+    cta:
+      title: "Comece pelo carro que está na sua frente."
+      subtitle: "Uma boa ficha nasce do item real: foto legível, escala correta, cor predominante e notas que ajudam a diferenciar variantes."
+      create_account: "Criar catálogo"
+      open_catalog: "Acessar meus carros"
+      items:
+        - "Cadastro manual para uma miniatura por vez"
+        - "Autodetecção local para revisar fotos com vários carros"
+        - "Exportação PDF/CSV para consulta fora do sistema"
+        - "Compartilhamento público por link controlado"
+    footer:
+      copyright: "(c) %{year} Smart Collection Catalog. Todos os direitos reservados."
   initial_setup:
     badge: "Configuração inicial"
     title: "Antes de começar"
@@ -78,7 +118,7 @@ pt-BR:
       description: "Melhora imagens pequenas adicionadas daqui em diante, quando o serviço estiver disponível."
       unavailable: "O serviço de upscale por IA não está configurado neste ambiente."
     actions:
-      finish: "Salvar e ir para a coleção"
+      finish: "Salvar e abrir meu acervo"
     messages:
       completed: "Configuração inicial salva com sucesso."
 
@@ -224,9 +264,9 @@ pt-BR:
 
   collection_exports:
     actions:
-      generate: "Gerar %{file_format}"
+      generate: "Exportar %{file_format}"
       download: "Baixar %{file_format}"
-      regenerate: "Gerar novamente"
+      regenerate: "Atualizar arquivo"
       retry: "Tentar novamente"
     status:
       processing: "Gerando %{file_format}..."
@@ -267,13 +307,13 @@ pt-BR:
     layout:
       title: "Coleção de %{name}"
       toggle_theme: "Alternar tema"
-      footer_text: "Organize, exiba e compartilhe seu acervo de forma elegante."
-      create_collection: "Criar minha coleção grátis"
+      footer_text: "Mostre os carros cadastrados com busca, foto e ficha do item."
+      create_collection: "Cadastrar primeiro carro"
     index:
       title: "Coleção de %{name}"
-      subtitle: "Explore uma cuidadosa curadoria de veículos exclusivos."
+      subtitle: "Navegue pelos carros cadastrados, filtre por modelo, marca, ano ou cor e abra a ficha com foto, escala e observações."
       cataloged_count: "Veículos catalogados"
-      search_placeholder: "Buscar na coleção..."
+      search_placeholder: "Buscar por modelo, marca, ano ou cor"
       loading: "Carregando..."
       searching: "Buscando..."
       clear_search: "Limpar busca"
@@ -292,16 +332,16 @@ pt-BR:
       next_item: "Próximo item"
       show_gallery_item: "Mostrar %{name} na galeria"
       empty_title: "Nenhum veículo encontrado"
-      empty_text: "Tente buscar por outro termo ou limpe a pesquisa."
+      empty_text: "Tente outro modelo, marca ou limpe a busca para voltar ao acervo completo."
     show:
       back_to_collection: "Voltar para a coleção"
 
   # ── Carros ─────────────────────────────────────────────
   cars:
     index:
-      subtitle: "Sua coleção pessoal"
+      subtitle: "Ficha do acervo com foto, escala, marca, ano, cor e observações."
       copy_public_link: "Copiar link público"
-      search_placeholder: "Buscar por nome, marca..."
+      search_placeholder: "Buscar por modelo, marca, ano, escala ou tag"
       searching: "Buscando..."
       clear_search: "Limpar busca"
       results_count:
@@ -315,59 +355,59 @@ pt-BR:
       secondary_actions: "Ações"
       export_actions: "Exportar coleção"
       public_link_copied: "Link copiado"
-      empty_title: "Nenhum item na coleção"
-      empty_text: "Adicione seu primeiro carro ou use a Autodetecção por foto."
-      add_first_item: "Adicionar Primeiro Item"
+      empty_title: "Nenhum carro cadastrado ainda"
+      empty_text: "Cadastre manualmente uma miniatura ou envie uma foto da prateleira para revisar recortes."
+      add_first_item: "Cadastrar primeiro carro"
       no_results_title: "Nenhum resultado encontrado"
       no_results_text: "Tente buscar por termos diferentes ou limpe o filtro."
     new:
-      badge: "Novo Registro"
-      title: "Adicionar à Coleção"
-      subtitle: "Preencha os detalhes do seu novo modelo com cuidado."
+      badge: "Ficha de miniatura"
+      title: "Cadastrar carro na coleção"
+      subtitle: "Registre foto, marca, modelo, ano, escala, cor e observações em uma ficha só."
     edit:
-      badge: "Edição"
+      badge: "Revisão da ficha"
       title: "Atualizar %{name}"
-      subtitle: "Modifique as especificações do item já existente no seu acervo."
+      subtitle: "Ajuste foto, escala, cor e observações sem recriar o item."
     modal:
       new_title: "Novo Item"
       edit_title: "Editar Item"
     card:
-      view_details: "Ver Detalhes"
+      view_details: "Abrir ficha"
       actions_menu: "Abrir ações do item"
       no_photo: "Sem foto"
       photo_processing: "Processando foto..."
     show:
       added_at: "Adicionado em %{date}"
       updated_at: "Atualizado em %{date}"
-      collection: "Minha Coleção"
+      collection: "Voltar ao acervo"
       fallback_name: "—"
       no_photo: "Sem foto cadastrada"
-      view_full_photo: "Ver foto completa"
-      view_original_photo: "Ver original"
-      view_ai_photo: "Ver com IA"
+      view_full_photo: "Ampliar foto"
+      view_original_photo: "Foto original"
+      view_ai_photo: "Foto tratada"
       photo_upscaled_by_ai: "IA"
       photo_upscaled_by_ai_tooltip: "Foto tratada por IA"
     form:
-      main_photo: "Foto Principal"
-      upload_prompt: "Clique ou arraste a imagem aqui"
+      main_photo: "Foto da miniatura"
+      upload_prompt: "Adicionar foto do carro"
       ai_upscaling_notice: "Se a imagem estiver abaixo de %{minimum_side}px, ela poderá receber upscale por IA."
-      upload_limits: "JPG, PNG ou GIF — máx. 5 MB"
+      upload_limits: "Use uma foto da miniatura em JPG, PNG ou GIF - max. 5 MB"
       crop_button: "Recortar"
       replace_button: "Substituir Foto"
       remove_button: "Remover Foto"
-      basic_info: "Informações Básicas"
-      specifications: "Especificações"
-      select_scale: "Selecione a escala..."
-      select_color: "Selecione a cor..."
-      adjust_photo: "Ajustar Foto"
-      save_crop: "Salvar Recorte"
-      create_another: "Salvar e adicionar outro"
-      predominant_color: "Cor Predominante"
+      basic_info: "Identificacao"
+      specifications: "Escala, ano e cor"
+      select_scale: "Escolha a escala da miniatura..."
+      select_color: "Escolha a cor predominante..."
+      adjust_photo: "Ajustar recorte da foto"
+      save_crop: "Salvar recorte"
+      create_another: "Salvar e cadastrar outro carro"
+      predominant_color: "Cor predominante da miniatura"
       validation_error_title: "Revise os campos destacados"
       brand_placeholder: "Ex: Hot Wheels, Matchbox, Maisto"
       name_placeholder: "Ex: Porsche 911 Carrera, Ford Mustang GT, Ferrari LaFerrari"
       year_placeholder: "Ex: 1998"
-      observations_placeholder: "Escreva detalhes sobre o estado de conservação..."
+      observations_placeholder: "Anote variação, estado, embalagem, lote ou detalhes que ajudam a reconhecer este carro."
       skip_upscaler: "Não usar upscaler neste registro"
       skip_upscaler_existing: "Exibir versão original sem IA neste registro"
       original_photo: "Original sem IA"
@@ -477,40 +517,121 @@ pt-BR:
     other: "Outra"
 
   admin:
+    layout:
+      short_title: "Admin"
     nav:
-      statistics: "Estatisticas"
+      dashboard: "Painel"
+      users: "Usuários"
+      statistics: "Estatísticas"
+      maintenance: "Manutenção"
+    roles:
+      admin: "Admin"
+      member: "Membro"
+    dashboard:
+      title: "Painel administrativo"
+      subtitle: "Leitura operacional de usuários, carros cadastrados, compartilhamentos e fila de autodetecção."
+      cards:
+        users:
+          title: "Usuários cadastrados"
+          sharing: "com link público ativo"
+        cars:
+          title: "Carros no catálogo"
+          per_user: "usuário"
+        ai_items:
+          title: "Carros vindos da autodetecção"
+          of_total: "do catálogo"
+        queue:
+          title: "Fila de autodetecção"
+          idle: "Sem fila"
+          active: "Em andamento"
+      recent_users:
+        title: "Usuários recentes"
+        view_all: "Ver lista completa"
+        user: "Usuário"
+        status: "Perfil"
+        items: "Carros"
+        created_at: "Cadastro"
+        empty: "Nenhum usuário cadastrado ainda."
+      quick_actions:
+        title: "Atalhos operacionais"
+        manage_users:
+          title: "Abrir usuários"
+          description_suffix: "usuários cadastrados"
+        maintenance:
+          title: "Ver manutenção"
+          description: "Jobs, armazenamento e limpeza temporária"
+    users:
+      index:
+        title: "Usuários"
+        subtitle: "Consulte contas, perfil administrativo, tamanho do acervo e data de cadastro."
+        search_placeholder: "Filtrar por nome ou e-mail"
+        user: "Usuário"
+        status: "Perfil"
+        collection: "Acervo"
+        created_at: "Cadastro"
+        actions: "Ações"
+        items_suffix: "carros"
+        details: "Ficha"
+        delete_confirm: "Remover este usuário também remove seus carros. Deseja continuar?"
+        page_info: "Página %{page} de %{total}"
+      show:
+        title: "Ficha do usuário"
+        subtitle: "Dados da conta, permissão administrativa e atividade recente no catálogo."
+        member_since: "Membro desde %{date}"
+        edit_user: "Editar usuário"
+        catalog_items: "Carros no catálogo"
+        autodetections: "Autodetecções"
+        recent_activity: "Últimos carros cadastrados"
+        added_on: "Adicionado em"
+        no_items: "Este usuário ainda não cadastrou carros."
+      edit:
+        title: "Editar usuário"
+        subtitle: "Atualize nome, e-mail e permissão administrativa."
+        name_label: "Nome completo"
+        name_placeholder: "Ex: João Silva"
+        email_label: "E-mail"
+        email_placeholder: "email@exemplo.com"
+        admin_privileges: "Permissão administrativa"
+        admin_privileges_help: "Permite acessar painel, usuários, estatísticas e manutenção."
+        self_admin_warning: "Você não pode remover sua própria permissão administrativa."
+        submit: "Salvar usuário"
+        best_practices:
+          title: "Notas de operação"
+          email: "Alterar e-mail muda o login usado por esta conta."
+          admin: "Permissão administrativa libera acesso a dados operacionais do sistema."
+          password: "Para troca de senha, oriente o usuário a usar o fluxo de recuperação no login."
     statistics:
-      title: "Estatisticas de uso e IA"
-      subtitle: "Acompanhe o uso atual do sistema e os contadores historicos preservados mesmo apos exclusoes ou alteracoes."
+      title: "Estatísticas de uso e IA"
+      subtitle: "Acompanhe o uso atual do sistema e os contadores históricos preservados mesmo após exclusões ou alterações."
       quick_link:
-        title: "Estatisticas de Uso"
+        title: "Estatísticas de uso"
         description: "Uso geral, YOLO e upscaler"
       sections:
-        historical_usage: "Uso historico"
-        autodetections: "Autodeteccoes por status"
+        historical_usage: "Uso histórico"
+        autodetections: "Autodetecções por status"
       cards:
         users_count:
-          title: "Usuarios atuais"
+          title: "Usuários atuais"
           description: "Total de contas cadastradas neste momento."
         cars_count:
           title: "Carros atuais"
-          description: "Itens ativos no acervo dos usuarios."
+          description: "Itens ativos no acervo dos usuários."
         ai_cars_count:
           title: "Carros via IA"
           description: "Carros ativos criados a partir de itens detectados."
         detected_items_count:
           title: "Itens detectados atuais"
-          description: "Recortes de autodeteccao ainda presentes no sistema."
+          description: "Recortes de autodetecção ainda presentes no sistema."
         shared_collections_count:
-          title: "Colecoes publicas"
-          description: "Usuarios com compartilhamento publico ativo."
+          title: "Coleções públicas"
+          description: "Usuários com compartilhamento público ativo."
         active_autodetections_count:
-          title: "Autodeteccoes ativas"
-          description: "Processos pendentes, em processamento ou aguardando verificacao."
+          title: "Autodetecções ativas"
+          description: "Processos pendentes, em processamento ou aguardando verificação."
         yolo_detected_items:
           title: "Itens detectados por YOLO"
       counters:
-        users_created: "Usuarios criados"
+        users_created: "Usuários criados"
         cars_created: "Carros cadastrados"
         cars_removed: "Carros removidos"
         yolo_detected_items: "Itens detectados por YOLO"
@@ -518,8 +639,8 @@ pt-BR:
         photos_upscaled_ai: "Fotos com upscaler por IA"
         photos_upscaled_local: "Fotos com upscaler local"
     maintenance:
-      title: "Manutencao do Sistema"
-      subtitle: "Monitore a saude do sistema e gerencie arquivos temporarios."
+      title: "Manutenção do sistema"
+      subtitle: "Monitore a saúde do sistema e gerencie arquivos temporários."
       storage:
         title: "Armazenamento"
         description_html: "Total ocupado pela pasta <code>public/uploads</code>."
@@ -527,14 +648,14 @@ pt-BR:
       cleanup:
         title: "Itens Expirados"
         button: "Limpar Agora"
-        confirm: "Isso removera permanentemente os registros e fotos de autodeteccoes concluidas ha mais de 24 horas. Deseja continuar?"
-        notice: "Limpeza de arquivos temporarios disparada com sucesso."
+        confirm: "Isso removerá permanentemente os registros e fotos de autodetecções concluídas há mais de 24 horas. Deseja continuar?"
+        notice: "Limpeza de arquivos temporários disparada com sucesso."
       background_jobs:
-        title: "Processos de Fundo (Background Jobs)"
+        title: "Processos de fundo"
         active: "Ativo"
         engine: "Motor de Processamento: Sidekiq"
-        description: "Sistema assincrono que processa IA (Autodeteccao) e gera Exportacoes sem travar o usuario. Esta secao atualiza automaticamente a cada 10 segundos."
+        description: "Sistema assíncrono que processa IA (autodetecção) e gera exportações sem travar o usuário. Esta seção atualiza automaticamente a cada 10 segundos."
         processed: "Processados"
-        enqueued: "Na Fila (Aguardando)"
-        workers: "Workers Ativos"
-        failed: "Falhas (Historico)"
+        enqueued: "Na fila"
+        workers: "Workers ativos"
+        failed: "Falhas (histórico)"

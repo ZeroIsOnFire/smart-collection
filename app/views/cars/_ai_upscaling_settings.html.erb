@@ -5,7 +5,7 @@
 <%= button_to toggle_ai_upscaling_cars_path,
               method: :patch,
               form: { class: "d-block" },
-              class: "btn #{current_user.ai_upscaling_enabled? ? 'btn-light text-danger' : 'btn-premium'} rounded-pill w-100 py-2 d-flex align-items-center justify-content-center gap-2" do %>
+              class: "btn #{current_user.ai_upscaling_enabled? ? 'btn-light text-danger' : 'btn-premium'} rounded-3 w-100 py-2 d-flex align-items-center justify-content-center gap-2" do %>
   <% if current_user.ai_upscaling_enabled? %>
     <i class="bi bi-x-circle"></i> <span><%= t('devise.ui.registrations.edit.ai_upscaling_disable') %></span>
   <% else %>
@@ -22,7 +22,7 @@
     <%= button_to toggle_bulk_ai_upscaling_cars_path,
                   method: :patch,
                   form: { class: "d-block" },
-                  class: "btn #{current_user.bulk_ai_upscaling_enabled? ? 'btn-light text-danger' : 'btn-outline-primary'} rounded-pill w-100 py-2 d-flex align-items-center justify-content-center gap-2" do %>
+                  class: "btn #{current_user.bulk_ai_upscaling_enabled? ? 'btn-light text-danger' : 'btn-outline-primary'} rounded-3 w-100 py-2 d-flex align-items-center justify-content-center gap-2" do %>
       <% if current_user.bulk_ai_upscaling_enabled? %>
         <i class="bi bi-pause-circle"></i> <span><%= t('devise.ui.registrations.edit.bulk_ai_upscaling_disable') %></span>
       <% else %>
