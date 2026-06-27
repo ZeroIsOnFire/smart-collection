@@ -50,6 +50,19 @@ docker compose exec web npm run lint
 
 Do not add ESLint, Prettier, TypeScript, or other JavaScript tools unless the user explicitly authorizes the new dependency.
 
+## Browser And Playwright Checks
+
+- For visible frontend behavior, first validate the smallest affected route, component, selector, console error, HTTP status, or asset request that can confirm the bug.
+- Prefer short temporary checks for assets, fonts, icons, Stimulus registration, Turbo events, or console errors before capturing large HTML or broad screenshots.
+- Run focused Playwright specs inside the `web` container when browser behavior changes:
+
+```bash
+docker compose exec web npm run test:e2e -- path/to/test.spec.js --browser=chromium
+```
+
+- Use `http://127.0.0.1:3000` when the test runs from inside the `web` container.
+- Remove or ignore temporary diagnostic artifacts after verification.
+
 ## Fixing Issues
 
 - Keep JavaScript dependencies managed by npm and locked in `package-lock.json`.
