@@ -4,6 +4,12 @@
 
 Servico Rails premium para registro e gerenciamento de colecoes: itens, fotos, autodeteccao local via YOLO, recorte manual, upscale local, compartilhamento publico seguro e exportacao PDF/CSV. Stack principal: Rails 8.1, Ruby 3.3.10, MongoDB/Mongoid, Devise, Hotwire/Turbo/Stimulus, Bootstrap 5, CarrierWave/MiniMagick, Sidekiq/Redis, RSpec e Docker Compose.
 
+## Uso de Contexto
+
+- Antes de abrir arquivos grandes, use `rg` com padroes especificos e leia apenas faixas de linhas relevantes.
+- Evite abrir artefatos gerados, minificados, compilados, logs extensos ou dumps completos quando uma busca focada resolver.
+- Resuma outputs grandes antes de continuar a investigacao.
+
 ## Prioridades Inviolaveis
 
 - Seguranca e segregacao de dados vem primeiro: dados de usuario sempre escopados por `current_user` ou pelo dono publico validado. Nunca use busca global para recursos privados.
