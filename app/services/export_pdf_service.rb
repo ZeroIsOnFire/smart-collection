@@ -88,8 +88,19 @@ class ExportPdfService
     pdf.line_width = 0.8
     pdf.stroke_rounded_rectangle [card_x, card_y], card_width, card_height, 8
 
-    pdf.bounding_box([card_x + 28, card_y - 30], width: card_width - 56, height: card_height - 52) do
+    content_x = card_x + 28
+    content_y = card_y - 30
+    content_width = card_width - 56
+    summary_width = 132
+    gap = 28
+
+    pdf.bounding_box([content_x, content_y], width: content_width - summary_width - gap, height: card_height - 52) do
       draw_cover_title_block(pdf)
+    end
+
+    pdf.bounding_box([content_x + content_width - summary_width, content_y - 32],
+                     width: summary_width,
+                     height: 96) do
       draw_collection_summary(pdf)
     end
   end
@@ -116,13 +127,12 @@ class ExportPdfService
     pdf.stroke_color COLORS[:gold]
     pdf.line_width = 1.2
     pdf.stroke_horizontal_line 0, 120, at: pdf.cursor
-    pdf.move_down 22
   end
 
   def draw_collection_summary(pdf)
     metric = collection_metrics.first
-    card_width = 170
-    card_height = 64
+    card_width = pdf.bounds.width
+    card_height = pdf.bounds.height
 
     pdf.bounding_box([0, pdf.cursor], width: card_width, height: card_height) do
       pdf.fill_color COLORS[:teal_soft]
@@ -131,15 +141,13 @@ class ExportPdfService
       pdf.line_width = 0.6
       pdf.stroke_rounded_rectangle [0, pdf.bounds.top], card_width, card_height, 8
 
-      pdf.move_down 12
+      pdf.move_down 18
       pdf.fill_color COLORS[:teal_dark]
-      pdf.text safe_text(metric[:value]), size: 22, style: :bold
-      pdf.move_down 1
+      pdf.text safe_text(metric[:value]), size: 26, style: :bold, align: :center
+      pdf.move_down 4
       pdf.fill_color COLORS[:muted]
-      pdf.text safe_text(metric[:label]), size: 8, character_spacing: 0.6
+      pdf.text safe_text(metric[:label]), size: 8, align: :center, character_spacing: 0.6
     end
-
-    pdf.move_down 8
   end
 
   def draw_cover_photo_strip(pdf)
