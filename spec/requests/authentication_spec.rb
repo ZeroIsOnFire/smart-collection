@@ -70,6 +70,10 @@ RSpec.describe 'Authentications', type: :request do
           }
         end.not_to change(User, :count)
         expect(response).to have_http_status(:unprocessable_entity)
+        error_text = Nokogiri::HTML(response.body).at_css('#error_explanation').text.squish
+
+        expect(error_text).to include(I18n.t('errors.messages.too_short.other', count: 6))
+        expect(error_text).not_to include('is too short')
       end
 
       it 'does not create a user with mismatched passwords' do
@@ -79,6 +83,10 @@ RSpec.describe 'Authentications', type: :request do
           }
         end.not_to change(User, :count)
         expect(response).to have_http_status(:unprocessable_entity)
+        error_text = Nokogiri::HTML(response.body).at_css('#error_explanation').text.squish
+
+        expect(error_text).to include(I18n.t('errors.messages.confirmation', attribute: User.human_attribute_name(:password)))
+        expect(error_text).not_to include("doesn't match")
       end
     end
   end

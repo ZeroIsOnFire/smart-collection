@@ -75,7 +75,7 @@ pt-BR:
       open_catalog: "Abrir meu catálogo"
       add_car: "Cadastrar carro"
       create_catalog: "Criar catálogo"
-      see_workflow: "Ver fluxo por foto"
+      see_workflow: "Saiba mais"
       sample_title: "Ficha pronta para consulta"
       sample_text: "Foto, marca, modelo, ano, escala, cor e notas ficam juntos para você reconhecer cada item depois."
     features:
@@ -220,10 +220,19 @@ pt-BR:
   # ── Mongoid ──────────────────────────────────────────
   mongoid:
     models:
+      user:
+        one: "Usuário"
+        other: "Usuários"
       car:
         one: "Carro"
         other: "Carros"
     attributes:
+      user:
+        name: "Nome"
+        email: "E-mail"
+        password: "Senha"
+        password_confirmation: "Confirmação de senha"
+        current_password: "Senha atual"
       car:
         name: "Nome / Modelo do Veículo"
         brand: "Marca"
@@ -243,6 +252,10 @@ pt-BR:
       empty: "não pode ficar vazio"
       taken: "já está em uso"
       invalid: "é inválido"
+      confirmation: "não é igual a %{attribute}"
+      not_saved:
+        one: "Não foi possível salvar %{resource}: 1 erro encontrado."
+        other: "Não foi possível salvar %{resource}: %{count} erros encontrados."
       too_long:
         one: "é muito longo (máximo: 1 caractere)"
         other: "é muito longo (máximo: %{count} caracteres)"
@@ -283,7 +296,7 @@ pt-BR:
     eyebrow: "SMART COLLECTION"
     catalog_section: "Itens da coleção"
     user_placeholder: "Usuário"
-    meta_info: "Gerado em: %{date} | Total: %{count} itens"
+    meta_info: "Gerado em: %{date} | Total: %{count} carros"
     generated_at: "Gerado em %{date}"
     cover_description: "Um relatório visual com resumo da coleção, fotos, metadados e observações dos itens catalogados."
     empty_collection: "Nenhum item cadastrado nesta coleção."
@@ -292,7 +305,7 @@ pt-BR:
     ai_photo_badge: "IA"
     page_info: "Página %{page} de %{total}"
     summary:
-      items: "Itens"
+      items: "Carros"
       brands: "Marcas"
       years: "Anos"
       ai_photos: "Fotos IA"
@@ -341,7 +354,7 @@ pt-BR:
     index:
       subtitle: "Ficha do acervo com foto, escala, marca, ano, cor e observações."
       copy_public_link: "Copiar link público"
-      search_placeholder: "Buscar por modelo, marca, ano, escala ou tag"
+      search_placeholder: "Buscar por modelo, marca, ano, escala ou cor"
       searching: "Buscando..."
       clear_search: "Limpar busca"
       results_count:
