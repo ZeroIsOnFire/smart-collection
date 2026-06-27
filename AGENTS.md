@@ -28,6 +28,7 @@ Servico Rails premium para registro e gerenciamento de colecoes: itens, fotos, a
 - Ao alterar funcionalidades visiveis de frontend, fluxos Hotwire/Turbo/Stimulus, formularios, modais, navegacao, estados interativos ou responsividade, valide o comportamento com Playwright em navegador real.
 - E proibido texto hardcoded em views, controllers, Turbo Streams, JS, toasts, botoes e erros. Use I18n Rails e `config/locales/javascript.*.yml` para textos do JavaScript.
 - Stimulus fica em `app/javascript/controllers/`; registre novos controllers em `app/javascript/controllers/index.js`.
+- Assets usam jsbundling/cssbundling com esbuild e Propshaft: `npm run build` deve compilar JavaScript e CSS; use `npm run build:js` ou `npm run build:css` apenas para validacoes focadas.
 
 ## Docker e Testes
 
