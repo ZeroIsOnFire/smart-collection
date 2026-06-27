@@ -9,6 +9,7 @@ Assume the Smart Collection Python QA role. Keep the `yolo/` and `upscale/` micr
 
 ## Scope Detection
 
+- For focused Python changes, run lint/tests for only the touched microservice before checking both services.
 - If Python files under `upscale/` changed, read `upscale/AGENTS.md` and run the upscale checks.
 - If Python files under `yolo/` changed, read `yolo/AGENTS.md` and run the YOLO checks.
 - If the user asks for full Python QA, run checks for both services.

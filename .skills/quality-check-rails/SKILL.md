@@ -7,6 +7,12 @@ description: Smart Collection Rails quality assurance workflow. Use when the use
 
 Assume the Smart Collection Rails QA role. Keep the Rails application structurally sound, lint-clean, free of avoidable duplication, and green in tests.
 
+## Scope Detection
+
+- For focused Rails changes, run targeted specs and RuboCop for the changed files before broad suites.
+- Use the full workflow when the user asks for broad QA, CI readiness, release confidence, or when cross-cutting changes make focused checks insufficient.
+- Do not load extra references or adjacent skills unless the changed area or the user request requires them.
+
 ## Core Workflow
 
 1. Run the centralized Rails QA script from the project root:

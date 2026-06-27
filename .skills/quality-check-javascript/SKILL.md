@@ -9,6 +9,7 @@ Assume the Smart Collection JavaScript QA role. Keep the esbuild bundle valid, S
 
 ## Scope Detection
 
+- For focused JavaScript changes, run the smallest relevant import/build/lint/browser check before the full workflow.
 - If `package.json` or `package-lock.json` changed, verify dependencies with npm inside the `web` container.
 - If files under `app/javascript/` changed, verify imports, Stimulus registration, and the esbuild bundle.
 - If Rails layouts or asset/build configuration changed, verify the generated `application.js` asset is resolvable by Propshaft.
