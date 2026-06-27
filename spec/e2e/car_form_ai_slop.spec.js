@@ -110,17 +110,51 @@ test.describe("car form visual identity", () => {
 
     const toggleStyles = await page.evaluate(() => {
       const toggle = document.querySelector(".form-check-input");
+      const uncheckedStyles = getComputedStyle(toggle);
+      const uncheckedBackground = uncheckedStyles.backgroundColor;
+      const uncheckedBorder = uncheckedStyles.borderColor;
+
       toggle.click();
 
       const checkedStyles = getComputedStyle(toggle);
 
       return {
+        uncheckedBackground,
+        uncheckedBorder,
         checkedBackground: checkedStyles.backgroundColor,
         checkedBorder: checkedStyles.borderColor,
       };
     });
 
+    expect(isPurpleOrBlue(toggleStyles.uncheckedBackground)).toBe(false);
+    expect(isPurpleOrBlue(toggleStyles.uncheckedBorder)).toBe(false);
     expect(isPurpleOrBlue(toggleStyles.checkedBackground)).toBe(false);
     expect(isPurpleOrBlue(toggleStyles.checkedBorder)).toBe(false);
+
+    await page.evaluate(() => localStorage.setItem("theme", "dark"));
+    await page.reload({ waitUntil: "domcontentloaded" });
+
+    const darkToggleStyles = await page.evaluate(() => {
+      const toggle = document.querySelector(".form-check-input");
+      const uncheckedStyles = getComputedStyle(toggle);
+      const uncheckedBackground = uncheckedStyles.backgroundColor;
+      const uncheckedBorder = uncheckedStyles.borderColor;
+
+      toggle.click();
+
+      const checkedStyles = getComputedStyle(toggle);
+
+      return {
+        uncheckedBackground,
+        uncheckedBorder,
+        checkedBackground: checkedStyles.backgroundColor,
+        checkedBorder: checkedStyles.borderColor,
+      };
+    });
+
+    expect(isPurpleOrBlue(darkToggleStyles.uncheckedBackground)).toBe(false);
+    expect(isPurpleOrBlue(darkToggleStyles.uncheckedBorder)).toBe(false);
+    expect(isPurpleOrBlue(darkToggleStyles.checkedBackground)).toBe(false);
+    expect(isPurpleOrBlue(darkToggleStyles.checkedBorder)).toBe(false);
   });
 });

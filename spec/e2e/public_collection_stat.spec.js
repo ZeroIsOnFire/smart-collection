@@ -31,6 +31,12 @@ function normalizeRgb(color) {
   return color.match(/\d+(\.\d+)?/g).slice(0, 3).map((channel) => Math.round(Number(channel))).join(",");
 }
 
+function isPurpleOrBlue(color) {
+  const [red, green, blue] = color.match(/\d+(\.\d+)?/g).slice(0, 3).map(Number);
+
+  return blue > red + 20 && blue > green + 10;
+}
+
 test.describe("public collection stat", () => {
   let shareToken;
 
@@ -95,12 +101,16 @@ test.describe("public collection stat", () => {
 
     const darkContrast = await stat.evaluate((element) => {
       const numberStyles = getComputedStyle(element.querySelector(".public-collection-stat-number"));
+      const labelStyles = getComputedStyle(element.querySelector(".public-collection-stat-label"));
       const background = getComputedStyle(element).backgroundColor;
 
-      return { color: numberStyles.color, background };
+      return { color: numberStyles.color, labelColor: labelStyles.color, background };
     });
 
     expect(contrastRatio(darkContrast.color, darkContrast.background)).toBeGreaterThanOrEqual(4.5);
+    expect(normalizeRgb(darkContrast.color)).toBe(normalizeRgb(darkContrast.labelColor));
+    expect(isPurpleOrBlue(darkContrast.background)).toBe(false);
+    expect(normalizeRgb(darkContrast.background)).not.toBe("15,23,42");
 
     await page.setViewportSize({ width: 390, height: 844 });
     await page.reload({ waitUntil: "domcontentloaded" });

@@ -96,15 +96,28 @@ test.describe("shared chrome visual identity", () => {
       const card = document.querySelector(".card");
       const badge = document.querySelector(".badge");
       const submit = document.querySelector("input[type='submit']");
+      const switchInput = document.querySelector(".initial-setup-switch-input");
+      const switchTrack = document.querySelector(".initial-setup-switch");
       const cardStyles = getComputedStyle(card);
       const badgeStyles = getComputedStyle(badge);
       const submitStyles = getComputedStyle(submit);
+      const switchOffStyles = getComputedStyle(switchTrack);
+      const switchOffBackground = switchOffStyles.backgroundColor;
+      const switchOffBorder = switchOffStyles.borderColor;
+
+      switchInput.click();
+
+      const switchOnStyles = getComputedStyle(switchTrack);
 
       return {
         cardRadius: Number.parseFloat(cardStyles.borderTopLeftRadius),
         badgeRadius: Number.parseFloat(badgeStyles.borderTopLeftRadius),
         submitRadius: Number.parseFloat(submitStyles.borderTopLeftRadius),
         submitBackground: submitStyles.backgroundColor,
+        switchOffBackground,
+        switchOffBorder,
+        switchOnBackground: switchOnStyles.backgroundColor,
+        switchOnBorder: switchOnStyles.borderColor,
         horizontalOverflow: document.documentElement.scrollWidth > window.innerWidth,
       };
     });
@@ -113,7 +126,39 @@ test.describe("shared chrome visual identity", () => {
     expect(setupStyles.badgeRadius).toBeLessThanOrEqual(8);
     expect(setupStyles.submitRadius).toBeLessThanOrEqual(8);
     expect(isPurpleOrBlue(setupStyles.submitBackground)).toBe(false);
+    expect(isPurpleOrBlue(setupStyles.switchOffBackground)).toBe(false);
+    expect(isPurpleOrBlue(setupStyles.switchOffBorder)).toBe(false);
+    expect(isPurpleOrBlue(setupStyles.switchOnBackground)).toBe(false);
+    expect(isPurpleOrBlue(setupStyles.switchOnBorder)).toBe(false);
     expect(setupStyles.horizontalOverflow).toBe(false);
+
+    await page.evaluate(() => localStorage.setItem("theme", "dark"));
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("heading", { name: /Antes de/i })).toBeVisible();
+
+    const darkSwitchStyles = await page.evaluate(() => {
+      const switchInput = document.querySelector(".initial-setup-switch-input");
+      const switchTrack = document.querySelector(".initial-setup-switch");
+      const switchOffStyles = getComputedStyle(switchTrack);
+      const switchOffBackground = switchOffStyles.backgroundColor;
+      const switchOffBorder = switchOffStyles.borderColor;
+
+      switchInput.click();
+
+      const switchOnStyles = getComputedStyle(switchTrack);
+
+      return {
+        switchOffBackground,
+        switchOffBorder,
+        switchOnBackground: switchOnStyles.backgroundColor,
+        switchOnBorder: switchOnStyles.borderColor,
+      };
+    });
+
+    expect(isPurpleOrBlue(darkSwitchStyles.switchOffBackground)).toBe(false);
+    expect(isPurpleOrBlue(darkSwitchStyles.switchOffBorder)).toBe(false);
+    expect(isPurpleOrBlue(darkSwitchStyles.switchOnBackground)).toBe(false);
+    expect(isPurpleOrBlue(darkSwitchStyles.switchOnBorder)).toBe(false);
 
     await page.context().clearCookies();
 
