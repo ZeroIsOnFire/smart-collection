@@ -13,6 +13,8 @@ class ExportPdfService
     teal_dark: '214F4A',
     teal_soft: 'E8F1EF',
     muted: '6B7280',
+    text_muted: '6F6256',
+    text_soft: '8E8174',
     soft: 'F6F1E8',
     line: 'D7C7B2',
     gold: 'A56D32',
@@ -303,12 +305,12 @@ class ExportPdfService
         draw_ai_photo_badge(pdf, col_width) if car.photo_upscaled_by_ai?
       else
         pdf.move_down (CARD_IMAGE_HEIGHT / 2) - 8
-        pdf.fill_color '94A3B8'
+        pdf.fill_color COLORS[:text_soft]
         pdf.text safe_text(I18n.t('export_pdf.no_photo')), align: :center, size: 8.5
       end
     rescue StandardError
       pdf.move_down (CARD_IMAGE_HEIGHT / 2) - 8
-      pdf.fill_color '94A3B8'
+      pdf.fill_color COLORS[:text_soft]
       pdf.text safe_text(I18n.t('export_pdf.no_image')), align: :center, size: 8.5
     end
   end
@@ -317,7 +319,7 @@ class ExportPdfService
     pdf.bounding_box([12, pdf.bounds.top - CARD_IMAGE_HEIGHT - 12],
                      width: col_width - 24,
                      height: CARD_HEIGHT - CARD_IMAGE_HEIGHT - 18) do
-      pdf.fill_color COLORS[:navy]
+      pdf.fill_color COLORS[:teal_dark]
       pdf.text safe_text(car.name), size: 11, style: :bold, overflow: :truncate
       pdf.move_down 8
 
@@ -329,7 +331,7 @@ class ExportPdfService
       return unless car.observations?
 
       pdf.move_down 7
-      pdf.fill_color '94A3B8'
+      pdf.fill_color COLORS[:text_soft]
       pdf.text_box safe_text(car.observations.to_s.squish),
                    at: [0, pdf.cursor],
                    width: pdf.bounds.width,
@@ -342,10 +344,10 @@ class ExportPdfService
   end
 
   def draw_metadata_row(pdf, label, value)
-    pdf.fill_color COLORS[:muted]
+    pdf.fill_color COLORS[:text_muted]
     pdf.formatted_text [
-      { text: "#{safe_text(label)}: ", styles: [:bold] },
-      { text: safe_text(value) }
+      { text: "#{safe_text(label)}: ", styles: [:bold], color: COLORS[:teal_dark] },
+      { text: safe_text(value), color: COLORS[:text_muted] }
     ], size: 8, leading: 1
   end
 
@@ -354,7 +356,7 @@ class ExportPdfService
     prawn_color = color_hex.delete('#')
     y = pdf.cursor - 4
 
-    pdf.fill_color COLORS[:muted]
+    pdf.fill_color COLORS[:teal_dark]
     pdf.draw_text "#{safe_text(I18n.t('export_pdf.metadata.color'))}:",
                   at: [0, y - 2],
                   size: 8,
@@ -363,11 +365,11 @@ class ExportPdfService
     label_width = pdf.width_of("#{safe_text(I18n.t('export_pdf.metadata.color'))}:", size: 8, style: :bold)
     pdf.fill_color prawn_color
     pdf.fill_circle [label_width + 9, y], 4
-    pdf.stroke_color 'CBD5E1'
+    pdf.stroke_color COLORS[:line]
     pdf.line_width = 0.5
     pdf.stroke_circle [label_width + 9, y], 4
 
-    pdf.fill_color COLORS[:muted]
+    pdf.fill_color COLORS[:text_muted]
     pdf.draw_text safe_text(car.color), at: [label_width + 18, y - 3], size: 8
     pdf.move_down 14
   end
