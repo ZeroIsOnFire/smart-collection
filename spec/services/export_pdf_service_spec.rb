@@ -33,6 +33,7 @@ RSpec.describe ExportPdfService do
       expect(service).to receive(:draw_cover_page).ordered.and_call_original
       expect(service).to receive(:draw_catalog_pages).ordered.and_call_original
       expect(service).to receive(:draw_collection_summary).and_call_original
+      expect(service).to receive(:draw_cover_photo_strip).and_call_original
 
       service.generate
     end
