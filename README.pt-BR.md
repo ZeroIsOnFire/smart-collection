@@ -56,9 +56,7 @@ O **Smart Collection Catalog** e um servico Rails premium para registro e gerenc
 
 ## Locale
 
-A aplicacao possui locales em portugues (`pt-BR`) e ingles (`en`). O portugues e o locale padrao atual em `config/initializers/locale.rb`.
-
-Para usar o sistema em ingles durante o desenvolvimento, acesse as paginas com `?locale=en` quando o fluxo do controller suportar troca de locale, ou altere o locale padrao para `:en` em `config/initializers/locale.rb` no ambiente local.
+A aplicacao possui arquivos de locale em portugues (`pt-BR`) e ingles (`en`). O portugues e o locale padrao atual em tempo de execucao em `config/initializers/locale.rb`.
 
 ## Funcionalidades principais
 
