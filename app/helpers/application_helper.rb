@@ -42,6 +42,14 @@ module ApplicationHelper
     record.errors[attribute].to_sentence.presence
   end
 
+  def versioned_public_path(path)
+    normalized_path = path.to_s.start_with?('/') ? path.to_s : "/#{path}"
+    file_path = Rails.public_path.join(normalized_path.delete_prefix('/'))
+    version = File.exist?(file_path) ? File.mtime(file_path).to_i : Time.current.to_i
+
+    "#{normalized_path}?v=#{version}"
+  end
+
   private
 
   def deep_stringify_translation_tree(value)

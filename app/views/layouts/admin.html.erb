@@ -9,11 +9,11 @@
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= render "shared/javascript_i18n" %>
     <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
-    <link rel="icon" type="image/png" href="/logo/favicon-96x96.png" sizes="96x96" />
-    <link rel="icon" type="image/svg+xml" href="/logo/favicon.svg" />
-    <link rel="shortcut icon" href="/logo/favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/logo/apple-touch-icon.png" />
-    <link rel="manifest" href="/logo/site.webmanifest" />
+    <link rel="icon" type="image/png" href="<%= versioned_public_path('/logo/favicon-96x96.png') %>" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="<%= versioned_public_path('/logo/favicon.svg') %>" />
+    <link rel="shortcut icon" href="<%= versioned_public_path('/logo/favicon.ico') %>" />
+    <link rel="apple-touch-icon" sizes="180x180" href="<%= versioned_public_path('/logo/apple-touch-icon.png') %>" />
+    <link rel="manifest" href="<%= versioned_public_path('/logo/site.webmanifest') %>" />
     <script nonce="<%= content_security_policy_nonce %>">
       (function() {
         const savedTheme = localStorage.getItem('theme');
@@ -32,7 +32,7 @@
       <aside class="admin-sidebar bg-dark text-white d-flex flex-column">
         <div class="p-4 border-bottom border-secondary mb-3">
           <%= link_to admin_dashboard_path, class: "text-white text-decoration-none d-flex align-items-center gap-2" do %>
-            <%= image_tag "/logo/logo-dark.png", alt: "SCC Admin", height: 32, class: "theme-logo", style: "mix-blend-mode: lighten;" %>
+            <%= image_tag versioned_public_path("/logo/logo-dark.png"), alt: "SCC Admin", height: 32, class: "theme-logo", style: "mix-blend-mode: lighten;" %>
             <span class="fw-bold fs-5 tracking-tight"><%= t('admin.layout.short_title') %></span>
           <% end %>
         </div>

@@ -1011,6 +1011,14 @@ body {
   border: 1px solid var(--border-color);
   display: flex;
   justify-content: center;
+  overflow: hidden;
+}
+
+.catalog-sample-image {
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
 }
 
 /* Feature Cards */

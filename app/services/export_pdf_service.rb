@@ -401,7 +401,7 @@ class ExportPdfService
       pdf.line_width = 0.5
       pdf.stroke_horizontal_line pdf.bounds.left, pdf.bounds.right, at: -5
 
-      logo_path = Rails.public_path.join('logo/logo.png')
+      logo_path = Rails.public_path.join('logo/logo-no-bg.png')
       if File.exist?(logo_path)
         pdf.image logo_path, at: [pdf.bounds.left, -10], height: 24
         pdf.fill_color '94A3B8'

@@ -4,7 +4,15 @@
   <div class="auth-card">
     <div class="auth-header">
       <div class="auth-logo">
-        <%= image_tag "/logo/logo.png", alt: "Smart Collection", height: 60, class: "theme-logo", data: { theme_target: "logo", dark_src: "/logo/logo-dark.png", light_src: "/logo/logo.png" } %>
+        <%= image_tag versioned_public_path("/logo/logo.png"),
+                      alt: "Smart Collection",
+                      height: 60,
+                      class: "theme-logo",
+                      data: {
+                        theme_target: "logo",
+                        dark_src: versioned_public_path("/logo/logo-dark.png"),
+                        light_src: versioned_public_path("/logo/logo.png")
+                      } %>
       </div>
       <h1 class="auth-title"><%= t('devise.ui.registrations.new.title') %></h1>
       <p class="auth-subtitle"><%= t('devise.ui.registrations.new.subtitle') %></p>
