@@ -10,11 +10,11 @@
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= render "shared/javascript_i18n" %>
     <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
-    <link rel="icon" type="image/png" href="/logo/favicon-96x96.png" sizes="96x96" />
-    <link rel="icon" type="image/svg+xml" href="/logo/favicon.svg" />
-    <link rel="shortcut icon" href="/logo/favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/logo/apple-touch-icon.png" />
-    <link rel="manifest" href="/logo/site.webmanifest" />
+    <link rel="icon" type="image/png" href="<%= versioned_public_path('/logo/favicon-96x96.png') %>" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="<%= versioned_public_path('/logo/favicon.svg') %>" />
+    <link rel="shortcut icon" href="<%= versioned_public_path('/logo/favicon.ico') %>" />
+    <link rel="apple-touch-icon" sizes="180x180" href="<%= versioned_public_path('/logo/apple-touch-icon.png') %>" />
+    <link rel="manifest" href="<%= versioned_public_path('/logo/site.webmanifest') %>" />
     <script nonce="<%= content_security_policy_nonce %>">
       (function() {
         const savedTheme = localStorage.getItem('theme');
@@ -31,7 +31,15 @@
     <header class="navbar navbar-expand-lg sticky-top border-bottom py-3">
       <div class="container-fluid app-container">
         <%= link_to root_path, class: "navbar-brand d-flex align-items-center" do %>
-          <%= image_tag "/logo/logo.png", alt: "Smart Collection", height: 32, class: "me-2 theme-logo", data: { theme_target: "logo", dark_src: "/logo/logo-dark.png", light_src: "/logo/logo.png" } %>
+          <%= image_tag versioned_public_path("/logo/logo.png"),
+                        alt: "Smart Collection",
+                        height: 32,
+                        class: "me-2 theme-logo",
+                        data: {
+                          theme_target: "logo",
+                          dark_src: versioned_public_path("/logo/logo-dark.png"),
+                          light_src: versioned_public_path("/logo/logo.png")
+                        } %>
           <span class="fw-bold tracking-tight">Smart<span class="text-primary">Collection</span></span>
         <% end %>
 
