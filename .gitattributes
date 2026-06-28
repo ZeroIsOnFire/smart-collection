@@ -2,6 +2,9 @@
 
 
 # Mark any vendored files as having been vendored.
+.gitattributes text eol=lf
+*.sh text eol=lf
+bin/* text eol=lf
 vendor/* linguist-vendored
 config/credentials/*.yml.enc diff=rails_credentials
 config/credentials.yml.enc diff=rails_credentials
