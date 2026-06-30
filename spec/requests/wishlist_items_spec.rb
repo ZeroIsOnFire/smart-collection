@@ -42,6 +42,26 @@ RSpec.describe 'WishlistItems', type: :request do
     end
   end
 
+  describe 'PATCH /wishlist/toggle_sharing' do
+    it 'enables wishlist sharing and creates a public token' do
+      patch toggle_sharing_wishlist_items_path
+
+      expect(response).to redirect_to(wishlist_items_path)
+      expect(user.reload.wishlist_sharing_enabled).to be true
+      expect(user.wishlist_share_token).to be_present
+    end
+
+    it 'disables wishlist sharing without removing the token' do
+      user.update!(wishlist_sharing_enabled: true)
+      token = user.wishlist_share_token
+
+      patch toggle_sharing_wishlist_items_path
+
+      expect(user.reload.wishlist_sharing_enabled).to be false
+      expect(user.wishlist_share_token).to eq(token)
+    end
+  end
+
   describe 'POST /wishlist' do
     it 'creates a wishlist item scoped to the current user' do
       expect do

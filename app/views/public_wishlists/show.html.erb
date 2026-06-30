@@ -1,0 +1,89 @@
+<div class="public-collection-page">
+  <section class="public-collection-hero py-5">
+    <div class="container-fluid app-container">
+      <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-4">
+        <div>
+          <p class="text-uppercase text-primary fw-bold small mb-2"><%= t('public_wishlists.show.eyebrow') %></p>
+          <h1 class="display-6 fw-bold mb-2">
+            <%= @user.wishlist_public_title.presence || t('public_wishlists.show.title', name: @user.name) %>
+          </h1>
+          <p class="text-muted mb-0"><%= t('public_wishlists.show.subtitle') %></p>
+        </div>
+        <div class="public-collection-stat rounded-3">
+          <div class="public-collection-stat-number"><%= @wishlist_items.count %></div>
+          <div class="public-collection-stat-label"><%= t('public_wishlists.show.items_count') %></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-4">
+    <div class="container-fluid app-container">
+      <%= form_with url: public_wishlist_path(@user.wishlist_share_token), method: :get, class: "row g-2 align-items-end mb-4" do |f| %>
+        <div class="col-12 col-md-4">
+          <%= f.label :status, t('mongoid.attributes.wishlist_item.status'), class: "form-label small fw-semibold text-muted" %>
+          <%= f.select :status,
+                       options_for_select([[t('wishlist_items.filters.all_statuses'), '']] + WishlistItem.status_options, params[:status]),
+                       {},
+                       class: "form-select rounded-3" %>
+        </div>
+        <div class="col-12 col-md-4">
+          <%= f.label :priority, t('mongoid.attributes.wishlist_item.priority'), class: "form-label small fw-semibold text-muted" %>
+          <%= f.select :priority,
+                       options_for_select([[t('wishlist_items.filters.all_priorities'), '']] + WishlistItem.priority_options, params[:priority]),
+                       {},
+                       class: "form-select rounded-3" %>
+        </div>
+        <div class="col-12 col-md-3">
+          <%= f.label :brand, t('mongoid.attributes.wishlist_item.brand'), class: "form-label small fw-semibold text-muted" %>
+          <%= f.select :brand,
+                       options_for_select([[t('wishlist_items.filters.all_brands'), '']] + @brands.map { |brand| [brand, brand] }, params[:brand]),
+                       {},
+                       class: "form-select rounded-3" %>
+        </div>
+        <div class="col-12 col-md-1 d-grid">
+          <button type="submit" class="btn btn-premium rounded-3" aria-label="<%= t('actions.filter') %>">
+            <i class="bi bi-funnel"></i>
+          </button>
+        </div>
+      <% end %>
+
+      <% if @wishlist_items.any? %>
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-4">
+          <% @wishlist_items.each do |item| %>
+            <div class="col">
+              <article class="card h-100 border-0 shadow-sm rounded-3 overflow-hidden">
+                <div class="ratio ratio-16x9 bg-light">
+                  <% if item.photo? %>
+                    <%= image_tag item.photo.url, alt: item.name, class: "w-100 h-100 object-fit-cover" %>
+                  <% else %>
+                    <div class="d-flex align-items-center justify-content-center text-muted">
+                      <i class="bi bi-image fs-1 opacity-50"></i>
+                    </div>
+                  <% end %>
+                </div>
+                <div class="card-body">
+                  <h2 class="h5 fw-bold mb-1"><%= item.name %></h2>
+                  <p class="text-muted small mb-3"><%= [item.brand, item.scale].compact_blank.join(' | ') %></p>
+                  <div class="d-flex gap-2 flex-wrap">
+                    <% if @user.wishlist_public_show_status? %>
+                      <span class="badge rounded-pill text-bg-primary-subtle text-primary-emphasis"><%= item.status_label %></span>
+                    <% end %>
+                    <% if @user.wishlist_public_show_priority? %>
+                      <span class="badge rounded-pill text-bg-light border"><%= item.priority_label %></span>
+                    <% end %>
+                  </div>
+                </div>
+              </article>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="text-center py-5">
+          <h2 class="h4 fw-bold"><%= t('public_wishlists.show.empty_title') %></h2>
+          <p class="text-muted"><%= t('public_wishlists.show.empty_text') %></p>
+        </div>
+      <% end %>
+    </div>
+  </section>
+</div>

@@ -19,7 +19,9 @@ Rails.application.routes.draw do
   end
 
   resource :wishlist_export, only: :show, path: 'wishlist/export'
+  get '/wishlist/public/:token', to: 'public_wishlists#show', as: :public_wishlist
   resources :wishlist_items, path: 'wishlist' do
+    patch :toggle_sharing, on: :collection
     post :add_to_collection, on: :member
   end
 

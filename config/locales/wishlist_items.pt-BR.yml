@@ -33,6 +33,9 @@ pt-BR:
     actions:
       new: "Novo desejo"
       add_to_collection: "Adicionar ao cadastro"
+      enable_public: "Ativar link publico"
+      disable_public: "Desativar link publico"
+      open_public: "Abrir link publico"
       back_to_wishlist: "Voltar para a lista"
       delete_confirm: "Excluir este item da lista de desejos?"
     filters:
@@ -99,3 +102,12 @@ pt-BR:
       generated_by: "SmartCollection"
       summary:
         total: "Total de desejos"
+
+  public_wishlists:
+    show:
+      eyebrow: "Wishlist publica"
+      title: "Lista de desejos de %{name}"
+      subtitle: "Miniaturas desejadas, reservadas ou ja compradas para acompanhar a busca."
+      items_count: "Itens na lista"
+      empty_title: "Nenhum item encontrado"
+      empty_text: "Tente ajustar os filtros para ver outros desejos compartilhados."

@@ -10,6 +10,12 @@ class WishlistItemsController < ApplicationController
     @wishlist_item = current_user.wishlist_items.build
   end
 
+  def toggle_sharing
+    current_user.update(wishlist_sharing_enabled: !current_user.wishlist_sharing_enabled)
+
+    redirect_to wishlist_items_path, notice: t('flash.updated', resource: t('nav.wishlist'))
+  end
+
   def new
     @wishlist_item = current_user.wishlist_items.build(default_wishlist_item_attributes)
   end

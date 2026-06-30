@@ -33,6 +33,9 @@ en:
     actions:
       new: "New wish"
       add_to_collection: "Add to collection"
+      enable_public: "Enable public link"
+      disable_public: "Disable public link"
+      open_public: "Open public link"
       back_to_wishlist: "Back to wishlist"
       delete_confirm: "Delete this wishlist item?"
     filters:
@@ -99,3 +102,12 @@ en:
       generated_by: "SmartCollection"
       summary:
         total: "Total wishes"
+
+  public_wishlists:
+    show:
+      eyebrow: "Public wishlist"
+      title: "%{name}'s wishlist"
+      subtitle: "Wanted, reserved or purchased miniatures to follow the hunt."
+      items_count: "Wishlist items"
+      empty_title: "No items found"
+      empty_text: "Try adjusting filters to see other shared wishes."
