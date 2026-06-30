@@ -194,6 +194,44 @@ RSpec.describe 'Cars', type: :request do
     end
   end
 
+  describe 'wishlist prefill' do
+    it 'renders the new car form with compatible wishlist values' do
+      wishlist_item = create(:wishlist_item, user: user, name: 'Wishlist Porsche', brand: 'Mini GT', scale: '1:64')
+
+      get new_car_path, params: {
+        wishlist_item_id: wishlist_item.id.to_s,
+        car: WishlistItemToCarAttributesService.new(wishlist_item).to_params
+      }
+
+      expect(response).to be_successful
+      expect(response.body).to include('Wishlist Porsche')
+      expect(response.body).to include('Mini GT')
+      expect(response.body).to include('name="wishlist_item_id"')
+    end
+
+    it 'marks the wishlist item as purchased and links the created car' do
+      wishlist_item = create(:wishlist_item, user: user, name: 'Wishlist Skyline', brand: 'Tomica', scale: '1:64')
+      wishlist_item.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+      wishlist_item.save!
+
+      expect do
+        post cars_path, params: {
+          wishlist_item_id: wishlist_item.id.to_s,
+          car: {
+            name: wishlist_item.name,
+            brand: wishlist_item.brand,
+            size: wishlist_item.scale,
+            observations: wishlist_item.observations
+          }
+        }
+      end.to change(user.cars, :count).by(1)
+
+      created_car = user.cars.desc(:created_at).first
+      expect(wishlist_item.reload.status).to eq('purchased')
+      expect(wishlist_item.car_id).to eq(created_car.id)
+    end
+  end
+
   describe 'GET /new' do
     it 'renders a successful response' do
       get new_car_path

@@ -44,6 +44,12 @@
 
     <div class="card-footer bg-transparent border-0 pt-0 pb-3 px-3">
       <div class="d-flex gap-2">
+        <%= button_to add_to_collection_wishlist_item_path(wishlist_item),
+                      method: :post,
+                      class: "btn btn-premium rounded-3 flex-fill" do %>
+          <i class="bi bi-plus-circle me-1"></i>
+          <%= t('wishlist_items.actions.add_to_collection') %>
+        <% end %>
         <%= link_to edit_wishlist_item_path(wishlist_item), class: "btn btn-soft-secondary rounded-3 flex-fill" do %>
           <i class="bi bi-pencil me-1"></i>
           <%= t('actions.edit') %>

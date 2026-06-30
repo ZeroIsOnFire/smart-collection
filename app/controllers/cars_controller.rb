@@ -71,6 +71,7 @@ class CarsController < ApplicationController
 
   # GET /cars/new
   def new
+    @wishlist_item = find_current_user_wishlist_item(params[:wishlist_item_id])
     @car = current_user.cars.build(new_car_params)
     render_form_modal(t('cars.modal.new_title')) if turbo_frame_request?
   end
@@ -88,6 +89,9 @@ class CarsController < ApplicationController
       return redirect_to cars_path, alert: t('flash.unauthorized') if @detected_item.nil? || @detected_item.autodetection.user_id.to_s != current_user.id.to_s
     end
 
+    @wishlist_item = find_current_user_wishlist_item(params[:wishlist_item_id]) if params[:wishlist_item_id].present?
+    return redirect_to wishlist_items_path, alert: t('flash.unauthorized') if params[:wishlist_item_id].present? && @wishlist_item.nil?
+
     # Se vier de um item detectado, garante que a foto seja carregada do arquivo local
     # CarrierWave remote_photo_url falha para arquivos locais / uploads/
     params_to_save = car_params
@@ -96,6 +100,7 @@ class CarsController < ApplicationController
       params_to_save[:color] = @detected_item.color if @detected_item.color? && params_to_save[:color].blank?
       params_to_save[:detected_via_ai] = true
     end
+    attach_wishlist_photo(params_to_save) if @wishlist_item
 
     @car = car_service.create(params_to_save)
 
@@ -112,6 +117,7 @@ class CarsController < ApplicationController
         )
         @detected_item.autodetection.check_completion!
       end
+      mark_wishlist_item_as_purchased if @wishlist_item
 
       respond_to do |format|
         format.html { redirect_to car_url(@car), notice: t('flash.created', resource: t('activerecord.models.car.one')) }
@@ -211,7 +217,7 @@ class CarsController < ApplicationController
 
   def render_form_modal(title, status: :ok)
     render partial: 'cars/form_modal',
-           locals: { car: @car, title: title },
+           locals: { car: @car, title: title, wishlist_item: @wishlist_item },
            formats: [:html],
            status: status
   end
@@ -220,7 +226,7 @@ class CarsController < ApplicationController
     render turbo_stream: turbo_stream.update(
       'modal',
       partial: 'cars/form_modal',
-      locals: { car: @car, title: title, frame: false }
+      locals: { car: @car, title: title, frame: false, wishlist_item: @wishlist_item }
     ), status: :unprocessable_content
   end
 
@@ -286,7 +292,25 @@ class CarsController < ApplicationController
   end
 
   def new_car_params
-    params.fetch(:car, {}).permit(:name, :brand, :observations, :size, :year, :color, :skip_upscaler)
+    params.fetch(:car, {}).permit(:name, :brand, :observations, :size, :year, :color, :skip_upscaler,
+                                  :remote_photo_url)
+  end
+
+  def find_current_user_wishlist_item(id)
+    return nil if id.blank?
+
+    current_user.wishlist_items.find_by(id: id)
+  end
+
+  def attach_wishlist_photo(params_to_save)
+    return if params_to_save[:photo].present?
+    return unless @wishlist_item.photo? && @wishlist_item.photo.path && File.exist?(@wishlist_item.photo.path)
+
+    params_to_save[:photo] = File.open(@wishlist_item.photo.path)
+  end
+
+  def mark_wishlist_item_as_purchased
+    @wishlist_item.update(status: 'purchased', car_id: @car.id)
   end
 
   def default_new_car_attributes

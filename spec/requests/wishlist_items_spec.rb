@@ -124,4 +124,33 @@ RSpec.describe 'WishlistItems', type: :request do
       expect(response).to redirect_to(wishlist_items_path)
     end
   end
+
+  describe 'POST /wishlist/:id/add_to_collection' do
+    it 'redirects to a prefilled new car form for the current user item' do
+      item = create(:wishlist_item, user: user, name: 'Mazda RX-7', brand: 'Mini GT', scale: '1:64')
+
+      post add_to_collection_wishlist_item_path(item)
+
+      expect(response).to redirect_to(
+        new_car_path(
+          wishlist_item_id: item.id.to_s,
+          car: {
+            name: 'Mazda RX-7',
+            brand: 'Mini GT',
+            size: '1:64',
+            observations: item.observations,
+            remote_photo_url: item.photo.url
+          }.compact_blank
+        )
+      )
+    end
+
+    it 'does not redirect another user wishlist item into the car form' do
+      item = create(:wishlist_item, user: other_user)
+
+      post add_to_collection_wishlist_item_path(item)
+
+      expect(response).not_to redirect_to(/wishlist_item_id=#{item.id}/)
+    end
+  end
 end

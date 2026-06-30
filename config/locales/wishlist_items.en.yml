@@ -32,6 +32,7 @@ en:
       dream: "Dream item"
     actions:
       new: "New wish"
+      add_to_collection: "Add to collection"
       back_to_wishlist: "Back to wishlist"
       delete_confirm: "Delete this wishlist item?"
     filters:

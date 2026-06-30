@@ -32,6 +32,7 @@ pt-BR:
       dream: "Sonho de consumo"
     actions:
       new: "Novo desejo"
+      add_to_collection: "Adicionar ao cadastro"
       back_to_wishlist: "Voltar para a lista"
       delete_confirm: "Excluir este item da lista de desejos?"
     filters:

@@ -2,7 +2,7 @@
 
 class WishlistItemsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_wishlist_item, only: %i[edit update destroy]
+  before_action :set_wishlist_item, only: %i[edit update destroy add_to_collection]
 
   def index
     @wishlist_items = filtered_wishlist_items.desc(:created_at)
@@ -38,6 +38,13 @@ class WishlistItemsController < ApplicationController
     @wishlist_item.destroy
 
     redirect_to wishlist_items_path, notice: t('flash.deleted', resource: t('mongoid.models.wishlist_item.one'))
+  end
+
+  def add_to_collection
+    redirect_to new_car_path(
+      wishlist_item_id: @wishlist_item.id.to_s,
+      car: WishlistItemToCarAttributesService.new(@wishlist_item).to_params
+    )
   end
 
   private
