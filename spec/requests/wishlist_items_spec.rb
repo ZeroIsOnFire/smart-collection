@@ -80,6 +80,7 @@ RSpec.describe 'WishlistItems', type: :request do
 
       expect(response).to redirect_to(wishlist_items_path)
       expect(user.wishlist_items.last.name).to eq('Nissan Skyline')
+      expect(user.wishlist_items.last.target_price_cents).to be_nil
     end
 
     it 'does not create with unsafe reference URL' do
@@ -95,6 +96,16 @@ RSpec.describe 'WishlistItems', type: :request do
       end.not_to change(user.wishlist_items, :count)
 
       expect(response).to have_http_status(:unprocessable_content)
+    end
+
+    it 'renders validation errors inside the modal for turbo requests' do
+      post wishlist_items_path,
+           params: { wishlist_item: { name: '', status: 'wanted', priority: 'medium' } },
+           as: :turbo_stream
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(response.body).to include('turbo-stream action="update" target="modal"')
+      expect(response.body).to include(I18n.t('wishlist_items.form.validation_error_title'))
     end
   end
 
@@ -130,6 +141,18 @@ RSpec.describe 'WishlistItems', type: :request do
 
       expect(item.reload.name).not_to eq('Intrusion')
       expect(item.status).to eq('wanted')
+    end
+  end
+
+  describe 'GET /wishlist/:id' do
+    it 'renders item details in a modal for turbo frame requests' do
+      item = create(:wishlist_item, user: user, name: 'Modal wish')
+
+      get wishlist_item_path(item), headers: { 'Turbo-Frame' => 'modal' }
+
+      expect(response).to be_successful
+      expect(response.body).to include('turboModal')
+      expect(response.body).to include('Modal wish')
     end
   end
 

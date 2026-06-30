@@ -59,6 +59,7 @@ en:
     copied: "Copied!"
     enable: "Enable Public Link"
     disable: "Disable Sharing"
+    open_public: "Open public link"
 
 
   home:

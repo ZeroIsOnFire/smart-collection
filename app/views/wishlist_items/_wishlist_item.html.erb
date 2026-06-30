@@ -1,74 +1,90 @@
-<div class="col" id="<%= dom_id(wishlist_item) %>">
-  <div class="card h-100 border-0 shadow-sm rounded-3 overflow-hidden">
-    <div class="ratio ratio-16x9 bg-light">
-      <% if wishlist_item.photo? %>
-        <%= image_tag wishlist_item.photo.url,
-                      alt: wishlist_item.name,
-                      class: "w-100 h-100 object-fit-cover" %>
-      <% else %>
-        <div class="d-flex flex-column align-items-center justify-content-center text-muted">
-          <i class="bi bi-image fs-1 opacity-50"></i>
-          <span class="small"><%= t('wishlist_items.card.no_photo') %></span>
-        </div>
-      <% end %>
+<div class="col animate-fade-in wishlist-card-wrapper" id="<%= dom_id(wishlist_item) %>">
+  <div class="card premium-card wishlist-card h-100 shadow-sm border-0 position-relative rounded-3 overflow-hidden">
+    <div class="position-absolute top-0 end-0 p-2 z-3">
+      <div class="dropdown">
+        <button class="btn btn-sm bg-white bg-opacity-90 rounded-circle shadow-sm border-0"
+                type="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+                aria-label="<%= t('wishlist_items.card.actions_menu') %>"
+                style="width: 32px; height: 32px; padding: 0;">
+          <i class="bi bi-three-dots-vertical small"></i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3">
+          <li>
+            <%= link_to wishlist_item_path(wishlist_item),
+                        class: 'dropdown-item d-flex align-items-center gap-2 py-2',
+                        data: { turbo_frame: "modal" } do %>
+              <i class="bi bi-eye text-muted"></i>
+              <%= t('wishlist_items.card.view_details') %>
+            <% end %>
+          </li>
+          <li>
+            <%= link_to edit_wishlist_item_path(wishlist_item),
+                        class: 'dropdown-item d-flex align-items-center gap-2 py-2',
+                        data: { turbo_frame: "modal" } do %>
+              <i class="bi bi-pencil text-muted"></i>
+              <%= t('actions.edit') %>
+            <% end %>
+          </li>
+          <li>
+            <%= link_to wishlist_item_share_image_path(wishlist_item, format: :png),
+                        class: 'dropdown-item d-flex align-items-center gap-2 py-2' do %>
+              <i class="bi bi-image text-muted"></i>
+              <%= t('wishlist_items.actions.share_item_image') %>
+            <% end %>
+          </li>
+          <li>
+            <%= button_to add_to_collection_wishlist_item_path(wishlist_item),
+                          method: :post,
+                          class: 'dropdown-item d-flex align-items-center gap-2 py-2' do %>
+              <i class="bi bi-plus-circle text-muted"></i>
+              <%= t('wishlist_items.actions.add_to_collection') %>
+            <% end %>
+          </li>
+          <li><hr class="dropdown-divider"></li>
+          <li>
+            <%= button_to wishlist_item_path(wishlist_item),
+                          method: :delete,
+                          class: 'dropdown-item text-danger d-flex align-items-center gap-2 py-2',
+                          form: { data: { turbo_confirm: t('wishlist_items.actions.delete_confirm') } } do %>
+              <i class="bi bi-trash3"></i>
+              <%= t('actions.delete') %>
+            <% end %>
+          </li>
+        </ul>
+      </div>
     </div>
 
-    <div class="card-body">
-      <div class="d-flex justify-content-between gap-3 align-items-start mb-2">
-        <div class="min-w-0">
-          <h2 class="h5 fw-bold mb-1 text-truncate"><%= wishlist_item.name %></h2>
-          <div class="text-muted small">
-            <%= [wishlist_item.brand, wishlist_item.scale].compact_blank.join(' | ') %>
+    <%= link_to wishlist_item_path(wishlist_item),
+                class: "text-decoration-none",
+                data: { turbo_frame: "modal" } do %>
+      <div class="wishlist-card-photo bg-light d-flex align-items-center justify-content-center text-muted">
+        <% if wishlist_item.photo? %>
+          <%= image_tag wishlist_item.photo.url, alt: wishlist_item.name, loading: "lazy" %>
+        <% else %>
+          <div class="text-center">
+            <i class="bi bi-camera fs-3 opacity-30 d-block mb-1"></i>
+            <small class="opacity-50"><%= t('wishlist_items.card.no_photo') %></small>
           </div>
+        <% end %>
+      </div>
+
+      <div class="card-body wishlist-card-body px-3 pb-3 pt-2">
+        <h2 class="card-title mb-0 fw-bold text-dark text-truncate fs-6"><%= wishlist_item.name %></h2>
+        <div class="wishlist-list-meta d-flex flex-wrap gap-1 mt-1 mb-2">
+          <% if wishlist_item.brand? %>
+            <span class="collection-brand-badge"><%= wishlist_item.brand %></span>
+          <% end %>
+          <% if wishlist_item.scale? %>
+            <span class="metadata-chip"><i class="bi bi-rulers"></i><%= wishlist_item.scale %></span>
+          <% end %>
         </div>
-        <span class="badge rounded-pill text-bg-light border">
-          <%= wishlist_item.priority_label %>
-        </span>
+        <div class="d-flex flex-wrap gap-1">
+          <span class="metadata-chip"><i class="bi bi-flag"></i><%= wishlist_item.status_label %></span>
+          <span class="metadata-chip"><i class="bi bi-star"></i><%= wishlist_item.priority_label %></span>
+        </div>
       </div>
-
-      <div class="d-flex gap-2 flex-wrap mb-3">
-        <span class="badge rounded-pill text-bg-primary-subtle text-primary-emphasis">
-          <%= wishlist_item.status_label %>
-        </span>
-        <% if wishlist_item.target_price_cents.present? %>
-          <span class="badge rounded-pill text-bg-light border">
-            <%= number_to_currency(wishlist_item.target_price) %>
-          </span>
-        <% end %>
-      </div>
-
-      <% if wishlist_item.observations.present? %>
-        <p class="text-muted small mb-0"><%= truncate(wishlist_item.observations.to_s.squish, length: 120) %></p>
-      <% end %>
-    </div>
-
-    <div class="card-footer bg-transparent border-0 pt-0 pb-3 px-3">
-      <div class="d-flex gap-2">
-        <%= button_to add_to_collection_wishlist_item_path(wishlist_item),
-                      method: :post,
-                      class: "btn btn-premium rounded-3 flex-fill" do %>
-          <i class="bi bi-plus-circle me-1"></i>
-          <%= t('wishlist_items.actions.add_to_collection') %>
-        <% end %>
-        <%= link_to edit_wishlist_item_path(wishlist_item), class: "btn btn-soft-secondary rounded-3 flex-fill" do %>
-          <i class="bi bi-pencil me-1"></i>
-          <%= t('actions.edit') %>
-        <% end %>
-        <%= link_to wishlist_item_share_image_path(wishlist_item, format: :png),
-                    class: "btn btn-soft-secondary rounded-3",
-                    title: t('wishlist_items.actions.share_item_image'),
-                    aria: { label: t('wishlist_items.actions.share_item_image') } do %>
-          <i class="bi bi-image"></i>
-        <% end %>
-        <%= button_to wishlist_item_path(wishlist_item),
-                      method: :delete,
-                      class: "btn btn-outline-danger rounded-3",
-                      form: { data: { turbo_confirm: t('wishlist_items.actions.delete_confirm') } },
-                      title: t('actions.delete'),
-                      aria: { label: t('actions.delete') } do %>
-          <i class="bi bi-trash"></i>
-        <% end %>
-      </div>
-    </div>
+    <% end %>
   </div>
 </div>

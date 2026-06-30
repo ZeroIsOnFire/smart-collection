@@ -26,10 +26,8 @@ class CarsController < ApplicationController
     current_user.update(sharing_enabled: !current_user.sharing_enabled)
 
     respond_to do |format|
-      format.turbo_stream do
-        render turbo_stream: turbo_stream.update('sharing_settings_toggle', partial: 'cars/sharing_settings')
-      end
-      format.html { redirect_to edit_user_registration_path, notice: t('flash.updated', resource: t('nav.settings')) }
+      format.turbo_stream { redirect_to cars_path, notice: t('flash.updated', resource: t('nav.my_cars')) }
+      format.html { redirect_to cars_path, notice: t('flash.updated', resource: t('nav.my_cars')) }
     end
   end
 

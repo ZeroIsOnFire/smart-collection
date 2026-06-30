@@ -1,132 +1,157 @@
-<div class="row justify-content-center">
-  <div class="col-12 col-xl-9">
-    <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-3">
-      <div>
-        <%= link_to wishlist_items_path, class: "btn text-muted hover-lift d-inline-flex align-items-center gap-2 text-decoration-none border-0 bg-transparent px-0 fw-medium mb-2" do %>
-          <i class="bi bi-arrow-left"></i>
-          <%= t('wishlist_items.actions.back_to_wishlist') %>
+<% modal = local_assigns.fetch(:modal, false) %>
+
+<%= form_with model: wishlist_item,
+              class: "needs-validation",
+              multipart: true do |f| %>
+  <% if wishlist_item.errors.any? %>
+    <div class="alert alert-danger car-form-errors" role="alert">
+      <div class="fw-bold mb-1"><%= t('wishlist_items.form.validation_error_title') %></div>
+      <ul class="mb-0 ps-3">
+        <% wishlist_item.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
         <% end %>
-        <h1 class="fw-bold mb-1 fs-3"><%= title %></h1>
-        <p class="text-muted small mb-0"><%= subtitle %></p>
-      </div>
+      </ul>
     </div>
+  <% end %>
 
-    <%= form_with model: wishlist_item, class: "card border-0 shadow-sm rounded-3" do |f| %>
-      <div class="card-body p-4">
-        <% if wishlist_item.errors.any? %>
-          <div class="alert alert-danger rounded-3">
-            <div class="fw-bold mb-1"><%= t('wishlist_items.form.validation_error_title') %></div>
-            <ul class="mb-0">
-              <% wishlist_item.errors.full_messages.each do |message| %>
-                <li><%= message %></li>
-              <% end %>
-            </ul>
-          </div>
+  <div class="<%= modal ? 'modal-form-shell' : 'card border-0 shadow-sm rounded-3 overflow-hidden mb-4' %>">
+    <div class="<%= modal ? 'p-0' : 'card-body p-4 p-md-5' %>">
+      <h5 class="fw-bold mb-4 text-dark pb-2 border-bottom">
+        <i class="bi bi-camera me-2 text-primary"></i> <%= t('wishlist_items.form.main_photo') %>
+      </h5>
+
+      <div class="col-12 mb-5"
+           data-controller="photo-upload"
+           data-action="dragover->photo-upload#dragOver dragleave->photo-upload#dragLeave drop->photo-upload#drop">
+        <%= f.hidden_field :photo_cache %>
+        <%= f.hidden_field :remove_photo, value: "", data: { "photo-upload-target": "removeField" } %>
+
+        <%= f.file_field :photo,
+                         accept: "image/png,image/gif,image/jpeg,image/webp",
+                         style: "position: absolute; width: 0; height: 0; opacity: 0; overflow: hidden;",
+                         data: { "photo-upload-target": "input", action: "change->photo-upload#fileSelected" } %>
+
+        <% if wishlist_item.photo? %>
+          <span data-photo-upload-target="existingPhoto"
+                data-url="<%= wishlist_item.photo.url %>"
+                class="d-none"></span>
         <% end %>
 
-        <div class="row g-4">
-          <div class="col-12 col-lg-5">
-            <%= f.label :photo, t('mongoid.attributes.wishlist_item.photo'), class: "form-label fw-semibold" %>
-            <div class="border rounded-3 bg-light p-3">
-              <% if wishlist_item.photo? %>
-                <%= image_tag wishlist_item.photo.url, alt: wishlist_item.name, class: "img-fluid rounded-3 mb-3" %>
-              <% else %>
-                <div class="ratio ratio-16x9 rounded-3 bg-white border d-flex align-items-center justify-content-center mb-3">
-                  <div class="text-muted text-center">
-                    <i class="bi bi-image fs-1 opacity-50"></i>
-                    <div class="small"><%= t('wishlist_items.card.no_photo') %></div>
-                  </div>
-                </div>
-              <% end %>
-              <%= f.file_field :photo, class: "form-control rounded-3", accept: "image/*" %>
-              <%= f.hidden_field :photo_cache %>
-              <% if wishlist_item.photo? %>
-                <div class="form-check mt-3">
-                  <%= f.check_box :remove_photo, class: "form-check-input" %>
-                  <%= f.label :remove_photo, t('wishlist_items.form.remove_photo'), class: "form-check-label" %>
-                </div>
-              <% end %>
-              <div class="form-text"><%= t('wishlist_items.form.upload_limits') %></div>
+        <div class="position-relative border rounded-3 p-4 p-md-5 text-center bg-light photo-dropzone"
+             style="border-style: dashed !important; border-width: 2px !important; border-color: var(--border-color) !important; cursor: pointer;"
+             data-photo-upload-target="dropzone"
+             data-action="click->photo-upload#openFilePicker">
+          <div data-photo-upload-target="uploadPrompt">
+            <div class="d-inline-flex align-items-center justify-content-center bg-white shadow-sm rounded-circle mb-3"
+                 style="width: 64px; height: 64px;">
+              <i class="bi bi-cloud-upload text-primary fs-3"></i>
             </div>
+            <h6 class="fw-bold text-dark mb-1"><%= t('wishlist_items.form.upload_prompt') %></h6>
+            <p class="text-muted small mb-0"><%= t('wishlist_items.form.upload_limits') %></p>
           </div>
 
-          <div class="col-12 col-lg-7">
-            <div class="row g-3">
-              <div class="col-12">
-                <%= f.label :name, class: "form-label fw-semibold" %>
-                <%= f.text_field :name,
-                                 class: "form-control rounded-3 #{'is-invalid' if field_error_message(wishlist_item, :name)}",
-                                 placeholder: t('wishlist_items.form.name_placeholder'),
-                                 autofocus: true %>
-                <% if field_error_message(wishlist_item, :name) %>
-                  <div class="invalid-feedback"><%= field_error_message(wishlist_item, :name) %></div>
-                <% end %>
-              </div>
+          <div data-photo-upload-target="preview" class="d-none">
+            <div class="position-relative d-inline-block">
+              <img data-photo-upload-target="previewImg"
+                   src=""
+                   alt="<%= t('mongoid.attributes.wishlist_item.photo') %>"
+                   class="rounded-3 shadow-sm"
+                   style="max-height: 240px; max-width: 100%; object-fit: contain;">
 
-              <div class="col-12 col-md-6">
-                <%= f.label :brand, class: "form-label fw-semibold" %>
-                <%= f.text_field :brand,
-                                 class: "form-control rounded-3",
-                                 placeholder: t('wishlist_items.form.brand_placeholder') %>
-              </div>
-
-              <div class="col-12 col-md-6">
-                <%= f.label :scale, class: "form-label fw-semibold" %>
-                <%= f.select :scale,
-                             options_for_select([[t('wishlist_items.form.select_scale'), '']] + Car.scale_options, wishlist_item.scale),
-                             {},
-                             class: "form-select rounded-3" %>
-              </div>
-
-              <div class="col-12 col-md-6">
-                <%= f.label :status, class: "form-label fw-semibold" %>
-                <%= f.select :status, WishlistItem.status_options, {}, class: "form-select rounded-3" %>
-              </div>
-
-              <div class="col-12 col-md-6">
-                <%= f.label :priority, class: "form-label fw-semibold" %>
-                <%= f.select :priority, WishlistItem.priority_options, {}, class: "form-select rounded-3" %>
-              </div>
-
-              <div class="col-12 col-md-6">
-                <%= f.label :target_price_cents, class: "form-label fw-semibold" %>
-                <div class="input-group">
-                  <span class="input-group-text rounded-start-3"><%= t('wishlist_items.form.price_prefix') %></span>
-                  <%= f.number_field :target_price_cents,
-                                     min: 0,
-                                     step: 1,
-                                     class: "form-control rounded-end-3",
-                                     placeholder: t('wishlist_items.form.target_price_placeholder') %>
-                </div>
-                <div class="form-text"><%= t('wishlist_items.form.target_price_help') %></div>
-              </div>
-
-              <div class="col-12 col-md-6">
-                <%= f.label :reference_url, class: "form-label fw-semibold" %>
-                <%= f.url_field :reference_url,
-                                class: "form-control rounded-3 #{'is-invalid' if field_error_message(wishlist_item, :reference_url)}",
-                                placeholder: t('wishlist_items.form.reference_url_placeholder') %>
-                <% if field_error_message(wishlist_item, :reference_url) %>
-                  <div class="invalid-feedback"><%= field_error_message(wishlist_item, :reference_url) %></div>
-                <% end %>
-              </div>
-
-              <div class="col-12">
-                <%= f.label :observations, class: "form-label fw-semibold" %>
-                <%= f.text_area :observations,
-                                rows: 4,
-                                class: "form-control rounded-3",
-                                placeholder: t('wishlist_items.form.observations_placeholder') %>
-              </div>
+              <button type="button"
+                      class="btn btn-danger btn-sm rounded-circle position-absolute shadow"
+                      style="top: -10px; right: -10px; width: 32px; height: 32px; padding: 0; line-height: 1;"
+                      title="<%= t('wishlist_items.form.remove_photo') %>"
+                      data-action="click->photo-upload#removePhoto">
+                <i class="bi bi-x-lg"></i>
+              </button>
             </div>
+            <p class="text-muted small mt-3 mb-0"><%= t('wishlist_items.form.replace_photo') %></p>
           </div>
         </div>
       </div>
 
-      <div class="card-footer bg-transparent border-0 d-flex justify-content-end gap-2 p-4 pt-0">
-        <%= link_to t('actions.cancel'), wishlist_items_path, class: "btn btn-soft-secondary rounded-3 px-4" %>
-        <%= f.submit t('actions.save'), class: "btn btn-premium rounded-3 px-4" %>
+      <h5 class="fw-bold mb-4 text-dark pb-2 border-bottom">
+        <i class="bi bi-stars me-2 text-primary"></i> <%= t('wishlist_items.form.basic_info') %>
+      </h5>
+
+      <div class="row g-4 mb-4">
+        <div class="col-12">
+          <%= f.label :name, class: "form-label text-secondary small text-uppercase tracking-wide" %>
+          <%= f.text_field :name,
+                           class: "form-control form-control-lg bg-light border-0 #{'is-invalid' if field_error_message(wishlist_item, :name)}",
+                           placeholder: t('wishlist_items.form.name_placeholder'),
+                           autofocus: true %>
+          <% if field_error_message(wishlist_item, :name) %>
+            <div class="invalid-feedback"><%= field_error_message(wishlist_item, :name) %></div>
+          <% end %>
+        </div>
+
+        <div class="col-12">
+          <%= f.label :brand, class: "form-label text-secondary small text-uppercase tracking-wide" %>
+          <%= f.text_field :brand,
+                           class: "form-control form-control-lg bg-light border-0",
+                           placeholder: t('wishlist_items.form.brand_placeholder') %>
+        </div>
       </div>
-    <% end %>
+
+      <h5 class="fw-bold mb-4 text-dark pb-2 border-bottom">
+        <i class="bi bi-sliders me-2 text-primary"></i> <%= t('wishlist_items.form.specifications') %>
+      </h5>
+
+      <div class="row g-4 mb-5">
+        <div class="col-md-6">
+          <%= f.label :scale, class: "form-label text-secondary small text-uppercase tracking-wide" %>
+          <%= f.select :scale,
+                       options_for_select([[t('wishlist_items.form.select_scale'), '']] + Car.scale_options, wishlist_item.scale),
+                       {},
+                       class: "form-select form-select-lg bg-light border-0" %>
+        </div>
+
+        <div class="col-md-6">
+          <%= f.label :status, class: "form-label text-secondary small text-uppercase tracking-wide" %>
+          <%= f.select :status, WishlistItem.status_options, {}, class: "form-select form-select-lg bg-light border-0" %>
+        </div>
+
+        <div class="col-md-6">
+          <%= f.label :priority, class: "form-label text-secondary small text-uppercase tracking-wide" %>
+          <%= f.select :priority, WishlistItem.priority_options, {}, class: "form-select form-select-lg bg-light border-0" %>
+        </div>
+
+        <div class="col-md-6">
+          <%= f.label :reference_url, class: "form-label text-secondary small text-uppercase tracking-wide" %>
+          <%= f.url_field :reference_url,
+                          class: "form-control form-control-lg bg-light border-0 #{'is-invalid' if field_error_message(wishlist_item, :reference_url)}",
+                          placeholder: t('wishlist_items.form.reference_url_placeholder') %>
+          <% if field_error_message(wishlist_item, :reference_url) %>
+            <div class="invalid-feedback"><%= field_error_message(wishlist_item, :reference_url) %></div>
+          <% end %>
+        </div>
+      </div>
+
+      <h5 class="fw-bold mb-4 text-dark pb-2 border-bottom">
+        <i class="bi bi-card-text me-2 text-primary"></i> <%= t('mongoid.attributes.wishlist_item.observations') %>
+      </h5>
+
+      <%= f.text_area :observations,
+                      rows: 4,
+                      class: "form-control bg-light border-0",
+                      placeholder: t('wishlist_items.form.observations_placeholder') %>
+    </div>
+
+    <div class="<%= modal ? 'car-form-actions pt-4 d-flex flex-column flex-sm-row justify-content-end align-items-stretch align-items-sm-center gap-2 border-top' : 'card-footer bg-light border-0 p-4 p-md-5 d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-3' %>">
+      <div>
+        <% if modal %>
+          <button type="button" class="btn btn-light rounded-3 px-4" data-bs-dismiss="modal"><%= t('actions.cancel') %></button>
+        <% else %>
+          <%= link_to wishlist_items_path, class: "btn btn-link text-secondary text-decoration-none fw-semibold px-0" do %>
+            <i class="bi bi-arrow-left me-2"></i><%= t('actions.back') %>
+          <% end %>
+        <% end %>
+      </div>
+
+      <%= f.submit wishlist_item.persisted? ? t('actions.save') : t('actions.create'),
+                   class: "btn btn-primary rounded-3 px-4 fw-bold shadow-sm" %>
+    </div>
   </div>
-</div>
+<% end %>

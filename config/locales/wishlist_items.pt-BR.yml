@@ -12,11 +12,11 @@ pt-BR:
         name: "Nome"
         brand: "Marca"
         scale: "Escala"
-        observations: "Observacoes"
+        observations: "Observações"
         priority: "Prioridade"
         status: "Status"
-        target_price_cents: "Preco desejado"
-        reference_url: "Link de referencia"
+        target_price_cents: "Valor desejado"
+        reference_url: "Link de referência"
         photo: "Foto"
         remove_photo: "Remover foto"
 
@@ -27,15 +27,16 @@ pt-BR:
       purchased: "Comprado"
     priorities:
       low: "Baixa"
-      medium: "Media"
+      medium: "Média"
       high: "Alta"
       dream: "Sonho de consumo"
     actions:
       new: "Novo desejo"
-      add_to_collection: "Adicionar ao cadastro"
-      enable_public: "Ativar link publico"
-      disable_public: "Desativar link publico"
-      open_public: "Abrir link publico"
+      add_to_collection: "Adicionar ao acervo"
+      enable_public: "Ativar link público"
+      disable_public: "Desativar link público"
+      open_public: "Abrir link público"
+      open_reference: "Abrir referência"
       share_image: "Imagem da lista"
       share_item_image: "Gerar imagem do item"
       back_to_wishlist: "Voltar para a lista"
@@ -46,10 +47,16 @@ pt-BR:
       all_brands: "Todas as marcas"
     index:
       title: "Lista de desejos"
-      subtitle: "Registre miniaturas desejadas sem abrir o cadastro completo da colecao."
+      subtitle: "Acompanhe miniaturas desejadas sem abrir o cadastro completo do acervo."
       search_label: "Busca"
-      search_placeholder: "Buscar por nome, marca, escala ou observacoes"
+      search_placeholder: "Buscar por nome, marca, escala ou observações"
       clear_filters: "Limpar filtros"
+      secondary_actions: "Ações"
+      export_actions: "Exportar lista"
+      copy_public_link: "Copiar link público"
+      public_link_copied: "Link copiado"
+      grid_view: "Grade"
+      list_view: "Lista"
       results_count:
         one: "%{count} desejo"
         other: "%{count} desejos"
@@ -57,28 +64,36 @@ pt-BR:
         one: "%{count} resultado para \"%{query}\""
         other: "%{count} resultados para \"%{query}\""
       empty_title: "Nenhum desejo cadastrado ainda"
-      empty_text: "Comece por uma miniatura que voce quer comprar, encontrar ou acompanhar."
+      empty_text: "Comece por uma miniatura que você quer comprar, encontrar ou acompanhar."
       add_first_item: "Adicionar primeiro desejo"
+    modal:
+      new_title: "Novo desejo"
+      edit_title: "Editar desejo"
+      details_title: "Detalhes do desejo"
     new:
       title: "Adicionar desejo"
-      subtitle: "Guarde nome, marca, escala, prioridade e uma referencia rapida."
+      subtitle: "Guarde nome, marca, escala, prioridade e uma referência rápida."
     edit:
       title: "Editar %{name}"
-      subtitle: "Atualize status, prioridade, preco ou observacoes do desejo."
+      subtitle: "Atualize status, prioridade ou observações do desejo."
     card:
+      actions_menu: "Abrir ações do desejo"
+      view_details: "Abrir detalhes"
       no_photo: "Sem foto"
     form:
       validation_error_title: "Revise os campos destacados"
-      upload_limits: "Use uma foto opcional em JPG, PNG, GIF ou WEBP."
+      main_photo: "Foto da miniatura"
+      upload_prompt: "Adicionar foto do desejo"
+      upload_limits: "Use uma foto em JPG, PNG, GIF ou WEBP."
+      replace_photo: "Clique para substituir a foto"
       remove_photo: "Remover foto atual"
+      basic_info: "Identificação"
+      specifications: "Status, prioridade e referência"
       name_placeholder: "Ex: Porsche 911 Treasure Hunt"
       brand_placeholder: "Ex: Hot Wheels, Matchbox, Mini GT"
       select_scale: "Escolha a escala..."
-      price_prefix: "centavos"
-      target_price_placeholder: "Ex: 4990"
-      target_price_help: "Informe o valor em centavos para evitar arredondamentos."
       reference_url_placeholder: "https://exemplo.com/anuncio"
-      observations_placeholder: "Anote loja, variacao, embalagem, estado ou qualquer pista util."
+      observations_placeholder: "Anote loja, variação, embalagem, estado ou qualquer pista útil."
 
   wishlist_exports:
     actions:
@@ -89,11 +104,10 @@ pt-BR:
         name: "Nome"
         brand: "Marca"
         scale: "Escala"
-        observations: "Observacoes"
+        observations: "Observações"
         priority: "Prioridade"
         status: "Status"
-        target_price: "Preco desejado"
-        reference_url: "Link de referencia"
+        reference_url: "Link de referência"
         created_at: "Criado em"
         updated_at: "Atualizado em"
     pdf:
@@ -107,9 +121,9 @@ pt-BR:
 
   public_wishlists:
     show:
-      eyebrow: "Wishlist publica"
+      eyebrow: "Lista pública"
       title: "Lista de desejos de %{name}"
-      subtitle: "Miniaturas desejadas, reservadas ou ja compradas para acompanhar a busca."
+      subtitle: "Miniaturas desejadas, reservadas ou já compradas para acompanhar a busca."
       items_count: "Itens na lista"
       empty_title: "Nenhum item encontrado"
       empty_text: "Tente ajustar os filtros para ver outros desejos compartilhados."
@@ -117,8 +131,8 @@ pt-BR:
   share_images:
     brand: "SmartCollection"
     badges:
-      collection: "Colecao"
-      wishlist: "Wishlist"
+      collection: "Acervo"
+      wishlist: "Lista de desejos"
     wishlist:
       total:
         one: "%{count} item na lista"

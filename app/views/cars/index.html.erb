@@ -32,7 +32,7 @@
 
         <div class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-3 p-3 collection-secondary-menu">
           <% if current_user.sharing_enabled? %>
-            <div class="mb-3" data-controller="clipboard"
+            <div class="mb-2" data-controller="clipboard"
                  data-clipboard-success-content-value="<i class='bi bi-check2'></i> <span><%= t("cars.index.public_link_copied") %></span>"
                  data-clipboard-default-class-value="btn-outline-primary"
                  data-clipboard-success-class-value="btn-primary">
@@ -45,6 +45,23 @@
                 <span><%= t("cars.index.copy_public_link") %></span>
               </button>
             </div>
+            <%= link_to public_share_url(current_user.share_token),
+                        class: "btn btn-soft-secondary rounded-3 w-100 d-flex align-items-center justify-content-center gap-2 mb-2" do %>
+              <i class="bi bi-box-arrow-up-right"></i>
+              <%= t("wishlist_items.actions.open_public") %>
+            <% end %>
+          <% end %>
+
+          <%= button_to toggle_sharing_cars_path,
+                        method: :patch,
+                        class: "btn #{current_user.sharing_enabled? ? 'btn-light text-danger' : 'btn-premium'} rounded-3 w-100 d-flex align-items-center justify-content-center gap-2 mb-3" do %>
+            <% if current_user.sharing_enabled? %>
+              <i class="bi bi-x-circle"></i>
+              <span><%= t('sharing_settings.disable') %></span>
+            <% else %>
+              <i class="bi bi-check-circle"></i>
+              <span><%= t('sharing_settings.enable') %></span>
+            <% end %>
           <% end %>
 
           <div class="small fw-bold text-muted text-uppercase mb-2">

@@ -12,12 +12,22 @@ RSpec.describe ShareImageService do
       expect(png).to start_with("\x89PNG".b)
     end
 
-    it 'generates a PNG for a wishlist item' do
+    it 'generates portrait PNGs without cropping the canvas back to square' do
       item = create(:wishlist_item, name: 'Share Wish')
+      item.photo = fixture_file_upload('car_sample.jpg', 'image/jpeg')
+      item.save!
 
       png = described_class.new(record: item, kind: :wishlist_item).generate
 
       expect(png).to start_with("\x89PNG".b)
+      Tempfile.create(['share_image_spec', '.png']) do |file|
+        file.binmode
+        file.write(png)
+        file.rewind
+
+        image = MiniMagick::Image.open(file.path)
+        expect(image.dimensions).to eq([1080, 1350])
+      end
     end
 
     it 'generates a PNG for a wishlist list' do

@@ -10,7 +10,6 @@ class WishlistCsvExportService
     observations
     priority
     status
-    target_price
     reference_url
     created_at
     updated_at
@@ -32,20 +31,11 @@ class WishlistCsvExportService
           item.observations.to_s.squish,
           item.priority_label,
           item.status_label,
-          formatted_price(item),
           item.reference_url,
           I18n.l(item.created_at, format: :export_timestamp),
           I18n.l(item.updated_at, format: :export_timestamp)
         ]
       end
     end
-  end
-
-  private
-
-  def formatted_price(item)
-    return nil if item.target_price_cents.blank?
-
-    format('%.2f', item.target_price)
   end
 end

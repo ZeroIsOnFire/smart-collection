@@ -155,15 +155,8 @@ class WishlistPdfExportService
       item.brand,
       item.scale,
       item.status_label,
-      item.priority_label,
-      formatted_price(item)
+      item.priority_label
     ].compact_blank
-  end
-
-  def formatted_price(item)
-    return nil if item.target_price_cents.blank?
-
-    ActionController::Base.helpers.number_to_currency(item.target_price)
   end
 
   def safe_text(value)

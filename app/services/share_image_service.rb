@@ -4,14 +4,20 @@ require 'mini_magick'
 
 class ShareImageService
   WIDTH = 1080
-  HEIGHT = 1080
-  PHOTO_HEIGHT = 620
+  HEIGHT = 1350
+  MARGIN = 72
+  PHOTO_BOX_WIDTH = 936
+  PHOTO_BOX_HEIGHT = 760
+  PHOTO_BOX_TOP = 76
+  TEXT_TOP = 910
   COLORS = {
-    background: '#F6F1E8',
+    background: '#F7F3EA',
+    panel: '#FFFFFF',
     teal: '#214F4A',
-    muted: '#6B7280',
+    muted: '#667085',
     gold: '#A56D32',
-    white: '#FFFFFF'
+    line: '#D8C8B4',
+    soft: '#EFE7DA'
   }.freeze
 
   def initialize(record:, kind:, title: nil)
@@ -32,27 +38,34 @@ class ShareImageService
   private
 
   def build_image(output_path)
-    image = base_image
+    image = individual_image? ? image_with_photo_panel : create_blank_image
+    decorate_image(image)
     annotate_image(image)
     image.format('png')
     image.write(output_path)
   end
 
-  def base_image
-    if photo_path
-      image = MiniMagick::Image.open(photo_path)
-      image.resize "#{WIDTH}x#{PHOTO_HEIGHT}^"
-      image.gravity 'center'
-      image.extent "#{WIDTH}x#{PHOTO_HEIGHT}"
-      image.background COLORS[:background]
-      image.gravity 'north'
-      image.extent "#{WIDTH}x#{HEIGHT}"
-      image
-    else
-      create_blank_image
-    end
+  def image_with_photo_panel
+    image = create_blank_image
+    draw_panel(image, MARGIN, PHOTO_BOX_TOP, PHOTO_BOX_WIDTH, PHOTO_BOX_HEIGHT)
+    return image unless photo_path
+
+    compose_photo(image)
   rescue MiniMagick::Error, MiniMagick::Invalid
     create_blank_image
+  end
+
+  def compose_photo(image)
+    photo = MiniMagick::Image.open(photo_path)
+    photo.resize "#{PHOTO_BOX_WIDTH - 48}x#{PHOTO_BOX_HEIGHT - 48}"
+
+    left = MARGIN + ((PHOTO_BOX_WIDTH - photo.width) / 2)
+    top = PHOTO_BOX_TOP + ((PHOTO_BOX_HEIGHT - photo.height) / 2)
+
+    image.composite(photo) do |composite|
+      composite.compose 'Over'
+      composite.geometry "+#{left}+#{top}"
+    end
   end
 
   def create_blank_image
@@ -66,9 +79,27 @@ class ShareImageService
     end
   end
 
+  def decorate_image(image)
+    image.combine_options do |convert|
+      convert.fill COLORS[:soft]
+      convert.draw "roundrectangle #{MARGIN},#{HEIGHT - 150} #{WIDTH - MARGIN},#{HEIGHT - 76} 26,26"
+      convert.fill COLORS[:gold]
+      convert.draw "rectangle #{MARGIN},#{HEIGHT - 150} #{MARGIN + 8},#{HEIGHT - 76}"
+    end
+  end
+
+  def draw_panel(image, left, top, width, height)
+    image.combine_options do |convert|
+      convert.fill COLORS[:panel]
+      convert.stroke COLORS[:line]
+      convert.strokewidth 2
+      convert.draw "roundrectangle #{left},#{top} #{left + width},#{top + height} 28,28"
+    end
+  end
+
   def annotate_image(image)
-    lines.each_with_index do |line, index|
-      annotate_line(image, line.merge(top: line[:top] + (index * 72)))
+    lines.each do |line|
+      annotate_line(image, line)
     end
   end
 
@@ -94,34 +125,38 @@ class ShareImageService
 
   def car_lines
     [
-      line(@record.name, 56, COLORS[:teal], 72, 690),
-      line([@record.brand, @record.size, @record.year, @record.color].compact_blank.join(' | '), 34, COLORS[:muted], 72, 750),
-      line(I18n.t('share_images.badges.collection'), 30, COLORS[:gold], 72, 810),
-      line(I18n.t('share_images.brand'), 28, COLORS[:muted], 72, 900)
+      line(@record.name, 58, COLORS[:teal], MARGIN, TEXT_TOP),
+      line([@record.brand, @record.size, @record.year, @record.color].compact_blank.join(' | '), 34, COLORS[:muted], MARGIN, TEXT_TOP + 78),
+      line(I18n.t('share_images.badges.collection'), 30, COLORS[:gold], MARGIN, TEXT_TOP + 142),
+      line(I18n.t('share_images.brand'), 28, COLORS[:muted], MARGIN + 24, HEIGHT - 128)
     ]
   end
 
   def wishlist_item_lines
     [
-      line(@record.name, 56, COLORS[:teal], 72, 690),
-      line([@record.brand, @record.scale].compact_blank.join(' | '), 34, COLORS[:muted], 72, 750),
-      line([@record.priority_label, @record.status_label].compact_blank.join(' | '), 30, COLORS[:gold], 72, 810),
-      line(I18n.t('share_images.badges.wishlist'), 28, COLORS[:muted], 72, 900)
+      line(@record.name, 58, COLORS[:teal], MARGIN, TEXT_TOP),
+      line([@record.brand, @record.scale].compact_blank.join(' | '), 34, COLORS[:muted], MARGIN, TEXT_TOP + 78),
+      line([@record.priority_label, @record.status_label].compact_blank.join(' | '), 30, COLORS[:gold], MARGIN, TEXT_TOP + 142),
+      line(I18n.t('share_images.badges.wishlist'), 28, COLORS[:muted], MARGIN + 24, HEIGHT - 128)
     ]
   end
 
   def wishlist_lines
     items = @record.to_a
     [
-      line(@title.presence || I18n.t('wishlist_items.index.title'), 54, COLORS[:teal], 72, 110),
-      line(I18n.t('share_images.wishlist.total', count: items.count), 34, COLORS[:gold], 72, 178),
-      line(items.first(6).map(&:name).join(' | '), 30, COLORS[:muted], 72, 270),
-      line(I18n.t('share_images.brand'), 28, COLORS[:muted], 72, 900)
+      line(@title.presence || I18n.t('wishlist_items.index.title'), 58, COLORS[:teal], MARGIN, 116),
+      line(I18n.t('share_images.wishlist.total', count: items.count), 36, COLORS[:gold], MARGIN, 196),
+      line(items.first(8).map(&:name).join(' | '), 32, COLORS[:muted], MARGIN, 304),
+      line(I18n.t('share_images.brand'), 28, COLORS[:muted], MARGIN + 24, HEIGHT - 128)
     ]
   end
 
   def line(text, size, color, left, top)
     { text: text.to_s, size: size, color: color, left: left, top: top }
+  end
+
+  def individual_image?
+    %i[car wishlist_item].include?(@kind)
   end
 
   def photo_path

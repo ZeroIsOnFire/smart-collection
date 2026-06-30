@@ -19,7 +19,8 @@ RSpec.describe WishlistCsvExportService do
       expect(csv).to include('Blue Porsche')
       expect(csv).to include(I18n.t('wishlist_items.priorities.high'))
       expect(csv).to include(I18n.t('wishlist_items.statuses.reserved'))
-      expect(csv).to include('129.90')
+      expect(csv).not_to include('129.90')
+      expect(csv).not_to include('Target price')
     end
   end
 end

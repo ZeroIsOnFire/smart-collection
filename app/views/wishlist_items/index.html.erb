@@ -7,43 +7,79 @@
       <h1 class="fw-bold mb-0 fs-3"><%= t('wishlist_items.index.title') %></h1>
       <p class="text-muted small mb-0"><%= t('wishlist_items.index.subtitle') %></p>
     </div>
-    <div class="d-flex gap-2 flex-wrap justify-content-end">
-      <% if current_user.wishlist_sharing_enabled? %>
-        <%= link_to public_wishlist_url(current_user.wishlist_share_token), class: 'btn btn-outline-primary rounded-3 px-4 d-flex align-items-center gap-2' do %>
-          <i class="bi bi-share"></i>
-          <%= t('wishlist_items.actions.open_public') %>
-        <% end %>
-      <% end %>
-      <%= button_to toggle_sharing_wishlist_items_path,
-                    method: :patch,
-                    class: 'btn btn-soft-secondary rounded-3 px-4 d-flex align-items-center gap-2' do %>
-        <i class="bi <%= current_user.wishlist_sharing_enabled? ? 'bi-lock' : 'bi-unlock' %>"></i>
-        <%= current_user.wishlist_sharing_enabled? ? t('wishlist_items.actions.disable_public') : t('wishlist_items.actions.enable_public') %>
-      <% end %>
-      <%= link_to wishlist_share_image_path(format: :png), class: 'btn btn-soft-secondary rounded-3 px-4 d-flex align-items-center gap-2' do %>
-        <i class="bi bi-image"></i>
-        <%= t('wishlist_items.actions.share_image') %>
-      <% end %>
-      <%= link_to wishlist_export_path(format: :csv), class: 'btn btn-soft-secondary rounded-3 px-4 d-flex align-items-center gap-2' do %>
-        <i class="bi bi-filetype-csv"></i>
-        <%= t('wishlist_exports.actions.csv') %>
-      <% end %>
-      <%= link_to wishlist_export_path(format: :pdf), class: 'btn btn-soft-secondary rounded-3 px-4 d-flex align-items-center gap-2' do %>
-        <i class="bi bi-filetype-pdf"></i>
-        <%= t('wishlist_exports.actions.pdf') %>
-      <% end %>
-      <%= link_to new_wishlist_item_path, class: 'btn btn-premium rounded-3 px-4 d-flex align-items-center gap-2' do %>
+    <div class="collection-primary-actions d-flex gap-2 flex-wrap justify-content-end">
+      <%= link_to new_wishlist_item_path,
+                  class: 'btn btn-premium rounded-3 px-4 d-flex align-items-center gap-2',
+                  data: { turbo_frame: "modal" } do %>
         <i class="bi bi-plus-circle"></i>
         <%= t('wishlist_items.actions.new') %>
       <% end %>
+
+      <div class="dropdown collection-secondary-actions">
+        <button class="btn btn-soft-secondary rounded-3 px-4 d-flex align-items-center gap-2"
+                type="button"
+                data-bs-toggle="dropdown"
+                data-bs-auto-close="outside"
+                aria-expanded="false">
+          <i class="bi bi-three-dots"></i>
+          <span><%= t('wishlist_items.index.secondary_actions') %></span>
+        </button>
+
+        <div class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-3 p-3 collection-secondary-menu">
+          <% if current_user.wishlist_sharing_enabled? %>
+            <div class="mb-2" data-controller="clipboard"
+                 data-clipboard-success-content-value="<i class='bi bi-check2'></i> <span><%= t('wishlist_items.index.public_link_copied') %></span>"
+                 data-clipboard-default-class-value="btn-outline-primary"
+                 data-clipboard-success-class-value="btn-primary">
+              <input type="hidden" data-clipboard-target="source" value="<%= public_wishlist_url(current_user.wishlist_share_token) %>">
+              <button class="btn btn-outline-primary rounded-3 w-100 d-flex align-items-center justify-content-center gap-2"
+                      type="button"
+                      data-action="clipboard#copy"
+                      data-clipboard-target="button">
+                <i class="bi bi-share"></i>
+                <span><%= t('wishlist_items.index.copy_public_link') %></span>
+              </button>
+            </div>
+            <%= link_to public_wishlist_url(current_user.wishlist_share_token),
+                        class: 'btn btn-soft-secondary rounded-3 w-100 d-flex align-items-center justify-content-center gap-2 mb-2' do %>
+              <i class="bi bi-box-arrow-up-right"></i>
+              <%= t('wishlist_items.actions.open_public') %>
+            <% end %>
+          <% end %>
+
+          <%= button_to toggle_sharing_wishlist_items_path,
+                        method: :patch,
+                        class: "btn #{current_user.wishlist_sharing_enabled? ? 'btn-light text-danger' : 'btn-premium'} rounded-3 w-100 d-flex align-items-center justify-content-center gap-2 mb-3" do %>
+            <i class="bi <%= current_user.wishlist_sharing_enabled? ? 'bi-x-circle' : 'bi-check-circle' %>"></i>
+            <%= current_user.wishlist_sharing_enabled? ? t('wishlist_items.actions.disable_public') : t('wishlist_items.actions.enable_public') %>
+          <% end %>
+
+          <div class="small fw-bold text-muted text-uppercase mb-2">
+            <%= t('wishlist_items.index.export_actions') %>
+          </div>
+          <div class="d-grid gap-2">
+            <%= link_to wishlist_share_image_path(format: :png), class: 'btn btn-soft-secondary rounded-3 d-flex align-items-center justify-content-center gap-2' do %>
+              <i class="bi bi-image"></i>
+              <%= t('wishlist_items.actions.share_image') %>
+            <% end %>
+            <%= link_to wishlist_export_path(format: :csv), class: 'btn btn-soft-secondary rounded-3 d-flex align-items-center justify-content-center gap-2' do %>
+              <i class="bi bi-filetype-csv"></i>
+              <%= t('wishlist_exports.actions.csv') %>
+            <% end %>
+            <%= link_to wishlist_export_path(format: :pdf), class: 'btn btn-soft-secondary rounded-3 d-flex align-items-center justify-content-center gap-2' do %>
+              <i class="bi bi-filetype-pdf"></i>
+              <%= t('wishlist_exports.actions.pdf') %>
+            <% end %>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
   <div class="row mb-4">
-    <div class="col-12">
+    <div class="col-12 col-xl-10 mx-auto">
       <%= form_with url: wishlist_items_path, method: :get, class: "row g-2 align-items-end" do |f| %>
         <div class="col-12 col-lg-4">
-          <%= f.label :q, t('wishlist_items.index.search_label'), class: "form-label small fw-semibold text-muted" %>
           <div class="input-group premium-search-container shadow-sm border rounded-3 overflow-hidden bg-white">
             <span class="input-group-text border-0 bg-transparent ps-3">
               <i class="bi bi-search text-muted"></i>
@@ -92,29 +128,111 @@
     </div>
   </div>
 
-  <div class="collection-results-summary text-muted small mb-3" aria-live="polite">
-    <% if search_query.present? %>
-      <%= t('wishlist_items.index.results_count_filtered', count: wishlist_results_count, query: search_query) %>
-    <% else %>
-      <%= t('wishlist_items.index.results_count', count: wishlist_results_count) %>
-    <% end %>
-  </div>
-
-  <% if @wishlist_items.any? %>
-    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
-      <%= render partial: 'wishlist_items/wishlist_item', collection: @wishlist_items %>
-    </div>
-  <% else %>
-    <div class="text-center py-5 mt-4">
-      <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light mb-4" style="width: 80px; height: 80px;">
-        <i class="bi bi-stars fs-2 text-muted opacity-50"></i>
+  <div data-controller="view-toggle" data-view-toggle-storage-key-value="wishlist_view_preference">
+    <div class="collection-view-controls d-flex justify-content-between align-items-center">
+      <div class="collection-results-summary text-muted small" aria-live="polite">
+        <% if search_query.present? %>
+          <%= t('wishlist_items.index.results_count_filtered', count: wishlist_results_count, query: search_query) %>
+        <% else %>
+          <%= t('wishlist_items.index.results_count', count: wishlist_results_count) %>
+        <% end %>
       </div>
-      <h4 class="fw-bold mb-2"><%= t('wishlist_items.index.empty_title') %></h4>
-      <p class="text-muted mb-4"><%= t('wishlist_items.index.empty_text') %></p>
-      <%= link_to new_wishlist_item_path, class: 'btn btn-premium rounded-3 px-5' do %>
-        <i class="bi bi-plus-circle me-2"></i>
-        <%= t('wishlist_items.index.add_first_item') %>
+      <div class="btn-group shadow-sm bg-white rounded-3 p-1 border">
+        <button type="button" class="btn btn-sm text-primary active rounded-3 px-3 fw-medium d-flex align-items-center gap-2" data-view-toggle-target="gridButton" data-action="click->view-toggle#setGrid">
+          <i class="bi bi-grid-fill"></i> <%= t('wishlist_items.index.grid_view') %>
+        </button>
+        <button type="button" class="btn btn-sm text-muted rounded-3 px-3 fw-medium d-flex align-items-center gap-2" data-view-toggle-target="listButton" data-action="click->view-toggle#setList">
+          <i class="bi bi-list-ul"></i> <%= t('wishlist_items.index.list_view') %>
+        </button>
+      </div>
+    </div>
+
+    <div id="wishlist_list_container" class="position-relative">
+      <% if @wishlist_items.any? %>
+        <div id="wishlist_grid_inner" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4 mt-2 grid-view wishlist-grid-inner">
+          <%= render partial: 'wishlist_items/wishlist_item', collection: @wishlist_items %>
+        </div>
+      <% else %>
+        <div id="wishlist_grid_inner" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4 mt-2 grid-view wishlist-grid-inner"></div>
+        <div id="wishlist_empty_state" class="text-center py-5 mt-4">
+          <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light mb-4" style="width: 80px; height: 80px;">
+            <i class="bi bi-stars fs-2 text-muted opacity-50"></i>
+          </div>
+          <h4 class="fw-bold mb-2"><%= t('wishlist_items.index.empty_title') %></h4>
+          <p class="text-muted mb-4"><%= t('wishlist_items.index.empty_text') %></p>
+          <%= link_to new_wishlist_item_path, class: 'btn btn-premium rounded-3 px-5', data: { turbo_frame: "modal" } do %>
+            <i class="bi bi-plus-circle me-2"></i>
+            <%= t('wishlist_items.index.add_first_item') %>
+          <% end %>
+        </div>
       <% end %>
     </div>
-  <% end %>
+  </div>
+
+  <style>
+    .wishlist-card-photo {
+      height: 180px;
+      overflow: hidden;
+    }
+
+    .wishlist-card-photo img {
+      height: 100%;
+      object-fit: cover;
+      width: 100%;
+    }
+
+    .wishlist-list-meta {
+      min-height: 1.6rem;
+    }
+
+    .view-list #wishlist_grid_inner {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .view-list #wishlist_grid_inner > .col {
+      width: 100%;
+    }
+
+    .view-list .wishlist-card {
+      display: grid;
+      grid-template-columns: 148px minmax(0, 1fr);
+      min-height: 132px;
+    }
+
+    .view-list .wishlist-card-photo {
+      height: 100%;
+      min-height: 132px;
+    }
+
+    .view-list .wishlist-card-body {
+      padding-right: 3.25rem !important;
+    }
+
+    @media (max-width: 575.98px) {
+      .collection-primary-actions,
+      .collection-primary-actions > .btn,
+      .collection-primary-actions .dropdown {
+        width: 100%;
+      }
+
+      .collection-primary-actions .dropdown > .btn {
+        justify-content: center;
+        width: 100%;
+      }
+
+      .view-list .wishlist-card {
+        grid-template-columns: 104px minmax(0, 1fr);
+      }
+
+      .view-list .wishlist-card-photo {
+        min-height: 112px;
+      }
+
+      .wishlist-card .card-body {
+        padding: 0.85rem !important;
+      }
+    }
+  </style>
 </div>
