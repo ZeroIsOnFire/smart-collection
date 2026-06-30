@@ -8,6 +8,14 @@
       <p class="text-muted small mb-0"><%= t('wishlist_items.index.subtitle') %></p>
     </div>
     <div class="d-flex gap-2 flex-wrap justify-content-end">
+      <%= link_to wishlist_export_path(format: :csv), class: 'btn btn-soft-secondary rounded-3 px-4 d-flex align-items-center gap-2' do %>
+        <i class="bi bi-filetype-csv"></i>
+        <%= t('wishlist_exports.actions.csv') %>
+      <% end %>
+      <%= link_to wishlist_export_path(format: :pdf), class: 'btn btn-soft-secondary rounded-3 px-4 d-flex align-items-center gap-2' do %>
+        <i class="bi bi-filetype-pdf"></i>
+        <%= t('wishlist_exports.actions.pdf') %>
+      <% end %>
       <%= link_to new_wishlist_item_path, class: 'btn btn-premium rounded-3 px-4 d-flex align-items-center gap-2' do %>
         <i class="bi bi-plus-circle"></i>
         <%= t('wishlist_items.actions.new') %>

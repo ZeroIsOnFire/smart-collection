@@ -73,3 +73,28 @@ pt-BR:
       target_price_help: "Informe o valor em centavos para evitar arredondamentos."
       reference_url_placeholder: "https://exemplo.com/anuncio"
       observations_placeholder: "Anote loja, variacao, embalagem, estado ou qualquer pista util."
+
+  wishlist_exports:
+    actions:
+      csv: "Exportar CSV"
+      pdf: "Exportar PDF"
+    csv:
+      headers:
+        name: "Nome"
+        brand: "Marca"
+        scale: "Escala"
+        observations: "Observacoes"
+        priority: "Prioridade"
+        status: "Status"
+        target_price: "Preco desejado"
+        reference_url: "Link de referencia"
+        created_at: "Criado em"
+        updated_at: "Atualizado em"
+    pdf:
+      title: "LISTA DE DESEJOS"
+      subtitle: "%{name} | Gerado em %{date}"
+      empty: "Nenhum item cadastrado na lista de desejos."
+      no_photo: "Sem foto"
+      generated_by: "SmartCollection"
+      summary:
+        total: "Total de desejos"

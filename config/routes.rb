@@ -18,6 +18,7 @@ Rails.application.routes.draw do
     end
   end
 
+  resource :wishlist_export, only: :show, path: 'wishlist/export'
   resources :wishlist_items, path: 'wishlist'
 
   # Public sharing routes

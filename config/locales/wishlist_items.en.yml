@@ -73,3 +73,28 @@ en:
       target_price_help: "Enter cents to avoid rounding."
       reference_url_placeholder: "https://example.com/listing"
       observations_placeholder: "Note store, variant, packaging, condition or any useful lead."
+
+  wishlist_exports:
+    actions:
+      csv: "Export CSV"
+      pdf: "Export PDF"
+    csv:
+      headers:
+        name: "Name"
+        brand: "Brand"
+        scale: "Scale"
+        observations: "Notes"
+        priority: "Priority"
+        status: "Status"
+        target_price: "Target price"
+        reference_url: "Reference link"
+        created_at: "Created at"
+        updated_at: "Updated at"
+    pdf:
+      title: "WISHLIST"
+      subtitle: "%{name} | Generated at %{date}"
+      empty: "No items have been registered in the wishlist."
+      no_photo: "No photo"
+      generated_by: "SmartCollection"
+      summary:
+        total: "Total wishes"
