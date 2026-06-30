@@ -1,0 +1,75 @@
+pt-BR:
+  nav:
+    wishlist: "Lista de desejos"
+
+  mongoid:
+    models:
+      wishlist_item:
+        one: "Item da lista de desejos"
+        other: "Itens da lista de desejos"
+    attributes:
+      wishlist_item:
+        name: "Nome"
+        brand: "Marca"
+        scale: "Escala"
+        observations: "Observacoes"
+        priority: "Prioridade"
+        status: "Status"
+        target_price_cents: "Preco desejado"
+        reference_url: "Link de referencia"
+        photo: "Foto"
+        remove_photo: "Remover foto"
+
+  wishlist_items:
+    statuses:
+      wanted: "Desejado"
+      reserved: "Reservado"
+      purchased: "Comprado"
+    priorities:
+      low: "Baixa"
+      medium: "Media"
+      high: "Alta"
+      dream: "Sonho de consumo"
+    actions:
+      new: "Novo desejo"
+      back_to_wishlist: "Voltar para a lista"
+      delete_confirm: "Excluir este item da lista de desejos?"
+    filters:
+      all_statuses: "Todos os status"
+      all_priorities: "Todas as prioridades"
+      all_brands: "Todas as marcas"
+    index:
+      title: "Lista de desejos"
+      subtitle: "Registre miniaturas desejadas sem abrir o cadastro completo da colecao."
+      search_label: "Busca"
+      search_placeholder: "Buscar por nome, marca, escala ou observacoes"
+      clear_filters: "Limpar filtros"
+      results_count:
+        one: "%{count} desejo"
+        other: "%{count} desejos"
+      results_count_filtered:
+        one: "%{count} resultado para \"%{query}\""
+        other: "%{count} resultados para \"%{query}\""
+      empty_title: "Nenhum desejo cadastrado ainda"
+      empty_text: "Comece por uma miniatura que voce quer comprar, encontrar ou acompanhar."
+      add_first_item: "Adicionar primeiro desejo"
+    new:
+      title: "Adicionar desejo"
+      subtitle: "Guarde nome, marca, escala, prioridade e uma referencia rapida."
+    edit:
+      title: "Editar %{name}"
+      subtitle: "Atualize status, prioridade, preco ou observacoes do desejo."
+    card:
+      no_photo: "Sem foto"
+    form:
+      validation_error_title: "Revise os campos destacados"
+      upload_limits: "Use uma foto opcional em JPG, PNG, GIF ou WEBP."
+      remove_photo: "Remover foto atual"
+      name_placeholder: "Ex: Porsche 911 Treasure Hunt"
+      brand_placeholder: "Ex: Hot Wheels, Matchbox, Mini GT"
+      select_scale: "Escolha a escala..."
+      price_prefix: "centavos"
+      target_price_placeholder: "Ex: 4990"
+      target_price_help: "Informe o valor em centavos para evitar arredondamentos."
+      reference_url_placeholder: "https://exemplo.com/anuncio"
+      observations_placeholder: "Anote loja, variacao, embalagem, estado ou qualquer pista util."

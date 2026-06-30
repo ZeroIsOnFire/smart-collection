@@ -18,6 +18,8 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :wishlist_items, path: 'wishlist'
+
   # Public sharing routes
   get '/s/:share_token', to: 'public_collections#index', as: :public_share
   get '/s/:share_token/car/:id', to: 'public_collections#show', as: :public_share_car

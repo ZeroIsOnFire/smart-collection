@@ -1,0 +1,96 @@
+<div class="container-fluid py-4 app-container">
+  <% wishlist_results_count = @wishlist_items.count %>
+  <% search_query = params[:q].to_s.strip %>
+
+  <div class="collection-toolbar d-flex justify-content-between align-items-start mb-4 flex-wrap gap-3">
+    <div>
+      <h1 class="fw-bold mb-0 fs-3"><%= t('wishlist_items.index.title') %></h1>
+      <p class="text-muted small mb-0"><%= t('wishlist_items.index.subtitle') %></p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap justify-content-end">
+      <%= link_to new_wishlist_item_path, class: 'btn btn-premium rounded-3 px-4 d-flex align-items-center gap-2' do %>
+        <i class="bi bi-plus-circle"></i>
+        <%= t('wishlist_items.actions.new') %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="row mb-4">
+    <div class="col-12">
+      <%= form_with url: wishlist_items_path, method: :get, class: "row g-2 align-items-end" do |f| %>
+        <div class="col-12 col-lg-4">
+          <%= f.label :q, t('wishlist_items.index.search_label'), class: "form-label small fw-semibold text-muted" %>
+          <div class="input-group premium-search-container shadow-sm border rounded-3 overflow-hidden bg-white">
+            <span class="input-group-text border-0 bg-transparent ps-3">
+              <i class="bi bi-search text-muted"></i>
+            </span>
+            <%= f.text_field :q,
+                             value: params[:q],
+                             placeholder: t('wishlist_items.index.search_placeholder'),
+                             class: "form-control border-0 bg-transparent py-2 shadow-none",
+                             autocomplete: "off" %>
+          </div>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-2">
+          <%= f.label :status, t('mongoid.attributes.wishlist_item.status'), class: "form-label small fw-semibold text-muted" %>
+          <%= f.select :status,
+                       options_for_select([[t('wishlist_items.filters.all_statuses'), '']] + WishlistItem.status_options, params[:status]),
+                       {},
+                       class: "form-select rounded-3" %>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-2">
+          <%= f.label :priority, t('mongoid.attributes.wishlist_item.priority'), class: "form-label small fw-semibold text-muted" %>
+          <%= f.select :priority,
+                       options_for_select([[t('wishlist_items.filters.all_priorities'), '']] + WishlistItem.priority_options, params[:priority]),
+                       {},
+                       class: "form-select rounded-3" %>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-2">
+          <%= f.label :brand, t('mongoid.attributes.wishlist_item.brand'), class: "form-label small fw-semibold text-muted" %>
+          <%= f.select :brand,
+                       options_for_select([[t('wishlist_items.filters.all_brands'), '']] + @brands.map { |brand| [brand, brand] }, params[:brand]),
+                       {},
+                       class: "form-select rounded-3" %>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-2 d-flex gap-2">
+          <button type="submit" class="btn btn-premium rounded-3 flex-fill">
+            <i class="bi bi-funnel me-1"></i>
+            <%= t('actions.filter') %>
+          </button>
+          <%= link_to wishlist_items_path,
+                      class: "btn btn-soft-secondary rounded-3",
+                      title: t('wishlist_items.index.clear_filters'),
+                      aria: { label: t('wishlist_items.index.clear_filters') } do %>
+            <i class="bi bi-x-circle"></i>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="collection-results-summary text-muted small mb-3" aria-live="polite">
+    <% if search_query.present? %>
+      <%= t('wishlist_items.index.results_count_filtered', count: wishlist_results_count, query: search_query) %>
+    <% else %>
+      <%= t('wishlist_items.index.results_count', count: wishlist_results_count) %>
+    <% end %>
+  </div>
+
+  <% if @wishlist_items.any? %>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+      <%= render partial: 'wishlist_items/wishlist_item', collection: @wishlist_items %>
+    </div>
+  <% else %>
+    <div class="text-center py-5 mt-4">
+      <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light mb-4" style="width: 80px; height: 80px;">
+        <i class="bi bi-stars fs-2 text-muted opacity-50"></i>
+      </div>
+      <h4 class="fw-bold mb-2"><%= t('wishlist_items.index.empty_title') %></h4>
+      <p class="text-muted mb-4"><%= t('wishlist_items.index.empty_text') %></p>
+      <%= link_to new_wishlist_item_path, class: 'btn btn-premium rounded-3 px-5' do %>
+        <i class="bi bi-plus-circle me-2"></i>
+        <%= t('wishlist_items.index.add_first_item') %>
+      <% end %>
+    </div>
+  <% end %>
+</div>

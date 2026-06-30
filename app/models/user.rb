@@ -55,6 +55,7 @@ class User
   end
 
   has_many :cars, class_name: 'Car', dependent: :destroy
+  has_many :wishlist_items, dependent: :destroy
   has_many :autodetections, dependent: :destroy
   has_many :collection_exports, dependent: :destroy
 

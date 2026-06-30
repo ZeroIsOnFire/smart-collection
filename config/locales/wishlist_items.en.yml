@@ -1,0 +1,75 @@
+en:
+  nav:
+    wishlist: "Wishlist"
+
+  mongoid:
+    models:
+      wishlist_item:
+        one: "Wishlist item"
+        other: "Wishlist items"
+    attributes:
+      wishlist_item:
+        name: "Name"
+        brand: "Brand"
+        scale: "Scale"
+        observations: "Notes"
+        priority: "Priority"
+        status: "Status"
+        target_price_cents: "Target price"
+        reference_url: "Reference link"
+        photo: "Photo"
+        remove_photo: "Remove photo"
+
+  wishlist_items:
+    statuses:
+      wanted: "Wanted"
+      reserved: "Reserved"
+      purchased: "Purchased"
+    priorities:
+      low: "Low"
+      medium: "Medium"
+      high: "High"
+      dream: "Dream item"
+    actions:
+      new: "New wish"
+      back_to_wishlist: "Back to wishlist"
+      delete_confirm: "Delete this wishlist item?"
+    filters:
+      all_statuses: "All statuses"
+      all_priorities: "All priorities"
+      all_brands: "All brands"
+    index:
+      title: "Wishlist"
+      subtitle: "Track wanted miniatures without opening the full collection form."
+      search_label: "Search"
+      search_placeholder: "Search by name, brand, scale or notes"
+      clear_filters: "Clear filters"
+      results_count:
+        one: "%{count} wish"
+        other: "%{count} wishes"
+      results_count_filtered:
+        one: "%{count} result for \"%{query}\""
+        other: "%{count} results for \"%{query}\""
+      empty_title: "No wishes yet"
+      empty_text: "Start with a miniature you want to buy, find or watch."
+      add_first_item: "Add first wish"
+    new:
+      title: "Add wish"
+      subtitle: "Save name, brand, scale, priority and a quick reference."
+    edit:
+      title: "Edit %{name}"
+      subtitle: "Update status, priority, price or notes for this wish."
+    card:
+      no_photo: "No photo"
+    form:
+      validation_error_title: "Review the highlighted fields"
+      upload_limits: "Use an optional JPG, PNG, GIF or WEBP photo."
+      remove_photo: "Remove current photo"
+      name_placeholder: "Ex: Porsche 911 Treasure Hunt"
+      brand_placeholder: "Ex: Hot Wheels, Matchbox, Mini GT"
+      select_scale: "Choose the scale..."
+      price_prefix: "cents"
+      target_price_placeholder: "Ex: 4990"
+      target_price_help: "Enter cents to avoid rounding."
+      reference_url_placeholder: "https://example.com/listing"
+      observations_placeholder: "Note store, variant, packaging, condition or any useful lead."

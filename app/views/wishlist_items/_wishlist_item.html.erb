@@ -1,0 +1,62 @@
+<div class="col" id="<%= dom_id(wishlist_item) %>">
+  <div class="card h-100 border-0 shadow-sm rounded-3 overflow-hidden">
+    <div class="ratio ratio-16x9 bg-light">
+      <% if wishlist_item.photo? %>
+        <%= image_tag wishlist_item.photo.url,
+                      alt: wishlist_item.name,
+                      class: "w-100 h-100 object-fit-cover" %>
+      <% else %>
+        <div class="d-flex flex-column align-items-center justify-content-center text-muted">
+          <i class="bi bi-image fs-1 opacity-50"></i>
+          <span class="small"><%= t('wishlist_items.card.no_photo') %></span>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="card-body">
+      <div class="d-flex justify-content-between gap-3 align-items-start mb-2">
+        <div class="min-w-0">
+          <h2 class="h5 fw-bold mb-1 text-truncate"><%= wishlist_item.name %></h2>
+          <div class="text-muted small">
+            <%= [wishlist_item.brand, wishlist_item.scale].compact_blank.join(' | ') %>
+          </div>
+        </div>
+        <span class="badge rounded-pill text-bg-light border">
+          <%= wishlist_item.priority_label %>
+        </span>
+      </div>
+
+      <div class="d-flex gap-2 flex-wrap mb-3">
+        <span class="badge rounded-pill text-bg-primary-subtle text-primary-emphasis">
+          <%= wishlist_item.status_label %>
+        </span>
+        <% if wishlist_item.target_price_cents.present? %>
+          <span class="badge rounded-pill text-bg-light border">
+            <%= number_to_currency(wishlist_item.target_price) %>
+          </span>
+        <% end %>
+      </div>
+
+      <% if wishlist_item.observations.present? %>
+        <p class="text-muted small mb-0"><%= truncate(wishlist_item.observations.to_s.squish, length: 120) %></p>
+      <% end %>
+    </div>
+
+    <div class="card-footer bg-transparent border-0 pt-0 pb-3 px-3">
+      <div class="d-flex gap-2">
+        <%= link_to edit_wishlist_item_path(wishlist_item), class: "btn btn-soft-secondary rounded-3 flex-fill" do %>
+          <i class="bi bi-pencil me-1"></i>
+          <%= t('actions.edit') %>
+        <% end %>
+        <%= button_to wishlist_item_path(wishlist_item),
+                      method: :delete,
+                      class: "btn btn-outline-danger rounded-3",
+                      form: { data: { turbo_confirm: t('wishlist_items.actions.delete_confirm') } },
+                      title: t('actions.delete'),
+                      aria: { label: t('actions.delete') } do %>
+          <i class="bi bi-trash"></i>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
