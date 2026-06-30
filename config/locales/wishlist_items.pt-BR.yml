@@ -36,6 +36,8 @@ pt-BR:
       enable_public: "Ativar link publico"
       disable_public: "Desativar link publico"
       open_public: "Abrir link publico"
+      share_image: "Imagem da lista"
+      share_item_image: "Gerar imagem do item"
       back_to_wishlist: "Voltar para a lista"
       delete_confirm: "Excluir este item da lista de desejos?"
     filters:
@@ -111,3 +113,13 @@ pt-BR:
       items_count: "Itens na lista"
       empty_title: "Nenhum item encontrado"
       empty_text: "Tente ajustar os filtros para ver outros desejos compartilhados."
+
+  share_images:
+    brand: "SmartCollection"
+    badges:
+      collection: "Colecao"
+      wishlist: "Wishlist"
+    wishlist:
+      total:
+        one: "%{count} item na lista"
+        other: "%{count} itens na lista"

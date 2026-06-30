@@ -20,6 +20,10 @@
         <i class="bi <%= current_user.wishlist_sharing_enabled? ? 'bi-lock' : 'bi-unlock' %>"></i>
         <%= current_user.wishlist_sharing_enabled? ? t('wishlist_items.actions.disable_public') : t('wishlist_items.actions.enable_public') %>
       <% end %>
+      <%= link_to wishlist_share_image_path(format: :png), class: 'btn btn-soft-secondary rounded-3 px-4 d-flex align-items-center gap-2' do %>
+        <i class="bi bi-image"></i>
+        <%= t('wishlist_items.actions.share_image') %>
+      <% end %>
       <%= link_to wishlist_export_path(format: :csv), class: 'btn btn-soft-secondary rounded-3 px-4 d-flex align-items-center gap-2' do %>
         <i class="bi bi-filetype-csv"></i>
         <%= t('wishlist_exports.actions.csv') %>

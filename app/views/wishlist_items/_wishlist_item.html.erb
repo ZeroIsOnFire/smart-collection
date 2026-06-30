@@ -54,6 +54,12 @@
           <i class="bi bi-pencil me-1"></i>
           <%= t('actions.edit') %>
         <% end %>
+        <%= link_to wishlist_item_share_image_path(wishlist_item, format: :png),
+                    class: "btn btn-soft-secondary rounded-3",
+                    title: t('wishlist_items.actions.share_item_image'),
+                    aria: { label: t('wishlist_items.actions.share_item_image') } do %>
+          <i class="bi bi-image"></i>
+        <% end %>
         <%= button_to wishlist_item_path(wishlist_item),
                       method: :delete,
                       class: "btn btn-outline-danger rounded-3",

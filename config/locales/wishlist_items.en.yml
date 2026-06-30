@@ -36,6 +36,8 @@ en:
       enable_public: "Enable public link"
       disable_public: "Disable public link"
       open_public: "Open public link"
+      share_image: "List image"
+      share_item_image: "Generate item image"
       back_to_wishlist: "Back to wishlist"
       delete_confirm: "Delete this wishlist item?"
     filters:
@@ -111,3 +113,13 @@ en:
       items_count: "Wishlist items"
       empty_title: "No items found"
       empty_text: "Try adjusting filters to see other shared wishes."
+
+  share_images:
+    brand: "SmartCollection"
+    badges:
+      collection: "Collection"
+      wishlist: "Wishlist"
+    wishlist:
+      total:
+        one: "%{count} list item"
+        other: "%{count} list items"
