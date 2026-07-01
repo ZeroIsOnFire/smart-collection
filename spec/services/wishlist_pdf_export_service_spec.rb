@@ -13,6 +13,7 @@ RSpec.describe WishlistPdfExportService do
 
       expect(pdf_content).to be_a(String)
       expect(pdf_content).to start_with('%PDF')
+      expect(pdf_content.scan(%r{/Type\s*/Page\b}).count).to eq(1)
     end
 
     it 'handles an empty wishlist' do

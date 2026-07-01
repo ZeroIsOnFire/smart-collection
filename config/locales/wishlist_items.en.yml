@@ -116,7 +116,8 @@ en:
       eyebrow: "SMART COLLECTION"
       title: "WISHLIST"
       subtitle: "%{name} | Generated at %{date}"
-      meta_info: "Generated at: %{date} | Total: %{count} wishes"
+      header_title: "%{name}'s wishlist"
+      meta_info: "%{count} wanted cars | Generated at %{date}"
       cover_description: "A visual report with wanted items, photos, status, priority and notes from the hunt."
       items_title: "Wanted items"
       empty: "No items have been registered in the wishlist."
@@ -126,6 +127,10 @@ en:
         total: "Total wishes"
 
   public_wishlists:
+    layout:
+      title: "%{name}'s wishlist"
+      footer_text: "Show shared wishes with search, status, priority and item details."
+      create_wishlist: "Create my wishlist"
     show:
       eyebrow: "Public wishlist"
       title: "%{name}'s wishlist"
@@ -135,6 +140,9 @@ en:
       results_count:
         one: "%{count} wish"
         other: "%{count} wishes"
+      results_count_filtered:
+        one: "%{count} result for \"%{query}\""
+        other: "%{count} results for \"%{query}\""
       empty_title: "No items found"
       empty_text: "Try adjusting filters to see other shared wishes."
 

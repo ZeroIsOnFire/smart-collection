@@ -6,10 +6,7 @@
         <p class="lead fs-4 opacity-75 mb-0 fw-light"><%= t("public_collections.index.subtitle") %></p>
         <% if @user.wishlist_sharing_enabled? && @user.wishlist_share_token.present? %>
           <%= link_to public_wishlist_url(@user.wishlist_share_token),
-                      class: "btn btn-light rounded-3 px-4 mt-4 d-inline-flex align-items-center gap-2",
-                      target: "_blank",
-                      rel: "noopener noreferrer",
-                      data: { turbo: false } do %>
+                      class: "btn btn-light rounded-3 px-4 mt-4 d-inline-flex align-items-center gap-2" do %>
             <i class="bi bi-stars"></i>
             <%= t("public_collections.index.open_wishlist") %>
           <% end %>

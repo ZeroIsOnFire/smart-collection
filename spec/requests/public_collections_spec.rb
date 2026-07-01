@@ -21,6 +21,7 @@ RSpec.describe 'Public Collections', type: :request do
 
       expect(response.body).to include(public_wishlist_url(user.wishlist_share_token))
       expect(response.body).to include(I18n.t('public_collections.index.open_wishlist'))
+      expect(response.body).not_to include('target="_blank"')
     end
 
     it 'renders the cataloged count with theme-safe contrast classes' do

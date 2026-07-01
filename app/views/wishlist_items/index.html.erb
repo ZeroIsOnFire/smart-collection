@@ -85,45 +85,48 @@
                       turbo_frame: "wishlist_grid",
                       search_form_results_container_id_value: "wishlist_list_container"
                     } do |f| %>
-        <div class="input-group input-group-lg premium-search-container shadow-sm border rounded-3 overflow-hidden bg-white">
-          <span class="input-group-text border-0 bg-transparent ps-4">
-            <i class="bi bi-search text-muted"></i>
-          </span>
-          <%= f.text_field :q,
-                           value: params[:q],
-                           placeholder: t('wishlist_items.index.search_placeholder'),
-                           class: "form-control border-0 bg-transparent py-3 shadow-none",
-                           autocomplete: "off",
-                           data: {
-                             search_form_target: "input",
-                             action: "input->search-form#submit"
-                           } %>
+        <div class="wishlist-search-controls d-flex gap-2 align-items-stretch">
+          <div class="input-group input-group-lg premium-search-container shadow-sm border rounded-3 overflow-hidden bg-white flex-grow-1">
+            <span class="input-group-text border-0 bg-transparent ps-4">
+              <i class="bi bi-search text-muted"></i>
+            </span>
+            <%= f.text_field :q,
+                             value: params[:q],
+                             placeholder: t('wishlist_items.index.search_placeholder'),
+                             class: "form-control border-0 bg-transparent py-3 shadow-none",
+                             autocomplete: "off",
+                             data: {
+                               search_form_target: "input",
+                               action: "input->search-form#submit"
+                             } %>
 
-          <div class="search-status d-none d-flex align-items-center me-2"
-               role="status"
-               aria-live="polite"
-               data-search-form-target="spinner">
-            <div class="spinner-border spinner-border-sm text-primary" role="status">
-              <span class="visually-hidden"><%= t('wishlist_items.index.searching') %></span>
+            <div class="search-status d-none d-flex align-items-center me-2"
+                 role="status"
+                 aria-live="polite"
+                 data-search-form-target="spinner">
+              <div class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="visually-hidden"><%= t('wishlist_items.index.searching') %></span>
+              </div>
+              <span class="search-status-label"><%= t('wishlist_items.index.searching') %></span>
             </div>
-            <span class="search-status-label"><%= t('wishlist_items.index.searching') %></span>
-          </div>
 
-          <% if params.slice(:q, :status, :priority, :brand).values.any?(&:present?) %>
-            <%= link_to wishlist_items_path,
-                        class: "btn border-0 bg-transparent text-muted px-3 d-flex align-items-center search-clear-button",
-                        title: t('wishlist_items.index.clear_filters'),
-                        aria: { label: t('wishlist_items.index.clear_filters') } do %>
-              <i class="bi bi-x-circle"></i>
+            <% if params.slice(:q, :status, :priority, :brand).values.any?(&:present?) %>
+              <%= link_to wishlist_items_path,
+                          class: "btn border-0 bg-transparent text-muted px-3 d-flex align-items-center search-clear-button",
+                          title: t('wishlist_items.index.clear_filters'),
+                          aria: { label: t('wishlist_items.index.clear_filters') } do %>
+                <i class="bi bi-x-circle"></i>
+              <% end %>
             <% end %>
-          <% end %>
+          </div>
 
           <div class="dropdown">
             <button class="btn btn-soft-secondary px-3 rounded-3 m-1 d-flex align-items-center gap-2"
                     type="button"
                     data-bs-toggle="dropdown"
                     data-bs-auto-close="outside"
-                    aria-expanded="false">
+                    aria-expanded="false"
+                    aria-label="<%= t('wishlist_items.index.filter_menu') %>">
               <i class="bi bi-sliders"></i>
               <span class="d-none d-sm-inline"><%= t('wishlist_items.index.filter_menu') %></span>
             </button>
@@ -241,6 +244,16 @@
 
     .wishlist-filter-menu {
       min-width: min(320px, calc(100vw - 2rem));
+    }
+
+    @media (max-width: 575.98px) {
+      .wishlist-search-controls {
+        flex-wrap: wrap;
+      }
+
+      .wishlist-search-controls > .input-group {
+        flex-basis: 100%;
+      }
     }
   </style>
 </div>

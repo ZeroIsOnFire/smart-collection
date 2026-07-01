@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html data-controller="theme">
   <head>
-    <title><%= t("public_collections.layout.title", name: display_name(@user)) %> | Smart Collection</title>
+    <% public_wishlist_page = controller_name == 'public_wishlists' %>
+    <title><%= t(public_wishlist_page ? "public_wishlists.layout.title" : "public_collections.layout.title", name: display_name(@user)) %> | Smart Collection</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
@@ -117,9 +118,11 @@
                         } %>
           <span class="brand-text fs-5">SmartCollection</span>
         </div>
-        <p class="text-muted small mb-4" style="color: var(--public-text-muted) !important;"><%= t("public_collections.layout.footer_text") %></p>
+        <p class="text-muted small mb-4" style="color: var(--public-text-muted) !important;">
+          <%= t(public_wishlist_page ? "public_wishlists.layout.footer_text" : "public_collections.layout.footer_text") %>
+        </p>
         <div>
-          <%= link_to t("public_collections.layout.create_collection"), new_user_registration_path, class: "btn text-white fw-medium rounded-3 px-5 py-2 hover-lift shadow-sm", style: "background-color: var(--public-primary);" %>
+          <%= link_to t(public_wishlist_page ? "public_wishlists.layout.create_wishlist" : "public_collections.layout.create_collection"), new_user_registration_path, class: "btn text-white fw-medium rounded-3 px-5 py-2 hover-lift shadow-sm", style: "background-color: var(--public-primary);" %>
         </div>
       </div>
     </footer>

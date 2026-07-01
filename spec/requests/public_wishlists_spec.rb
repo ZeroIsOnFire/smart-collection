@@ -22,19 +22,25 @@ RSpec.describe 'PublicWishlists', type: :request do
       expect(response.body).to include('public_wishlist_view_preference')
       expect(response.body).to include('view-toggle#setList')
       expect(response.body).to include(public_share_url(user.share_token))
+      expect(response.body).not_to include('target="_blank"')
+      expect(response.body).to include('data-controller="search-form"')
+      expect(response.body).to include('data-turbo-frame="public_wishlist_grid"')
+      expect(response.body).to include(I18n.t('wishlist_items.index.filter_menu'))
     end
 
-    it 'filters public wishlist by status, priority and brand' do
+    it 'filters public wishlist by query, status, priority and brand' do
       create(:wishlist_item, user: user, name: 'Matching wish', brand: 'Mini GT',
                              status: 'reserved', priority: 'dream')
       create(:wishlist_item, user: user, name: 'Other wish', brand: 'Hot Wheels',
                              status: 'wanted', priority: 'low')
 
       get public_wishlist_path(user.wishlist_share_token),
-          params: { status: 'reserved', priority: 'dream', brand: 'Mini GT' }
+          params: { q: 'Matching', status: 'reserved', priority: 'dream', brand: 'Mini GT' }
 
       expect(response.body).to include('Matching wish')
       expect(response.body).not_to include('Other wish')
+      expect(response.body).to include('1 resultado para')
+      expect(response.body).to include('Matching')
     end
 
     it 'does not expose the wishlist when sharing is disabled' do

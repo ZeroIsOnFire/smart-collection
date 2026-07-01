@@ -18,7 +18,10 @@ class PublicWishlistsController < ApplicationController
     scope = scope.where(status: params[:status]) if WishlistItem::STATUSES.include?(params[:status])
     scope = scope.where(priority: params[:priority]) if WishlistItem::PRIORITIES.include?(params[:priority])
     scope = scope.where(brand: params[:brand]) if params[:brand].present?
-    scope
+    return scope if params[:q].blank?
+
+    pattern = /#{Regexp.escape(params[:q].to_s.strip)}/i
+    scope.any_of({ name: pattern }, { brand: pattern }, { scale: pattern }, { observations: pattern })
   end
 
   def render_not_found

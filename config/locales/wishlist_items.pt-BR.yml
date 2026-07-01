@@ -116,7 +116,8 @@ pt-BR:
       eyebrow: "SMART COLLECTION"
       title: "LISTA DE DESEJOS"
       subtitle: "%{name} | Gerado em %{date}"
-      meta_info: "Gerado em: %{date} | Total: %{count} desejos"
+      header_title: "Lista de desejos de %{name}"
+      meta_info: "%{count} carros desejados | Gerado em %{date}"
       cover_description: "Um relatório visual com os itens desejados, fotos, status, prioridade e anotações da busca."
       items_title: "Itens desejados"
       empty: "Nenhum item cadastrado na lista de desejos."
@@ -126,6 +127,10 @@ pt-BR:
         total: "Total de desejos"
 
   public_wishlists:
+    layout:
+      title: "Lista de desejos de %{name}"
+      footer_text: "Mostre desejos compartilhados com busca, status, prioridade e ficha do item."
+      create_wishlist: "Criar minha lista de desejos"
     show:
       eyebrow: "Lista pública"
       title: "Lista de desejos de %{name}"
@@ -135,6 +140,9 @@ pt-BR:
       results_count:
         one: "%{count} desejo"
         other: "%{count} desejos"
+      results_count_filtered:
+        one: "%{count} resultado para \"%{query}\""
+        other: "%{count} resultados para \"%{query}\""
       empty_title: "Nenhum item encontrado"
       empty_text: "Tente ajustar os filtros para ver outros desejos compartilhados."
 
