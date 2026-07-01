@@ -22,6 +22,15 @@ RSpec.describe 'WishlistItems', type: :request do
       expect(response.body).not_to include('Private wish')
     end
 
+    it 'renders background export controls for CSV and PDF' do
+      get wishlist_items_path
+
+      expect(response.body).to include('wishlist_export_csv_status_container')
+      expect(response.body).to include('wishlist_export_pdf_status_container')
+      expect(response.body).to include('export_type')
+      expect(response.body).to include('wishlist')
+    end
+
     it 'filters by status, priority, brand and query' do
       matching = create(
         :wishlist_item,
@@ -39,6 +48,25 @@ RSpec.describe 'WishlistItems', type: :request do
 
       expect(response.body).to include(matching.name)
       expect(response.body).not_to include('Red Ferrari')
+    end
+  end
+
+  describe 'POST /collection_exports for wishlist' do
+    before do
+      ActiveJob::Base.queue_adapter = :test
+    end
+
+    it 'creates a pending wishlist export and enqueues the export job' do
+      expect do
+        post collection_exports_path(format_type: 'csv'),
+             params: { export_type: 'wishlist' },
+             as: :turbo_stream
+      end.to have_enqueued_job(ExportCollectionJob)
+
+      export = user.collection_exports.last
+      expect(export.export_type).to eq('wishlist')
+      expect(export.format_type).to eq('csv')
+      expect(response.body).to include('wishlist_export_csv_status_container')
     end
   end
 

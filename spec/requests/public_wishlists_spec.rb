@@ -10,6 +10,7 @@ RSpec.describe 'PublicWishlists', type: :request do
 
   describe 'GET /wishlist/public/:token' do
     it 'allows access without login and renders shared wishlist items' do
+      user.update!(sharing_enabled: true, share_token: 'collection-token')
       create(:wishlist_item, user: user, name: 'Public wish', reference_url: 'https://example.com/private-trace')
 
       get public_wishlist_path(user.wishlist_share_token)
@@ -18,6 +19,9 @@ RSpec.describe 'PublicWishlists', type: :request do
       expect(response.body).to include(I18n.t('public_wishlists.show.title', name: user.name))
       expect(response.body).to include('Public wish')
       expect(response.body).not_to include('private-trace')
+      expect(response.body).to include('public_wishlist_view_preference')
+      expect(response.body).to include('view-toggle#setList')
+      expect(response.body).to include(public_share_url(user.share_token))
     end
 
     it 'filters public wishlist by status, priority and brand' do

@@ -8,6 +8,7 @@ class WishlistPdfExportService
     teal: '2F6F68',
     muted: '6B7280',
     soft: 'F6F1E8',
+    accent: 'A56D32',
     line: 'D7C7B2',
     white: 'FFFFFF'
   }.freeze
@@ -34,14 +35,16 @@ class WishlistPdfExportService
 
   def draw_header(pdf)
     pdf.fill_color COLORS[:teal]
-    pdf.text safe_text(I18n.t('wishlist_exports.pdf.title')), size: 18, style: :bold
-    pdf.move_down 4
-    pdf.fill_color COLORS[:muted]
-    pdf.text safe_text(I18n.t('wishlist_exports.pdf.subtitle',
-                              name: @user.name.presence || I18n.t('export_pdf.user_placeholder'),
-                              date: I18n.l(@generated_at, format: :export_timestamp))),
-             size: 9
-    pdf.move_down 18
+    pdf.fill_rounded_rectangle [0, pdf.cursor], pdf.bounds.width, 82, 8
+    pdf.fill_color COLORS[:white]
+    pdf.draw_text safe_text(I18n.t('wishlist_exports.pdf.eyebrow')), at: [18, pdf.cursor - 24], size: 8
+    pdf.draw_text safe_text(I18n.t('wishlist_exports.pdf.title')), at: [18, pdf.cursor - 52], size: 22, style: :bold
+    pdf.fill_color COLORS[:soft]
+    pdf.draw_text safe_text(I18n.t('wishlist_exports.pdf.subtitle',
+                                   name: @user.name.presence || I18n.t('export_pdf.user_placeholder'),
+                                   date: I18n.l(@generated_at, format: :export_timestamp))),
+                  at: [18, pdf.cursor - 70], size: 8
+    pdf.move_down 104
   end
 
   def draw_summary(pdf)
@@ -49,13 +52,13 @@ class WishlistPdfExportService
     summary_rows.each do |row|
       row.each_with_index do |metric, index|
         x = index.zero? ? 0 : (pdf.bounds.width / 2.0) + 8
-        pdf.bounding_box([x, pdf.cursor], width: (pdf.bounds.width / 2.0) - 8, height: 48) do
+        pdf.bounding_box([x, pdf.cursor], width: (pdf.bounds.width / 2.0) - 8, height: 50) do
           pdf.fill_color COLORS[:soft]
-          pdf.fill_rounded_rectangle [0, pdf.bounds.top], pdf.bounds.width, 42, 6
+          pdf.fill_rounded_rectangle [0, pdf.bounds.top], pdf.bounds.width, 44, 6
           pdf.fill_color COLORS[:teal]
-          pdf.text safe_text(metric[:value]), size: 15, style: :bold, align: :center
+          pdf.text safe_text(metric[:value]), size: 16, style: :bold, align: :center
           pdf.fill_color COLORS[:muted]
-          pdf.text safe_text(metric[:label]), size: 7, align: :center
+          pdf.text safe_text(metric[:label]), size: 7.5, align: :center
         end
       end
       pdf.move_down 8
@@ -69,46 +72,56 @@ class WishlistPdfExportService
       return
     end
 
+    pdf.fill_color COLORS[:ink]
+    pdf.text safe_text(I18n.t('wishlist_exports.pdf.items_title')), size: 13, style: :bold
+    pdf.stroke_color COLORS[:line]
+    pdf.stroke_horizontal_rule
+    pdf.move_down 12
+
     @wishlist_items.each do |item|
-      pdf.start_new_page if pdf.cursor < 105
+      pdf.start_new_page if pdf.cursor < 118
       draw_item(pdf, item)
       pdf.move_down 10
     end
   end
 
   def draw_item(pdf, item)
-    card_height = 86
+    card_height = 96
     pdf.bounding_box([0, pdf.cursor], width: pdf.bounds.width, height: card_height) do
       pdf.stroke_color COLORS[:line]
       pdf.line_width 0.6
       pdf.stroke_rounded_rectangle [0, pdf.bounds.top], pdf.bounds.width, card_height, 6
+      pdf.fill_color COLORS[:white]
 
       draw_item_photo(pdf, item)
 
-      pdf.bounding_box([78, pdf.bounds.top - 12], width: pdf.bounds.width - 94, height: 64) do
+      pdf.bounding_box([88, pdf.bounds.top - 14], width: pdf.bounds.width - 106, height: 72) do
         pdf.fill_color COLORS[:ink]
-        pdf.text safe_text(item.name), size: 11, style: :bold, overflow: :truncate
+        pdf.text safe_text(item.name), size: 12, style: :bold, overflow: :truncate
         pdf.move_down 4
         pdf.fill_color COLORS[:muted]
         pdf.text safe_text(metadata_for(item).join(' | ')), size: 8, overflow: :truncate
-        pdf.move_down 4
-        pdf.text safe_text(item.observations.to_s.squish), size: 7.5, overflow: :truncate if item.observations.present?
+        if item.observations.present?
+          pdf.move_down 5
+          pdf.fill_color COLORS[:ink]
+          pdf.text safe_text(item.observations.to_s.squish), size: 7.5, overflow: :truncate
+        end
       end
     end
   end
 
   def draw_item_photo(pdf, item)
-    pdf.bounding_box([12, pdf.bounds.top - 12], width: 54, height: 54) do
+    pdf.bounding_box([14, pdf.bounds.top - 14], width: 62, height: 62) do
       pdf.fill_color COLORS[:soft]
-      pdf.fill_rounded_rectangle [0, pdf.bounds.top], 54, 54, 5
+      pdf.fill_rounded_rectangle [0, pdf.bounds.top], 62, 62, 5
 
       if item.photo? && item.photo.path && File.exist?(item.photo.path)
-        pdf.image item.photo.path, fit: [54, 54], position: :center, vposition: :center
+        pdf.image item.photo.path, fit: [62, 62], position: :center, vposition: :center
       else
         pdf.fill_color COLORS[:muted]
         pdf.text_box safe_text(I18n.t('wishlist_exports.pdf.no_photo')),
-                     at: [0, 32],
-                     width: 54,
+                     at: [0, 36],
+                     width: 62,
                      align: :center,
                      size: 7
       end
@@ -116,8 +129,8 @@ class WishlistPdfExportService
   rescue StandardError
     pdf.fill_color COLORS[:muted]
     pdf.text_box safe_text(I18n.t('wishlist_exports.pdf.no_photo')),
-                 at: [0, 32],
-                 width: 54,
+                 at: [0, 36],
+                 width: 62,
                  align: :center,
                  size: 7
   end

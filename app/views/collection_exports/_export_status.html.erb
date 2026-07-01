@@ -1,10 +1,15 @@
-<div id="export_<%= format_type %>_status_container"
+<% export_type = local_assigns.fetch(:export_type, "collection") %>
+<% container_id = export_type == "wishlist" ? "wishlist_export_#{format_type}_status_container" : "export_#{format_type}_status_container" %>
+
+<div id="<%= container_id %>"
      data-controller="export-refresh"
      data-export-refresh-format-value="<%= format_type %>"
+     data-export-refresh-export-type-value="<%= export_type %>"
      data-export-refresh-status-value="<%= export&.status %>">
   <% if export.nil? %>
     <%= button_to collection_exports_path(format_type: format_type),
                   method: :post,
+                  params: { export_type: export_type },
                   class: "btn btn-export-action rounded-3 px-3 d-flex align-items-center gap-2",
                   data: { turbo_stream: true } do %>
       <i class="bi <%= format_type == 'csv' ? 'bi-filetype-csv' : 'bi-file-earmark-pdf' %>"></i>
@@ -34,6 +39,7 @@
       <% end %>
       <%= button_to collection_exports_path(format_type: format_type),
                     method: :post,
+                    params: { export_type: export_type },
                     class: "btn btn-outline-success rounded-end-3 px-3 d-flex align-items-center export-regenerate-button",
                     form: { class: "export-regenerate-form" },
                     data: { turbo_stream: true },
@@ -49,6 +55,7 @@
       </button>
       <%= button_to collection_exports_path(format_type: format_type),
                     method: :post,
+                    params: { export_type: export_type },
                     class: "btn btn-outline-danger rounded-end-3 px-3 d-flex align-items-center export-regenerate-button",
                     form: { class: "export-regenerate-form" },
                     data: { turbo_stream: true },

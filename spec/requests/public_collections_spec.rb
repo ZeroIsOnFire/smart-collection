@@ -14,6 +14,15 @@ RSpec.describe 'Public Collections', type: :request do
       expect(response.body).to include('Public Car')
     end
 
+    it 'links to the public wishlist when both public shares are enabled' do
+      user.update!(wishlist_sharing_enabled: true, wishlist_share_token: 'wishlist-token')
+
+      get public_share_path(user.share_token)
+
+      expect(response.body).to include(public_wishlist_url(user.wishlist_share_token))
+      expect(response.body).to include(I18n.t('public_collections.index.open_wishlist'))
+    end
+
     it 'renders the cataloged count with theme-safe contrast classes' do
       get public_share_path(user.share_token)
 

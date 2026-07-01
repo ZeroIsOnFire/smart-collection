@@ -1,6 +1,6 @@
-<div class="col animate-fade-in wishlist-card-wrapper" id="<%= dom_id(wishlist_item) %>">
+<div class="col animate-fade-in car-card-wrapper wishlist-card-wrapper" id="<%= dom_id(wishlist_item) %>">
   <div class="card premium-card wishlist-card h-100 shadow-sm border-0 position-relative rounded-3 overflow-hidden">
-    <div class="position-absolute top-0 end-0 p-2 z-3">
+    <div class="position-absolute top-0 end-0 p-2 z-3 car-action-dropdown">
       <div class="dropdown">
         <button class="btn btn-sm bg-white bg-opacity-90 rounded-circle shadow-sm border-0"
                 type="button"
@@ -28,8 +28,9 @@
             <% end %>
           </li>
           <li>
-            <%= link_to wishlist_item_share_image_path(wishlist_item, format: :png),
-                        class: 'dropdown-item d-flex align-items-center gap-2 py-2' do %>
+            <%= link_to wishlist_item_share_image_path(wishlist_item),
+                        class: 'dropdown-item d-flex align-items-center gap-2 py-2',
+                        data: { turbo_frame: "modal" } do %>
               <i class="bi bi-image text-muted"></i>
               <%= t('wishlist_items.actions.share_item_image') %>
             <% end %>
@@ -59,9 +60,12 @@
     <%= link_to wishlist_item_path(wishlist_item),
                 class: "text-decoration-none",
                 data: { turbo_frame: "modal" } do %>
-      <div class="wishlist-card-photo bg-light d-flex align-items-center justify-content-center text-muted">
+      <div class="car-photo-container wishlist-card-photo bg-light d-flex align-items-center justify-content-center text-muted" style="height: 180px; overflow: hidden;">
         <% if wishlist_item.photo? %>
-          <%= image_tag wishlist_item.photo.url, alt: wishlist_item.name, loading: "lazy" %>
+          <%= image_tag wishlist_item.photo.url,
+                        alt: wishlist_item.name,
+                        loading: "lazy",
+                        style: "width: 100%; height: 100%; object-fit: cover;" %>
         <% else %>
           <div class="text-center">
             <i class="bi bi-camera fs-3 opacity-30 d-block mb-1"></i>
@@ -72,7 +76,10 @@
 
       <div class="card-body wishlist-card-body px-3 pb-3 pt-2">
         <h2 class="card-title mb-0 fw-bold text-dark text-truncate fs-6"><%= wishlist_item.name %></h2>
-        <div class="wishlist-list-meta d-flex flex-wrap gap-1 mt-1 mb-2">
+        <div class="card-text text-muted small mb-0">
+          <%= [wishlist_item.brand, wishlist_item.scale].compact_blank.join(' | ') %>
+        </div>
+        <div class="d-flex flex-wrap gap-1 mt-1 mb-2">
           <% if wishlist_item.brand? %>
             <span class="collection-brand-badge"><%= wishlist_item.brand %></span>
           <% end %>

@@ -1,6 +1,10 @@
 <div class="container-fluid py-4 app-container">
   <% wishlist_results_count = @wishlist_items.count %>
   <% search_query = params[:q].to_s.strip %>
+  <% csv_export = current_user.collection_exports.where(format_type: 'csv', export_type: 'wishlist').last %>
+  <% pdf_export = current_user.collection_exports.where(format_type: 'pdf', export_type: 'wishlist').last %>
+
+  <%= turbo_stream_from "user_#{current_user.id.to_s}_exports" %>
 
   <div class="collection-toolbar d-flex justify-content-between align-items-start mb-4 flex-wrap gap-3">
     <div>
@@ -41,7 +45,10 @@
               </button>
             </div>
             <%= link_to public_wishlist_url(current_user.wishlist_share_token),
-                        class: 'btn btn-soft-secondary rounded-3 w-100 d-flex align-items-center justify-content-center gap-2 mb-2' do %>
+                        class: 'btn btn-soft-secondary rounded-3 w-100 d-flex align-items-center justify-content-center gap-2 mb-2',
+                        target: "_blank",
+                        rel: "noopener noreferrer",
+                        data: { turbo: false } do %>
               <i class="bi bi-box-arrow-up-right"></i>
               <%= t('wishlist_items.actions.open_public') %>
             <% end %>
@@ -58,18 +65,10 @@
             <%= t('wishlist_items.index.export_actions') %>
           </div>
           <div class="d-grid gap-2">
-            <%= link_to wishlist_share_image_path(format: :png), class: 'btn btn-soft-secondary rounded-3 d-flex align-items-center justify-content-center gap-2' do %>
-              <i class="bi bi-image"></i>
-              <%= t('wishlist_items.actions.share_image') %>
-            <% end %>
-            <%= link_to wishlist_export_path(format: :csv), class: 'btn btn-soft-secondary rounded-3 d-flex align-items-center justify-content-center gap-2' do %>
-              <i class="bi bi-filetype-csv"></i>
-              <%= t('wishlist_exports.actions.csv') %>
-            <% end %>
-            <%= link_to wishlist_export_path(format: :pdf), class: 'btn btn-soft-secondary rounded-3 d-flex align-items-center justify-content-center gap-2' do %>
-              <i class="bi bi-filetype-pdf"></i>
-              <%= t('wishlist_exports.actions.pdf') %>
-            <% end %>
+            <%= render partial: "collection_exports/export_status",
+                       locals: { export: csv_export, format_type: 'csv', export_type: 'wishlist' } %>
+            <%= render partial: "collection_exports/export_status",
+                       locals: { export: pdf_export, format_type: 'pdf', export_type: 'wishlist' } %>
           </div>
         </div>
       </div>
@@ -170,46 +169,6 @@
   </div>
 
   <style>
-    .wishlist-card-photo {
-      height: 180px;
-      overflow: hidden;
-    }
-
-    .wishlist-card-photo img {
-      height: 100%;
-      object-fit: cover;
-      width: 100%;
-    }
-
-    .wishlist-list-meta {
-      min-height: 1.6rem;
-    }
-
-    .view-list #wishlist_grid_inner {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-
-    .view-list #wishlist_grid_inner > .col {
-      width: 100%;
-    }
-
-    .view-list .wishlist-card {
-      display: grid;
-      grid-template-columns: 148px minmax(0, 1fr);
-      min-height: 132px;
-    }
-
-    .view-list .wishlist-card-photo {
-      height: 100%;
-      min-height: 132px;
-    }
-
-    .view-list .wishlist-card-body {
-      padding-right: 3.25rem !important;
-    }
-
     @media (max-width: 575.98px) {
       .collection-primary-actions,
       .collection-primary-actions > .btn,
@@ -220,18 +179,6 @@
       .collection-primary-actions .dropdown > .btn {
         justify-content: center;
         width: 100%;
-      }
-
-      .view-list .wishlist-card {
-        grid-template-columns: 104px minmax(0, 1fr);
-      }
-
-      .view-list .wishlist-card-photo {
-        min-height: 112px;
-      }
-
-      .wishlist-card .card-body {
-        padding: 0.85rem !important;
       }
     }
   </style>

@@ -6,13 +6,21 @@ class ShareImagesController < ApplicationController
   def car
     car = current_user.cars.find(params[:car_id])
 
-    send_png ShareImageService.new(record: car, kind: :car).generate
+    respond_with_share_image(
+      png_path: car_share_image_path(car, format: :png),
+      title: car.name,
+      data: -> { ShareImageService.new(record: car, kind: :car).generate }
+    )
   end
 
   def wishlist_item
     wishlist_item = current_user.wishlist_items.find(params[:wishlist_item_id])
 
-    send_png ShareImageService.new(record: wishlist_item, kind: :wishlist_item).generate
+    respond_with_share_image(
+      png_path: wishlist_item_share_image_path(wishlist_item, format: :png),
+      title: wishlist_item.name,
+      data: -> { ShareImageService.new(record: wishlist_item, kind: :wishlist_item).generate }
+    )
   end
 
   def wishlist
@@ -33,6 +41,17 @@ class ShareImagesController < ApplicationController
   end
 
   private
+
+  def respond_with_share_image(png_path:, title:, data:)
+    respond_to do |format|
+      format.html do
+        render partial: 'share_images/preview_modal',
+               locals: { image_path: png_path, title: title },
+               formats: [:html]
+      end
+      format.png { send_png data.call }
+    end
+  end
 
   def send_png(data)
     send_data data, filename: "smart-collection-share-#{Time.current.strftime('%Y%m%d-%H%M')}.png",

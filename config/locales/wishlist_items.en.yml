@@ -111,8 +111,10 @@ en:
         created_at: "Created at"
         updated_at: "Updated at"
     pdf:
+      eyebrow: "SMART COLLECTION"
       title: "WISHLIST"
       subtitle: "%{name} | Generated at %{date}"
+      items_title: "Wanted items"
       empty: "No items have been registered in the wishlist."
       no_photo: "No photo"
       generated_by: "SmartCollection"
@@ -125,11 +127,18 @@ en:
       title: "%{name}'s wishlist"
       subtitle: "Wanted, reserved or purchased miniatures to follow the hunt."
       items_count: "Wishlist items"
+      open_collection: "View public collection"
+      results_count:
+        one: "%{count} wish"
+        other: "%{count} wishes"
       empty_title: "No items found"
       empty_text: "Try adjusting filters to see other shared wishes."
 
   share_images:
     brand: "SmartCollection"
+    preview:
+      title: "%{name} image"
+      open_png: "Open PNG"
     badges:
       collection: "Collection"
       wishlist: "Wishlist"

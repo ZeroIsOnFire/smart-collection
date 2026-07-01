@@ -330,6 +330,7 @@ en:
       gallery_view: "Gallery"
       gallery_label: "Collection carousel gallery"
       gallery_thumbnails: "Gallery thumbnails"
+      open_wishlist: "View wishlist"
       previous_item: "Previous item"
       next_item: "Next item"
       show_gallery_item: "Show %{name} in the gallery"

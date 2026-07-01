@@ -41,6 +41,17 @@ RSpec.describe 'ShareImages', type: :request do
       expect(response.body).to start_with("\x89PNG".b)
     end
 
+    it 'renders an in-app preview modal for a current user wishlist item' do
+      item = create(:wishlist_item, user: user, name: 'Preview wish')
+
+      get wishlist_item_share_image_path(item), headers: { 'Turbo-Frame' => 'modal' }
+
+      expect(response).to be_successful
+      expect(response.body).to include('turboModal')
+      expect(response.body).to include(wishlist_item_share_image_path(item, format: :png))
+      expect(response.body).to include('Preview wish')
+    end
+
     it 'does not generate an image for another user wishlist item' do
       item = create(:wishlist_item, user: other_user)
 

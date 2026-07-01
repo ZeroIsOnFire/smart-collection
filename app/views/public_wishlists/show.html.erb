@@ -1,25 +1,41 @@
-<div class="public-collection-page">
-  <section class="public-collection-hero py-5">
-    <div class="container-fluid app-container">
-      <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-4">
-        <div>
-          <p class="text-uppercase text-primary fw-bold small mb-2"><%= t('public_wishlists.show.eyebrow') %></p>
-          <h1 class="display-6 fw-bold mb-2">
-            <%= @user.wishlist_public_title.presence || t('public_wishlists.show.title', name: @user.name) %>
-          </h1>
-          <p class="text-muted mb-0"><%= t('public_wishlists.show.subtitle') %></p>
-        </div>
-        <div class="public-collection-stat rounded-3">
-          <div class="public-collection-stat-number"><%= @wishlist_items.count %></div>
-          <div class="public-collection-stat-label"><%= t('public_wishlists.show.items_count') %></div>
+<div class="hero-gradient text-white pt-5 pb-5 mb-0">
+  <div class="container-fluid app-container public-container py-4">
+    <div class="row align-items-center position-relative" style="z-index: 2;">
+      <div class="col-lg-8">
+        <p class="text-uppercase fw-bold small mb-2 opacity-75"><%= t('public_wishlists.show.eyebrow') %></p>
+        <h1 class="display-3 fw-bold mb-3">
+          <%= @user.wishlist_public_title.presence || t('public_wishlists.show.title', name: display_name(@user)) %>
+        </h1>
+        <p class="lead fs-4 opacity-75 mb-0 fw-light"><%= t('public_wishlists.show.subtitle') %></p>
+        <% if @user.sharing_enabled? && @user.share_token.present? %>
+          <%= link_to public_share_url(@user.share_token),
+                      class: "btn btn-light rounded-3 px-4 mt-4 d-inline-flex align-items-center gap-2",
+                      target: "_blank",
+                      rel: "noopener noreferrer",
+                      data: { turbo: false } do %>
+            <i class="bi bi-car-front"></i>
+            <%= t('public_wishlists.show.open_collection') %>
+          <% end %>
+        <% end %>
+      </div>
+      <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
+        <div class="public-collection-stat d-inline-flex flex-column align-items-center rounded-3 p-3">
+          <span class="public-collection-stat-number fs-2 fw-bold lh-1"><%= @wishlist_items.count %></span>
+          <span class="public-collection-stat-label small text-uppercase fw-semibold mt-1">
+            <i class="bi bi-stars me-1"></i> <%= t('public_wishlists.show.items_count') %>
+          </span>
         </div>
       </div>
     </div>
-  </section>
+  </div>
+</div>
 
-  <section class="py-4">
-    <div class="container-fluid app-container">
-      <%= form_with url: public_wishlist_path(@user.wishlist_share_token), method: :get, class: "row g-2 align-items-end mb-4" do |f| %>
+<div class="container-fluid app-container public-container mb-5">
+  <% public_results_count = @wishlist_items.count %>
+
+  <div class="row mb-5 search-wrapper">
+    <div class="col-12 col-xl-10 mx-auto">
+      <%= form_with url: public_wishlist_path(@user.wishlist_share_token), method: :get, class: "row g-2 align-items-end" do |f| %>
         <div class="col-12 col-md-4">
           <%= f.label :status, t('mongoid.attributes.wishlist_item.status'), class: "form-label small fw-semibold text-muted" %>
           <%= f.select :status,
@@ -47,43 +63,42 @@
           </button>
         </div>
       <% end %>
+    </div>
+  </div>
 
+  <div data-controller="view-toggle"
+       data-view-toggle-storage-key-value="public_wishlist_view_preference">
+    <div class="collection-view-controls d-flex justify-content-between align-items-center">
+      <div class="collection-results-summary text-muted small" aria-live="polite">
+        <%= t('public_wishlists.show.results_count', count: public_results_count) %>
+      </div>
+      <div class="btn-group shadow-sm bg-white rounded-3 p-1 border public-view-toggle">
+        <button type="button" class="btn btn-sm text-primary active rounded-3 px-3 fw-medium d-flex align-items-center gap-2" data-view-toggle-target="gridButton" data-action="click->view-toggle#setGrid">
+          <i class="bi bi-grid-fill"></i> <%= t('public_collections.index.grid_view') %>
+        </button>
+        <button type="button" class="btn btn-sm text-muted rounded-3 px-3 fw-medium d-flex align-items-center gap-2" data-view-toggle-target="listButton" data-action="click->view-toggle#setList">
+          <i class="bi bi-list-ul"></i> <%= t('public_collections.index.list_view') %>
+        </button>
+      </div>
+    </div>
+
+    <div id="cars_list_container" class="position-relative mt-2">
       <% if @wishlist_items.any? %>
-        <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-4">
-          <% @wishlist_items.each do |item| %>
-            <div class="col">
-              <article class="card h-100 border-0 shadow-sm rounded-3 overflow-hidden">
-                <div class="ratio ratio-16x9 bg-light">
-                  <% if item.photo? %>
-                    <%= image_tag item.photo.url, alt: item.name, class: "w-100 h-100 object-fit-cover" %>
-                  <% else %>
-                    <div class="d-flex align-items-center justify-content-center text-muted">
-                      <i class="bi bi-image fs-1 opacity-50"></i>
-                    </div>
-                  <% end %>
-                </div>
-                <div class="card-body">
-                  <h2 class="h5 fw-bold mb-1"><%= item.name %></h2>
-                  <p class="text-muted small mb-3"><%= [item.brand, item.scale].compact_blank.join(' | ') %></p>
-                  <div class="d-flex gap-2 flex-wrap">
-                    <% if @user.wishlist_public_show_status? %>
-                      <span class="badge rounded-pill text-bg-primary-subtle text-primary-emphasis"><%= item.status_label %></span>
-                    <% end %>
-                    <% if @user.wishlist_public_show_priority? %>
-                      <span class="badge rounded-pill text-bg-light border"><%= item.priority_label %></span>
-                    <% end %>
-                  </div>
-                </div>
-              </article>
-            </div>
-          <% end %>
+        <div id="cars_grid_inner" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4 pt-2 grid-view is-public">
+          <%= render partial: "public_wishlists/wishlist_item",
+                     collection: @wishlist_items,
+                     as: :wishlist_item,
+                     locals: { user: @user } %>
         </div>
       <% else %>
-        <div class="text-center py-5">
-          <h2 class="h4 fw-bold"><%= t('public_wishlists.show.empty_title') %></h2>
-          <p class="text-muted"><%= t('public_wishlists.show.empty_text') %></p>
+        <div class="text-center py-5 mt-4 public-empty-state">
+          <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-white shadow-sm mb-4 public-empty-icon">
+            <i class="bi bi-search display-4 text-muted opacity-25"></i>
+          </div>
+          <h3 class="fw-bold mb-2"><%= t('public_wishlists.show.empty_title') %></h3>
+          <p class="text-muted mb-0 fs-5"><%= t('public_wishlists.show.empty_text') %></p>
         </div>
       <% end %>
     </div>
-  </section>
+  </div>
 </div>

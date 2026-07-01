@@ -2390,7 +2390,8 @@ body {
   display: none !important;
 }
 
-.view-list #cars_grid_inner {
+.view-list #cars_grid_inner,
+.view-list #wishlist_grid_inner {
   display: flex !important;
   flex-direction: column !important;
   gap: 0 !important;
@@ -2402,7 +2403,8 @@ body {
   box-shadow: var(--card-shadow);
 }
 
-.view-list #cars_grid_inner > .col {
+.view-list #cars_grid_inner > .col,
+.view-list #wishlist_grid_inner > .col {
   width: 100% !important;
   flex: 0 0 100% !important;
   max-width: 100% !important;
@@ -2414,7 +2416,9 @@ body {
 
 /* Fix z-index stacking when hovering or opening dropdowns */
 .view-list #cars_grid_inner > .col:hover,
-.view-list #cars_grid_inner > .col:focus-within {
+.view-list #cars_grid_inner > .col:focus-within,
+.view-list #wishlist_grid_inner > .col:hover,
+.view-list #wishlist_grid_inner > .col:focus-within {
   z-index: 20;
 }
 
@@ -2449,7 +2453,8 @@ body {
   box-shadow: none !important;
 }
 
-.view-list .card > a {
+.view-list .card > a,
+.view-list .public-wishlist-card-content {
   display: flex;
   flex-direction: row;
   min-width: 0;

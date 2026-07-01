@@ -4,6 +4,16 @@
       <div class="col-lg-8">
         <h1 class="display-3 fw-bold mb-3"><%= t("public_collections.index.title", name: display_name(@user)) %></h1>
         <p class="lead fs-4 opacity-75 mb-0 fw-light"><%= t("public_collections.index.subtitle") %></p>
+        <% if @user.wishlist_sharing_enabled? && @user.wishlist_share_token.present? %>
+          <%= link_to public_wishlist_url(@user.wishlist_share_token),
+                      class: "btn btn-light rounded-3 px-4 mt-4 d-inline-flex align-items-center gap-2",
+                      target: "_blank",
+                      rel: "noopener noreferrer",
+                      data: { turbo: false } do %>
+            <i class="bi bi-stars"></i>
+            <%= t("public_collections.index.open_wishlist") %>
+          <% end %>
+        <% end %>
       </div>
       <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
         <div class="public-collection-stat d-inline-flex flex-column align-items-center rounded-3 p-3">

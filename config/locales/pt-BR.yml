@@ -341,6 +341,7 @@ pt-BR:
       gallery_view: "Galeria"
       gallery_label: "Galeria em carrossel da coleção"
       gallery_thumbnails: "Miniaturas da galeria"
+      open_wishlist: "Ver lista de desejos"
       previous_item: "Item anterior"
       next_item: "Próximo item"
       show_gallery_item: "Mostrar %{name} na galeria"

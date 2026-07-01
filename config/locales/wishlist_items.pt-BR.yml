@@ -111,8 +111,10 @@ pt-BR:
         created_at: "Criado em"
         updated_at: "Atualizado em"
     pdf:
+      eyebrow: "SMART COLLECTION"
       title: "LISTA DE DESEJOS"
       subtitle: "%{name} | Gerado em %{date}"
+      items_title: "Itens desejados"
       empty: "Nenhum item cadastrado na lista de desejos."
       no_photo: "Sem foto"
       generated_by: "SmartCollection"
@@ -125,11 +127,18 @@ pt-BR:
       title: "Lista de desejos de %{name}"
       subtitle: "Miniaturas desejadas, reservadas ou já compradas para acompanhar a busca."
       items_count: "Itens na lista"
+      open_collection: "Ver acervo público"
+      results_count:
+        one: "%{count} desejo"
+        other: "%{count} desejos"
       empty_title: "Nenhum item encontrado"
       empty_text: "Tente ajustar os filtros para ver outros desejos compartilhados."
 
   share_images:
     brand: "SmartCollection"
+    preview:
+      title: "Imagem de %{name}"
+      open_png: "Abrir PNG"
     badges:
       collection: "Acervo"
       wishlist: "Lista de desejos"
