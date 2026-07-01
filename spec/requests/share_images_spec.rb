@@ -93,4 +93,38 @@ RSpec.describe 'ShareImages', type: :request do
       expect(response).to have_http_status(:not_found)
     end
   end
+
+  describe 'GET /wishlist/public/:token/items/:id/share_image.png' do
+    it 'generates a PNG for a publicly shared wishlist item without login' do
+      sign_out user
+      item = create(:wishlist_item, user: user)
+
+      get public_wishlist_item_share_image_path(user.wishlist_share_token, item, format: :png)
+
+      expect(response).to be_successful
+      expect(response.media_type).to eq('image/png')
+      expect(response.body).to start_with("\x89PNG".b)
+    end
+
+    it 'renders an in-app preview modal for a publicly shared wishlist item' do
+      sign_out user
+      item = create(:wishlist_item, user: user, name: 'Public preview wish')
+
+      get public_wishlist_item_share_image_path(user.wishlist_share_token, item), headers: { 'Turbo-Frame' => 'modal' }
+
+      expect(response).to be_successful
+      expect(response.body).to include('turboModal')
+      expect(response.body).to include(public_wishlist_item_share_image_path(user.wishlist_share_token, item, format: :png))
+      expect(response.body).to include('Public preview wish')
+    end
+
+    it 'blocks public item image generation when wishlist sharing is disabled' do
+      item = create(:wishlist_item, user: user)
+      user.update!(wishlist_sharing_enabled: false)
+
+      get public_wishlist_item_share_image_path(user.wishlist_share_token, item, format: :png)
+
+      expect(response).to have_http_status(:not_found)
+    end
+  end
 end

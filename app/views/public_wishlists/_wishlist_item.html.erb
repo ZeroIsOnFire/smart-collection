@@ -1,18 +1,14 @@
 <div class="col animate-fade-in car-card-wrapper">
-  <article class="card premium-card h-100 shadow-sm border-0 position-relative rounded-3 overflow-hidden"
-           data-controller="photo-lightbox">
-    <div class="text-decoration-none public-wishlist-card-content">
+  <article class="card premium-card h-100 shadow-sm border-0 position-relative rounded-3 overflow-hidden">
+    <%= link_to public_wishlist_item_path(user.wishlist_share_token, wishlist_item),
+                class: "text-decoration-none public-wishlist-card-content",
+                data: { turbo_frame: "modal" } do %>
       <div class="car-photo-container bg-light d-flex align-items-center justify-content-center text-muted" style="height: 180px; overflow: hidden;">
         <% if wishlist_item.photo? %>
-          <button type="button"
-                  class="border-0 bg-transparent p-0 w-100 h-100"
-                  data-action="click->photo-lightbox#open"
-                  aria-label="<%= t('cars.show.view_full_photo') %>">
-            <%= image_tag wishlist_item.photo.url,
-                          alt: wishlist_item.name,
-                          loading: "lazy",
-                          style: "width: 100%; height: 100%; object-fit: cover;" %>
-          </button>
+          <%= image_tag wishlist_item.photo.url,
+                        alt: wishlist_item.name,
+                        loading: "lazy",
+                        style: "width: 100%; height: 100%; object-fit: cover;" %>
         <% else %>
           <div class="text-center">
             <i class="bi bi-camera fs-3 opacity-30 d-block mb-1"></i>
@@ -31,27 +27,6 @@
           <% if user.wishlist_public_show_priority? %>
             <span class="metadata-chip"><i class="bi bi-star"></i><%= wishlist_item.priority_label %></span>
           <% end %>
-        </div>
-      </div>
-    </div>
-
-    <% if wishlist_item.photo? %>
-      <div class="photo-lightbox-overlay d-none"
-           data-photo-lightbox-target="overlay"
-           data-action="click->photo-lightbox#close keydown@window->photo-lightbox#closeWithKeyboard"
-           role="dialog"
-           aria-modal="true"
-           aria-label="<%= t('cars.show.view_full_photo') %>">
-        <div class="photo-lightbox-stage" data-action="click->photo-lightbox#keepOpen">
-          <%= image_tag wishlist_item.photo.url,
-                        alt: wishlist_item.name,
-                        class: "photo-lightbox-image rounded-3 shadow-lg" %>
-          <button type="button"
-                  class="btn btn-dark btn-sm rounded-circle shadow photo-lightbox-close"
-                  data-action="click->photo-lightbox#close"
-                  aria-label="<%= t('actions.close') %>">
-            <i class="bi bi-x-lg"></i>
-          </button>
         </div>
       </div>
     <% end %>

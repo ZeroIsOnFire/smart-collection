@@ -22,6 +22,7 @@ RSpec.describe 'PublicWishlists', type: :request do
       expect(response.body).to include('public_wishlist_view_preference')
       expect(response.body).to include('view-toggle#setList')
       expect(response.body).to include(public_share_url(user.share_token))
+      expect(response.body).to include('data-turbo-frame="modal"')
       expect(response.body).not_to include('target="_blank"')
       expect(response.body).to include('data-controller="search-form"')
       expect(response.body).to include('data-turbo-frame="public_wishlist_grid"')
@@ -59,6 +60,29 @@ RSpec.describe 'PublicWishlists', type: :request do
 
       expect(response).to have_http_status(:not_found)
       expect(response.body).not_to include('Hidden wish')
+    end
+  end
+
+  describe 'GET /wishlist/public/:token/items/:id' do
+    it 'renders public wishlist item details in a modal with share image action' do
+      item = create(:wishlist_item, user: user, name: 'Modal public wish', brand: 'Mini GT', scale: '1:64')
+
+      get public_wishlist_item_path(user.wishlist_share_token, item), headers: { 'Turbo-Frame' => 'modal' }
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include('turboModal')
+      expect(response.body).to include('Modal public wish')
+      expect(response.body).to include(public_wishlist_item_share_image_path(user.wishlist_share_token, item))
+      expect(response.body).to include(I18n.t('wishlist_items.actions.share_item_image'))
+    end
+
+    it 'does not expose public details when sharing is disabled' do
+      item = create(:wishlist_item, user: user)
+      user.update!(wishlist_sharing_enabled: false)
+
+      get public_wishlist_item_path(user.wishlist_share_token, item), headers: { 'Turbo-Frame' => 'modal' }
+
+      expect(response).to have_http_status(:not_found)
     end
   end
 end

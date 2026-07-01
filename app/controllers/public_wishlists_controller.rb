@@ -11,6 +11,16 @@ class PublicWishlistsController < ApplicationController
     @brands = @user.wishlist_items.distinct(:brand).compact_blank.sort
   end
 
+  def item
+    @user = User.where(wishlist_share_token: params[:token], wishlist_sharing_enabled: true).first
+    return render_not_found unless @user
+
+    wishlist_item = @user.wishlist_items.find(params[:id])
+    render partial: 'public_wishlists/details_modal', locals: { wishlist_item: wishlist_item, user: @user } if turbo_frame_request?
+  rescue Mongoid::Errors::DocumentNotFound
+    render_not_found
+  end
+
   private
 
   def filtered_wishlist_items

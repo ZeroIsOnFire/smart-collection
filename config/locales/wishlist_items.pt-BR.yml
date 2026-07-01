@@ -117,7 +117,9 @@ pt-BR:
       title: "LISTA DE DESEJOS"
       subtitle: "%{name} | Gerado em %{date}"
       header_title: "Lista de desejos de %{name}"
-      meta_info: "%{count} carros desejados | Gerado em %{date}"
+      meta_info:
+        one: "%{count} carro desejado | Gerado em %{date}"
+        other: "%{count} carros desejados | Gerado em %{date}"
       cover_description: "Um relatório visual com os itens desejados, fotos, status, prioridade e anotações da busca."
       items_title: "Itens desejados"
       empty: "Nenhum item cadastrado na lista de desejos."

@@ -75,8 +75,8 @@ class WishlistPdfExportService
                   style: :bold
     pdf.fill_color 'E8F1EF'
     pdf.draw_text safe_text(I18n.t('wishlist_exports.pdf.meta_info',
-                                   date: I18n.l(@generated_at, format: :export_timestamp),
-                                   count: @wishlist_items.count)),
+                                   count: @wishlist_items.count,
+                                   date: I18n.l(@generated_at, format: :export_timestamp))),
                   at: [18, pdf.cursor - 62],
                   size: 9
 

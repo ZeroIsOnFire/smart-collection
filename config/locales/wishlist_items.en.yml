@@ -117,7 +117,9 @@ en:
       title: "WISHLIST"
       subtitle: "%{name} | Generated at %{date}"
       header_title: "%{name}'s wishlist"
-      meta_info: "%{count} wanted cars | Generated at %{date}"
+      meta_info:
+        one: "%{count} wanted car | Generated at %{date}"
+        other: "%{count} wanted cars | Generated at %{date}"
       cover_description: "A visual report with wanted items, photos, status, priority and notes from the hunt."
       items_title: "Wanted items"
       empty: "No items have been registered in the wishlist."

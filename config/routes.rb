@@ -22,6 +22,8 @@ Rails.application.routes.draw do
   resource :wishlist_export, only: :show, path: 'wishlist/export'
   get '/wishlist/share_image.png', to: 'share_images#wishlist', as: :wishlist_share_image
   get '/wishlist/public/:token/image.png', to: 'share_images#public_wishlist', as: :public_wishlist_share_image
+  get '/wishlist/public/:token/items/:id/share_image', to: 'share_images#public_wishlist_item', as: :public_wishlist_item_share_image
+  get '/wishlist/public/:token/items/:id', to: 'public_wishlists#item', as: :public_wishlist_item
   get '/wishlist/public/:token', to: 'public_wishlists#show', as: :public_wishlist
   resources :wishlist_items, path: 'wishlist' do
     patch :toggle_sharing, on: :collection

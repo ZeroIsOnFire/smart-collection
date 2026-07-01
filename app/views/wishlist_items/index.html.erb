@@ -118,10 +118,17 @@
                 <i class="bi bi-x-circle"></i>
               <% end %>
             <% end %>
+
+            <button type="submit" class="btn btn-premium px-4 rounded-3 m-1 d-none d-sm-block">
+              <%= t('actions.search') %>
+            </button>
+            <button type="submit" class="btn btn-premium px-3 rounded-3 m-1 d-sm-none" aria-label="<%= t('actions.search') %>">
+              <i class="bi bi-search"></i>
+            </button>
           </div>
 
           <div class="dropdown">
-            <button class="btn btn-soft-secondary px-3 rounded-3 m-1 d-flex align-items-center gap-2"
+            <button class="btn btn-soft-secondary wishlist-filter-button px-3 rounded-3 d-flex align-items-center gap-2 h-100"
                     type="button"
                     data-bs-toggle="dropdown"
                     data-bs-auto-close="outside"
@@ -173,13 +180,6 @@
               </div>
             </div>
           </div>
-
-          <button type="submit" class="btn btn-premium px-4 rounded-3 m-1 d-none d-sm-block">
-            <%= t('actions.search') %>
-          </button>
-          <button type="submit" class="btn btn-premium px-3 rounded-3 m-1 d-sm-none" aria-label="<%= t('actions.search') %>">
-            <i class="bi bi-search"></i>
-          </button>
         </div>
       <% end %>
     </div>
@@ -244,6 +244,38 @@
 
     .wishlist-filter-menu {
       min-width: min(320px, calc(100vw - 2rem));
+      z-index: 1080;
+    }
+
+    .wishlist-search-controls {
+      position: relative;
+      z-index: 1070;
+    }
+
+    .wishlist-search-controls .dropdown {
+      position: relative;
+      z-index: 1081;
+    }
+
+    .wishlist-filter-button {
+      min-width: 3.25rem;
+      min-height: 3.25rem;
+      justify-content: center;
+      color: var(--primary-color, #2f6f68);
+      opacity: 1;
+    }
+
+    .wishlist-filter-button .bi {
+      color: currentColor;
+    }
+
+    .wishlist-search-controls .dropdown.show > .wishlist-filter-button,
+    .wishlist-filter-button.show,
+    .wishlist-filter-button:focus,
+    .wishlist-filter-button[aria-expanded="true"] {
+      background-color: var(--primary-color, #2f6f68);
+      border-color: var(--primary-color, #2f6f68);
+      color: #fff;
     }
 
     @media (max-width: 575.98px) {
