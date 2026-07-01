@@ -31,6 +31,16 @@ RSpec.describe 'WishlistItems', type: :request do
       expect(response.body).to include('wishlist')
     end
 
+    it 'renders live search and compact filter controls' do
+      get wishlist_items_path
+
+      expect(response.body).to include('data-controller="search-form"')
+      expect(response.body).to include('data-turbo-frame="wishlist_grid"')
+      expect(response.body).to include('data-action="input-&gt;search-form#submit"')
+      expect(response.body).to include('id="wishlist_grid"')
+      expect(response.body).to include(I18n.t('wishlist_items.index.filter_menu'))
+    end
+
     it 'filters by status, priority, brand and query' do
       matching = create(
         :wishlist_item,

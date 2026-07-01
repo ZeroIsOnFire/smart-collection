@@ -50,6 +50,8 @@ en:
       subtitle: "Track wanted miniatures without opening the full collection form."
       search_label: "Search"
       search_placeholder: "Search by name, brand, scale or notes"
+      searching: "Searching..."
+      filter_menu: "Filters"
       clear_filters: "Clear filters"
       secondary_actions: "Actions"
       export_actions: "Export list"
@@ -114,6 +116,8 @@ en:
       eyebrow: "SMART COLLECTION"
       title: "WISHLIST"
       subtitle: "%{name} | Generated at %{date}"
+      meta_info: "Generated at: %{date} | Total: %{count} wishes"
+      cover_description: "A visual report with wanted items, photos, status, priority and notes from the hunt."
       items_title: "Wanted items"
       empty: "No items have been registered in the wishlist."
       no_photo: "No photo"
@@ -142,6 +146,7 @@ en:
     badges:
       collection: "Collection"
       wishlist: "Wishlist"
+      user_wishlist: "%{name}'s wishlist"
     wishlist:
       total:
         one: "%{count} list item"

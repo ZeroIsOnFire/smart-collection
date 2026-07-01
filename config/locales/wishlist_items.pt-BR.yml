@@ -50,6 +50,8 @@ pt-BR:
       subtitle: "Acompanhe miniaturas desejadas sem abrir o cadastro completo do acervo."
       search_label: "Busca"
       search_placeholder: "Buscar por nome, marca, escala ou observações"
+      searching: "Buscando..."
+      filter_menu: "Filtros"
       clear_filters: "Limpar filtros"
       secondary_actions: "Ações"
       export_actions: "Exportar lista"
@@ -114,6 +116,8 @@ pt-BR:
       eyebrow: "SMART COLLECTION"
       title: "LISTA DE DESEJOS"
       subtitle: "%{name} | Gerado em %{date}"
+      meta_info: "Gerado em: %{date} | Total: %{count} desejos"
+      cover_description: "Um relatório visual com os itens desejados, fotos, status, prioridade e anotações da busca."
       items_title: "Itens desejados"
       empty: "Nenhum item cadastrado na lista de desejos."
       no_photo: "Sem foto"
@@ -142,6 +146,7 @@ pt-BR:
     badges:
       collection: "Acervo"
       wishlist: "Lista de desejos"
+      user_wishlist: "Lista de desejos de %{name}"
     wishlist:
       total:
         one: "%{count} item na lista"

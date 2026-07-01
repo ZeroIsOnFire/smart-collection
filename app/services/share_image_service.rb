@@ -11,13 +11,13 @@ class ShareImageService
   PHOTO_BOX_TOP = 76
   TEXT_TOP = 910
   COLORS = {
-    background: '#F7F3EA',
-    panel: '#FFFFFF',
-    teal: '#214F4A',
-    muted: '#667085',
-    gold: '#A56D32',
-    line: '#D8C8B4',
-    soft: '#EFE7DA'
+    background: '#0F1417',
+    panel: '#171F23',
+    teal: '#9FCBC4',
+    muted: '#B8C0C2',
+    gold: '#D6A85D',
+    line: '#2A363B',
+    soft: '#151B1F'
   }.freeze
 
   def initialize(record:, kind:, title: nil)
@@ -137,7 +137,13 @@ class ShareImageService
       line(@record.name, 58, COLORS[:teal], MARGIN, TEXT_TOP),
       line([@record.brand, @record.scale].compact_blank.join(' | '), 34, COLORS[:muted], MARGIN, TEXT_TOP + 78),
       line([@record.priority_label, @record.status_label].compact_blank.join(' | '), 30, COLORS[:gold], MARGIN, TEXT_TOP + 142),
-      line(I18n.t('share_images.badges.wishlist'), 28, COLORS[:muted], MARGIN + 24, HEIGHT - 128)
+      line(
+        I18n.t('share_images.badges.user_wishlist', name: owner_name),
+        28,
+        COLORS[:muted],
+        MARGIN + 24,
+        HEIGHT - 128
+      )
     ]
   end
 
@@ -164,6 +170,12 @@ class ShareImageService
     return nil unless @record.photo? && @record.photo.path && File.exist?(@record.photo.path)
 
     @record.photo.path
+  end
+
+  def owner_name
+    return I18n.t('export_pdf.user_placeholder') unless @record.respond_to?(:user)
+
+    @record.user&.name.presence || I18n.t('export_pdf.user_placeholder')
   end
 
   def safe_text(value)

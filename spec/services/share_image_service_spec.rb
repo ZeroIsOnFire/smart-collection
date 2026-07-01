@@ -10,6 +10,14 @@ RSpec.describe ShareImageService do
       png = described_class.new(record: car, kind: :car).generate
 
       expect(png).to start_with("\x89PNG".b)
+      Tempfile.create(['share_image_dark_spec', '.png']) do |file|
+        file.binmode
+        file.write(png)
+        file.rewind
+
+        image = MiniMagick::Image.open(file.path)
+        expect(image.get_pixels[0][0]).to eq([15, 20, 23])
+      end
     end
 
     it 'generates portrait PNGs without cropping the canvas back to square' do
