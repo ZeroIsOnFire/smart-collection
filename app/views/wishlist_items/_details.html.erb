@@ -1,92 +1,151 @@
-<div class="wishlist-details">
-  <div class="card premium-card shadow-sm rounded-3 overflow-hidden mb-3">
-    <% if wishlist_item.photo? %>
-      <div class="bg-light d-flex align-items-center justify-content-center">
-        <%= image_tag wishlist_item.photo.url,
-                      alt: wishlist_item.name,
-                      class: "img-fluid w-100",
-                      style: "max-height: 420px; object-fit: contain;" %>
-      </div>
-    <% else %>
-      <div class="bg-light d-flex align-items-center justify-content-center text-muted" style="height: 220px;">
-        <div class="text-center">
-          <i class="bi bi-camera fs-2 opacity-50 d-block mb-2"></i>
-          <span class="small"><%= t('wishlist_items.card.no_photo') %></span>
-        </div>
-      </div>
-    <% end %>
-
-    <div class="card-body p-3 p-md-4">
-      <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
-        <div class="min-w-0">
-          <h1 class="h4 fw-bold mb-1"><%= wishlist_item.name %></h1>
-          <div class="d-flex flex-wrap gap-1">
-            <% if wishlist_item.brand? %>
-              <span class="collection-brand-badge"><%= wishlist_item.brand %></span>
-            <% end %>
-            <% if wishlist_item.scale? %>
-              <span class="metadata-chip"><i class="bi bi-rulers"></i><%= wishlist_item.scale %></span>
-            <% end %>
+<div class="row car-showcase-row g-3 wishlist-details" data-controller="photo-lightbox">
+  <div class="col-lg-7 mb-2 mb-lg-0">
+    <div class="card car-detail-card shadow-sm rounded-3 overflow-hidden bg-white h-100 position-relative">
+      <% if wishlist_item.photo? %>
+        <button type="button"
+                class="public-detail-photo p-4 d-flex align-items-center justify-content-center h-100 w-100 border-0 bg-light bg-opacity-50 position-relative"
+                data-action="click->photo-lightbox#open"
+                aria-label="<%= t('cars.show.view_full_photo') %>">
+          <%= image_tag wishlist_item.photo.url,
+                        class: "img-fluid w-100 rounded-3 shadow-sm",
+                        alt: wishlist_item.name %>
+          <div class="position-absolute bottom-0 end-0 m-4">
+            <span class="badge bg-dark bg-opacity-75 rounded-3 px-3 py-2 text-white shadow-sm">
+              <i class="bi bi-zoom-in me-1"></i> <%= t('cars.show.view_full_photo') %>
+            </span>
+          </div>
+        </button>
+      <% else %>
+        <div class="public-detail-empty-photo bg-light d-flex align-items-center justify-content-center text-muted h-100">
+          <div class="text-center">
+            <i class="bi bi-camera display-1 opacity-20 d-block mb-3"></i>
+            <span class="fs-5 fw-medium text-muted opacity-75"><%= t('wishlist_items.card.no_photo') %></span>
           </div>
         </div>
-        <span class="badge rounded-pill text-bg-light border"><%= wishlist_item.priority_label %></span>
-      </div>
-
-      <div class="row g-3 mb-3">
-        <div class="col-sm-6">
-          <div class="bg-light rounded-3 p-3 h-100">
-            <div class="small text-muted mb-1"><%= t('mongoid.attributes.wishlist_item.status') %></div>
-            <div class="fw-semibold"><%= wishlist_item.status_label %></div>
-          </div>
-        </div>
-        <div class="col-sm-6">
-          <div class="bg-light rounded-3 p-3 h-100">
-            <div class="small text-muted mb-1"><%= t('mongoid.attributes.wishlist_item.priority') %></div>
-            <div class="fw-semibold"><%= wishlist_item.priority_label %></div>
-          </div>
-        </div>
-      </div>
-
-      <% if wishlist_item.observations.present? %>
-        <div class="text-muted mb-0"><%= simple_format(wishlist_item.observations) %></div>
       <% end %>
     </div>
   </div>
 
-  <div class="d-flex flex-column flex-sm-row justify-content-end gap-2">
-    <% if wishlist_item.reference_url.present? %>
-      <%= link_to wishlist_item.reference_url,
-                  class: "btn btn-soft-secondary rounded-3 px-4",
-                  target: "_blank",
-                  rel: "noopener noreferrer" do %>
-        <i class="bi bi-box-arrow-up-right me-1"></i>
-        <%= t('wishlist_items.actions.open_reference') %>
-      <% end %>
-    <% end %>
-    <%= button_to add_to_collection_wishlist_item_path(wishlist_item),
-                  method: :post,
-                  class: "btn btn-premium rounded-3 px-4" do %>
-      <i class="bi bi-plus-circle me-1"></i>
-      <%= t('wishlist_items.actions.add_to_collection') %>
-    <% end %>
-    <%= link_to edit_wishlist_item_path(wishlist_item),
-                class: "btn btn-soft-secondary rounded-3 px-4",
-                data: { turbo_frame: "modal" } do %>
-      <i class="bi bi-pencil me-1"></i>
-      <%= t('actions.edit') %>
-    <% end %>
-    <%= link_to wishlist_item_share_image_path(wishlist_item),
-                class: "btn btn-soft-secondary rounded-3 px-4",
-                data: { turbo_frame: "modal" } do %>
-      <i class="bi bi-image me-1"></i>
-      <%= t('wishlist_items.actions.share_item_image') %>
-    <% end %>
-    <%= button_to wishlist_item_path(wishlist_item),
-                  method: :delete,
-                  class: "btn btn-outline-danger rounded-3 px-4",
-                  form: { data: { turbo_confirm: t('wishlist_items.actions.delete_confirm') } } do %>
-      <i class="bi bi-trash3 me-1"></i>
-      <%= t('actions.delete') %>
-    <% end %>
+  <div class="col-lg-5">
+    <div class="card car-detail-card shadow-sm rounded-3 bg-white h-100">
+      <div class="card-body p-4 p-xl-5 d-flex flex-column">
+        <div class="car-showcase-actions d-flex align-items-center justify-content-end gap-2 mb-4">
+          <% if wishlist_item.reference_url.present? %>
+            <%= link_to wishlist_item.reference_url,
+                        class: "btn btn-soft-secondary rounded-3 d-inline-flex align-items-center justify-content-center",
+                        target: "_blank",
+                        rel: "noopener noreferrer" do %>
+              <i class="bi bi-box-arrow-up-right me-2"></i><%= t('wishlist_items.actions.open_reference') %>
+            <% end %>
+          <% end %>
+          <%= button_to add_to_collection_wishlist_item_path(wishlist_item),
+                        method: :post,
+                        class: "btn btn-premium rounded-3 d-inline-flex align-items-center justify-content-center" do %>
+            <i class="bi bi-plus-circle me-2"></i><%= t('wishlist_items.actions.add_to_collection') %>
+          <% end %>
+          <%= link_to edit_wishlist_item_path(wishlist_item),
+                      class: "btn btn-soft-secondary rounded-3 d-inline-flex align-items-center justify-content-center",
+                      data: { turbo_frame: "modal" } do %>
+            <i class="bi bi-pencil me-2"></i><%= t('actions.edit') %>
+          <% end %>
+          <%= link_to wishlist_item_share_image_path(wishlist_item),
+                      class: "btn btn-soft-secondary rounded-3 d-inline-flex align-items-center justify-content-center",
+                      data: { turbo_frame: "modal" } do %>
+            <i class="bi bi-image me-2"></i><%= t('wishlist_items.actions.share_item_image') %>
+          <% end %>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
+          <div>
+            <h1 class="h4 fw-bold mb-1 text-dark"><%= wishlist_item.name %></h1>
+            <% if wishlist_item.brand? %>
+              <span class="badge bg-primary bg-opacity-10 text-primary fw-semibold fs-6 rounded-3"><%= wishlist_item.brand %></span>
+            <% end %>
+          </div>
+        </div>
+
+        <hr class="my-3">
+
+        <div class="text-muted small d-flex flex-wrap gap-3 mb-3">
+          <% if wishlist_item.scale? %>
+            <span class="d-inline-flex align-items-center gap-1 text-dark">
+              <i class="bi bi-arrows-fullscreen"></i><%= wishlist_item.scale %>
+            </span>
+          <% end %>
+          <span class="d-inline-flex align-items-center gap-1 text-dark">
+            <i class="bi bi-flag"></i><%= wishlist_item.status_label %>
+          </span>
+          <span class="d-inline-flex align-items-center gap-1 text-dark">
+            <i class="bi bi-star"></i><%= wishlist_item.priority_label %>
+          </span>
+        </div>
+
+        <div class="row g-3 mb-3 car-details-stats">
+          <% if wishlist_item.reference_url.present? %>
+            <div class="col-12">
+              <div class="d-flex flex-column">
+                <small class="text-uppercase fw-semibold text-muted tracking-wide mb-1"><%= t('mongoid.attributes.wishlist_item.reference_url') %></small>
+                <%= link_to wishlist_item.reference_url,
+                            wishlist_item.reference_url,
+                            class: "text-break text-decoration-none",
+                            target: "_blank",
+                            rel: "noopener noreferrer" %>
+              </div>
+            </div>
+          <% end %>
+
+          <div class="col-12">
+            <div class="d-flex flex-column">
+              <small class="text-uppercase fw-semibold text-muted tracking-wide mb-1"><%= t('mongoid.attributes.wishlist_item.observations') %></small>
+              <div class="mb-0 text-dark public-detail-notes">
+                <%= simple_format(wishlist_item.observations.presence || t('cars.show.fallback_name'), {}, wrapper_tag: "span") %>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="public-detail-footer car-details-timestamps mt-auto pt-4 border-top text-muted small">
+          <div class="car-details-timestamp">
+            <i class="bi bi-clock"></i>
+            <span><%= t('cars.show.added_at', date: l(wishlist_item.created_at.to_date, format: :numeric)) %></span>
+          </div>
+          <div class="car-details-timestamp">
+            <i class="bi bi-arrow-repeat"></i>
+            <span><%= t('cars.show.updated_at', date: l(wishlist_item.updated_at, format: :short)) %></span>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end mt-4">
+          <%= button_to wishlist_item_path(wishlist_item),
+                        method: :delete,
+                        class: "btn btn-outline-danger rounded-3 px-4",
+                        form: { data: { turbo_confirm: t('wishlist_items.actions.delete_confirm') } } do %>
+            <i class="bi bi-trash3 me-1"></i>
+            <%= t('actions.delete') %>
+          <% end %>
+        </div>
+      </div>
+    </div>
   </div>
+
+  <% if wishlist_item.photo? %>
+    <div class="photo-lightbox-overlay d-none"
+         data-photo-lightbox-target="overlay"
+         data-action="click->photo-lightbox#close keydown@window->photo-lightbox#closeWithKeyboard"
+         role="dialog"
+         aria-modal="true"
+         aria-label="<%= t('cars.show.view_full_photo') %>">
+      <div class="photo-lightbox-stage" data-action="click->photo-lightbox#keepOpen">
+        <%= image_tag wishlist_item.photo.url,
+                      class: "photo-lightbox-image rounded-3 shadow-lg",
+                      alt: wishlist_item.name %>
+        <button type="button"
+                class="btn btn-dark btn-sm rounded-circle shadow photo-lightbox-close"
+                data-action="click->photo-lightbox#close"
+                aria-label="<%= t('actions.close') %>">
+          <i class="bi bi-x-lg small"></i>
+        </button>
+      </div>
+    </div>
+  <% end %>
 </div>

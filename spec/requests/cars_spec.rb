@@ -191,6 +191,16 @@ RSpec.describe 'Cars', type: :request do
         expect(response.body).to include('Searchable Car')
         expect(response.body).not_to include('Other Car')
       end
+
+      it 'filters cars by scale, brand, year and color menu parameters' do
+        car_matching.update!(brand: 'Mini GT', size: '1:64', year: 2024, color: 'Azul')
+        car_not_matching.update!(brand: 'Hot Wheels', size: '1:18', year: 2023, color: 'Vermelho')
+
+        get cars_path, params: { brand: 'Mini GT', size: '1:64', year: '2024', color: 'Azul' }
+
+        expect(response.body).to include('Searchable Car')
+        expect(response.body).not_to include('Other Car')
+      end
     end
   end
 

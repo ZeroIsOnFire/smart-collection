@@ -1,7 +1,8 @@
 <%= render "shared/turbo_modal",
-           title: t('wishlist_items.modal.details_title'),
-           size: "lg",
+           title: nil,
+           size: "xl",
            modal_class: "turbo-car-modal turbo-car-details-modal",
            dialog_class: "turbo-car-modal-dialog",
+           body_class: "p-3 p-md-4",
            body_partial: "wishlist_items/details",
            body_locals: { wishlist_item: wishlist_item } %>

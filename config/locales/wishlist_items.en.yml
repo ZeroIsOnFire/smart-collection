@@ -45,11 +45,12 @@ en:
       all_statuses: "All statuses"
       all_priorities: "All priorities"
       all_brands: "All brands"
+      all_scales: "All scales"
     index:
       title: "Wishlist"
       subtitle: "Track wanted miniatures without opening the full collection form."
       search_label: "Search"
-      search_placeholder: "Search by name, brand, scale or notes"
+      search_placeholder: "Search by name, brand or scale"
       searching: "Searching..."
       filter_menu: "Filters"
       clear_filters: "Clear filters"
@@ -150,6 +151,7 @@ en:
 
   share_images:
     brand: "SmartCollection"
+    footer_brand: "Smart Collection %{year}"
     preview:
       title: "%{name} image"
       open_png: "Open PNG"

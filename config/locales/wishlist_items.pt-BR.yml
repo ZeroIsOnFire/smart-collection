@@ -45,11 +45,12 @@ pt-BR:
       all_statuses: "Todos os status"
       all_priorities: "Todas as prioridades"
       all_brands: "Todas as marcas"
+      all_scales: "Todas as escalas"
     index:
       title: "Lista de desejos"
       subtitle: "Acompanhe miniaturas desejadas sem abrir o cadastro completo do acervo."
       search_label: "Busca"
-      search_placeholder: "Buscar por nome, marca, escala ou observações"
+      search_placeholder: "Buscar por nome, marca ou escala"
       searching: "Buscando..."
       filter_menu: "Filtros"
       clear_filters: "Limpar filtros"
@@ -150,6 +151,7 @@ pt-BR:
 
   share_images:
     brand: "SmartCollection"
+    footer_brand: "Smart Collection %{year}"
     preview:
       title: "Imagem de %{name}"
       open_png: "Abrir PNG"

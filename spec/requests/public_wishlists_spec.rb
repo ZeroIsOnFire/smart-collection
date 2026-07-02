@@ -29,17 +29,21 @@ RSpec.describe 'PublicWishlists', type: :request do
       expect(response.body).to include(I18n.t('wishlist_items.index.filter_menu'))
     end
 
-    it 'filters public wishlist by query, status, priority and brand' do
+    it 'filters public wishlist by query, status, priority, brand and scale without searching notes' do
       create(:wishlist_item, user: user, name: 'Matching wish', brand: 'Mini GT',
-                             status: 'reserved', priority: 'dream')
+                             scale: '1:64', status: 'reserved', priority: 'dream')
       create(:wishlist_item, user: user, name: 'Other wish', brand: 'Hot Wheels',
-                             status: 'wanted', priority: 'low')
+                             scale: '1:18', status: 'wanted', priority: 'low')
+      create(:wishlist_item, user: user, name: 'Notes only wish', brand: 'Mini GT',
+                             scale: '1:64', status: 'reserved', priority: 'dream',
+                             observations: 'Matching')
 
       get public_wishlist_path(user.wishlist_share_token),
-          params: { q: 'Matching', status: 'reserved', priority: 'dream', brand: 'Mini GT' }
+          params: { q: 'Matching', status: 'reserved', priority: 'dream', brand: 'Mini GT', scale: '1:64' }
 
       expect(response.body).to include('Matching wish')
       expect(response.body).not_to include('Other wish')
+      expect(response.body).not_to include('Notes only wish')
       expect(response.body).to include('1 resultado para')
       expect(response.body).to include('Matching')
     end

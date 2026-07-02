@@ -41,23 +41,29 @@ RSpec.describe 'WishlistItems', type: :request do
       expect(response.body).to include(I18n.t('wishlist_items.index.filter_menu'))
     end
 
-    it 'filters by status, priority, brand and query' do
+    it 'filters by status, priority, brand, scale and query without searching notes' do
       matching = create(
         :wishlist_item,
         user: user,
         name: 'Blue Porsche',
         brand: 'Mini GT',
+        scale: '1:64',
         status: 'reserved',
-        priority: 'high'
+        priority: 'high',
+        observations: 'Hidden clue'
       )
       create(:wishlist_item, user: user, name: 'Red Ferrari', brand: 'Hot Wheels',
-                             status: 'wanted', priority: 'low')
+                             scale: '1:18', status: 'wanted', priority: 'low')
+      create(:wishlist_item, user: user, name: 'Silent Skyline', brand: 'Mini GT',
+                             scale: '1:64', status: 'reserved', priority: 'high',
+                             observations: 'Porsche')
 
       get wishlist_items_path,
-          params: { q: 'Porsche', brand: 'Mini GT', status: 'reserved', priority: 'high' }
+          params: { q: 'Porsche', brand: 'Mini GT', scale: '1:64', status: 'reserved', priority: 'high' }
 
       expect(response.body).to include(matching.name)
       expect(response.body).not_to include('Red Ferrari')
+      expect(response.body).not_to include('Silent Skyline')
     end
   end
 

@@ -12,12 +12,15 @@ class CarsController < ApplicationController
     @cars = car_service.all(params.merge(per_page: PER_PAGE))
     @page = @cars.current_page
     @has_more = @cars.next_page.present?
+    @brands = current_user.cars.distinct(:brand).compact_blank.sort
+    @years = current_user.cars.distinct(:year).compact_blank.sort.reverse
 
     respond_to do |format|
       format.html
       # Apenas renderiza o stream (infinito scroll/busca) se houver parâmetros específicos.
       # Isso evita que redirecionamentos de outras controllers sejam engolidos por acidente.
-      format.turbo_stream if params.key?(:page) || params.key?(:query) || params.key?(:view)
+      format.turbo_stream if params.key?(:page) || params.key?(:query) || params.key?(:view) ||
+                             params.slice(:q, :brand, :size, :year, :color).values.any?(&:present?)
     end
   end
 

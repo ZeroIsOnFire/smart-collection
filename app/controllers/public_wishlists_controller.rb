@@ -9,6 +9,7 @@ class PublicWishlistsController < ApplicationController
 
     @wishlist_items = filtered_wishlist_items.desc(:created_at)
     @brands = @user.wishlist_items.distinct(:brand).compact_blank.sort
+    @scales = @user.wishlist_items.distinct(:scale).compact_blank.sort
   end
 
   def item
@@ -28,10 +29,11 @@ class PublicWishlistsController < ApplicationController
     scope = scope.where(status: params[:status]) if WishlistItem::STATUSES.include?(params[:status])
     scope = scope.where(priority: params[:priority]) if WishlistItem::PRIORITIES.include?(params[:priority])
     scope = scope.where(brand: params[:brand]) if params[:brand].present?
+    scope = scope.where(scale: params[:scale]) if params[:scale].present?
     return scope if params[:q].blank?
 
     pattern = /#{Regexp.escape(params[:q].to_s.strip)}/i
-    scope.any_of({ name: pattern }, { brand: pattern }, { scale: pattern }, { observations: pattern })
+    scope.any_of({ name: pattern }, { brand: pattern }, { scale: pattern })
   end
 
   def render_not_found

@@ -166,6 +166,14 @@
                              class: "form-select rounded-3" %>
               </div>
 
+              <div class="mb-3">
+                <%= f.label :scale, t('mongoid.attributes.wishlist_item.scale'), class: "form-label small fw-semibold text-muted" %>
+                <%= f.select :scale,
+                             options_for_select([[t('wishlist_items.filters.all_scales'), '']] + @scales.map { |scale| [scale, scale] }, params[:scale]),
+                             {},
+                             class: "form-select rounded-3" %>
+              </div>
+
               <div class="d-grid gap-2">
                 <button type="submit" class="btn btn-premium rounded-3">
                   <i class="bi bi-funnel me-1"></i>
@@ -207,11 +215,11 @@
 
     <div id="wishlist_list_container" class="position-relative">
       <% if @wishlist_items.any? %>
-        <div id="wishlist_grid_inner" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4 mt-2 grid-view wishlist-grid-inner">
+        <div id="wishlist_grid_inner" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4 mt-2 grid-view">
           <%= render partial: 'wishlist_items/wishlist_item', collection: @wishlist_items %>
         </div>
       <% else %>
-        <div id="wishlist_grid_inner" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4 mt-2 grid-view wishlist-grid-inner"></div>
+        <div id="wishlist_grid_inner" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4 mt-2 grid-view"></div>
         <div id="wishlist_empty_state" class="text-center py-5 mt-4">
           <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light mb-4" style="width: 80px; height: 80px;">
             <i class="bi bi-stars fs-2 text-muted opacity-50"></i>
@@ -249,12 +257,12 @@
 
     .wishlist-search-controls {
       position: relative;
-      z-index: 1070;
+      z-index: 30;
     }
 
     .wishlist-search-controls .dropdown {
       position: relative;
-      z-index: 1081;
+      z-index: 31;
     }
 
     .wishlist-filter-button {

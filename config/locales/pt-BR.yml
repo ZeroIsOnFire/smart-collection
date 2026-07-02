@@ -359,6 +359,13 @@ pt-BR:
       search_placeholder: "Buscar por modelo, marca, ano, escala ou cor"
       searching: "Buscando..."
       clear_search: "Limpar busca"
+      clear_filters: "Limpar filtros"
+      filter_menu: "Filtros"
+      filters:
+        all_scales: "Todas as escalas"
+        all_brands: "Todas as marcas"
+        all_years: "Todos os anos"
+        all_colors: "Todas as cores"
       results_count:
         one: "%{count} item"
         other: "%{count} itens"

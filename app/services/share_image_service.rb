@@ -40,6 +40,7 @@ class ShareImageService
   def build_image(output_path)
     image = individual_image? ? image_with_photo_panel : create_blank_image
     decorate_image(image)
+    image = compose_footer_logo(image)
     annotate_image(image)
     image.format('png')
     image.write(output_path)
@@ -85,7 +86,23 @@ class ShareImageService
       convert.draw "roundrectangle #{MARGIN},#{HEIGHT - 150} #{WIDTH - MARGIN},#{HEIGHT - 76} 26,26"
       convert.fill COLORS[:gold]
       convert.draw "rectangle #{MARGIN},#{HEIGHT - 150} #{MARGIN + 8},#{HEIGHT - 76}"
+      convert.fill '#E8F1EF'
+      convert.draw "roundrectangle #{MARGIN + 20},#{HEIGHT - 138} #{MARGIN + 84},#{HEIGHT - 88} 18,18"
     end
+  end
+
+  def compose_footer_logo(image)
+    return image unless File.exist?(footer_logo_path)
+
+    logo = MiniMagick::Image.open(footer_logo_path)
+    logo.resize '56x56'
+
+    image.composite(logo) do |composite|
+      composite.compose 'Over'
+      composite.geometry "+#{MARGIN + 24}+#{HEIGHT - 141}"
+    end
+  rescue MiniMagick::Error, MiniMagick::Invalid
+    image
   end
 
   def draw_panel(image, left, top, width, height)
@@ -128,7 +145,7 @@ class ShareImageService
       line(@record.name, 58, COLORS[:teal], MARGIN, TEXT_TOP),
       line([@record.brand, @record.size, @record.year, @record.color].compact_blank.join(' | '), 34, COLORS[:muted], MARGIN, TEXT_TOP + 78),
       line(I18n.t('share_images.badges.collection'), 30, COLORS[:gold], MARGIN, TEXT_TOP + 142),
-      line(I18n.t('share_images.brand'), 28, COLORS[:muted], MARGIN + 24, HEIGHT - 128)
+      footer_line
     ]
   end
 
@@ -136,15 +153,9 @@ class ShareImageService
     [
       line(@record.name, 58, COLORS[:teal], MARGIN, TEXT_TOP),
       line([@record.brand, @record.scale].compact_blank.join(' | '), 34, COLORS[:muted], MARGIN, TEXT_TOP + 78),
-      line([@record.priority_label, @record.status_label].compact_blank.join(' | '), 30, COLORS[:gold], MARGIN, TEXT_TOP + 142),
-      line(
-        I18n.t('share_images.badges.user_wishlist', name: owner_name),
-        28,
-        COLORS[:muted],
-        MARGIN + 24,
-        HEIGHT - 128
-      )
-    ]
+      line(@record.observations, 30, COLORS[:gold], MARGIN, TEXT_TOP + 142),
+      footer_line
+    ].reject { |line| line[:text].blank? }
   end
 
   def wishlist_lines
@@ -153,8 +164,12 @@ class ShareImageService
       line(@title.presence || I18n.t('wishlist_items.index.title'), 58, COLORS[:teal], MARGIN, 116),
       line(I18n.t('share_images.wishlist.total', count: items.count), 36, COLORS[:gold], MARGIN, 196),
       line(items.first(8).map(&:name).join(' | '), 32, COLORS[:muted], MARGIN, 304),
-      line(I18n.t('share_images.brand'), 28, COLORS[:muted], MARGIN + 24, HEIGHT - 128)
+      footer_line
     ]
+  end
+
+  def footer_line
+    line(I18n.t('share_images.footer_brand', year: Date.current.year), 28, COLORS[:muted], MARGIN + 104, HEIGHT - 128)
   end
 
   def line(text, size, color, left, top)
@@ -172,10 +187,8 @@ class ShareImageService
     @record.photo.path
   end
 
-  def owner_name
-    return I18n.t('export_pdf.user_placeholder') unless @record.respond_to?(:user)
-
-    @record.user&.name.presence || I18n.t('export_pdf.user_placeholder')
+  def footer_logo_path
+    Rails.public_path.join('logo/logo-no-bg.png')
   end
 
   def safe_text(value)

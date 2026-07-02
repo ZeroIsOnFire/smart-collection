@@ -2349,7 +2349,9 @@ body {
 
 /* Toggle View Styles (Compact Table) */
 .view-grid #cars_grid_inner,
-#cars_grid_inner.grid-view {
+.view-grid #wishlist_grid_inner,
+#cars_grid_inner.grid-view,
+#wishlist_grid_inner.grid-view {
   display: grid !important;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
   gap: var(--app-gap) !important;
@@ -2363,7 +2365,9 @@ body {
 /* On medium screen ranges, ensure margins are consistent */
 @media (max-width: 991.98px) {
   .view-grid #cars_grid_inner,
-  #cars_grid_inner.grid-view {
+  .view-grid #wishlist_grid_inner,
+  #cars_grid_inner.grid-view,
+  #wishlist_grid_inner.grid-view {
     /* Padding is now handled by the parent .app-container */
   }
 }
@@ -2371,18 +2375,78 @@ body {
 /* Mobile override for grid view: 1fr */
 @media (max-width: 576px) {
   .view-grid #cars_grid_inner,
-  #cars_grid_inner.grid-view {
+  .view-grid #wishlist_grid_inner,
+  #cars_grid_inner.grid-view,
+  #wishlist_grid_inner.grid-view {
     grid-template-columns: 1fr !important;
   }
 }
 
 /* Reset Bootstrap column paddings for CSS grid */
 .view-grid #cars_grid_inner > .col,
-#cars_grid_inner.grid-view > .col {
+.view-grid #wishlist_grid_inner > .col,
+#cars_grid_inner.grid-view > .col,
+#wishlist_grid_inner.grid-view > .col {
   width: 100% !important;
   max-width: none !important;
   padding: 0 !important;
   margin: 0 !important;
+}
+
+.collection-search-controls,
+.wishlist-search-controls {
+  position: relative;
+  z-index: 30;
+}
+
+.collection-search-controls .dropdown,
+.wishlist-search-controls .dropdown {
+  position: relative;
+  z-index: 31;
+}
+
+.collection-filter-menu,
+.wishlist-filter-menu {
+  min-width: min(320px, calc(100vw - 2rem));
+  z-index: 1080;
+}
+
+.collection-filter-button,
+.wishlist-filter-button {
+  min-height: 3.25rem;
+  min-width: 3.25rem;
+  justify-content: center;
+  opacity: 1;
+}
+
+.collection-filter-button {
+  color: var(--primary-color, #2f6f68);
+}
+
+.collection-filter-button .bi,
+.wishlist-filter-button .bi {
+  color: currentColor;
+}
+
+.collection-search-controls .dropdown.show > .collection-filter-button,
+.collection-filter-button.show,
+.collection-filter-button:focus,
+.collection-filter-button[aria-expanded="true"] {
+  background-color: var(--primary-color, #2f6f68);
+  border-color: var(--primary-color, #2f6f68);
+  color: #fff;
+}
+
+@media (max-width: 575.98px) {
+  .collection-search-controls,
+  .wishlist-search-controls {
+    flex-wrap: wrap;
+  }
+
+  .collection-search-controls > .input-group,
+  .wishlist-search-controls > .input-group {
+    flex-basis: 100%;
+  }
 }
 
 .view-gallery #cars_grid_inner,

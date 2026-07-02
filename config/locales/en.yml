@@ -347,6 +347,13 @@ en:
       search_placeholder: "Search by model, brand, year, scale or color"
       searching: "Searching..."
       clear_search: "Clear search"
+      clear_filters: "Clear filters"
+      filter_menu: "Filters"
+      filters:
+        all_scales: "All scales"
+        all_brands: "All brands"
+        all_years: "All years"
+        all_colors: "All colors"
       results_count:
         one: "%{count} item"
         other: "%{count} items"
