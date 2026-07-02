@@ -38,7 +38,7 @@ pt-BR:
       open_public: "Abrir link público"
       open_reference: "Abrir referência"
       share_image: "Imagem da lista"
-      share_item_image: "Gerar imagem do item"
+      share_item_image: "Compartilhar como imagem"
       back_to_wishlist: "Voltar para a lista"
       delete_confirm: "Excluir este item da lista de desejos?"
     filters:
@@ -155,6 +155,7 @@ pt-BR:
     preview:
       title: "Imagem de %{name}"
       open_png: "Abrir PNG"
+      loading: "Carregando imagem..."
     badges:
       collection: "Acervo"
       wishlist: "Lista de desejos"

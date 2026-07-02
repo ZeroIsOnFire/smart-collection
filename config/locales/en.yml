@@ -320,6 +320,7 @@ en:
       loading: "Loading..."
       searching: "Searching..."
       clear_search: "Clear search"
+      filter_menu: "Filters"
       results_count:
         one: "%{count} result"
         other: "%{count} results"

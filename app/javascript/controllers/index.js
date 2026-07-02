@@ -19,6 +19,7 @@ import PasswordVisibilityController from "./password_visibility_controller"
 import PollController from "./poll_controller"
 import SearchFormController from "./search_form_controller"
 import SelectionAdjustmentController from "./selection_adjustment_controller"
+import ShareImagePreviewController from "./share_image_preview_controller"
 import ThemeController from "./theme_controller"
 import ToastController from "./toast_controller"
 import ViewToggleController from "./view_toggle_controller"
@@ -43,6 +44,7 @@ application.register("password-visibility", PasswordVisibilityController)
 application.register("poll", PollController)
 application.register("search-form", SearchFormController)
 application.register("selection-adjustment", SelectionAdjustmentController)
+application.register("share-image-preview", ShareImagePreviewController)
 application.register("theme", ThemeController)
 application.register("toast", ToastController)
 application.register("view-toggle", ViewToggleController)

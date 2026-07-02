@@ -66,6 +66,23 @@ RSpec.describe 'Public Collections', type: :request do
       expect(response.body).not_to include('Other Public Car')
     end
 
+    it 'renders and applies public car filters by scale, brand, year and color' do
+      car.update!(name: 'Filtered Public Car', brand: 'Mini GT', size: '1:64', color: 'Azul', year: 1988)
+      create(:car, user: user, name: 'Other Public Car', brand: 'Hot Wheels',
+                   size: '1:18', color: 'Vermelho', year: 1970)
+
+      get public_share_path(user.share_token),
+          params: { brand: 'Mini GT', size: '1:64', year: '1988', color: 'Azul' }
+
+      expect(response.body).to include(I18n.t('public_collections.index.filter_menu'))
+      expect(response.body).to include('name="size"')
+      expect(response.body).to include('name="brand"')
+      expect(response.body).to include('name="year"')
+      expect(response.body).to include('name="color"')
+      expect(response.body).to include('Filtered Public Car')
+      expect(response.body).not_to include('Other Public Car')
+    end
+
     it 'renders public view modes with a premium gallery carousel and opens public cards in a modal' do
       car.update!(
         brand: 'Porsche',

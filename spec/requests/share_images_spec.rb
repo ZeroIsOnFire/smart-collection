@@ -50,6 +50,8 @@ RSpec.describe 'ShareImages', type: :request do
       expect(response.body).to include('turboModal')
       expect(response.body).to include(wishlist_item_share_image_path(item, format: :png))
       expect(response.body).to include('Preview wish')
+      expect(response.body).to include('data-controller="share-image-preview"')
+      expect(response.body).to include(I18n.t('share_images.preview.loading'))
     end
 
     it 'does not generate an image for another user wishlist item' do

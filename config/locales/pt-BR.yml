@@ -331,6 +331,7 @@ pt-BR:
       loading: "Carregando..."
       searching: "Buscando..."
       clear_search: "Limpar busca"
+      filter_menu: "Filtros"
       results_count:
         one: "%{count} resultado"
         other: "%{count} resultados"

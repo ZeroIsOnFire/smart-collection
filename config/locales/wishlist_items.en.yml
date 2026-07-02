@@ -38,7 +38,7 @@ en:
       open_public: "Open public link"
       open_reference: "Open reference"
       share_image: "List image"
-      share_item_image: "Generate item image"
+      share_item_image: "Share as image"
       back_to_wishlist: "Back to wishlist"
       delete_confirm: "Delete this wishlist item?"
     filters:
@@ -155,6 +155,7 @@ en:
     preview:
       title: "%{name} image"
       open_png: "Open PNG"
+      loading: "Loading image..."
     badges:
       collection: "Collection"
       wishlist: "Wishlist"

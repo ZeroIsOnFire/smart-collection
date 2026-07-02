@@ -190,13 +190,16 @@ RSpec.describe 'WishlistItems', type: :request do
 
   describe 'GET /wishlist/:id' do
     it 'renders item details in a modal for turbo frame requests' do
-      item = create(:wishlist_item, user: user, name: 'Modal wish')
+      item = create(:wishlist_item, user: user, name: 'Modal wish', reference_url: 'https://example.com/reference')
 
       get wishlist_item_path(item), headers: { 'Turbo-Frame' => 'modal' }
 
       expect(response).to be_successful
       expect(response.body).to include('turboModal')
       expect(response.body).to include('Modal wish')
+      expect(response.body).to include('https://example.com/reference')
+      expect(response.body).to include(I18n.t('wishlist_items.actions.share_item_image'))
+      expect(response.body).not_to include(I18n.t('wishlist_items.actions.open_reference'))
     end
   end
 

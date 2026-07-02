@@ -1879,7 +1879,7 @@ body {
 .search-wrapper {
   position: relative;
   transform: translateY(-50%);
-  z-index: 10;
+  z-index: 1040;
 }
 
 .public-empty-icon {
@@ -2435,6 +2435,26 @@ body {
   background-color: var(--primary-color, #2f6f68);
   border-color: var(--primary-color, #2f6f68);
   color: #fff;
+}
+
+.search-wrapper .dropdown.show > .wishlist-filter-button,
+.search-wrapper .wishlist-filter-button.show,
+.search-wrapper .wishlist-filter-button:focus,
+.search-wrapper .wishlist-filter-button[aria-expanded="true"] {
+  background-color: var(--public-primary) !important;
+  border-color: var(--public-primary) !important;
+  color: #fff !important;
+  opacity: 1 !important;
+}
+
+.share-image-preview-stage {
+  min-height: min(70vh, 640px);
+}
+
+.share-image-preview-loading {
+  inset: 0;
+  position: absolute;
+  z-index: 1;
 }
 
 @media (max-width: 575.98px) {
