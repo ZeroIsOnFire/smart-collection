@@ -33,6 +33,7 @@ Rails.application.routes.draw do
 
   # Public sharing routes
   get '/s/:share_token', to: 'public_collections#index', as: :public_share
+  get '/s/:share_token/car/:id/share_image', to: 'share_images#public_car', as: :public_car_share_image
   get '/s/:share_token/car/:id', to: 'public_collections#show', as: :public_share_car
 
   resources :autodetections, only: %i[create show destroy] do

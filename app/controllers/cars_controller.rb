@@ -92,6 +92,7 @@ class CarsController < ApplicationController
 
     @wishlist_item = find_current_user_wishlist_item(params[:wishlist_item_id]) if params[:wishlist_item_id].present?
     return redirect_to wishlist_items_path, alert: t('flash.unauthorized') if params[:wishlist_item_id].present? && @wishlist_item.nil?
+    return render_wishlist_item_already_added if @wishlist_item&.added_to_collection?
 
     # Se vier de um item detectado, garante que a foto seja carregada do arquivo local
     # CarrierWave remote_photo_url falha para arquivos locais / uploads/
@@ -240,6 +241,19 @@ class CarsController < ApplicationController
                                                              locals: success_toast(:created))
   end
 
+  def render_wishlist_item_already_added
+    respond_to do |format|
+      format.html { redirect_to wishlist_items_path, alert: t('wishlist_items.flash.already_in_collection') }
+      format.turbo_stream do
+        render turbo_stream: turbo_stream.update('modal', '') +
+                             turbo_stream.append('flash_toasts',
+                                                 partial: 'shared/toast',
+                                                 locals: already_added_toast),
+               status: :unprocessable_content
+      end
+    end
+  end
+
   def render_create_another_success
     created_car = @car
     @car = current_user.cars.build(default_new_car_attributes)
@@ -282,6 +296,10 @@ class CarsController < ApplicationController
 
   def success_toast(action)
     { type: :notice, message: t("flash.#{action}", resource: t('activerecord.models.car.one')) }
+  end
+
+  def already_added_toast
+    { type: :alert, message: t('wishlist_items.flash.already_in_collection') }
   end
 
   def create_another?

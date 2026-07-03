@@ -145,7 +145,8 @@
               <div class="mb-3">
                 <%= f.label :status, t('mongoid.attributes.wishlist_item.status'), class: "form-label small fw-semibold text-muted" %>
                 <%= f.select :status,
-                             options_for_select([[t('wishlist_items.filters.all_statuses'), '']] + WishlistItem.status_options, params[:status]),
+                             options_for_select(WishlistItem.status_filter_options,
+                                                params.key?(:status) ? params[:status] : WishlistItem::STATUS_FILTER_WITHOUT_PURCHASED),
                              {},
                              class: "form-select rounded-3" %>
               </div>

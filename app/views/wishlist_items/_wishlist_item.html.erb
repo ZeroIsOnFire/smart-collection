@@ -36,11 +36,19 @@
             <% end %>
           </li>
           <li>
-            <%= link_to new_car_from_wishlist_item_path(wishlist_item),
-                        class: 'dropdown-item d-flex align-items-center gap-2 py-2',
-                        data: { turbo_frame: "modal" } do %>
-              <i class="bi bi-plus-circle text-muted"></i>
-              <%= t('wishlist_items.actions.add_to_collection') %>
+            <% if wishlist_item.added_to_collection? %>
+              <span class="dropdown-item disabled d-flex align-items-center gap-2 py-2"
+                    aria-disabled="true">
+                <i class="bi bi-check-circle text-muted"></i>
+                <%= t('wishlist_items.actions.already_in_collection') %>
+              </span>
+            <% else %>
+              <%= link_to new_car_from_wishlist_item_path(wishlist_item),
+                          class: 'dropdown-item d-flex align-items-center gap-2 py-2',
+                          data: { turbo_frame: "modal" } do %>
+                <i class="bi bi-plus-circle text-muted"></i>
+                <%= t('wishlist_items.actions.add_to_collection') %>
+              <% end %>
             <% end %>
           </li>
           <li><hr class="dropdown-divider"></li>

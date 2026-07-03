@@ -30,10 +30,17 @@
     <div class="card car-detail-card shadow-sm rounded-3 bg-white h-100">
       <div class="card-body p-4 p-xl-5 d-flex flex-column">
         <div class="car-showcase-actions d-flex align-items-center justify-content-end gap-2 mb-4">
-          <%= link_to new_car_from_wishlist_item_path(wishlist_item),
-                      class: "btn btn-premium rounded-3 d-inline-flex align-items-center justify-content-center",
-                      data: { turbo_frame: "modal" } do %>
-            <i class="bi bi-plus-circle me-2"></i><%= t('wishlist_items.actions.add_to_collection') %>
+          <% if wishlist_item.added_to_collection? %>
+            <span class="btn btn-soft-secondary rounded-3 d-inline-flex align-items-center justify-content-center disabled"
+                  aria-disabled="true">
+              <i class="bi bi-check-circle me-2"></i><%= t('wishlist_items.actions.already_in_collection') %>
+            </span>
+          <% else %>
+            <%= link_to new_car_from_wishlist_item_path(wishlist_item),
+                        class: "btn btn-premium rounded-3 d-inline-flex align-items-center justify-content-center",
+                        data: { turbo_frame: "modal" } do %>
+              <i class="bi bi-plus-circle me-2"></i><%= t('wishlist_items.actions.add_to_collection') %>
+            <% end %>
           <% end %>
           <%= link_to edit_wishlist_item_path(wishlist_item),
                       class: "btn btn-soft-secondary rounded-3 d-inline-flex align-items-center justify-content-center",

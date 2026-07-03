@@ -193,6 +193,7 @@ RSpec.describe 'Public Collections', type: :request do
       expect(response.body).not_to include('data-bs-target="#photoLightbox')
       expect(document.at_css("a[href='#{edit_car_path(car)}']")).to be_nil
       expect(document.at_css("[data-car-removal-trigger][data-car-removal-car-id='#{car.id}']")).to be_nil
+      expect(document.at_css("a[href='#{public_car_share_image_path(user.share_token, car)}']")).to be_present
       expect(response.body).to include(I18n.t('activerecord.attributes.car.color'))
       expect(response.body).not_to include(I18n.t('cars.show.view_original_photo'))
       expect(response.body).to include('Azul')

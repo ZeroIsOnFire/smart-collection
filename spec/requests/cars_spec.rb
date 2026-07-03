@@ -283,6 +283,22 @@ RSpec.describe 'Cars', type: :request do
       expect(response.body).to include("target=\"wishlist_item_#{wishlist_item.id}\"")
       expect(response.body).to include(I18n.t('wishlist_items.statuses.purchased'))
     end
+
+    it 'does not create another car from an already added wishlist item' do
+      wishlist_item = create(:wishlist_item, user: user, status: 'purchased')
+
+      expect do
+        post cars_path,
+             params: {
+               wishlist_item_id: wishlist_item.id.to_s,
+               car: valid_attributes
+             },
+             as: :turbo_stream
+      end.not_to change(user.cars, :count)
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(response.body).to include(I18n.t('wishlist_items.flash.already_in_collection'))
+    end
   end
 
   describe 'GET /new' do

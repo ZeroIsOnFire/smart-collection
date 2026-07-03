@@ -24,7 +24,7 @@ pt-BR:
     statuses:
       wanted: "Desejado"
       reserved: "Reservado"
-      purchased: "Comprado"
+      purchased: "Adquirido"
     priorities:
       low: "Baixa"
       medium: "Média"
@@ -33,6 +33,7 @@ pt-BR:
     actions:
       new: "Novo desejo"
       add_to_collection: "Adicionar ao acervo"
+      already_in_collection: "Já no acervo"
       enable_public: "Ativar link público"
       disable_public: "Desativar link público"
       open_public: "Abrir link público"
@@ -42,6 +43,7 @@ pt-BR:
       back_to_wishlist: "Voltar para a lista"
       delete_confirm: "Excluir este item da lista de desejos?"
     filters:
+      without_purchased: "Sem adquiridos"
       all_statuses: "Todos os status"
       all_priorities: "Todas as prioridades"
       all_brands: "Todas as marcas"
@@ -69,6 +71,8 @@ pt-BR:
       empty_title: "Nenhum desejo cadastrado ainda"
       empty_text: "Comece por uma miniatura que você quer comprar, encontrar ou acompanhar."
       add_first_item: "Adicionar primeiro desejo"
+    flash:
+      already_in_collection: "Este item já foi adicionado ao acervo."
     modal:
       new_title: "Novo desejo"
       edit_title: "Editar desejo"

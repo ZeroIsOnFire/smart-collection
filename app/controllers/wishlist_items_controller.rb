@@ -74,6 +74,8 @@ class WishlistItemsController < ApplicationController
   end
 
   def add_to_collection
+    return redirect_to wishlist_items_path, alert: t('wishlist_items.flash.already_in_collection') if @wishlist_item.added_to_collection?
+
     redirect_to new_car_path(
       wishlist_item_id: @wishlist_item.id.to_s,
       car: WishlistItemToCarAttributesService.new(@wishlist_item).to_params
@@ -130,7 +132,7 @@ class WishlistItemsController < ApplicationController
 
   def filtered_wishlist_items
     scope = current_user.wishlist_items
-    scope = scope.where(status: params[:status]) if WishlistItem::STATUSES.include?(params[:status])
+    scope = filter_wishlist_status(scope)
     scope = scope.where(priority: params[:priority]) if WishlistItem::PRIORITIES.include?(params[:priority])
     scope = scope.where(brand: params[:brand]) if params[:brand].present?
     scope = scope.where(scale: params[:scale]) if params[:scale].present?
@@ -138,6 +140,21 @@ class WishlistItemsController < ApplicationController
 
     pattern = /#{Regexp.escape(params[:q].to_s.strip)}/i
     scope.any_of({ name: pattern }, { brand: pattern }, { scale: pattern })
+  end
+
+  def filter_wishlist_status(scope)
+    case wishlist_status_filter
+    when WishlistItem::STATUS_FILTER_WITHOUT_PURCHASED
+      scope.where(:status.ne => 'purchased')
+    when *WishlistItem::STATUSES
+      scope.where(status: wishlist_status_filter)
+    else
+      scope
+    end
+  end
+
+  def wishlist_status_filter
+    params.key?(:status) ? params[:status] : WishlistItem::STATUS_FILTER_WITHOUT_PURCHASED
   end
 
   def wishlist_item_params

@@ -48,6 +48,22 @@ RSpec.describe 'PublicWishlists', type: :request do
       expect(response.body).to include('Matching')
     end
 
+    it 'hides purchased public wishlist items by default' do
+      create(:wishlist_item, user: user, name: 'Public wanted', status: 'wanted')
+      create(:wishlist_item, user: user, name: 'Public acquired', status: 'purchased')
+
+      get public_wishlist_path(user.wishlist_share_token)
+
+      expect(response.body).to include('Public wanted')
+      expect(response.body).not_to include('Public acquired')
+      expect(response.body).to include(I18n.t('wishlist_items.filters.without_purchased'))
+
+      get public_wishlist_path(user.wishlist_share_token), params: { status: '' }
+
+      expect(response.body).to include('Public wanted')
+      expect(response.body).to include('Public acquired')
+    end
+
     it 'does not expose the wishlist when sharing is disabled' do
       user.update!(wishlist_sharing_enabled: false)
 

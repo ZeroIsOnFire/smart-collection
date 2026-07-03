@@ -33,6 +33,7 @@ en:
     actions:
       new: "New wish"
       add_to_collection: "Add to collection"
+      already_in_collection: "Already in collection"
       enable_public: "Enable public link"
       disable_public: "Disable public link"
       open_public: "Open public link"
@@ -42,6 +43,7 @@ en:
       back_to_wishlist: "Back to wishlist"
       delete_confirm: "Delete this wishlist item?"
     filters:
+      without_purchased: "Without purchased"
       all_statuses: "All statuses"
       all_priorities: "All priorities"
       all_brands: "All brands"
@@ -69,6 +71,8 @@ en:
       empty_title: "No wishes yet"
       empty_text: "Start with a miniature you want to buy, find or watch."
       add_first_item: "Add first wish"
+    flash:
+      already_in_collection: "This item has already been added to the collection."
     modal:
       new_title: "New wish"
       edit_title: "Edit wish"

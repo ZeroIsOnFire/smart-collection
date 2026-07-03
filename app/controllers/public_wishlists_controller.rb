@@ -26,7 +26,7 @@ class PublicWishlistsController < ApplicationController
 
   def filtered_wishlist_items
     scope = @user.wishlist_items
-    scope = scope.where(status: params[:status]) if WishlistItem::STATUSES.include?(params[:status])
+    scope = filter_wishlist_status(scope)
     scope = scope.where(priority: params[:priority]) if WishlistItem::PRIORITIES.include?(params[:priority])
     scope = scope.where(brand: params[:brand]) if params[:brand].present?
     scope = scope.where(scale: params[:scale]) if params[:scale].present?
@@ -34,6 +34,21 @@ class PublicWishlistsController < ApplicationController
 
     pattern = /#{Regexp.escape(params[:q].to_s.strip)}/i
     scope.any_of({ name: pattern }, { brand: pattern }, { scale: pattern })
+  end
+
+  def filter_wishlist_status(scope)
+    case wishlist_status_filter
+    when WishlistItem::STATUS_FILTER_WITHOUT_PURCHASED
+      scope.where(:status.ne => 'purchased')
+    when *WishlistItem::STATUSES
+      scope.where(status: wishlist_status_filter)
+    else
+      scope
+    end
+  end
+
+  def wishlist_status_filter
+    params.key?(:status) ? params[:status] : WishlistItem::STATUS_FILTER_WITHOUT_PURCHASED
   end
 
   def render_not_found

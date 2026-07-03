@@ -7,6 +7,7 @@ class WishlistItem
 
   STATUSES = %w[wanted reserved purchased].freeze
   PRIORITIES = %w[low medium high dream].freeze
+  STATUS_FILTER_WITHOUT_PURCHASED = 'without_purchased'
 
   field :name, type: String
   field :brand, type: String
@@ -41,12 +42,23 @@ class WishlistItem
     STATUSES.map { |value| [I18n.t("wishlist_items.statuses.#{value}"), value] }
   end
 
+  def self.status_filter_options
+    [
+      [I18n.t('wishlist_items.filters.without_purchased'), STATUS_FILTER_WITHOUT_PURCHASED],
+      [I18n.t('wishlist_items.filters.all_statuses'), '']
+    ] + status_options
+  end
+
   def self.priority_options
     PRIORITIES.map { |value| [I18n.t("wishlist_items.priorities.#{value}"), value] }
   end
 
   def status_label
     I18n.t("wishlist_items.statuses.#{status}")
+  end
+
+  def added_to_collection?
+    car_id.present? || status == 'purchased'
   end
 
   def priority_label

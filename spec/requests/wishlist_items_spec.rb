@@ -23,6 +23,23 @@ RSpec.describe 'WishlistItems', type: :request do
       expect(response.body).not_to include('Private wish')
     end
 
+    it 'hides purchased items by default and keeps an all statuses option' do
+      wanted_item = create(:wishlist_item, user: user, name: 'Wanted wish', status: 'wanted')
+      purchased_item = create(:wishlist_item, user: user, name: 'Purchased wish', status: 'purchased')
+
+      get wishlist_items_path
+
+      expect(response.body).to include(wanted_item.name)
+      expect(response.body).not_to include(purchased_item.name)
+      expect(response.body).to include(WishlistItem::STATUS_FILTER_WITHOUT_PURCHASED)
+      expect(response.body).to include(I18n.t('wishlist_items.filters.without_purchased'))
+
+      get wishlist_items_path, params: { status: '' }
+
+      expect(response.body).to include(wanted_item.name)
+      expect(response.body).to include(purchased_item.name)
+    end
+
     it 'renders background export controls for CSV and PDF' do
       get wishlist_items_path
 
@@ -54,6 +71,18 @@ RSpec.describe 'WishlistItems', type: :request do
       expect(badge_list.at_css('.collection-brand-badge.metadata-chip-brand').text).to include('Mini GT')
       expect(badge_list.at_css('.metadata-chip.metadata-chip-scale').text).to include('1:64')
       expect(badge_list.text).to include(item.status_label)
+    end
+
+    it 'shows purchased wishlist items as already added to the collection' do
+      item = create(:wishlist_item, user: user, name: 'Purchased RX-7', status: 'purchased')
+
+      get wishlist_items_path, params: { status: 'purchased' }
+
+      document = Nokogiri::HTML(response.body)
+      card = document.at_css("##{ActionView::RecordIdentifier.dom_id(item)}")
+
+      expect(card.at_css("a[href*='wishlist_item_id=#{item.id}']")).to be_nil
+      expect(card.text).to include(I18n.t('wishlist_items.actions.already_in_collection'))
     end
 
     it 'filters by status, priority, brand, scale and query without searching notes' do
@@ -218,6 +247,16 @@ RSpec.describe 'WishlistItems', type: :request do
       expect(response.body).to include('data-turbo-frame="modal"')
       expect(response.body).not_to include(I18n.t('wishlist_items.actions.open_reference'))
     end
+
+    it 'does not render a clickable add to collection action for acquired items' do
+      item = create(:wishlist_item, user: user, name: 'Acquired wish', status: 'purchased')
+
+      get wishlist_item_path(item), headers: { 'Turbo-Frame' => 'modal' }
+
+      expect(response).to be_successful
+      expect(response.body).to include(I18n.t('wishlist_items.actions.already_in_collection'))
+      expect(response.body).not_to include(ERB::Util.html_escape(new_car_path(wishlist_item_id: item.id.to_s, car: WishlistItemToCarAttributesService.new(item).to_params)))
+    end
   end
 
   describe 'DELETE /wishlist/:id' do
@@ -250,6 +289,15 @@ RSpec.describe 'WishlistItems', type: :request do
           }.compact_blank
         )
       )
+    end
+
+    it 'does not redirect an already added wishlist item into the car form' do
+      item = create(:wishlist_item, user: user, status: 'purchased')
+
+      post add_to_collection_wishlist_item_path(item)
+
+      expect(response).to redirect_to(wishlist_items_path)
+      expect(flash[:alert]).to eq(I18n.t('wishlist_items.flash.already_in_collection'))
     end
 
     it 'does not redirect another user wishlist item into the car form' do

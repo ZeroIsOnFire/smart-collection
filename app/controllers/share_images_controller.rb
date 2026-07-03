@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class ShareImagesController < ApplicationController
-  before_action :authenticate_user!, except: %i[public_wishlist public_wishlist_item]
+  before_action :authenticate_user!, except: %i[public_car public_wishlist public_wishlist_item]
 
   def car
     car = current_user.cars.find(params[:car_id])
@@ -21,6 +21,20 @@ class ShareImagesController < ApplicationController
       title: wishlist_item.name,
       data: -> { ShareImageService.new(record: wishlist_item, kind: :wishlist_item).generate }
     )
+  end
+
+  def public_car
+    user = User.find_by(share_token: params[:share_token], sharing_enabled: true)
+    return head :not_found unless user
+
+    car = user.cars.find(params[:id])
+    respond_with_share_image(
+      png_path: public_car_share_image_path(user.share_token, car, format: :png),
+      title: car.name,
+      data: -> { ShareImageCacheService.fetch(record: car, kind: :car) }
+    )
+  rescue Mongoid::Errors::DocumentNotFound
+    head :not_found
   end
 
   def wishlist

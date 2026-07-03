@@ -56,6 +56,30 @@ RSpec.describe 'ShareImages', type: :request do
     end
   end
 
+  describe 'GET /s/:share_token/car/:id/share_image.png' do
+    it 'renders an in-app preview modal for a public car' do
+      public_user = create(:user, sharing_enabled: true, share_token: 'public-car-token')
+      car = create(:car, user: public_user, name: 'Public preview car')
+
+      get public_car_share_image_path(public_user.share_token, car), headers: { 'Turbo-Frame' => 'modal' }
+
+      expect(response).to be_successful
+      expect(response.body).to include('turboModal')
+      expect(response.body).to include(public_car_share_image_path(public_user.share_token, car, format: :png))
+      expect(response.body).to include('Public preview car')
+      expect(response.body).to include('data-controller="share-image-preview"')
+    end
+
+    it 'does not generate an image when public sharing is disabled' do
+      private_user = create(:user, sharing_enabled: false, share_token: 'private-car-token')
+      car = create(:car, user: private_user)
+
+      get public_car_share_image_path(private_user.share_token, car, format: :png)
+
+      expect(response).to have_http_status(:not_found)
+    end
+  end
+
   describe 'GET /wishlist/:wishlist_item_id/share_image.png' do
     it 'generates a PNG for a current user wishlist item' do
       item = create(:wishlist_item, user: user)
