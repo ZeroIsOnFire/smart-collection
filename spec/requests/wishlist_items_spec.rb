@@ -42,6 +42,20 @@ RSpec.describe 'WishlistItems', type: :request do
       expect(response.body).to include(I18n.t('wishlist_items.index.filter_menu'))
     end
 
+    it 'renders brand, scale and status as metadata pills in the same badge list' do
+      item = create(:wishlist_item, user: user, name: 'Wishlist RX-7', brand: 'Mini GT', scale: '1:64')
+
+      get wishlist_items_path
+
+      document = Nokogiri::HTML(response.body)
+      card = document.at_css("##{ActionView::RecordIdentifier.dom_id(item)}")
+      badge_list = card.at_css('.metadata-chip-list')
+
+      expect(badge_list.at_css('.collection-brand-badge.metadata-chip-brand').text).to include('Mini GT')
+      expect(badge_list.at_css('.metadata-chip.metadata-chip-scale').text).to include('1:64')
+      expect(badge_list.text).to include(item.status_label)
+    end
+
     it 'filters by status, priority, brand, scale and query without searching notes' do
       matching = create(
         :wishlist_item,

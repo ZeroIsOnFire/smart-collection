@@ -352,7 +352,9 @@ body {
   font-size: 0.74rem;
   font-weight: 700;
   letter-spacing: 0.01em;
+  line-height: 1;
   max-width: 100%;
+  min-height: 1.55rem;
   min-width: 0;
   overflow: hidden;
   padding: 0.28rem 0.58rem;
@@ -388,8 +390,8 @@ body {
 }
 
 .metadata-chip-ai {
-  background: transparent;
-  border-color: transparent;
+  background: rgba(47, 111, 104, 0.1);
+  border-color: rgba(47, 111, 104, 0.18);
   color: var(--premium-indigo);
 }
 
@@ -402,10 +404,9 @@ body {
   width: 0.72rem;
 }
 
-[data-theme="dark"] .collection-brand-badge,
-[data-theme="dark"] .metadata-chip-ai {
-  background: transparent;
-  border-color: transparent;
+[data-theme="dark"] .collection-brand-badge {
+  background: rgba(111, 207, 196, 0.12);
+  border-color: rgba(111, 207, 196, 0.24);
 }
 
 [data-theme="dark"] .metadata-chip {
@@ -414,8 +415,8 @@ body {
 }
 
 [data-theme="dark"] .metadata-chip-ai {
-  background: transparent;
-  border-color: transparent;
+  background: rgba(111, 207, 196, 0.12);
+  border-color: rgba(111, 207, 196, 0.24);
 }
 
 [data-theme="dark"] .metadata-color-dot {

@@ -86,15 +86,12 @@
         <div class="card-body px-3 pb-3 pt-2">
           <h5 class="card-title mb-0 fw-bold text-dark text-truncate fs-6"><%= car.name.presence || '—' %></h5>
 
-          <!-- Marca -->
-          <div class="d-flex flex-wrap gap-1 mt-1 mb-2">
-            <% if car.brand? %>
-              <span class="collection-brand-badge"><%= car.brand %></span>
-            <% end %>
-          </div>
-
-          <!-- Ano + Escala + Cor -->
-          <%= render "cars/metadata_badges", car: car, photo_upscaled_by_ai: display_photo_upscaled_by_ai %>
+          <!-- Marca + Ano + Escala + Cor -->
+          <%= render "cars/metadata_badges",
+                     car: car,
+                     brand: car.brand,
+                     photo_upscaled_by_ai: display_photo_upscaled_by_ai,
+                     badge_class: "metadata-chip-list mt-1 mb-2" %>
         </div>
       <% end %>
 

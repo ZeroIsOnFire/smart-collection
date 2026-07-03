@@ -233,6 +233,7 @@ class CarsController < ApplicationController
 
   def render_create_success
     render turbo_stream: turbo_stream.prepend('cars_grid_inner', partial: 'cars/car', locals: { car: @car }) +
+                         wishlist_item_update_stream +
                          turbo_stream.remove('cars_empty_state') +
                          turbo_stream.update('modal', '') +
                          turbo_stream.append('flash_toasts', partial: 'shared/toast',
@@ -269,6 +270,14 @@ class CarsController < ApplicationController
     safe_car_id = car_id.to_s.gsub(/[^a-zA-Z0-9_-]/, '')
 
     view_context.turbo_stream_action_tag(:remove, targets: %([data-car-card-id="#{safe_car_id}"]))
+  end
+
+  def wishlist_item_update_stream
+    return ''.html_safe unless @wishlist_item
+
+    turbo_stream.replace(view_context.dom_id(@wishlist_item),
+                         partial: 'wishlist_items/wishlist_item',
+                         locals: { wishlist_item: @wishlist_item })
   end
 
   def success_toast(action)

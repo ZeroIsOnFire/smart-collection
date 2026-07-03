@@ -108,6 +108,23 @@ RSpec.describe 'Cars', type: :request do
       expect(response.body).to include(I18n.t('cars.card.photo_processing'))
     end
 
+    it 'renders brand and AI indicator as metadata pills in the same badge list' do
+      allow(ImageUpscalerService).to receive(:upscale_needed?).and_return(true)
+      ai_car = create(:car, user: user, brand: 'Mini GT', size: '1:64', photo_upscale_strategy: 'ai')
+      ai_car.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+      ai_car.save!
+
+      get cars_path
+
+      document = Nokogiri::HTML(response.body)
+      card = document.at_css("#car_#{ai_car.id}")
+      badge_list = card.at_css('.metadata-chip-list')
+
+      expect(badge_list.at_css('.collection-brand-badge.metadata-chip-brand').text).to include('Mini GT')
+      expect(badge_list.at_css('.metadata-chip.metadata-chip-scale').text).to include('1:64')
+      expect(badge_list.at_css('.metadata-chip.metadata-chip-ai').text).to include(I18n.t('cars.show.photo_upscaled_by_ai'))
+    end
+
     it 'does not show the autodetection AI upscaling notice when enabled and configured' do
       allow(ImageUpscalerService).to receive(:service_configured?).and_return(true)
 
@@ -242,6 +259,29 @@ RSpec.describe 'Cars', type: :request do
       created_car = user.cars.desc(:created_at).first
       expect(wishlist_item.reload.status).to eq('purchased')
       expect(wishlist_item.car_id).to eq(created_car.id)
+    end
+
+    it 'updates the wishlist card when a wishlist item is added through turbo' do
+      wishlist_item = create(:wishlist_item, user: user, name: 'Wishlist RX-7', brand: 'Tomica', scale: '1:64')
+
+      expect do
+        post cars_path,
+             params: {
+               wishlist_item_id: wishlist_item.id.to_s,
+               car: {
+                 name: wishlist_item.name,
+                 brand: wishlist_item.brand,
+                 size: wishlist_item.scale,
+                 photo: fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+               }
+             },
+             as: :turbo_stream
+      end.to change(user.cars, :count).by(1)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('turbo-stream action="replace"')
+      expect(response.body).to include("target=\"wishlist_item_#{wishlist_item.id}\"")
+      expect(response.body).to include(I18n.t('wishlist_items.statuses.purchased'))
     end
   end
 

@@ -76,9 +76,9 @@
 
       <div class="card-body wishlist-card-body px-3 pb-3 pt-2">
         <h2 class="card-title mb-0 fw-bold text-dark text-truncate fs-6"><%= wishlist_item.name %></h2>
-        <div class="d-flex flex-wrap gap-1 mt-1 mb-2">
+        <div class="metadata-chip-list mt-1 mb-2">
           <% if wishlist_item.brand? %>
-            <span class="collection-brand-badge"><%= wishlist_item.brand %></span>
+            <span class="collection-brand-badge metadata-chip-brand"><%= wishlist_item.brand %></span>
           <% end %>
           <% if wishlist_item.scale? %>
             <span class="metadata-chip metadata-chip-scale"><i class="bi bi-arrows-fullscreen"></i><%= wishlist_item.scale %></span>
