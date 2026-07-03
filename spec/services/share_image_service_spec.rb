@@ -86,6 +86,32 @@ RSpec.describe ShareImageService do
       end
     end
 
+    it 'uses the compact item layout for wishlist share images' do
+      item = create(
+        :wishlist_item,
+        name: 'Wish NSX',
+        brand: 'Mini GT',
+        scale: '1:64',
+        status: 'wanted',
+        priority: 'high',
+        observations: 'Versao azul muito desejada com varias observacoes para caber no mesmo padrao visual do carro'
+      )
+
+      lines = described_class.new(record: item, kind: :wishlist_item).send(:lines).pluck(:text)
+      metadata = "#{I18n.t('share_images.car_fields.brand')} Mini GT  |  #{I18n.t('share_images.car_fields.scale')} 1:64"
+      observation_index = lines.index(I18n.t('share_images.car_fields.observations'))
+      observation_lines = lines[(observation_index + 1)..].take_while do |text|
+        text != I18n.t('share_images.footer_brand', year: Date.current.year)
+      end
+
+      expect(lines).to include('Wish NSX')
+      expect(lines).to include(metadata)
+      expect(lines).to include(I18n.t('share_images.car_fields.observations'))
+      expect(observation_lines).to all(have_attributes(length: be <= 74))
+      expect(lines.join(' ')).not_to include(item.status_label)
+      expect(lines.join(' ')).not_to include(item.priority_label)
+    end
+
     it 'generates a PNG for a wishlist list' do
       user = create(:user)
       create(:wishlist_item, user: user)

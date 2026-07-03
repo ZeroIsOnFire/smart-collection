@@ -151,10 +151,11 @@ class ShareImageService
   end
 
   def wishlist_item_lines
+    text_top = PHOTO_BOX_TOP + PHOTO_BOX_HEIGHT + 24
     [
-      line(@record.name, 58, COLORS[:teal], MARGIN, TEXT_TOP),
-      line([@record.brand, @record.scale].compact_blank.join(' | '), 34, COLORS[:muted], MARGIN, TEXT_TOP + 78),
-      line(@record.observations, 30, COLORS[:gold], MARGIN, TEXT_TOP + 142),
+      line(@record.name, 50, COLORS[:teal], MARGIN, text_top),
+      *wishlist_item_metadata_lines(text_top),
+      *wishlist_item_observation_lines(text_top),
       footer_line
     ].reject { |line| line[:text].blank? }
   end
@@ -192,6 +193,33 @@ class ShareImageService
   end
 
   def car_observation_lines(text_top)
+    return [] if @record.observations.blank?
+
+    top = text_top + 112
+    [
+      line(I18n.t('share_images.car_fields.observations'), 24, COLORS[:gold], MARGIN, top),
+      *wrapped_lines(@record.observations, max_chars: 74, max_lines: 5).map.with_index do |text, index|
+        line(text, 24, COLORS[:muted], MARGIN, top + 34 + (index * 30))
+      end
+    ]
+  end
+
+  def wishlist_item_metadata_lines(text_top)
+    metadata = wishlist_item_metadata_entries.map { |label, value| "#{label} #{value}" }.join('  |  ')
+    [line(metadata, 22, COLORS[:muted], MARGIN, text_top + 66)]
+  end
+
+  def wishlist_item_metadata_entries
+    [
+      [I18n.t('share_images.car_fields.brand'), @record.brand],
+      [I18n.t('share_images.car_fields.scale'), @record.scale]
+    ].filter_map do |label, value|
+      text = value.to_s.squish
+      [label, text] if text.present?
+    end
+  end
+
+  def wishlist_item_observation_lines(text_top)
     return [] if @record.observations.blank?
 
     top = text_top + 112
