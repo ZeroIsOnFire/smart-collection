@@ -217,6 +217,9 @@ RSpec.describe 'Cars', type: :request do
       expect(response.body).to include('Wishlist Porsche')
       expect(response.body).to include('Mini GT')
       expect(response.body).to include('name="wishlist_item_id"')
+
+      document = Nokogiri::HTML(response.body)
+      expect(document.at_css("button[name='commit_action'][value='create_another']")).to be_nil
     end
 
     it 'marks the wishlist item as purchased and links the created car' do
