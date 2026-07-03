@@ -21,6 +21,19 @@ RSpec.describe 'ShareImages', type: :request do
       expect(response.body).to start_with("\x89PNG".b)
     end
 
+    it 'renders an in-app preview modal for a current user car' do
+      car = create(:car, user: user, name: 'Preview car')
+
+      get car_share_image_path(car), headers: { 'Turbo-Frame' => 'modal' }
+
+      expect(response).to be_successful
+      expect(response.body).to include('turboModal')
+      expect(response.body).to include(car_share_image_path(car, format: :png))
+      expect(response.body).to include('Preview car')
+      expect(response.body).to include('data-controller="share-image-preview"')
+      expect(response.body).to include(I18n.t('share_images.preview.loading'))
+    end
+
     it 'does not generate an image for another user car' do
       car = create(:car, user: other_user)
 

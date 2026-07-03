@@ -658,6 +658,7 @@ RSpec.describe 'Cars', type: :request do
       delete_form = document.at_css("form[data-car-removal-car-id='#{car.id}']")
       delete_button = document.at_css("[data-car-removal-trigger][data-car-removal-car-id='#{car.id}']")
       edit_link = document.at_css("a[href='#{edit_car_path(car)}']")
+      share_image_link = document.at_css("a[href='#{car_share_image_path(car)}']")
 
       expect(document.at_css('#turboModalLabel')).to be_nil
       expect(document.at_css('[data-controller*="photo-lightbox"]')).to be_present
@@ -665,6 +666,8 @@ RSpec.describe 'Cars', type: :request do
       expect(document.at_css('.photo-lightbox-overlay[data-photo-lightbox-target="overlay"]')).to be_present
       expect(response.body).not_to include('data-bs-target="#photoLightbox')
       expect(edit_link).to be_present
+      expect(share_image_link).to be_present
+      expect(share_image_link.text).to include(I18n.t('cars.show.share_image'))
       expect(delete_form['data-turbo-frame']).to be_nil
       expect(delete_form['data-turbo-confirm']).to be_nil
       expect(delete_button['data-car-removal-confirm-message']).to eq(I18n.t('items.delete_confirm'))

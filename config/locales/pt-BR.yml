@@ -408,6 +408,7 @@ pt-BR:
       view_full_photo: "Ampliar foto"
       view_original_photo: "Foto original"
       view_ai_photo: "Foto tratada"
+      share_image: "Compartilhar imagem"
       photo_upscaled_by_ai: "IA"
       photo_upscaled_by_ai_tooltip: "Foto tratada por IA"
     form:

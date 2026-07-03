@@ -142,11 +142,11 @@ class ShareImageService
 
   def car_lines
     [
-      line(@record.name, 58, COLORS[:teal], MARGIN, TEXT_TOP),
-      line([@record.brand, @record.size, @record.year, @record.color].compact_blank.join(' | '), 34, COLORS[:muted], MARGIN, TEXT_TOP + 78),
-      line(I18n.t('share_images.badges.collection'), 30, COLORS[:gold], MARGIN, TEXT_TOP + 142),
+      line(@record.name, 54, COLORS[:teal], MARGIN, TEXT_TOP - 20),
+      line(I18n.t('share_images.badges.collection'), 28, COLORS[:gold], MARGIN, TEXT_TOP + 48),
+      *car_detail_lines,
       footer_line
-    ]
+    ].reject { |line| line[:text].blank? }
   end
 
   def wishlist_item_lines
@@ -170,6 +170,26 @@ class ShareImageService
 
   def footer_line
     line(I18n.t('share_images.footer_brand', year: Date.current.year), 28, COLORS[:muted], MARGIN + 104, HEIGHT - 128)
+  end
+
+  def car_detail_lines
+    car_detail_attributes.each_with_index.map do |(label, value), index|
+      line("#{label}: #{value}", 28, COLORS[:muted], MARGIN, TEXT_TOP + 92 + (index * 34))
+    end
+  end
+
+  def car_detail_attributes
+    [
+      [I18n.t('activerecord.attributes.car.brand'), @record.brand],
+      [I18n.t('activerecord.attributes.car.size'), @record.size],
+      [I18n.t('activerecord.attributes.car.year'), @record.year],
+      [I18n.t('activerecord.attributes.car.color'), @record.color],
+      [I18n.t('activerecord.attributes.car.tags'), @record.tags.to_a.join(', ')],
+      [I18n.t('activerecord.attributes.car.observations'), @record.observations]
+    ].filter_map do |label, value|
+      text = value.to_s.squish
+      [label, text] if text.present?
+    end
   end
 
   def line(text, size, color, left, top)

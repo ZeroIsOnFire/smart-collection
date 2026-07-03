@@ -396,6 +396,7 @@ en:
       view_full_photo: "Enlarge photo"
       view_original_photo: "Original photo"
       view_ai_photo: "Processed photo"
+      share_image: "Share image"
       photo_upscaled_by_ai: "AI"
       photo_upscaled_by_ai_tooltip: "Photo processed by AI"
     form:
