@@ -144,7 +144,8 @@ class ShareImageService
     [
       line(@record.name, 54, COLORS[:teal], MARGIN, TEXT_TOP - 20),
       line(I18n.t('share_images.badges.collection'), 28, COLORS[:gold], MARGIN, TEXT_TOP + 48),
-      *car_detail_lines,
+      *car_metadata_lines,
+      *car_observation_lines,
       footer_line
     ].reject { |line| line[:text].blank? }
   end
@@ -172,24 +173,61 @@ class ShareImageService
     line(I18n.t('share_images.footer_brand', year: Date.current.year), 28, COLORS[:muted], MARGIN + 104, HEIGHT - 128)
   end
 
-  def car_detail_lines
-    car_detail_attributes.each_with_index.map do |(label, value), index|
-      line("#{label}: #{value}", 28, COLORS[:muted], MARGIN, TEXT_TOP + 92 + (index * 34))
+  def car_metadata_lines
+    metadata = car_metadata_entries.each_slice(2).map do |entries|
+      entries.map { |label, value| "#{label} #{value}" }.join('  |  ')
+    end
+
+    metadata.each_with_index.map do |text, index|
+      line(text, 24, COLORS[:muted], MARGIN, TEXT_TOP + 88 + (index * 30))
     end
   end
 
-  def car_detail_attributes
+  def car_metadata_entries
     [
-      [I18n.t('activerecord.attributes.car.brand'), @record.brand],
-      [I18n.t('activerecord.attributes.car.size'), @record.size],
-      [I18n.t('activerecord.attributes.car.year'), @record.year],
-      [I18n.t('activerecord.attributes.car.color'), @record.color],
-      [I18n.t('activerecord.attributes.car.tags'), @record.tags.to_a.join(', ')],
-      [I18n.t('activerecord.attributes.car.observations'), @record.observations]
+      [I18n.t('share_images.car_fields.brand'), @record.brand],
+      [I18n.t('share_images.car_fields.scale'), @record.size],
+      [I18n.t('share_images.car_fields.year'), @record.year],
+      [I18n.t('share_images.car_fields.color'), @record.color],
+      [I18n.t('share_images.car_fields.tags'), @record.tags.to_a.join(', ')]
     ].filter_map do |label, value|
       text = value.to_s.squish
       [label, text] if text.present?
     end
+  end
+
+  def car_observation_lines
+    return [] if @record.observations.blank?
+
+    top = TEXT_TOP + 164
+    [
+      line(I18n.t('share_images.car_fields.observations'), 24, COLORS[:gold], MARGIN, top),
+      *wrapped_lines(@record.observations, max_chars: 68, max_lines: 3).map.with_index do |text, index|
+        line(text, 24, COLORS[:muted], MARGIN, top + 34 + (index * 30))
+      end
+    ]
+  end
+
+  def wrapped_lines(text, max_chars:, max_lines:)
+    words = text.to_s.squish.split
+    lines = []
+    current = +''
+
+    words.each do |word|
+      candidate = current.blank? ? word : "#{current} #{word}"
+      if candidate.length <= max_chars
+        current = candidate
+      else
+        lines << current if current.present?
+        current = word
+      end
+      break if lines.size == max_lines
+    end
+
+    lines << current if current.present? && lines.size < max_lines
+    return lines if lines.size < max_lines || words.join(' ').length <= lines.join(' ').length
+
+    lines[0...(max_lines - 1)] + ["#{lines[max_lines - 1].truncate(max_chars - 1, omission: '')}..."]
   end
 
   def line(text, size, color, left, top)

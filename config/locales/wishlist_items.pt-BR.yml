@@ -160,6 +160,13 @@ pt-BR:
       collection: "Acervo"
       wishlist: "Lista de desejos"
       user_wishlist: "Lista de desejos de %{name}"
+    car_fields:
+      brand: "Marca"
+      scale: "Escala"
+      year: "Ano"
+      color: "Cor"
+      tags: "Tags"
+      observations: "Observações"
     wishlist:
       total:
         one: "%{count} item na lista"

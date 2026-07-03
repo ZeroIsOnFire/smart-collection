@@ -160,6 +160,13 @@ en:
       collection: "Collection"
       wishlist: "Wishlist"
       user_wishlist: "%{name}'s wishlist"
+    car_fields:
+      brand: "Brand"
+      scale: "Scale"
+      year: "Year"
+      color: "Color"
+      tags: "Tags"
+      observations: "Notes"
     wishlist:
       total:
         one: "%{count} list item"
