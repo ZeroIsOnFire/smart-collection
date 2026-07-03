@@ -38,7 +38,7 @@ pt-BR:
       open_public: "Abrir link público"
       open_reference: "Abrir referência"
       share_image: "Imagem da lista"
-      share_item_image: "Compartilhar como imagem"
+      share_item_image: "Compartilhar imagem"
       back_to_wishlist: "Voltar para a lista"
       delete_confirm: "Excluir este item da lista de desejos?"
     filters:

@@ -2155,29 +2155,29 @@ body {
 }
 
 .car-showcase-actions {
-  flex-wrap: wrap;
-  white-space: nowrap;
+  align-items: stretch !important;
+  display: grid !important;
+  gap: .5rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+  white-space: normal;
 }
 
 .car-showcase-actions > .btn,
 .car-showcase-actions form {
-  flex: 1 1 112px;
-}
-
-.car-showcase-actions form .btn {
+  min-width: 0;
   width: 100%;
 }
 
-@media (max-width: 420px) {
-  .car-showcase-actions {
-    align-items: stretch !important;
-    flex-direction: column;
-  }
+.car-showcase-actions .btn,
+.car-showcase-actions form .btn {
+  height: 100%;
+  min-height: 3rem;
+  padding: .65rem 1rem;
+  width: 100%;
+}
 
-  .car-showcase-actions > .btn,
-  .car-showcase-actions form {
-    width: 100%;
-  }
+.car-showcase-actions .btn {
+  overflow-wrap: anywhere;
 }
 
 .public-detail-photo img {

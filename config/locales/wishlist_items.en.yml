@@ -38,7 +38,7 @@ en:
       open_public: "Open public link"
       open_reference: "Open reference"
       share_image: "List image"
-      share_item_image: "Share as image"
+      share_item_image: "Share image"
       back_to_wishlist: "Back to wishlist"
       delete_confirm: "Delete this wishlist item?"
     filters:

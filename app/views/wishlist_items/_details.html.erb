@@ -32,28 +32,24 @@
         <div class="car-showcase-actions d-flex align-items-center justify-content-end gap-2 mb-4">
           <%= button_to add_to_collection_wishlist_item_path(wishlist_item),
                         method: :post,
-                        form: { class: "d-inline-flex m-0" },
-                        class: "btn btn-premium rounded-3 d-inline-flex align-items-center justify-content-center",
-                        style: "padding: 0.65rem 1.5rem; min-width: 112px;" do %>
+                        form: { class: "m-0" },
+                        class: "btn btn-premium rounded-3 d-inline-flex align-items-center justify-content-center" do %>
             <i class="bi bi-plus-circle me-2"></i><%= t('wishlist_items.actions.add_to_collection') %>
           <% end %>
           <%= link_to edit_wishlist_item_path(wishlist_item),
                       class: "btn btn-soft-secondary rounded-3 d-inline-flex align-items-center justify-content-center",
-                      style: "padding: 0.65rem 1.5rem; min-width: 112px;",
                       data: { turbo_frame: "modal" } do %>
             <i class="bi bi-pencil me-2"></i><%= t('actions.edit') %>
           <% end %>
           <%= link_to wishlist_item_share_image_path(wishlist_item),
                       class: "btn btn-soft-secondary rounded-3 d-inline-flex align-items-center justify-content-center",
-                      style: "padding: 0.65rem 1.5rem; min-width: 112px;",
                       data: { turbo_frame: "modal" } do %>
             <i class="bi bi-image me-2"></i><%= t('wishlist_items.actions.share_item_image') %>
           <% end %>
           <%= button_to wishlist_item_path(wishlist_item),
                         method: :delete,
-                        form: { class: "d-inline-flex m-0", data: { turbo_confirm: t('wishlist_items.actions.delete_confirm') } },
-                        class: "btn btn-outline-danger rounded-3 d-inline-flex align-items-center justify-content-center",
-                        style: "padding: 0.65rem 1.5rem; min-width: 112px;" do %>
+                        form: { class: "m-0", data: { turbo_confirm: t('wishlist_items.actions.delete_confirm') } },
+                        class: "btn btn-outline-danger rounded-3 d-inline-flex align-items-center justify-content-center" do %>
             <i class="bi bi-trash3 me-2"></i><%= t('actions.delete') %>
           <% end %>
         </div>
