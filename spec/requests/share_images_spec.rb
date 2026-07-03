@@ -21,6 +21,19 @@ RSpec.describe 'ShareImages', type: :request do
       expect(response.body).to start_with("\x89PNG".b)
     end
 
+    it 'uses the share image cache for current user cars' do
+      car = create(:car, user: user)
+      png = "\x89PNG\r\n\x1A\ncached".b
+
+      allow(ShareImageCacheService).to receive(:fetch).with(record: car, kind: :car).and_return(png)
+
+      get car_share_image_path(car, format: :png)
+
+      expect(response).to be_successful
+      expect(response.body).to eq(png)
+      expect(ShareImageCacheService).to have_received(:fetch).with(record: car, kind: :car)
+    end
+
     it 'renders an in-app preview modal for a current user car' do
       car = create(:car, user: user, name: 'Preview car')
 

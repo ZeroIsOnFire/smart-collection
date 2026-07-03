@@ -9,7 +9,7 @@ class ShareImagesController < ApplicationController
     respond_with_share_image(
       png_path: car_share_image_path(car, format: :png),
       title: car.name,
-      data: -> { ShareImageService.new(record: car, kind: :car).generate }
+      data: -> { ShareImageCacheService.fetch(record: car, kind: :car) }
     )
   end
 
