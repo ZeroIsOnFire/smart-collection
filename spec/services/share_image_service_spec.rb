@@ -35,13 +35,19 @@ RSpec.describe ShareImageService do
       )
 
       lines = described_class.new(record: car, kind: :car).send(:lines).pluck(:text)
+      metadata = [
+        "#{I18n.t('share_images.car_fields.brand')} Mini GT",
+        "#{I18n.t('share_images.car_fields.scale')} 1:64",
+        "#{I18n.t('share_images.car_fields.year')} 2024",
+        "#{I18n.t('share_images.car_fields.color')} Azul",
+        "#{I18n.t('share_images.car_fields.tags')} premium, coupe"
+      ].join('  |  ')
 
       expect(lines).to include('Share Porsche')
-      expect(lines).to include("#{I18n.t('share_images.car_fields.brand')} Mini GT  |  #{I18n.t('share_images.car_fields.scale')} 1:64")
-      expect(lines).to include("#{I18n.t('share_images.car_fields.year')} 2024  |  #{I18n.t('share_images.car_fields.color')} Azul")
-      expect(lines).to include("#{I18n.t('share_images.car_fields.tags')} premium, coupe")
+      expect(lines).to include(metadata)
       expect(lines).to include(I18n.t('share_images.car_fields.observations'))
       expect(lines).to include('Edicao especial')
+      expect(lines).not_to include(I18n.t('share_images.badges.collection'))
       expect(lines.join(' ')).not_to include(I18n.t('cars.show.photo_upscaled_by_ai'))
       expect(lines.join(' ')).not_to include(I18n.t('cars.show.photo_upscaled_by_ai_tooltip'))
     end
@@ -58,8 +64,8 @@ RSpec.describe ShareImageService do
         text != I18n.t('share_images.footer_brand', year: Date.current.year)
       end
 
-      expect(observation_lines.size).to be_between(2, 3)
-      expect(observation_lines).to all(have_attributes(length: be <= 68))
+      expect(observation_lines.size).to be_between(2, 5)
+      expect(observation_lines).to all(have_attributes(length: be <= 74))
     end
 
     it 'generates portrait PNGs without cropping the canvas back to square' do

@@ -141,11 +141,11 @@ class ShareImageService
   end
 
   def car_lines
+    text_top = PHOTO_BOX_TOP + PHOTO_BOX_HEIGHT + 24
     [
-      line(@record.name, 54, COLORS[:teal], MARGIN, TEXT_TOP - 20),
-      line(I18n.t('share_images.badges.collection'), 28, COLORS[:gold], MARGIN, TEXT_TOP + 48),
-      *car_metadata_lines,
-      *car_observation_lines,
+      line(@record.name, 50, COLORS[:teal], MARGIN, text_top),
+      *car_metadata_lines(text_top),
+      *car_observation_lines(text_top),
       footer_line
     ].reject { |line| line[:text].blank? }
   end
@@ -173,14 +173,9 @@ class ShareImageService
     line(I18n.t('share_images.footer_brand', year: Date.current.year), 28, COLORS[:muted], MARGIN + 104, HEIGHT - 128)
   end
 
-  def car_metadata_lines
-    metadata = car_metadata_entries.each_slice(2).map do |entries|
-      entries.map { |label, value| "#{label} #{value}" }.join('  |  ')
-    end
-
-    metadata.each_with_index.map do |text, index|
-      line(text, 24, COLORS[:muted], MARGIN, TEXT_TOP + 88 + (index * 30))
-    end
+  def car_metadata_lines(text_top)
+    metadata = car_metadata_entries.map { |label, value| "#{label} #{value}" }.join('  |  ')
+    [line(metadata, 22, COLORS[:muted], MARGIN, text_top + 66)]
   end
 
   def car_metadata_entries
@@ -196,13 +191,13 @@ class ShareImageService
     end
   end
 
-  def car_observation_lines
+  def car_observation_lines(text_top)
     return [] if @record.observations.blank?
 
-    top = TEXT_TOP + 164
+    top = text_top + 112
     [
       line(I18n.t('share_images.car_fields.observations'), 24, COLORS[:gold], MARGIN, top),
-      *wrapped_lines(@record.observations, max_chars: 68, max_lines: 3).map.with_index do |text, index|
+      *wrapped_lines(@record.observations, max_chars: 74, max_lines: 5).map.with_index do |text, index|
         line(text, 24, COLORS[:muted], MARGIN, top + 34 + (index * 30))
       end
     ]
