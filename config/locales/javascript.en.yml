@@ -28,6 +28,10 @@ en:
       errors:
         unexpected_console: "Error removing item:"
         unexpected: "The item could not be removed. Try again."
+    share_image_preview:
+      errors:
+        share_console: "Error sharing image:"
+        share_failed: "Could not open sharing. Try opening the PNG."
     modal:
       loading: "Loading..."
       submitting: "Loading..."

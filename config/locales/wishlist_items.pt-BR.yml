@@ -159,6 +159,8 @@ pt-BR:
     preview:
       title: "Imagem de %{name}"
       open_png: "Abrir PNG"
+      share: "Compartilhar"
+      sharing: "Compartilhando..."
       loading: "Carregando imagem..."
     badges:
       collection: "Acervo"

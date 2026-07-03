@@ -159,6 +159,8 @@ en:
     preview:
       title: "%{name} image"
       open_png: "Open PNG"
+      share: "Share"
+      sharing: "Sharing..."
       loading: "Loading image..."
     badges:
       collection: "Collection"

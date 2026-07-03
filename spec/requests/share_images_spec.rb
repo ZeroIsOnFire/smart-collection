@@ -44,6 +44,8 @@ RSpec.describe 'ShareImages', type: :request do
       expect(response.body).to include(car_share_image_path(car, format: :png))
       expect(response.body).to include('Preview car')
       expect(response.body).to include('data-controller="share-image-preview"')
+      expect(response.body).to include('data-share-image-preview-target="shareButton"')
+      expect(response.body).to include(I18n.t('share_images.preview.share'))
       expect(response.body).to include(I18n.t('share_images.preview.loading'))
     end
 
@@ -68,6 +70,8 @@ RSpec.describe 'ShareImages', type: :request do
       expect(response.body).to include(public_car_share_image_path(public_user.share_token, car, format: :png))
       expect(response.body).to include('Public preview car')
       expect(response.body).to include('data-controller="share-image-preview"')
+      expect(response.body).to include('data-share-image-preview-target="shareButton"')
+      expect(response.body).to include(I18n.t('share_images.preview.share'))
     end
 
     it 'does not generate an image when public sharing is disabled' do
@@ -101,6 +105,8 @@ RSpec.describe 'ShareImages', type: :request do
       expect(response.body).to include(wishlist_item_share_image_path(item, format: :png))
       expect(response.body).to include('Preview wish')
       expect(response.body).to include('data-controller="share-image-preview"')
+      expect(response.body).to include('data-share-image-preview-target="shareButton"')
+      expect(response.body).to include(I18n.t('share_images.preview.share'))
       expect(response.body).to include(I18n.t('share_images.preview.loading'))
     end
 
@@ -168,6 +174,9 @@ RSpec.describe 'ShareImages', type: :request do
       expect(response.body).to include('turboModal')
       expect(response.body).to include(public_wishlist_item_share_image_path(user.wishlist_share_token, item, format: :png))
       expect(response.body).to include('Public preview wish')
+      expect(response.body).to include('data-controller="share-image-preview"')
+      expect(response.body).to include('data-share-image-preview-target="shareButton"')
+      expect(response.body).to include(I18n.t('share_images.preview.share'))
     end
 
     it 'blocks public item image generation when wishlist sharing is disabled' do

@@ -28,6 +28,10 @@ pt-BR:
       errors:
         unexpected_console: "Erro ao remover item:"
         unexpected: "Não foi possível remover o item. Tente novamente."
+    share_image_preview:
+      errors:
+        share_console: "Erro ao compartilhar imagem:"
+        share_failed: "Não foi possível abrir o compartilhamento. Tente abrir o PNG."
     modal:
       loading: "Carregando..."
       submitting: "Carregando..."
