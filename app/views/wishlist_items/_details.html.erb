@@ -30,10 +30,9 @@
     <div class="card car-detail-card shadow-sm rounded-3 bg-white h-100">
       <div class="card-body p-4 p-xl-5 d-flex flex-column">
         <div class="car-showcase-actions d-flex align-items-center justify-content-end gap-2 mb-4">
-          <%= button_to add_to_collection_wishlist_item_path(wishlist_item),
-                        method: :post,
-                        form: { class: "m-0" },
-                        class: "btn btn-premium rounded-3 d-inline-flex align-items-center justify-content-center" do %>
+          <%= link_to new_car_from_wishlist_item_path(wishlist_item),
+                      class: "btn btn-premium rounded-3 d-inline-flex align-items-center justify-content-center",
+                      data: { turbo_frame: "modal" } do %>
             <i class="bi bi-plus-circle me-2"></i><%= t('wishlist_items.actions.add_to_collection') %>
           <% end %>
           <%= link_to edit_wishlist_item_path(wishlist_item),

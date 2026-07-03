@@ -36,9 +36,9 @@
             <% end %>
           </li>
           <li>
-            <%= button_to add_to_collection_wishlist_item_path(wishlist_item),
-                          method: :post,
-                          class: 'dropdown-item d-flex align-items-center gap-2 py-2' do %>
+            <%= link_to new_car_from_wishlist_item_path(wishlist_item),
+                        class: 'dropdown-item d-flex align-items-center gap-2 py-2',
+                        data: { turbo_frame: "modal" } do %>
               <i class="bi bi-plus-circle text-muted"></i>
               <%= t('wishlist_items.actions.add_to_collection') %>
             <% end %>

@@ -19,6 +19,7 @@ RSpec.describe 'WishlistItems', type: :request do
 
       expect(response).to be_successful
       expect(response.body).to include(own_item.name)
+      expect(response.body).to include(ERB::Util.html_escape(new_car_path(wishlist_item_id: own_item.id.to_s, car: WishlistItemToCarAttributesService.new(own_item).to_params)))
       expect(response.body).not_to include('Private wish')
     end
 
@@ -199,6 +200,8 @@ RSpec.describe 'WishlistItems', type: :request do
       expect(response.body).to include('Modal wish')
       expect(response.body).to include('https://example.com/reference')
       expect(response.body).to include(I18n.t('wishlist_items.actions.share_item_image'))
+      expect(response.body).to include(ERB::Util.html_escape(new_car_path(wishlist_item_id: item.id.to_s, car: WishlistItemToCarAttributesService.new(item).to_params)))
+      expect(response.body).to include('data-turbo-frame="modal"')
       expect(response.body).not_to include(I18n.t('wishlist_items.actions.open_reference'))
     end
   end
