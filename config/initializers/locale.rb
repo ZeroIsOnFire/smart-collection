@@ -20,10 +20,10 @@
 I18n.load_path += Rails.root.glob('config/locales/**/*.{rb,yml}')
 
 # Locales disponíveis
-I18n.available_locales = %i[pt-BR en]
+I18n.available_locales = %i[en pt-BR]
 
 # Locale padrão
-I18n.default_locale = :'pt-BR'
+I18n.default_locale = :en
 
 # Fallbacks: se uma tradução não existir em pt-BR, usa en
-Rails.application.config.i18n.fallbacks = %i[pt-BR en]
+Rails.application.config.i18n.fallbacks = %i[en pt-BR]

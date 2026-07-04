@@ -3,7 +3,9 @@
 class ApplicationController < ActionController::Base
   helper :all
   layout :set_layout
+  around_action :switch_locale
   before_action :configure_permitted_parameters, if: :devise_controller?
+  helper_method :current_locale_param
 
   rescue_from Mongoid::Errors::DocumentNotFound, with: :record_not_found
 
@@ -46,5 +48,32 @@ class ApplicationController < ActionController::Base
     else
       'application'
     end
+  end
+
+  def switch_locale(&action)
+    I18n.with_locale(resolved_locale, &action)
+  end
+
+  def resolved_locale
+    requested_locale.presence || user_locale.presence || I18n.default_locale
+  end
+
+  def requested_locale
+    normalized_locale(params[:locale])
+  end
+
+  def user_locale
+    normalized_locale(current_user&.locale)
+  end
+
+  def normalized_locale(locale)
+    locale = locale.to_s
+    return unless I18n.available_locales.map(&:to_s).include?(locale)
+
+    locale
+  end
+
+  def current_locale_param
+    { locale: I18n.locale.to_s }
   end
 end

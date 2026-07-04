@@ -92,12 +92,19 @@ RSpec.describe 'Authentications', type: :request do
   end
 
   describe 'POST /users/sign_in' do
-    it 'shows the unauthenticated warning in Portuguese' do
+    it 'shows the unauthenticated warning in English by default' do
       get cars_path
 
       expect(response).to redirect_to(new_user_session_path)
-      expect(flash[:alert]).to eq(I18n.t('devise.failure.unauthenticated'))
-      expect(flash[:alert]).not_to include('You need to sign in')
+      expect(flash[:alert]).to eq(I18n.t('devise.failure.unauthenticated', locale: :en))
+      expect(flash[:alert]).to include('You need to sign in')
+    end
+
+    it 'uses the URL locale when present' do
+      get cars_path, params: { locale: 'pt-BR' }
+
+      expect(response).to redirect_to(new_user_session_path)
+      expect(flash[:alert]).to eq(I18n.t('devise.failure.unauthenticated', locale: :'pt-BR'))
     end
 
     it 'renders dark autofill overrides for the email field' do
@@ -142,18 +149,18 @@ RSpec.describe 'Authentications', type: :request do
       expect(response).to redirect_to(cars_path)
     end
 
-    it 'shows invalid credentials warning in Portuguese for a wrong password' do
+    it 'shows invalid credentials warning in English for a wrong password by default' do
       post user_session_path, params: { user: { email: user.email, password: 'wrong-password' } }
 
-      expect(flash[:alert]).to eq(I18n.t('devise.failure.invalid'))
-      expect(flash[:alert]).not_to include('Invalid')
+      expect(flash[:alert]).to eq(I18n.t('devise.failure.invalid', locale: :en))
+      expect(flash[:alert]).to include('Invalid')
     end
 
-    it 'shows invalid credentials warning in Portuguese for an unknown email' do
+    it 'shows invalid credentials warning in English for an unknown email by default' do
       post user_session_path, params: { user: { email: 'missing@example.com', password: 'password123' } }
 
-      expect(flash[:alert]).to eq(I18n.t('devise.failure.not_found_in_database'))
-      expect(flash[:alert]).not_to include('Invalid')
+      expect(flash[:alert]).to eq(I18n.t('devise.failure.not_found_in_database', locale: :en))
+      expect(flash[:alert]).to include('Invalid')
     end
 
     it 'redirects a user with pending setup to initial setup' do
@@ -193,6 +200,23 @@ RSpec.describe 'Authentications', type: :request do
 
       expect(response.body).not_to include('ai_upscaling_settings_toggle')
       expect(response.body).not_to include('user_ai_upscaling_enabled')
+    end
+
+    it 'uses the user locale when no URL locale is present' do
+      user.update!(locale: 'pt-BR')
+
+      get edit_user_registration_path
+
+      expect(response.body).to include(I18n.t('devise.ui.registrations.edit.title', locale: :'pt-BR'))
+    end
+
+    it 'gives URL locale precedence over the user locale' do
+      user.update!(locale: 'pt-BR')
+
+      get edit_user_registration_path, params: { locale: 'en' }
+
+      expect(response.body).to include(I18n.t('devise.ui.registrations.edit.title', locale: :en))
+      expect(response.body).not_to include(I18n.t('devise.ui.registrations.edit.title', locale: :'pt-BR'))
     end
   end
 
