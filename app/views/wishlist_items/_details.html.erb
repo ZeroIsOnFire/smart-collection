@@ -86,7 +86,7 @@
         </div>
 
         <div class="row g-3 mb-3 car-details-stats">
-          <% if wishlist_item.reference_url.present? %>
+          <% if wishlist_item.reference_url? %>
             <div class="col-12">
               <div class="d-flex flex-column">
                 <small class="text-uppercase fw-semibold text-muted tracking-wide mb-1"><%= t('mongoid.attributes.wishlist_item.reference_url') %></small>

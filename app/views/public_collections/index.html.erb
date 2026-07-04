@@ -4,7 +4,7 @@
       <div class="col-lg-8">
         <h1 class="display-3 fw-bold mb-3"><%= t("public_collections.index.title", name: display_name(@user)) %></h1>
         <p class="lead fs-4 opacity-75 mb-0 fw-light"><%= t("public_collections.index.subtitle") %></p>
-        <% if @user.wishlist_sharing_enabled? && @user.wishlist_share_token.present? %>
+        <% if @user.wishlist_sharing_enabled? && @user.wishlist_share_token? %>
           <div class="d-flex flex-column flex-sm-row align-items-start gap-2 mt-4">
             <%= link_to public_wishlist_url(@user.wishlist_share_token),
                         class: "btn btn-light rounded-3 px-4 d-inline-flex align-items-center gap-2" do %>

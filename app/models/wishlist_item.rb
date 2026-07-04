@@ -65,12 +65,6 @@ class WishlistItem
     I18n.t("wishlist_items.priorities.#{priority}")
   end
 
-  def target_price
-    return nil if target_price_cents.blank?
-
-    target_price_cents / 100.0
-  end
-
   private
 
   def normalize_reference_url

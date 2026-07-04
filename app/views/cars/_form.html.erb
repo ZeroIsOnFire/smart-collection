@@ -1,5 +1,5 @@
 <% modal = local_assigns.fetch(:modal, false) %>
-<% wishlist_item = local_assigns[:wishlist_item] || (defined?(@wishlist_item) ? @wishlist_item : nil) %>
+<% wishlist_item = local_assigns[:wishlist_item] %>
 
 <%= simple_form_for(car, html: {
   class: "needs-validation",

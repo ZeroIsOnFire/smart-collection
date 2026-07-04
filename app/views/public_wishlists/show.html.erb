@@ -7,7 +7,7 @@
           <%= @user.wishlist_public_title.presence || t('public_wishlists.show.title', name: display_name(@user)) %>
         </h1>
         <p class="lead fs-4 opacity-75 mb-0 fw-light"><%= t('public_wishlists.show.subtitle') %></p>
-        <% if @user.sharing_enabled? && @user.share_token.present? %>
+        <% if @user.sharing_enabled? && @user.share_token? %>
           <div class="d-flex flex-column flex-sm-row align-items-start gap-2 mt-4">
             <%= link_to public_share_url(@user.share_token),
                         class: "btn btn-light rounded-3 px-4 d-inline-flex align-items-center gap-2" do %>
