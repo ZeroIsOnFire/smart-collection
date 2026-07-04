@@ -30,6 +30,7 @@
                       controller: "search-form",
                       turbo_frame: "cars_grid"
                     } do |f| %>
+        <%= f.hidden_field :locale, value: I18n.locale.to_s %>
         <div class="input-group input-group-lg premium-search-container shadow-sm border border-light border-opacity-50 rounded-3 overflow-hidden bg-white">
           <span class="input-group-text border-0 bg-transparent ps-4 pe-2">
             <i class="bi bi-search text-muted fs-5"></i>
@@ -55,7 +56,7 @@
           </div>
 
           <% if params[:q].present? %>
-            <%= link_to public_share_path(@user.share_token),
+            <%= link_to public_share_path(@user.share_token, current_locale_param),
                         class: "btn border-0 bg-transparent text-muted px-4 d-flex align-items-center search-clear-button",
                         title: t("public_collections.index.clear_search"),
                         aria: { label: t("public_collections.index.clear_search") } do %>
@@ -100,7 +101,7 @@
           </div>
 
           <% if @has_more %>
-            <%= render partial: "cars/sentinel", locals: { next_page: @cars.next_page, url: public_share_path(@user.share_token, page: @cars.next_page, q: params[:q], format: :turbo_stream) } %>
+            <%= render partial: "cars/sentinel", locals: { next_page: @cars.next_page, url: public_share_path(@user.share_token, current_locale_param.merge(page: @cars.next_page, q: params[:q], format: :turbo_stream)) } %>
           <% end %>
         <% else %>
           <div class="text-center py-5 mt-4 public-empty-state">

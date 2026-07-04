@@ -71,6 +71,17 @@ RSpec.describe 'Cars', type: :request do
       expect(response.body).to include(signed_stream)
     end
 
+    it 'copies the public sharing link with the current locale' do
+      user.update!(sharing_enabled: true, locale: 'pt-BR')
+
+      get cars_path
+
+      document = Nokogiri::HTML(response.body)
+      public_link_source = document.at_css("[data-clipboard-target='source'][value*='/s/#{user.share_token}']")
+
+      expect(public_link_source['value']).to include(public_share_path(user.share_token, locale: 'pt-BR'))
+    end
+
     it 'renders active export actions before the first export' do
       get cars_path
 

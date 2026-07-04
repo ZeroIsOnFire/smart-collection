@@ -3,7 +3,7 @@
     <label class="form-label fw-medium small"><%= t('sharing_settings.public_link') %></label>
     <div class="input-group" data-controller="clipboard" data-clipboard-success-content-value="<%= t('sharing_settings.copied') %>">
       <input type="text" class="form-control bg-light border-0 rounded-start-3 ps-3 small" readonly
-             value="<%= public_share_url(current_user.share_token) %>"
+             value="<%= public_share_url(current_user.share_token, current_locale_param) %>"
              data-clipboard-target="source">
       <button class="btn btn-primary rounded-end-3 px-3 d-flex align-items-center gap-2" type="button" data-action="clipboard#copy" data-clipboard-target="button">
         <i class="bi bi-clipboard"></i>

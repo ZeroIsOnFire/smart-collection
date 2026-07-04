@@ -26,6 +26,19 @@
               </div>
             </div>
 
+            <div class="mb-4">
+              <%= f.label :locale, t('devise.ui.registrations.edit.locale_label'), class: "form-label fw-medium" %>
+              <%= f.select :locale,
+                           [[t('devise.ui.registrations.edit.locales.en'), 'en'],
+                            [t('devise.ui.registrations.edit.locales.pt-BR'), 'pt-BR']],
+                           {},
+                           class: "form-select bg-light border-0 py-2",
+                           aria: { describedby: "user_locale_help" } %>
+              <p id="user_locale_help" class="form-text text-muted small mb-0">
+                <%= t('devise.ui.registrations.edit.locale_help') %>
+              </p>
+            </div>
+
             <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
               <div class="alert alert-warning mb-4">
                 <%= t('devise.ui.registrations.edit.pending_confirmation', email: resource.unconfirmed_email) %>

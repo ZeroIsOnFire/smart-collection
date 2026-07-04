@@ -25,7 +25,7 @@
 
   <% if @has_more %>
     <%= turbo_stream.replace "cars_sentinel" do %>
-      <%= render partial: "cars/sentinel", locals: { next_page: @cars.next_page, url: public_share_path(@user.share_token, page: @cars.next_page, q: params[:q], format: :turbo_stream) } %>
+      <%= render partial: "cars/sentinel", locals: { next_page: @cars.next_page, url: public_share_path(@user.share_token, current_locale_param.merge(page: @cars.next_page, q: params[:q], format: :turbo_stream)) } %>
     <% end %>
   <% else %>
     <%= turbo_stream.remove "cars_sentinel" %>
@@ -42,7 +42,7 @@
       </div>
       <% if @has_more %>
         <div id="cars_sentinel" class="row mt-4">
-          <%= render partial: "cars/sentinel", locals: { next_page: @cars.next_page, url: public_share_path(@user.share_token, page: @cars.next_page, q: params[:q], format: :turbo_stream) } %>
+          <%= render partial: "cars/sentinel", locals: { next_page: @cars.next_page, url: public_share_path(@user.share_token, current_locale_param.merge(page: @cars.next_page, q: params[:q], format: :turbo_stream)) } %>
         </div>
       <% end %>
     <% else %>

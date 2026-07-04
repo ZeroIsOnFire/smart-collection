@@ -55,7 +55,7 @@
       <% end %>
 
       <%# Detalhe: se for público, usamos o path do share, senão o path normal %>
-      <% target_path = public_view ? routes.public_share_car_path(share_token: local_assigns[:user].share_token, id: car.id) : car_details_path %>
+      <% target_path = public_view ? routes.public_share_car_path(share_token: local_assigns[:user].share_token, id: car.id, locale: I18n.locale.to_s) : car_details_path %>
       <%= link_to target_path, class: "text-decoration-none", data: { turbo_frame: "modal" } do %>
         <!-- Foto -->
         <% if display_photo_url.present? %>

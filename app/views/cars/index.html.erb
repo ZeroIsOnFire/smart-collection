@@ -36,7 +36,7 @@
                  data-clipboard-success-content-value="<i class='bi bi-check2'></i> <span><%= t("cars.index.public_link_copied") %></span>"
                  data-clipboard-default-class-value="btn-outline-primary"
                  data-clipboard-success-class-value="btn-primary">
-              <input type="hidden" data-clipboard-target="source" value="<%= public_share_url(current_user.share_token) %>">
+              <input type="hidden" data-clipboard-target="source" value="<%= public_share_url(current_user.share_token, current_locale_param) %>">
               <button class="btn btn-outline-primary rounded-3 w-100 d-flex align-items-center justify-content-center gap-2"
                       type="button"
                       data-action="clipboard#copy"

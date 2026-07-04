@@ -1,8 +1,8 @@
 const translationsElement = document.getElementById("rails-i18n-data")
 
 let config = {
-  locale: "pt-BR",
-  defaultLocale: "pt-BR",
+  locale: "en",
+  defaultLocale: "en",
   translations: {}
 }
 
@@ -33,8 +33,8 @@ function lookup(scope, locale) {
 }
 
 const i18n = {
-  locale: config.locale || "pt-BR",
-  defaultLocale: config.defaultLocale || "pt-BR",
+  locale: config.locale || "en",
+  defaultLocale: config.defaultLocale || "en",
   translations: config.translations || {},
   t(scope, options = {}) {
     const message = lookup(scope, this.locale) ?? lookup(scope, this.defaultLocale)

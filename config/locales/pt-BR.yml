@@ -233,6 +233,7 @@ pt-BR:
         password: "Senha"
         password_confirmation: "Confirmação de senha"
         current_password: "Senha atual"
+        locale: "Idioma"
       car:
         name: "Nome / Modelo do Veículo"
         brand: "Marca"

@@ -202,6 +202,22 @@ RSpec.describe 'Authentications', type: :request do
       expect(response.body).not_to include('user_ai_upscaling_enabled')
     end
 
+    it 'renders the language selector with the current locale selected' do
+      user.update!(locale: 'pt-BR')
+
+      get edit_user_registration_path
+
+      document = Nokogiri::HTML(response.body)
+      locale_select = document.at_css('#user_locale')
+      selected_option = locale_select.at_css('option[selected]')
+
+      expect(locale_select).to be_present
+      expect(locale_select['aria-describedby']).to eq('user_locale_help')
+      expect(selected_option['value']).to eq('pt-BR')
+      expect(locale_select.text).to include(I18n.t('devise.ui.registrations.edit.locales.en', locale: :'pt-BR'))
+      expect(locale_select.text).to include(I18n.t('devise.ui.registrations.edit.locales.pt-BR', locale: :'pt-BR'))
+    end
+
     it 'uses the user locale when no URL locale is present' do
       user.update!(locale: 'pt-BR')
 
@@ -230,12 +246,14 @@ RSpec.describe 'Authentications', type: :request do
         user: {
           name: user.name,
           email: user.email,
+          locale: 'pt-BR',
           ai_upscaling_enabled: '0',
           current_password: 'password123'
         }
       }
 
       expect(user.reload.ai_upscaling_enabled).to be true
+      expect(user.locale).to eq('pt-BR')
     end
   end
 
