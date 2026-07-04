@@ -16,7 +16,10 @@ RSpec.describe 'PublicWishlists', type: :request do
       get public_wishlist_path(user.wishlist_share_token)
 
       expect(response).to have_http_status(:success)
-      expect(response.body).to include(I18n.t('public_wishlists.show.title', name: user.name))
+      document = Nokogiri::HTML(response.body)
+      expect(document.at_css('h1').text.squish).to eq(I18n.t('public_wishlists.show.title',
+                                                             name: user.name,
+                                                             locale: :en))
       expect(response.body).to include('Public wish')
       expect(response.body).not_to include('private-trace')
       expect(response.body).to include('public_wishlist_view_preference')
@@ -26,9 +29,11 @@ RSpec.describe 'PublicWishlists', type: :request do
       expect(response.body).not_to include('target="_blank"')
       expect(response.body).to include('data-controller="search-form"')
       expect(response.body).to include('data-turbo-frame="public_wishlist_grid"')
-      expect(response.body).to include(I18n.t('wishlist_items.index.filter_menu'))
+      expect(response.body).to include('name="locale"')
+      expect(response.body).to include(public_wishlist_item_path(user.wishlist_share_token, user.wishlist_items.first, locale: 'en'))
+      expect(response.body).to include(I18n.t('wishlist_items.index.filter_menu', locale: :en))
       expect(response.body).to include('data-controller="native-link-share"')
-      expect(response.body).to include(I18n.t('javascript.native_link_share.share'))
+      expect(response.body).to include(I18n.t('javascript.native_link_share.share', locale: :en))
     end
 
     it 'filters public wishlist by query, status, priority, brand and scale without searching notes' do
@@ -41,13 +46,24 @@ RSpec.describe 'PublicWishlists', type: :request do
                              observations: 'Matching')
 
       get public_wishlist_path(user.wishlist_share_token),
-          params: { q: 'Matching', status: 'reserved', priority: 'dream', brand: 'Mini GT', scale: '1:64' }
+          params: { q: 'Matching', status: 'reserved', priority: 'dream', brand: 'Mini GT', scale: '1:64',
+                    locale: 'pt-BR' }
 
       expect(response.body).to include('Matching wish')
       expect(response.body).not_to include('Other wish')
       expect(response.body).not_to include('Notes only wish')
-      expect(response.body).to include('1 resultado para')
+      document = Nokogiri::HTML(response.body)
+      expect(document.at_css('.collection-results-summary').text.squish).to eq(
+        I18n.t('public_wishlists.show.results_count_filtered',
+               count: 1,
+               query: 'Matching',
+               locale: :'pt-BR')
+      )
       expect(response.body).to include('Matching')
+      expect(response.body).to include(public_wishlist_path(user.wishlist_share_token, locale: 'pt-BR'))
+      expect(response.body).to include(public_wishlist_item_path(user.wishlist_share_token,
+                                                                 user.wishlist_items.find_by(name: 'Matching wish'),
+                                                                 locale: 'pt-BR'))
     end
 
     it 'hides purchased public wishlist items by default' do
@@ -94,7 +110,7 @@ RSpec.describe 'PublicWishlists', type: :request do
       expect(response).to have_http_status(:success)
       expect(response.body).to include('turboModal')
       expect(response.body).to include('Modal public wish')
-      expect(response.body).to include(public_wishlist_item_share_image_path(user.wishlist_share_token, item))
+      expect(response.body).to include(public_wishlist_item_share_image_path(user.wishlist_share_token, item, locale: 'en'))
       expect(response.body).to include(I18n.t('wishlist_items.actions.share_item_image'))
     end
 

@@ -65,6 +65,7 @@ pt-BR:
     copied: "Copiado!"
     enable: "Ativar Link Público"
     disable: "Desativar Compartilhamento"
+    open_public: "Abrir link público"
 
   home:
     hero:
