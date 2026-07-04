@@ -69,9 +69,9 @@ pt-BR:
   home:
     hero:
       image_alt: "Prateleira com miniaturas catalogadas"
-      badge: "Catálogo de miniaturas e carros"
-      title: "Cadastre cada carro com foto, escala, cor e observações."
-      subtitle: "Monte uma ficha para cada miniatura, revise recortes vindos de fotos da prateleira e exporte o acervo quando precisar conferir, compartilhar ou imprimir."
+      badge: "Catálogo e lista de desejos"
+      title: "Organize seus carros e acompanhe os próximos desejos da coleção."
+      subtitle: "Monte fichas com foto, escala, cor e observações, mantenha uma lista de desejos separada e exporte ou compartilhe tudo quando precisar conferir, comprar ou imprimir."
       open_catalog: "Abrir meu catálogo"
       add_car: "Cadastrar carro"
       create_catalog: "Criar catálogo"
@@ -79,8 +79,8 @@ pt-BR:
       sample_title: "Ficha pronta para consulta"
       sample_text: "Foto, marca, modelo, ano, escala, cor e notas ficam juntos para você reconhecer cada item depois."
     features:
-      title: "Ferramentas para catalogar o acervo real"
-      subtitle: "O fluxo foi pensado para miniaturas, coleções visuais e revisão manual, sem depender de planilhas soltas."
+      title: "Ferramentas para catalogar o acervo e planejar desejos"
+      subtitle: "O fluxo foi pensado para miniaturas, coleções visuais, revisão manual e acompanhamento do que ainda falta encontrar."
       cards:
         - icon: "bi-card-image"
           icon_bg: "bg-teal-soft"
@@ -92,15 +92,16 @@ pt-BR:
           text: "Envie uma foto da prateleira, revise cada recorte e salve apenas os itens que fazem sentido."
         - icon: "bi-file-earmark-spreadsheet"
           icon_bg: "bg-emerald-light"
-          title: "PDF, CSV e link público"
-          text: "Exporte o catálogo filtrado ou compartilhe uma vitrine pública com busca por nome e marca."
+          title: "Wishlist, PDF, CSV e link público"
+          text: "Acompanhe desejos, exporte o acervo ou compartilhe vitrines públicas com busca por nome e marca."
     cta:
-      title: "Comece pelo carro que está na sua frente."
-      subtitle: "Uma boa ficha nasce do item real: foto legível, escala correta, cor predominante e notas que ajudam a diferenciar variantes."
+      title: "Comece pelo carro que está na sua frente ou pelo desejo que está procurando."
+      subtitle: "Uma boa ficha nasce do item real, e uma boa lista de desejos guarda as pistas de compra: marca, escala, prioridade, referência e notas úteis."
       create_account: "Criar catálogo"
       open_catalog: "Acessar meus carros"
       items:
         - "Cadastro manual para uma miniatura por vez"
+        - "Lista de desejos com status, prioridade, foto e link de referência"
         - "Autodetecção local para revisar fotos com vários carros"
         - "Exportação PDF/CSV para consulta fora do sistema"
         - "Compartilhamento público por link controlado"
@@ -332,6 +333,7 @@ pt-BR:
       loading: "Carregando..."
       searching: "Buscando..."
       clear_search: "Limpar busca"
+      filter_menu: "Filtros"
       results_count:
         one: "%{count} resultado"
         other: "%{count} resultados"
@@ -343,6 +345,7 @@ pt-BR:
       gallery_view: "Galeria"
       gallery_label: "Galeria em carrossel da coleção"
       gallery_thumbnails: "Miniaturas da galeria"
+      open_wishlist: "Ver lista de desejos"
       previous_item: "Item anterior"
       next_item: "Próximo item"
       show_gallery_item: "Mostrar %{name} na galeria"
@@ -359,6 +362,13 @@ pt-BR:
       search_placeholder: "Buscar por modelo, marca, ano, escala ou cor"
       searching: "Buscando..."
       clear_search: "Limpar busca"
+      clear_filters: "Limpar filtros"
+      filter_menu: "Filtros"
+      filters:
+        all_scales: "Todas as escalas"
+        all_brands: "Todas as marcas"
+        all_years: "Todos os anos"
+        all_colors: "Todas as cores"
       results_count:
         one: "%{count} item"
         other: "%{count} itens"
@@ -400,6 +410,7 @@ pt-BR:
       view_full_photo: "Ampliar foto"
       view_original_photo: "Foto original"
       view_ai_photo: "Foto tratada"
+      share_image: "Compartilhar imagem"
       photo_upscaled_by_ai: "IA"
       photo_upscaled_by_ai_tooltip: "Foto tratada por IA"
     form:

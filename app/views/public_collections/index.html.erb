@@ -4,6 +4,24 @@
       <div class="col-lg-8">
         <h1 class="display-3 fw-bold mb-3"><%= t("public_collections.index.title", name: display_name(@user)) %></h1>
         <p class="lead fs-4 opacity-75 mb-0 fw-light"><%= t("public_collections.index.subtitle") %></p>
+        <% if @user.wishlist_sharing_enabled? && @user.wishlist_share_token? %>
+          <div class="d-flex flex-column flex-sm-row align-items-start gap-2 mt-4">
+            <%= link_to public_wishlist_url(@user.wishlist_share_token, current_locale_param),
+                        class: "btn btn-light rounded-3 px-4 d-inline-flex align-items-center gap-2" do %>
+              <i class="bi bi-stars"></i>
+              <%= t("public_collections.index.open_wishlist") %>
+            <% end %>
+            <%= render "shared/native_link_share_button",
+                       title: t("public_collections.index.title", name: display_name(@user)),
+                       text: t("public_collections.index.subtitle") %>
+          </div>
+        <% else %>
+          <div class="mt-4">
+            <%= render "shared/native_link_share_button",
+                       title: t("public_collections.index.title", name: display_name(@user)),
+                       text: t("public_collections.index.subtitle") %>
+          </div>
+        <% end %>
       </div>
       <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
         <div class="public-collection-stat d-inline-flex flex-column align-items-center rounded-3 p-3">
@@ -20,6 +38,7 @@
 <div class="container-fluid app-container public-container mb-5">
   <% public_results_count = @cars.total_count %>
   <% search_query = params[:q].to_s.strip %>
+  <% public_car_filters_active = params.values_at(:brand, :size, :year, :color).any?(&:present?) %>
 
   <div class="row mb-5 search-wrapper">
     <div class="col-12 col-lg-8 mx-auto">
@@ -31,38 +50,109 @@
                       turbo_frame: "cars_grid"
                     } do |f| %>
         <%= f.hidden_field :locale, value: I18n.locale.to_s %>
-        <div class="input-group input-group-lg premium-search-container shadow-sm border border-light border-opacity-50 rounded-3 overflow-hidden bg-white">
-          <span class="input-group-text border-0 bg-transparent ps-4 pe-2">
-            <i class="bi bi-search text-muted fs-5"></i>
-          </span>
-          <%= f.text_field :q,
-                           value: params[:q],
-                           placeholder: t("public_collections.index.search_placeholder", name: display_name(@user)),
-                           class: "form-control border-0 py-4 fs-5 shadow-none bg-transparent fw-light",
-                           autocomplete: "off",
-                           data: {
-                             search_form_target: "input",
-                             action: "input->search-form#submit"
-                           } %>
+        <div class="wishlist-search-controls public-collection-search-controls d-flex gap-2 align-items-stretch">
+          <div class="input-group input-group-lg premium-search-container shadow-sm border border-light border-opacity-50 rounded-3 overflow-hidden bg-white flex-grow-1">
+            <span class="input-group-text border-0 bg-transparent ps-4 pe-2">
+              <i class="bi bi-search text-muted fs-5"></i>
+            </span>
+            <%= f.text_field :q,
+                             value: params[:q],
+                             placeholder: t("public_collections.index.search_placeholder", name: display_name(@user)),
+                             class: "form-control border-0 py-4 fs-5 shadow-none bg-transparent fw-light",
+                             autocomplete: "off",
+                             data: {
+                               search_form_target: "input",
+                               action: "input->search-form#submit"
+                             } %>
 
-          <div class="search-status public-search-status d-none d-flex align-items-center me-2"
-               role="status"
-               aria-live="polite"
-               data-search-form-target="spinner">
-            <div class="spinner-border spinner-border-sm text-primary" role="status">
-              <span class="visually-hidden"><%= t("public_collections.index.searching") %></span>
+            <div class="search-status public-search-status d-none d-flex align-items-center me-2"
+                 role="status"
+                 aria-live="polite"
+                 data-search-form-target="spinner">
+              <div class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="visually-hidden"><%= t("public_collections.index.searching") %></span>
+              </div>
+              <span class="search-status-label"><%= t("public_collections.index.searching") %></span>
             </div>
-            <span class="search-status-label"><%= t("public_collections.index.searching") %></span>
+
+            <% if params[:q].present? || public_car_filters_active %>
+              <%= link_to public_share_path(@user.share_token, current_locale_param),
+                          class: "btn border-0 bg-transparent text-muted px-4 d-flex align-items-center search-clear-button",
+                          title: t("public_collections.index.clear_search"),
+                          aria: { label: t("public_collections.index.clear_search") } do %>
+                <i class="bi bi-x-circle"></i>
+              <% end %>
+            <% end %>
+
+            <button type="submit" class="btn btn-premium px-4 rounded-3 m-1 d-none d-sm-block">
+              <%= t('actions.search') %>
+            </button>
+            <button type="submit" class="btn btn-premium px-3 rounded-3 m-1 d-sm-none" aria-label="<%= t('actions.search') %>">
+              <i class="bi bi-search"></i>
+            </button>
           </div>
 
-          <% if params[:q].present? %>
-            <%= link_to public_share_path(@user.share_token, current_locale_param),
-                        class: "btn border-0 bg-transparent text-muted px-4 d-flex align-items-center search-clear-button",
-                        title: t("public_collections.index.clear_search"),
-                        aria: { label: t("public_collections.index.clear_search") } do %>
-              <i class="bi bi-x-circle"></i>
-            <% end %>
-          <% end %>
+          <div class="dropdown">
+            <button class="btn btn-soft-secondary wishlist-filter-button px-3 rounded-3 d-flex align-items-center gap-2 h-100"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    data-bs-auto-close="outside"
+                    aria-expanded="false"
+                    aria-label="<%= t('public_collections.index.filter_menu') %>">
+              <i class="bi bi-sliders"></i>
+              <span class="d-none d-sm-inline"><%= t('public_collections.index.filter_menu') %></span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-3 p-3 wishlist-filter-menu">
+              <div class="small fw-bold text-muted text-uppercase mb-3">
+                <%= t('public_collections.index.filter_menu') %>
+              </div>
+
+              <div class="mb-3">
+                <%= f.label :size, t('activerecord.attributes.car.size'), class: "form-label small fw-semibold text-muted" %>
+                <%= f.select :size,
+                             options_for_select([[t('cars.index.filters.all_scales'), '']] + Car.scale_options, params[:size]),
+                             {},
+                             class: "form-select rounded-3" %>
+              </div>
+
+              <div class="mb-3">
+                <%= f.label :brand, t('activerecord.attributes.car.brand'), class: "form-label small fw-semibold text-muted" %>
+                <%= f.select :brand,
+                             options_for_select([[t('cars.index.filters.all_brands'), '']] + @brands.map { |brand| [brand, brand] }, params[:brand]),
+                             {},
+                             class: "form-select rounded-3" %>
+              </div>
+
+              <div class="mb-3">
+                <%= f.label :year, t('activerecord.attributes.car.year'), class: "form-label small fw-semibold text-muted" %>
+                <%= f.select :year,
+                             options_for_select([[t('cars.index.filters.all_years'), '']] + @years.map { |year| [year, year] }, params[:year]),
+                             {},
+                             class: "form-select rounded-3" %>
+              </div>
+
+              <div class="mb-3">
+                <%= f.label :color, t('activerecord.attributes.car.color'), class: "form-label small fw-semibold text-muted" %>
+                <%= f.select :color,
+                             options_for_select([[t('cars.index.filters.all_colors'), '']] + Car.color_options, params[:color]),
+                             {},
+                             class: "form-select rounded-3" %>
+              </div>
+
+              <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-premium rounded-3">
+                  <i class="bi bi-funnel me-1"></i>
+                  <%= t('actions.filter') %>
+                </button>
+                <%= link_to public_share_path(@user.share_token, current_locale_param),
+                            class: "btn btn-soft-secondary rounded-3",
+                            title: t("public_collections.index.clear_search"),
+                            aria: { label: t("public_collections.index.clear_search") } do %>
+                  <%= t('cars.index.clear_filters') %>
+                <% end %>
+              </div>
+            </div>
+          </div>
         </div>
       <% end %>
     </div>
@@ -101,7 +191,9 @@
           </div>
 
           <% if @has_more %>
-            <%= render partial: "cars/sentinel", locals: { next_page: @cars.next_page, url: public_share_path(@user.share_token, current_locale_param.merge(page: @cars.next_page, q: params[:q], format: :turbo_stream)) } %>
+            <%= render partial: "cars/sentinel",
+                       locals: { next_page: @cars.next_page,
+                                 url: public_share_path(@user.share_token, current_locale_param.merge(@filter_params).merge(page: @cars.next_page, format: :turbo_stream)) } %>
           <% end %>
         <% else %>
           <div class="text-center py-5 mt-4 public-empty-state">

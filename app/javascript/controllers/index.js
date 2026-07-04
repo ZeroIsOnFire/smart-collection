@@ -11,6 +11,7 @@ import ImageCropperController from "./image_cropper_controller"
 import InfiniteScrollController from "./infinite_scroll_controller"
 import ManualSelectionController from "./manual_selection_controller"
 import ModalFrameController from "./modal_frame_controller"
+import NativeLinkShareController from "./native_link_share_controller"
 import NumericMaskController from "./numeric_mask_controller"
 import PhotoLightboxController from "./photo_lightbox_controller"
 import PhotoUploadController from "./photo_upload_controller"
@@ -19,6 +20,7 @@ import PasswordVisibilityController from "./password_visibility_controller"
 import PollController from "./poll_controller"
 import SearchFormController from "./search_form_controller"
 import SelectionAdjustmentController from "./selection_adjustment_controller"
+import ShareImagePreviewController from "./share_image_preview_controller"
 import ThemeController from "./theme_controller"
 import ToastController from "./toast_controller"
 import ViewToggleController from "./view_toggle_controller"
@@ -35,6 +37,7 @@ application.register("image-cropper", ImageCropperController)
 application.register("infinite-scroll", InfiniteScrollController)
 application.register("manual-selection", ManualSelectionController)
 application.register("modal-frame", ModalFrameController)
+application.register("native-link-share", NativeLinkShareController)
 application.register("numeric-mask", NumericMaskController)
 application.register("photo-lightbox", PhotoLightboxController)
 application.register("photo-upload", PhotoUploadController)
@@ -43,6 +46,7 @@ application.register("password-visibility", PasswordVisibilityController)
 application.register("poll", PollController)
 application.register("search-form", SearchFormController)
 application.register("selection-adjustment", SelectionAdjustmentController)
+application.register("share-image-preview", ShareImagePreviewController)
 application.register("theme", ThemeController)
 application.register("toast", ToastController)
 application.register("view-toggle", ViewToggleController)

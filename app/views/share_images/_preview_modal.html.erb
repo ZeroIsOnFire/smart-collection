@@ -1,0 +1,7 @@
+<%= render "shared/turbo_modal",
+           title: t('share_images.preview.title', name: title),
+           size: "lg",
+           modal_class: "turbo-car-modal turbo-car-details-modal",
+           dialog_class: "turbo-car-modal-dialog",
+           body_partial: "share_images/preview",
+           body_locals: { image_path: image_path, title: title } %>

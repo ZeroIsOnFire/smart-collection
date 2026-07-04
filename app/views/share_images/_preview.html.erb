@@ -1,0 +1,43 @@
+<div class="share-image-preview text-center"
+     data-controller="share-image-preview"
+     data-share-image-preview-title-value="<%= title %>"
+     data-share-image-preview-filename-value="smart-collection-share.png">
+  <div class="share-image-preview-stage bg-light rounded-3 p-2 p-md-3 mb-3 position-relative">
+    <div class="share-image-preview-loading d-flex flex-column align-items-center justify-content-center gap-2"
+         data-share-image-preview-target="loading">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden"><%= t('share_images.preview.loading') %></span>
+      </div>
+      <span class="small text-muted fw-semibold"><%= t('share_images.preview.loading') %></span>
+    </div>
+    <%= image_tag image_path,
+                  alt: title,
+                  class: "img-fluid rounded-3 shadow-sm opacity-0",
+                  style: "max-height: 70vh; object-fit: contain;",
+                  data: {
+                    share_image_preview_target: "image",
+                    action: "load->share-image-preview#loaded"
+                  } %>
+  </div>
+
+  <div class="d-flex flex-column flex-sm-row justify-content-end gap-2">
+    <button type="button"
+            class="btn btn-premium rounded-3 px-4 d-none"
+            data-share-image-preview-target="shareButton"
+            data-action="share-image-preview#share">
+      <i class="bi bi-share me-1"></i>
+      <span data-share-image-preview-target="shareLabel"><%= t('share_images.preview.share') %></span>
+    </button>
+    <%= link_to image_path,
+                class: "btn btn-success rounded-3 px-4",
+                target: "_blank",
+                rel: "noopener noreferrer",
+                data: { turbo: false } do %>
+      <i class="bi bi-download me-1"></i>
+      <%= t('share_images.preview.open_png') %>
+    <% end %>
+  </div>
+  <p class="share-image-preview-message small text-muted mt-2 mb-0 d-none"
+     data-share-image-preview-target="message"
+     aria-live="polite"></p>
+</div>

@@ -119,6 +119,23 @@ RSpec.describe 'Cars', type: :request do
       expect(response.body).to include(I18n.t('cars.card.photo_processing'))
     end
 
+    it 'renders brand and AI indicator as metadata pills in the same badge list' do
+      allow(ImageUpscalerService).to receive(:upscale_needed?).and_return(true)
+      ai_car = create(:car, user: user, brand: 'Mini GT', size: '1:64', photo_upscale_strategy: 'ai')
+      ai_car.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+      ai_car.save!
+
+      get cars_path
+
+      document = Nokogiri::HTML(response.body)
+      card = document.at_css("#car_#{ai_car.id}")
+      badge_list = card.at_css('.metadata-chip-list')
+
+      expect(badge_list.at_css('.collection-brand-badge.metadata-chip-brand').text).to include('Mini GT')
+      expect(badge_list.at_css('.metadata-chip.metadata-chip-scale').text).to include('1:64')
+      expect(badge_list.at_css('.metadata-chip.metadata-chip-ai').text).to include(I18n.t('cars.show.photo_upscaled_by_ai'))
+    end
+
     it 'does not show the autodetection AI upscaling notice when enabled and configured' do
       allow(ImageUpscalerService).to receive(:service_configured?).and_return(true)
 
@@ -202,6 +219,96 @@ RSpec.describe 'Cars', type: :request do
         expect(response.body).to include('Searchable Car')
         expect(response.body).not_to include('Other Car')
       end
+
+      it 'filters cars by scale, brand, year and color menu parameters' do
+        car_matching.update!(brand: 'Mini GT', size: '1:64', year: 2024, color: 'Azul')
+        car_not_matching.update!(brand: 'Hot Wheels', size: '1:18', year: 2023, color: 'Vermelho')
+
+        get cars_path, params: { brand: 'Mini GT', size: '1:64', year: '2024', color: 'Azul' }
+
+        expect(response.body).to include('Searchable Car')
+        expect(response.body).not_to include('Other Car')
+      end
+    end
+  end
+
+  describe 'wishlist prefill' do
+    it 'renders the new car form with compatible wishlist values' do
+      wishlist_item = create(:wishlist_item, user: user, name: 'Wishlist Porsche', brand: 'Mini GT', scale: '1:64')
+
+      get new_car_path, params: {
+        wishlist_item_id: wishlist_item.id.to_s,
+        car: WishlistItemToCarAttributesService.new(wishlist_item).to_params
+      }
+
+      expect(response).to be_successful
+      expect(response.body).to include('Wishlist Porsche')
+      expect(response.body).to include('Mini GT')
+      expect(response.body).to include('name="wishlist_item_id"')
+
+      document = Nokogiri::HTML(response.body)
+      expect(document.at_css("button[name='commit_action'][value='create_another']")).to be_nil
+    end
+
+    it 'marks the wishlist item as purchased and links the created car' do
+      wishlist_item = create(:wishlist_item, user: user, name: 'Wishlist Skyline', brand: 'Tomica', scale: '1:64')
+      wishlist_item.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+      wishlist_item.save!
+
+      expect do
+        post cars_path, params: {
+          wishlist_item_id: wishlist_item.id.to_s,
+          car: {
+            name: wishlist_item.name,
+            brand: wishlist_item.brand,
+            size: wishlist_item.scale,
+            observations: wishlist_item.observations
+          }
+        }
+      end.to change(user.cars, :count).by(1)
+
+      created_car = user.cars.desc(:created_at).first
+      expect(wishlist_item.reload.status).to eq('purchased')
+      expect(wishlist_item.car_id).to eq(created_car.id)
+    end
+
+    it 'updates the wishlist card when a wishlist item is added through turbo' do
+      wishlist_item = create(:wishlist_item, user: user, name: 'Wishlist RX-7', brand: 'Tomica', scale: '1:64')
+
+      expect do
+        post cars_path,
+             params: {
+               wishlist_item_id: wishlist_item.id.to_s,
+               car: {
+                 name: wishlist_item.name,
+                 brand: wishlist_item.brand,
+                 size: wishlist_item.scale,
+                 photo: fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
+               }
+             },
+             as: :turbo_stream
+      end.to change(user.cars, :count).by(1)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('turbo-stream action="replace"')
+      expect(response.body).to include("target=\"wishlist_item_#{wishlist_item.id}\"")
+      expect(response.body).to include(I18n.t('wishlist_items.statuses.purchased'))
+    end
+
+    it 'does not create another car from an already added wishlist item' do
+      wishlist_item = create(:wishlist_item, user: user, status: 'purchased')
+
+      expect do
+        post cars_path,
+             params: {
+               wishlist_item_id: wishlist_item.id.to_s,
+               car: valid_attributes
+             },
+             as: :turbo_stream
+      end.not_to change(user.cars, :count)
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(response.body).to include(I18n.t('wishlist_items.flash.already_in_collection'))
     end
   end
 
@@ -621,6 +728,7 @@ RSpec.describe 'Cars', type: :request do
       delete_form = document.at_css("form[data-car-removal-car-id='#{car.id}']")
       delete_button = document.at_css("[data-car-removal-trigger][data-car-removal-car-id='#{car.id}']")
       edit_link = document.at_css("a[href='#{edit_car_path(car)}']")
+      share_image_link = document.at_css("a[href='#{car_share_image_path(car)}']")
 
       expect(document.at_css('#turboModalLabel')).to be_nil
       expect(document.at_css('[data-controller*="photo-lightbox"]')).to be_present
@@ -628,6 +736,8 @@ RSpec.describe 'Cars', type: :request do
       expect(document.at_css('.photo-lightbox-overlay[data-photo-lightbox-target="overlay"]')).to be_present
       expect(response.body).not_to include('data-bs-target="#photoLightbox')
       expect(edit_link).to be_present
+      expect(share_image_link).to be_present
+      expect(share_image_link.text).to include(I18n.t('cars.show.share_image'))
       expect(delete_form['data-turbo-frame']).to be_nil
       expect(delete_form['data-turbo-confirm']).to be_nil
       expect(delete_button['data-car-removal-confirm-message']).to eq(I18n.t('items.delete_confirm'))

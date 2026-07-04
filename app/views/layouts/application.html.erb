@@ -52,7 +52,12 @@
             <% if user_signed_in? %>
               <li class="nav-item">
                 <%= link_to cars_path, class: "nav-link fw-medium d-flex align-items-center" do %>
-                  <i class="bi bi-grid-1x2 me-2 text-primary"></i> <%= t('nav.my_cars') %>
+                  <i class="bi bi-car-front me-2 text-primary"></i> <%= t('nav.my_cars') %>
+                <% end %>
+              </li>
+              <li class="nav-item">
+                <%= link_to wishlist_items_path, class: "nav-link fw-medium d-flex align-items-center" do %>
+                  <i class="bi bi-stars me-2 text-primary"></i> <%= t('nav.wishlist') %>
                 <% end %>
               </li>
             <% end %>
@@ -90,7 +95,12 @@
                   </li>
                   <li>
                     <%= link_to cars_path, class: "dropdown-item d-flex align-items-center py-2" do %>
-                      <i class="bi bi-grid-1x2 me-2 text-primary"></i> <%= t('nav.my_cars') %>
+                      <i class="bi bi-car-front me-2 text-primary"></i> <%= t('nav.my_cars') %>
+                    <% end %>
+                  </li>
+                  <li>
+                    <%= link_to wishlist_items_path, class: "dropdown-item d-flex align-items-center py-2" do %>
+                      <i class="bi bi-stars me-2 text-primary"></i> <%= t('nav.wishlist') %>
                     <% end %>
                   </li>
                   <% if current_user.admin? %>

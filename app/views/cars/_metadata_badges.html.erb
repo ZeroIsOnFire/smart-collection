@@ -1,9 +1,15 @@
 <% badge_class = local_assigns.fetch(:badge_class, "metadata-chip-list") %>
 <% item_class = local_assigns.fetch(:item_class, "metadata-chip") %>
 <% photo_upscaled_by_ai = local_assigns.fetch(:photo_upscaled_by_ai, car.photo_upscaled_by_ai?) %>
+<% brand = local_assigns[:brand] %>
 
-<% if car.year? || car.size? || car.color? || photo_upscaled_by_ai %>
+<% if brand.present? || car.year? || car.size? || car.color? || photo_upscaled_by_ai %>
   <div class="<%= badge_class %>">
+    <% if brand.present? %>
+      <span class="collection-brand-badge metadata-chip-brand" title="<%= t('activerecord.attributes.car.brand') %>" aria-label="<%= t('activerecord.attributes.car.brand') %>">
+        <%= brand %>
+      </span>
+    <% end %>
     <% if car.year? %>
       <span class="<%= item_class %> metadata-chip-year" title="<%= t('activerecord.attributes.car.year') %>" aria-label="<%= t('activerecord.attributes.car.year') %>">
         <i class="bi bi-calendar"></i><%= car.year %>

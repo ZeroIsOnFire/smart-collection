@@ -1,0 +1,179 @@
+en:
+  nav:
+    wishlist: "Wishlist"
+
+  mongoid:
+    models:
+      wishlist_item:
+        one: "Wishlist item"
+        other: "Wishlist items"
+    attributes:
+      wishlist_item:
+        name: "Name"
+        brand: "Brand"
+        scale: "Scale"
+        observations: "Notes"
+        priority: "Priority"
+        status: "Status"
+        target_price_cents: "Target price"
+        reference_url: "Reference link"
+        photo: "Photo"
+        remove_photo: "Remove photo"
+
+  wishlist_items:
+    statuses:
+      wanted: "Wanted"
+      reserved: "Reserved"
+      purchased: "Purchased"
+    priorities:
+      low: "Low"
+      medium: "Medium"
+      high: "High"
+      dream: "Dream item"
+    actions:
+      new: "New wish"
+      add_to_collection: "Add to collection"
+      already_in_collection: "Already in collection"
+      enable_public: "Enable public link"
+      disable_public: "Disable public link"
+      open_public: "Open public link"
+      open_reference: "Open reference"
+      share_image: "List image"
+      share_item_image: "Share image"
+      back_to_wishlist: "Back to wishlist"
+      delete_confirm: "Delete this wishlist item?"
+    filters:
+      without_purchased: "Without purchased"
+      all_statuses: "All statuses"
+      all_priorities: "All priorities"
+      all_brands: "All brands"
+      all_scales: "All scales"
+    index:
+      title: "Wishlist"
+      subtitle: "Track wanted miniatures without opening the full collection form."
+      search_label: "Search"
+      search_placeholder: "Search by name, brand or scale"
+      searching: "Searching..."
+      filter_menu: "Filters"
+      clear_filters: "Clear filters"
+      secondary_actions: "Actions"
+      export_actions: "Export list"
+      copy_public_link: "Copy public link"
+      public_link_copied: "Link copied"
+      grid_view: "Grid"
+      list_view: "List"
+      results_count:
+        one: "%{count} wish"
+        other: "%{count} wishes"
+      results_count_filtered:
+        one: "%{count} result for \"%{query}\""
+        other: "%{count} results for \"%{query}\""
+      empty_title: "No wishes yet"
+      empty_text: "Start with a miniature you want to buy, find or watch."
+      add_first_item: "Add first wish"
+    flash:
+      already_in_collection: "This item has already been added to the collection."
+    modal:
+      new_title: "New wish"
+      edit_title: "Edit wish"
+      details_title: "Wish details"
+    new:
+      title: "Add wish"
+      subtitle: "Save name, brand, scale, priority and a quick reference."
+    edit:
+      title: "Edit %{name}"
+      subtitle: "Update status, priority or notes for this wish."
+    card:
+      actions_menu: "Open wish actions"
+      view_details: "Open details"
+      no_photo: "No photo"
+    form:
+      validation_error_title: "Review the highlighted fields"
+      main_photo: "Miniature photo"
+      upload_prompt: "Add wish photo"
+      upload_limits: "Use an optional JPG, PNG, GIF or WEBP photo."
+      replace_photo: "Click to replace the photo"
+      remove_photo: "Remove current photo"
+      basic_info: "Identification"
+      specifications: "Status, priority and reference"
+      name_placeholder: "Ex: Porsche 911 Treasure Hunt"
+      brand_placeholder: "Ex: Hot Wheels, Matchbox, Mini GT"
+      select_scale: "Choose the scale..."
+      reference_url_placeholder: "https://example.com/listing"
+      observations_placeholder: "Note store, variant, packaging, condition or any useful lead."
+
+  wishlist_exports:
+    actions:
+      csv: "Export CSV"
+      pdf: "Export PDF"
+    csv:
+      headers:
+        name: "Name"
+        brand: "Brand"
+        scale: "Scale"
+        observations: "Notes"
+        priority: "Priority"
+        status: "Status"
+        reference_url: "Reference link"
+        created_at: "Created at"
+        updated_at: "Updated at"
+    pdf:
+      eyebrow: "SMART COLLECTION"
+      title: "WISHLIST"
+      subtitle: "%{name} | Generated at %{date}"
+      header_title: "%{name}'s wishlist"
+      meta_info:
+        one: "%{count} wanted car | Generated at %{date}"
+        other: "%{count} wanted cars | Generated at %{date}"
+      cover_description: "A visual report with wanted items, photos, status, priority and notes from the hunt."
+      items_title: "Wanted items"
+      empty: "No items have been registered in the wishlist."
+      no_photo: "No photo"
+      generated_by: "SmartCollection"
+      summary:
+        total: "Total wishes"
+
+  public_wishlists:
+    layout:
+      title: "%{name}'s wishlist"
+      footer_text: "Show shared wishes with search, status, priority and item details."
+      create_wishlist: "Create my wishlist"
+    show:
+      eyebrow: "Public wishlist"
+      title: "%{name}'s wishlist"
+      subtitle: "Wanted, reserved or purchased miniatures to follow the hunt."
+      items_count: "Wishlist items"
+      open_collection: "View public collection"
+      results_count:
+        one: "%{count} wish"
+        other: "%{count} wishes"
+      results_count_filtered:
+        one: "%{count} result for \"%{query}\""
+        other: "%{count} results for \"%{query}\""
+      empty_title: "No items found"
+      empty_text: "Try adjusting filters to see other shared wishes."
+
+  share_images:
+    brand: "SmartCollection"
+    footer_brand: "Smart Collection %{year}"
+    preview:
+      title: "%{name} image"
+      open_png: "Open PNG"
+      share: "Share"
+      sharing: "Sharing..."
+      loading: "Loading image..."
+    badges:
+      collection: "Collection"
+      wishlist: "Wishlist"
+      user_wishlist: "%{name}'s wishlist"
+    car_fields:
+      brand: "Brand"
+      scale: "Scale"
+      year: "Year"
+      color: "Color"
+      tags: "Tags"
+      observations: "Notes"
+    wishlist:
+      total:
+        one: "%{count} list item"
+        other: "%{count} list items"

@@ -61,14 +61,15 @@ en:
     copied: "Copied!"
     enable: "Enable Public Link"
     disable: "Disable Sharing"
+    open_public: "Open public link"
 
 
   home:
     hero:
       image_alt: "Shelf with cataloged miniature cars"
-      badge: "Miniature car catalog"
-      title: "Register each car with photo, scale, color and notes."
-      subtitle: "Create a record for each miniature, review crops from shelf photos and export the catalog when you need to check, share or print it."
+      badge: "Catalog and wishlist"
+      title: "Organize your cars and track the next wishes for the collection."
+      subtitle: "Create records with photo, scale, color and notes, keep a separate wishlist and export or share everything when you need to check, buy or print."
       open_catalog: "Open my catalog"
       add_car: "Register car"
       create_catalog: "Create catalog"
@@ -76,8 +77,8 @@ en:
       sample_title: "Record ready for lookup"
       sample_text: "Photo, brand, model, year, scale, color and notes stay together so you can identify each item later."
     features:
-      title: "Tools for cataloging the real collection"
-      subtitle: "The workflow is built for miniatures, visual collections and manual review, without loose spreadsheets."
+      title: "Tools for cataloging the collection and planning wishes"
+      subtitle: "The workflow is built for miniatures, visual collections, manual review and tracking what is still missing."
       cards:
         - icon: "bi-card-image"
           icon_bg: "bg-teal-soft"
@@ -89,15 +90,16 @@ en:
           text: "Upload a shelf photo, review each crop and save only the items that make sense."
         - icon: "bi-file-earmark-spreadsheet"
           icon_bg: "bg-emerald-light"
-          title: "PDF, CSV and public link"
-          text: "Export the filtered catalog or share a public showcase with search by name and brand."
+          title: "Wishlist, PDF, CSV and public link"
+          text: "Track wishes, export the catalog or share public showcases with search by name and brand."
     cta:
-      title: "Start with the car in front of you."
-      subtitle: "A good record starts with the real item: readable photo, correct scale, predominant color and notes that separate variants."
+      title: "Start with the car in front of you or the wish you are hunting."
+      subtitle: "A good record starts with the real item, and a good wishlist keeps buying leads: brand, scale, priority, reference and useful notes."
       create_account: "Create catalog"
       open_catalog: "Open my cars"
       items:
         - "Manual registration for one miniature at a time"
+        - "Wishlist with status, priority, photo and reference link"
         - "Local autodetection to review photos with many cars"
         - "PDF/CSV export for offline reference"
         - "Controlled public sharing by link"
@@ -322,6 +324,7 @@ en:
       loading: "Loading..."
       searching: "Searching..."
       clear_search: "Clear search"
+      filter_menu: "Filters"
       results_count:
         one: "%{count} result"
         other: "%{count} results"
@@ -333,6 +336,7 @@ en:
       gallery_view: "Gallery"
       gallery_label: "Collection carousel gallery"
       gallery_thumbnails: "Gallery thumbnails"
+      open_wishlist: "View wishlist"
       previous_item: "Previous item"
       next_item: "Next item"
       show_gallery_item: "Show %{name} in the gallery"
@@ -348,6 +352,13 @@ en:
       search_placeholder: "Search by model, brand, year, scale or color"
       searching: "Searching..."
       clear_search: "Clear search"
+      clear_filters: "Clear filters"
+      filter_menu: "Filters"
+      filters:
+        all_scales: "All scales"
+        all_brands: "All brands"
+        all_years: "All years"
+        all_colors: "All colors"
       results_count:
         one: "%{count} item"
         other: "%{count} items"
@@ -389,6 +400,7 @@ en:
       view_full_photo: "Enlarge photo"
       view_original_photo: "Original photo"
       view_ai_photo: "Processed photo"
+      share_image: "Share image"
       photo_upscaled_by_ai: "AI"
       photo_upscaled_by_ai_tooltip: "Photo processed by AI"
     form:

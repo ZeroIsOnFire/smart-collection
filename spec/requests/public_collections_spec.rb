@@ -13,6 +13,18 @@ RSpec.describe 'Public Collections', type: :request do
       document = Nokogiri::HTML(response.body)
       expect(document.at_css('h1').text).to include(I18n.t('public_collections.index.title', name: user.name))
       expect(response.body).to include('Public Car')
+      expect(response.body).to include('data-controller="native-link-share"')
+      expect(response.body).to include(I18n.t('javascript.native_link_share.share'))
+    end
+
+    it 'links to the public wishlist when both public shares are enabled' do
+      user.update!(wishlist_sharing_enabled: true, wishlist_share_token: 'wishlist-token')
+
+      get public_share_path(user.share_token)
+
+      expect(response.body).to include(public_wishlist_url(user.wishlist_share_token))
+      expect(response.body).to include(I18n.t('public_collections.index.open_wishlist'))
+      expect(response.body).not_to include('target="_blank"')
     end
 
     it 'renders the public collection in the URL locale' do
@@ -61,6 +73,23 @@ RSpec.describe 'Public Collections', type: :request do
       expect(response.body).not_to include('Other Public Car')
 
       get public_share_path(user.share_token), params: { q: '1988' }
+      expect(response.body).to include('Filtered Public Car')
+      expect(response.body).not_to include('Other Public Car')
+    end
+
+    it 'renders and applies public car filters by scale, brand, year and color' do
+      car.update!(name: 'Filtered Public Car', brand: 'Mini GT', size: '1:64', color: 'Azul', year: 1988)
+      create(:car, user: user, name: 'Other Public Car', brand: 'Hot Wheels',
+                   size: '1:18', color: 'Vermelho', year: 1970)
+
+      get public_share_path(user.share_token),
+          params: { brand: 'Mini GT', size: '1:64', year: '1988', color: 'Azul' }
+
+      expect(response.body).to include(I18n.t('public_collections.index.filter_menu'))
+      expect(response.body).to include('name="size"')
+      expect(response.body).to include('name="brand"')
+      expect(response.body).to include('name="year"')
+      expect(response.body).to include('name="color"')
       expect(response.body).to include('Filtered Public Car')
       expect(response.body).not_to include('Other Public Car')
     end
@@ -150,6 +179,8 @@ RSpec.describe 'Public Collections', type: :request do
       expect(response).to have_http_status(:success)
       expect(response.body).to include('Public Car')
       expect(response.body).to include(public_share_path(user.share_token, locale: 'pt-BR'))
+      expect(response.body).to include('data-controller="native-link-share"')
+      expect(response.body).to include(I18n.t('javascript.native_link_share.share'))
     end
 
     it 'renders public car details inside the global modal frame' do
@@ -180,6 +211,7 @@ RSpec.describe 'Public Collections', type: :request do
       expect(response.body).not_to include('data-bs-target="#photoLightbox')
       expect(document.at_css("a[href='#{edit_car_path(car)}']")).to be_nil
       expect(document.at_css("[data-car-removal-trigger][data-car-removal-car-id='#{car.id}']")).to be_nil
+      expect(document.at_css("a[href='#{public_car_share_image_path(user.share_token, car)}']")).to be_present
       expect(response.body).to include(I18n.t('activerecord.attributes.car.color'))
       expect(response.body).not_to include(I18n.t('cars.show.view_original_photo'))
       expect(response.body).to include('Azul')

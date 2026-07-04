@@ -3,6 +3,9 @@ import { Controller } from "@hotwired/stimulus"
 // Connects to data-controller="search-form"
 export default class extends Controller {
   static targets = ["input", "spinner", "results"]
+  static values = {
+    resultsContainerId: { type: String, default: "cars_list_container" }
+  }
 
   connect() {
     this.timeout = null
@@ -39,7 +42,7 @@ export default class extends Controller {
     if (this.hasSpinnerTarget) this.spinnerTarget.classList.remove("d-none")
     this.inputTarget.setAttribute("aria-busy", "true")
     
-    const results = document.getElementById('cars_list_container')
+    const results = document.getElementById(this.resultsContainerIdValue)
     if (results) {
       results.classList.add("is-searching")
       results.setAttribute("aria-busy", "true")
@@ -50,7 +53,7 @@ export default class extends Controller {
     if (this.hasSpinnerTarget) this.spinnerTarget.classList.add("d-none")
     this.inputTarget.setAttribute("aria-busy", "false")
     
-    const results = document.getElementById('cars_list_container')
+    const results = document.getElementById(this.resultsContainerIdValue)
     if (results) {
       results.classList.remove("is-searching")
       results.setAttribute("aria-busy", "false")

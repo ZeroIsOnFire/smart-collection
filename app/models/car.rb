@@ -96,6 +96,8 @@ class Car
 
   belongs_to :user, touch: true
   after_create :track_creation
+  after_update :clear_share_image_cache
+  after_destroy :clear_share_image_cache
   after_destroy :track_removal
 
   # Assume standard ActiveStorage with mongoid wrapper setup later or skip if unsupported natively without gem.
@@ -162,6 +164,10 @@ class Car
 
   def track_removal
     UsageMetric.record!('cars_removed')
+  end
+
+  def clear_share_image_cache
+    ShareImageCacheService.clear(record: self, kind: :car)
   end
 
   def year_must_be_numeric
