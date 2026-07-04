@@ -10,7 +10,8 @@ RSpec.describe 'Public Collections', type: :request do
     it 'allows access without login' do
       get public_share_path(user.share_token)
       expect(response).to have_http_status(:success)
-      expect(response.body).to include(I18n.t('public_collections.index.title', name: user.name))
+      document = Nokogiri::HTML(response.body)
+      expect(document.at_css('h1').text).to include(I18n.t('public_collections.index.title', name: user.name))
       expect(response.body).to include('Public Car')
     end
 

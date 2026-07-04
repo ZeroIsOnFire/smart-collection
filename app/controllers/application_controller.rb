@@ -50,8 +50,8 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  def switch_locale(&action)
-    I18n.with_locale(resolved_locale, &action)
+  def switch_locale(&)
+    I18n.with_locale(resolved_locale, &)
   end
 
   def resolved_locale

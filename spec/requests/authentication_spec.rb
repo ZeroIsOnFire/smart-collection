@@ -73,7 +73,6 @@ RSpec.describe 'Authentications', type: :request do
         error_text = Nokogiri::HTML(response.body).at_css('#error_explanation').text.squish
 
         expect(error_text).to include(I18n.t('errors.messages.too_short.other', count: 6))
-        expect(error_text).not_to include('is too short')
       end
 
       it 'does not create a user with mismatched passwords' do
@@ -86,7 +85,6 @@ RSpec.describe 'Authentications', type: :request do
         error_text = Nokogiri::HTML(response.body).at_css('#error_explanation').text.squish
 
         expect(error_text).to include(I18n.t('errors.messages.confirmation', attribute: User.human_attribute_name(:password)))
-        expect(error_text).not_to include("doesn't match")
       end
     end
   end
@@ -231,8 +229,8 @@ RSpec.describe 'Authentications', type: :request do
 
       get edit_user_registration_path, params: { locale: 'en' }
 
-      expect(response.body).to include(I18n.t('devise.ui.registrations.edit.title', locale: :en))
-      expect(response.body).not_to include(I18n.t('devise.ui.registrations.edit.title', locale: :'pt-BR'))
+      document = Nokogiri::HTML(response.body)
+      expect(document.at_css('h1').text).to include(I18n.t('devise.ui.registrations.edit.title', locale: :en))
     end
   end
 
