@@ -262,7 +262,7 @@ RSpec.describe 'Authentications', type: :request do
       sign_in user
       get admin_dashboard_path
       expect(response).to redirect_to(root_path)
-      expect(flash[:alert]).to eq('Not authorized')
+      expect(flash[:alert]).to eq(I18n.t('admin.messages.not_authorized'))
     end
 
     it 'allows admin user to access admin dashboard' do

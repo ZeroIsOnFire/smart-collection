@@ -254,6 +254,7 @@ pt-BR:
       taken: "já está em uso"
       invalid: "é inválido"
       confirmation: "não é igual a %{attribute}"
+      page_not_found: "Página ou item não encontrado."
       not_saved:
         one: "Não foi possível salvar %{resource}: 1 erro encontrado."
         other: "Não foi possível salvar %{resource}: %{count} erros encontrados."
@@ -427,6 +428,9 @@ pt-BR:
       original_photo: "Original sem IA"
       ai_photo: "Versão com IA"
       ai_photo_missing: "Versão com IA ainda não gerada"
+    sentinel:
+      loading: "Carregando mais..."
+      loading_more: "Carregando mais itens..."
 
   # ── Autodetecção ───────────────────────────────────────
   autodetections:
@@ -531,6 +535,11 @@ pt-BR:
     other: "Outra"
 
   admin:
+    messages:
+      not_authorized: "Não autorizado"
+      user_updated: "Usuário atualizado com sucesso."
+      self_delete: "Você não pode deletar seu próprio usuário."
+      user_deleted: "Usuário removido com sucesso."
     layout:
       short_title: "Admin"
     nav:

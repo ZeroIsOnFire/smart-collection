@@ -595,7 +595,7 @@ RSpec.describe 'Cars', type: :request do
       other_car = create(:car, user: other_user)
       get edit_car_path(other_car)
       expect(response).to redirect_to(cars_path)
-      expect(flash[:alert]).to eq(I18n.t('errors.messages.page_not_found', default: 'Página ou item não encontrado.'))
+      expect(flash[:alert]).to eq(I18n.t('errors.messages.page_not_found'))
     end
   end
 
@@ -737,7 +737,7 @@ RSpec.describe 'Cars', type: :request do
       get car_path(other_car)
 
       expect(response).to redirect_to(cars_path)
-      expect(flash[:alert]).to eq(I18n.t('errors.messages.page_not_found', default: 'Página ou item não encontrado.'))
+      expect(flash[:alert]).to eq(I18n.t('errors.messages.page_not_found'))
     end
   end
 

@@ -28,7 +28,7 @@ module Admin
     private
 
     def authenticate_admin!
-      redirect_to root_path, alert: 'Not authorized' unless current_user.admin?
+      redirect_to root_path, alert: t('admin.messages.not_authorized') unless current_user.admin?
     end
   end
 end

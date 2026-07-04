@@ -19,12 +19,14 @@ en:
   nav:
     home: "Home"
     collections: "Collections"
+    my_cars: "My Cars"
     profile: "Profile"
     sign_in: "Sign in"
     sign_out: "Sign out"
     sign_up: "Create account"
     settings: "Settings"
     language: "Language"
+    admin_panel: "Admin Panel"
     open_menu: "Open menu"
     toggle_theme: "Toggle theme"
     user_menu: "User menu"
@@ -243,6 +245,7 @@ en:
       taken: "has already been taken"
       invalid: "is invalid"
       confirmation: "doesn't match %{attribute}"
+      page_not_found: "Page or item not found."
       not_saved:
         one: "%{resource} could not be saved: 1 error found."
         other: "%{resource} could not be saved: %{count} errors found."
@@ -414,6 +417,9 @@ en:
       original_photo: "Original without AI"
       ai_photo: "AI version"
       ai_photo_missing: "AI version not generated yet"
+    sentinel:
+      loading: "Loading more..."
+      loading_more: "Loading more items..."
 
   autodetections:
     title: "Photo Autodetection"
@@ -515,6 +521,11 @@ en:
     other: "Other"
 
   admin:
+    messages:
+      not_authorized: "Not authorized"
+      user_updated: "User updated successfully."
+      self_delete: "You cannot delete your own user."
+      user_deleted: "User removed successfully."
     layout:
       short_title: "Admin"
     nav:

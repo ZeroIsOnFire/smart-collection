@@ -16,7 +16,7 @@
             <i class="bi <%= type.to_s == 'alert' || type.to_s == 'error' ? 'bi-exclamation-triangle' : 'bi-check-circle' %> me-2"></i>
             <%= message %>
           </div>
-          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="<%= t('actions.close') %>"></button>
         </div>
       </div>
     <% end %>

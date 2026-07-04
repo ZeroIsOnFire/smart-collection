@@ -55,7 +55,7 @@ RSpec.describe 'Admin::Maintenance', type: :request do
 
         expect(response).to redirect_to(root_path)
         follow_redirect!
-        expect(response.body).to include('Not authorized')
+        expect(response.body).to include(I18n.t('admin.messages.not_authorized'))
       end
     end
 

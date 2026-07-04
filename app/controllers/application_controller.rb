@@ -31,7 +31,7 @@ class ApplicationController < ActionController::Base
   def record_not_found
     respond_to do |format|
       format.html do
-        flash[:alert] = t('errors.messages.page_not_found', default: 'Página ou item não encontrado.')
+        flash[:alert] = t('errors.messages.page_not_found')
         if user_signed_in?
           redirect_to cars_path
         else
