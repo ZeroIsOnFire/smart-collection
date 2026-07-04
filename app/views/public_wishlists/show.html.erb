@@ -1,0 +1,254 @@
+<div class="hero-gradient text-white pt-5 pb-5 mb-0">
+  <div class="container-fluid app-container public-container py-4">
+    <div class="row align-items-center position-relative" style="z-index: 2;">
+      <div class="col-lg-8">
+        <p class="text-uppercase fw-bold small mb-2 opacity-75"><%= t('public_wishlists.show.eyebrow') %></p>
+        <h1 class="display-3 fw-bold mb-3">
+          <%= @user.wishlist_public_title.presence || t('public_wishlists.show.title', name: display_name(@user)) %>
+        </h1>
+        <p class="lead fs-4 opacity-75 mb-0 fw-light"><%= t('public_wishlists.show.subtitle') %></p>
+        <% if @user.sharing_enabled? && @user.share_token? %>
+          <div class="d-flex flex-column flex-sm-row align-items-start gap-2 mt-4">
+            <%= link_to public_share_url(@user.share_token),
+                        class: "btn btn-light rounded-3 px-4 d-inline-flex align-items-center gap-2" do %>
+              <i class="bi bi-car-front"></i>
+              <%= t('public_wishlists.show.open_collection') %>
+            <% end %>
+            <%= render "shared/native_link_share_button",
+                       title: @user.wishlist_public_title.presence || t('public_wishlists.show.title', name: display_name(@user)),
+                       text: t('public_wishlists.show.subtitle') %>
+          </div>
+        <% else %>
+          <div class="mt-4">
+            <%= render "shared/native_link_share_button",
+                       title: @user.wishlist_public_title.presence || t('public_wishlists.show.title', name: display_name(@user)),
+                       text: t('public_wishlists.show.subtitle') %>
+          </div>
+        <% end %>
+      </div>
+      <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
+        <div class="public-collection-stat d-inline-flex flex-column align-items-center rounded-3 p-3">
+          <span class="public-collection-stat-number fs-2 fw-bold lh-1"><%= @wishlist_items.count %></span>
+          <span class="public-collection-stat-label small text-uppercase fw-semibold mt-1">
+            <i class="bi bi-stars me-1"></i> <%= t('public_wishlists.show.items_count') %>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid app-container public-container mb-5">
+  <% public_results_count = @wishlist_items.count %>
+  <% search_query = params[:q].to_s.strip %>
+
+  <div class="row mb-5 search-wrapper">
+    <div class="col-12 col-lg-8 mx-auto">
+      <%= form_with url: public_wishlist_path(@user.wishlist_share_token),
+                    method: :get,
+                    class: "position-relative",
+                    data: {
+                      controller: "search-form",
+                      turbo_frame: "public_wishlist_grid",
+                      search_form_results_container_id_value: "cars_list_container"
+                    } do |f| %>
+        <div class="wishlist-search-controls d-flex gap-2 align-items-stretch">
+          <div class="input-group input-group-lg premium-search-container shadow-sm border border-light border-opacity-50 rounded-3 overflow-hidden bg-white flex-grow-1">
+            <span class="input-group-text border-0 bg-transparent ps-4 pe-2">
+              <i class="bi bi-search text-muted fs-5"></i>
+            </span>
+            <%= f.text_field :q,
+                             value: params[:q],
+                             placeholder: t('wishlist_items.index.search_placeholder'),
+                             class: "form-control border-0 py-4 fs-5 shadow-none bg-transparent fw-light",
+                             autocomplete: "off",
+                             data: {
+                               search_form_target: "input",
+                               action: "input->search-form#submit"
+                             } %>
+
+            <div class="search-status public-search-status d-none d-flex align-items-center me-2"
+                 role="status"
+                 aria-live="polite"
+                 data-search-form-target="spinner">
+              <div class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="visually-hidden"><%= t('wishlist_items.index.searching') %></span>
+              </div>
+              <span class="search-status-label"><%= t('wishlist_items.index.searching') %></span>
+            </div>
+
+            <% if params.slice(:q, :status, :priority, :brand, :scale).values.any?(&:present?) %>
+              <%= link_to public_wishlist_path(@user.wishlist_share_token),
+                          class: "btn border-0 bg-transparent text-muted px-3 d-flex align-items-center search-clear-button",
+                          title: t('wishlist_items.index.clear_filters'),
+                          aria: { label: t('wishlist_items.index.clear_filters') } do %>
+                <i class="bi bi-x-circle"></i>
+              <% end %>
+            <% end %>
+
+            <button type="submit" class="btn btn-premium px-4 rounded-3 m-1 d-none d-sm-block">
+              <%= t('actions.search') %>
+            </button>
+            <button type="submit" class="btn btn-premium px-3 rounded-3 m-1 d-sm-none" aria-label="<%= t('actions.search') %>">
+              <i class="bi bi-search"></i>
+            </button>
+          </div>
+
+          <div class="dropdown">
+            <button class="btn btn-soft-secondary wishlist-filter-button px-3 rounded-3 d-flex align-items-center gap-2 h-100"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    data-bs-auto-close="outside"
+                    aria-expanded="false"
+                    aria-label="<%= t('wishlist_items.index.filter_menu') %>">
+              <i class="bi bi-sliders"></i>
+              <span class="d-none d-sm-inline"><%= t('wishlist_items.index.filter_menu') %></span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-3 p-3 wishlist-filter-menu">
+              <div class="small fw-bold text-muted text-uppercase mb-3">
+                <%= t('wishlist_items.index.filter_menu') %>
+              </div>
+
+              <div class="mb-3">
+                <%= f.label :status, t('mongoid.attributes.wishlist_item.status'), class: "form-label small fw-semibold text-muted" %>
+                <%= f.select :status,
+                             options_for_select(WishlistItem.status_filter_options,
+                                                params.key?(:status) ? params[:status] : WishlistItem::STATUS_FILTER_WITHOUT_PURCHASED),
+                             {},
+                             class: "form-select rounded-3" %>
+              </div>
+
+              <div class="mb-3">
+                <%= f.label :priority, t('mongoid.attributes.wishlist_item.priority'), class: "form-label small fw-semibold text-muted" %>
+                <%= f.select :priority,
+                             options_for_select([[t('wishlist_items.filters.all_priorities'), '']] + WishlistItem.priority_options, params[:priority]),
+                             {},
+                             class: "form-select rounded-3" %>
+              </div>
+
+              <div class="mb-3">
+                <%= f.label :brand, t('mongoid.attributes.wishlist_item.brand'), class: "form-label small fw-semibold text-muted" %>
+                <%= f.select :brand,
+                             options_for_select([[t('wishlist_items.filters.all_brands'), '']] + @brands.map { |brand| [brand, brand] }, params[:brand]),
+                             {},
+                             class: "form-select rounded-3" %>
+              </div>
+
+              <div class="mb-3">
+                <%= f.label :scale, t('mongoid.attributes.wishlist_item.scale'), class: "form-label small fw-semibold text-muted" %>
+                <%= f.select :scale,
+                             options_for_select([[t('wishlist_items.filters.all_scales'), '']] + @scales.map { |scale| [scale, scale] }, params[:scale]),
+                             {},
+                             class: "form-select rounded-3" %>
+              </div>
+
+              <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-premium rounded-3">
+                  <i class="bi bi-funnel me-1"></i>
+                  <%= t('actions.filter') %>
+                </button>
+                <%= link_to public_wishlist_path(@user.wishlist_share_token),
+                            class: "btn btn-soft-secondary rounded-3",
+                            title: t('wishlist_items.index.clear_filters'),
+                            aria: { label: t('wishlist_items.index.clear_filters') } do %>
+                  <%= t('wishlist_items.index.clear_filters') %>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <turbo-frame id="public_wishlist_grid">
+  <div data-controller="view-toggle"
+       data-view-toggle-storage-key-value="public_wishlist_view_preference">
+    <div class="collection-view-controls d-flex justify-content-between align-items-center">
+      <div class="collection-results-summary text-muted small" aria-live="polite">
+        <% if search_query.present? %>
+          <%= t('public_wishlists.show.results_count_filtered', count: public_results_count, query: search_query) %>
+        <% else %>
+          <%= t('public_wishlists.show.results_count', count: public_results_count) %>
+        <% end %>
+      </div>
+      <div class="btn-group shadow-sm bg-white rounded-3 p-1 border public-view-toggle">
+        <button type="button" class="btn btn-sm text-primary active rounded-3 px-3 fw-medium d-flex align-items-center gap-2" data-view-toggle-target="gridButton" data-action="click->view-toggle#setGrid">
+          <i class="bi bi-grid-fill"></i> <%= t('public_collections.index.grid_view') %>
+        </button>
+        <button type="button" class="btn btn-sm text-muted rounded-3 px-3 fw-medium d-flex align-items-center gap-2" data-view-toggle-target="listButton" data-action="click->view-toggle#setList">
+          <i class="bi bi-list-ul"></i> <%= t('public_collections.index.list_view') %>
+        </button>
+      </div>
+    </div>
+
+    <div id="cars_list_container" class="position-relative mt-2">
+      <% if @wishlist_items.any? %>
+        <div id="cars_grid_inner" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4 pt-2 grid-view is-public">
+          <%= render partial: "public_wishlists/wishlist_item",
+                     collection: @wishlist_items,
+                     as: :wishlist_item,
+                     locals: { user: @user } %>
+        </div>
+      <% else %>
+        <div class="text-center py-5 mt-4 public-empty-state">
+          <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-white shadow-sm mb-4 public-empty-icon">
+            <i class="bi bi-search display-4 text-muted opacity-25"></i>
+          </div>
+          <h3 class="fw-bold mb-2"><%= t('public_wishlists.show.empty_title') %></h3>
+          <p class="text-muted mb-0 fs-5"><%= t('public_wishlists.show.empty_text') %></p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+  </turbo-frame>
+
+  <style>
+    .wishlist-filter-menu {
+      min-width: min(320px, calc(100vw - 2rem));
+      z-index: 1080;
+    }
+
+    .wishlist-search-controls {
+      position: relative;
+      z-index: 30;
+    }
+
+    .wishlist-search-controls .dropdown {
+      position: relative;
+      z-index: 31;
+    }
+
+    .wishlist-filter-button {
+      min-width: 3.25rem;
+      min-height: 3.25rem;
+      justify-content: center;
+      color: var(--public-primary);
+      opacity: 1;
+    }
+
+    .wishlist-filter-button .bi {
+      color: currentColor;
+    }
+
+    .wishlist-search-controls .dropdown.show > .wishlist-filter-button,
+    .wishlist-filter-button.show,
+    .wishlist-filter-button:focus,
+    .wishlist-filter-button[aria-expanded="true"] {
+      background-color: var(--public-primary) !important;
+      border-color: var(--public-primary) !important;
+      color: #fff !important;
+      opacity: 1 !important;
+    }
+
+    @media (max-width: 575.98px) {
+      .wishlist-search-controls {
+        flex-wrap: wrap;
+      }
+
+      .wishlist-search-controls > .input-group {
+        flex-basis: 100%;
+      }
+    }
+  </style>
+</div>

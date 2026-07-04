@@ -1,0 +1,179 @@
+pt-BR:
+  nav:
+    wishlist: "Lista de desejos"
+
+  mongoid:
+    models:
+      wishlist_item:
+        one: "Item da lista de desejos"
+        other: "Itens da lista de desejos"
+    attributes:
+      wishlist_item:
+        name: "Nome"
+        brand: "Marca"
+        scale: "Escala"
+        observations: "Observações"
+        priority: "Prioridade"
+        status: "Status"
+        target_price_cents: "Valor desejado"
+        reference_url: "Link de referência"
+        photo: "Foto"
+        remove_photo: "Remover foto"
+
+  wishlist_items:
+    statuses:
+      wanted: "Desejado"
+      reserved: "Reservado"
+      purchased: "Adquirido"
+    priorities:
+      low: "Baixa"
+      medium: "Média"
+      high: "Alta"
+      dream: "Sonho de consumo"
+    actions:
+      new: "Novo desejo"
+      add_to_collection: "Adicionar ao acervo"
+      already_in_collection: "Já no acervo"
+      enable_public: "Ativar link público"
+      disable_public: "Desativar link público"
+      open_public: "Abrir link público"
+      open_reference: "Abrir referência"
+      share_image: "Imagem da lista"
+      share_item_image: "Compartilhar imagem"
+      back_to_wishlist: "Voltar para a lista"
+      delete_confirm: "Excluir este item da lista de desejos?"
+    filters:
+      without_purchased: "Sem adquiridos"
+      all_statuses: "Todos os status"
+      all_priorities: "Todas as prioridades"
+      all_brands: "Todas as marcas"
+      all_scales: "Todas as escalas"
+    index:
+      title: "Lista de desejos"
+      subtitle: "Acompanhe miniaturas desejadas sem abrir o cadastro completo do acervo."
+      search_label: "Busca"
+      search_placeholder: "Buscar por nome, marca ou escala"
+      searching: "Buscando..."
+      filter_menu: "Filtros"
+      clear_filters: "Limpar filtros"
+      secondary_actions: "Ações"
+      export_actions: "Exportar lista"
+      copy_public_link: "Copiar link público"
+      public_link_copied: "Link copiado"
+      grid_view: "Grade"
+      list_view: "Lista"
+      results_count:
+        one: "%{count} desejo"
+        other: "%{count} desejos"
+      results_count_filtered:
+        one: "%{count} resultado para \"%{query}\""
+        other: "%{count} resultados para \"%{query}\""
+      empty_title: "Nenhum desejo cadastrado ainda"
+      empty_text: "Comece por uma miniatura que você quer comprar, encontrar ou acompanhar."
+      add_first_item: "Adicionar primeiro desejo"
+    flash:
+      already_in_collection: "Este item já foi adicionado ao acervo."
+    modal:
+      new_title: "Novo desejo"
+      edit_title: "Editar desejo"
+      details_title: "Detalhes do desejo"
+    new:
+      title: "Adicionar desejo"
+      subtitle: "Guarde nome, marca, escala, prioridade e uma referência rápida."
+    edit:
+      title: "Editar %{name}"
+      subtitle: "Atualize status, prioridade ou observações do desejo."
+    card:
+      actions_menu: "Abrir ações do desejo"
+      view_details: "Abrir detalhes"
+      no_photo: "Sem foto"
+    form:
+      validation_error_title: "Revise os campos destacados"
+      main_photo: "Foto da miniatura"
+      upload_prompt: "Adicionar foto do desejo"
+      upload_limits: "Use uma foto em JPG, PNG, GIF ou WEBP."
+      replace_photo: "Clique para substituir a foto"
+      remove_photo: "Remover foto atual"
+      basic_info: "Identificação"
+      specifications: "Status, prioridade e referência"
+      name_placeholder: "Ex: Porsche 911 Treasure Hunt"
+      brand_placeholder: "Ex: Hot Wheels, Matchbox, Mini GT"
+      select_scale: "Escolha a escala..."
+      reference_url_placeholder: "https://exemplo.com/anuncio"
+      observations_placeholder: "Anote loja, variação, embalagem, estado ou qualquer pista útil."
+
+  wishlist_exports:
+    actions:
+      csv: "Exportar CSV"
+      pdf: "Exportar PDF"
+    csv:
+      headers:
+        name: "Nome"
+        brand: "Marca"
+        scale: "Escala"
+        observations: "Observações"
+        priority: "Prioridade"
+        status: "Status"
+        reference_url: "Link de referência"
+        created_at: "Criado em"
+        updated_at: "Atualizado em"
+    pdf:
+      eyebrow: "SMART COLLECTION"
+      title: "LISTA DE DESEJOS"
+      subtitle: "%{name} | Gerado em %{date}"
+      header_title: "Lista de desejos de %{name}"
+      meta_info:
+        one: "%{count} carro desejado | Gerado em %{date}"
+        other: "%{count} carros desejados | Gerado em %{date}"
+      cover_description: "Um relatório visual com os itens desejados, fotos, status, prioridade e anotações da busca."
+      items_title: "Itens desejados"
+      empty: "Nenhum item cadastrado na lista de desejos."
+      no_photo: "Sem foto"
+      generated_by: "SmartCollection"
+      summary:
+        total: "Total de desejos"
+
+  public_wishlists:
+    layout:
+      title: "Lista de desejos de %{name}"
+      footer_text: "Mostre desejos compartilhados com busca, status, prioridade e ficha do item."
+      create_wishlist: "Criar minha lista de desejos"
+    show:
+      eyebrow: "Lista pública"
+      title: "Lista de desejos de %{name}"
+      subtitle: "Miniaturas desejadas, reservadas ou já compradas para acompanhar a busca."
+      items_count: "Itens na lista"
+      open_collection: "Ver acervo público"
+      results_count:
+        one: "%{count} desejo"
+        other: "%{count} desejos"
+      results_count_filtered:
+        one: "%{count} resultado para \"%{query}\""
+        other: "%{count} resultados para \"%{query}\""
+      empty_title: "Nenhum item encontrado"
+      empty_text: "Tente ajustar os filtros para ver outros desejos compartilhados."
+
+  share_images:
+    brand: "SmartCollection"
+    footer_brand: "Smart Collection %{year}"
+    preview:
+      title: "Imagem de %{name}"
+      open_png: "Abrir PNG"
+      share: "Compartilhar"
+      sharing: "Compartilhando..."
+      loading: "Carregando imagem..."
+    badges:
+      collection: "Acervo"
+      wishlist: "Lista de desejos"
+      user_wishlist: "Lista de desejos de %{name}"
+    car_fields:
+      brand: "Marca"
+      scale: "Escala"
+      year: "Ano"
+      color: "Cor"
+      tags: "Tags"
+      observations: "Observações"
+    wishlist:
+      total:
+        one: "%{count} item na lista"
+        other: "%{count} itens na lista"

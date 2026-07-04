@@ -352,7 +352,9 @@ body {
   font-size: 0.74rem;
   font-weight: 700;
   letter-spacing: 0.01em;
+  line-height: 1;
   max-width: 100%;
+  min-height: 1.55rem;
   min-width: 0;
   overflow: hidden;
   padding: 0.28rem 0.58rem;
@@ -388,8 +390,8 @@ body {
 }
 
 .metadata-chip-ai {
-  background: transparent;
-  border-color: transparent;
+  background: rgba(47, 111, 104, 0.1);
+  border-color: rgba(47, 111, 104, 0.18);
   color: var(--premium-indigo);
 }
 
@@ -402,10 +404,9 @@ body {
   width: 0.72rem;
 }
 
-[data-theme="dark"] .collection-brand-badge,
-[data-theme="dark"] .metadata-chip-ai {
-  background: transparent;
-  border-color: transparent;
+[data-theme="dark"] .collection-brand-badge {
+  background: rgba(111, 207, 196, 0.12);
+  border-color: rgba(111, 207, 196, 0.24);
 }
 
 [data-theme="dark"] .metadata-chip {
@@ -414,8 +415,8 @@ body {
 }
 
 [data-theme="dark"] .metadata-chip-ai {
-  background: transparent;
-  border-color: transparent;
+  background: rgba(111, 207, 196, 0.12);
+  border-color: rgba(111, 207, 196, 0.24);
 }
 
 [data-theme="dark"] .metadata-color-dot {
@@ -1879,7 +1880,7 @@ body {
 .search-wrapper {
   position: relative;
   transform: translateY(-50%);
-  z-index: 10;
+  z-index: 1040;
 }
 
 .public-empty-icon {
@@ -2155,29 +2156,29 @@ body {
 }
 
 .car-showcase-actions {
-  flex-wrap: wrap;
-  white-space: nowrap;
+  align-items: stretch !important;
+  display: grid !important;
+  gap: .5rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+  white-space: normal;
 }
 
 .car-showcase-actions > .btn,
 .car-showcase-actions form {
-  flex: 1 1 112px;
-}
-
-.car-showcase-actions form .btn {
+  min-width: 0;
   width: 100%;
 }
 
-@media (max-width: 420px) {
-  .car-showcase-actions {
-    align-items: stretch !important;
-    flex-direction: column;
-  }
+.car-showcase-actions .btn,
+.car-showcase-actions form .btn {
+  height: 100%;
+  min-height: 3rem;
+  padding: .65rem 1rem;
+  width: 100%;
+}
 
-  .car-showcase-actions > .btn,
-  .car-showcase-actions form {
-    width: 100%;
-  }
+.car-showcase-actions .btn {
+  overflow-wrap: anywhere;
 }
 
 .public-detail-photo img {
@@ -2349,7 +2350,9 @@ body {
 
 /* Toggle View Styles (Compact Table) */
 .view-grid #cars_grid_inner,
-#cars_grid_inner.grid-view {
+.view-grid #wishlist_grid_inner,
+#cars_grid_inner.grid-view,
+#wishlist_grid_inner.grid-view {
   display: grid !important;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
   gap: var(--app-gap) !important;
@@ -2363,7 +2366,9 @@ body {
 /* On medium screen ranges, ensure margins are consistent */
 @media (max-width: 991.98px) {
   .view-grid #cars_grid_inner,
-  #cars_grid_inner.grid-view {
+  .view-grid #wishlist_grid_inner,
+  #cars_grid_inner.grid-view,
+  #wishlist_grid_inner.grid-view {
     /* Padding is now handled by the parent .app-container */
   }
 }
@@ -2371,18 +2376,98 @@ body {
 /* Mobile override for grid view: 1fr */
 @media (max-width: 576px) {
   .view-grid #cars_grid_inner,
-  #cars_grid_inner.grid-view {
+  .view-grid #wishlist_grid_inner,
+  #cars_grid_inner.grid-view,
+  #wishlist_grid_inner.grid-view {
     grid-template-columns: 1fr !important;
   }
 }
 
 /* Reset Bootstrap column paddings for CSS grid */
 .view-grid #cars_grid_inner > .col,
-#cars_grid_inner.grid-view > .col {
+.view-grid #wishlist_grid_inner > .col,
+#cars_grid_inner.grid-view > .col,
+#wishlist_grid_inner.grid-view > .col {
   width: 100% !important;
   max-width: none !important;
   padding: 0 !important;
   margin: 0 !important;
+}
+
+.collection-search-controls,
+.wishlist-search-controls {
+  position: relative;
+  z-index: 30;
+}
+
+.collection-search-controls .dropdown,
+.wishlist-search-controls .dropdown {
+  position: relative;
+  z-index: 31;
+}
+
+.collection-filter-menu,
+.wishlist-filter-menu {
+  min-width: min(320px, calc(100vw - 2rem));
+  z-index: 1080;
+}
+
+.collection-filter-button,
+.wishlist-filter-button {
+  min-height: 3.25rem;
+  min-width: 3.25rem;
+  justify-content: center;
+  opacity: 1;
+}
+
+.collection-filter-button {
+  color: var(--primary-color, #2f6f68);
+}
+
+.collection-filter-button .bi,
+.wishlist-filter-button .bi {
+  color: currentColor;
+}
+
+.collection-search-controls .dropdown.show > .collection-filter-button,
+.collection-filter-button.show,
+.collection-filter-button:focus,
+.collection-filter-button[aria-expanded="true"] {
+  background-color: var(--primary-color, #2f6f68);
+  border-color: var(--primary-color, #2f6f68);
+  color: #fff;
+}
+
+.search-wrapper .dropdown.show > .wishlist-filter-button,
+.search-wrapper .wishlist-filter-button.show,
+.search-wrapper .wishlist-filter-button:focus,
+.search-wrapper .wishlist-filter-button[aria-expanded="true"] {
+  background-color: var(--public-primary) !important;
+  border-color: var(--public-primary) !important;
+  color: #fff !important;
+  opacity: 1 !important;
+}
+
+.share-image-preview-stage {
+  min-height: min(70vh, 640px);
+}
+
+.share-image-preview-loading {
+  inset: 0;
+  position: absolute;
+  z-index: 1;
+}
+
+@media (max-width: 575.98px) {
+  .collection-search-controls,
+  .wishlist-search-controls {
+    flex-wrap: wrap;
+  }
+
+  .collection-search-controls > .input-group,
+  .wishlist-search-controls > .input-group {
+    flex-basis: 100%;
+  }
 }
 
 .view-gallery #cars_grid_inner,
@@ -2390,7 +2475,8 @@ body {
   display: none !important;
 }
 
-.view-list #cars_grid_inner {
+.view-list #cars_grid_inner,
+.view-list #wishlist_grid_inner {
   display: flex !important;
   flex-direction: column !important;
   gap: 0 !important;
@@ -2402,7 +2488,8 @@ body {
   box-shadow: var(--card-shadow);
 }
 
-.view-list #cars_grid_inner > .col {
+.view-list #cars_grid_inner > .col,
+.view-list #wishlist_grid_inner > .col {
   width: 100% !important;
   flex: 0 0 100% !important;
   max-width: 100% !important;
@@ -2414,7 +2501,9 @@ body {
 
 /* Fix z-index stacking when hovering or opening dropdowns */
 .view-list #cars_grid_inner > .col:hover,
-.view-list #cars_grid_inner > .col:focus-within {
+.view-list #cars_grid_inner > .col:focus-within,
+.view-list #wishlist_grid_inner > .col:hover,
+.view-list #wishlist_grid_inner > .col:focus-within {
   z-index: 20;
 }
 
@@ -2449,7 +2538,8 @@ body {
   box-shadow: none !important;
 }
 
-.view-list .card > a {
+.view-list .card > a,
+.view-list .public-wishlist-card-content {
   display: flex;
   flex-direction: row;
   min-width: 0;

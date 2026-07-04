@@ -30,7 +30,7 @@ export default class extends Controller {
     if (this.hasExistingPhotoTarget && this.existingPhotoTarget.dataset.url) {
       this.showExistingPhoto(this.existingPhotoTarget.dataset.url)
     } else if (this.hasRemotePhotoTarget && this.remotePhotoTarget.dataset.url) {
-      this.showExistingPhoto(this.remotePhotoTarget.dataset.url)
+      this.showRemotePhoto(this.remotePhotoTarget.dataset.url)
     } else {
       this.hideUpscalerToggle()
     }
@@ -155,6 +155,16 @@ export default class extends Controller {
     } else {
       this.hideUpscalerToggle()
     }
+  }
+
+  showRemotePhoto(url) {
+    this.previewImgTarget.dataset.cropSourceUrl = url
+    this.previewImgTarget.src = url
+    this.renderStoredCropPreview(url)
+    this.previewTarget.classList.remove("d-none")
+    this.uploadPromptTarget.classList.add("d-none")
+    this.showNewPhotoUpscalerMessage()
+    this.showUpscalerToggle()
   }
 
   showNewPhotoUpscalerMessage() {

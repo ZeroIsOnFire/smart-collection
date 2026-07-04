@@ -1,0 +1,15 @@
+<div class="native-link-share d-inline-flex flex-column align-items-stretch"
+     data-controller="native-link-share"
+     data-native-link-share-title-value="<%= title %>"
+     data-native-link-share-text-value="<%= text %>">
+  <button type="button"
+          class="<%= local_assigns.fetch(:button_class, 'btn btn-light rounded-3 px-4 d-inline-flex align-items-center gap-2 d-none') %>"
+          data-native-link-share-target="button"
+          data-action="native-link-share#share">
+    <i class="bi bi-share"></i>
+    <span data-native-link-share-target="label"><%= t('javascript.native_link_share.share') %></span>
+  </button>
+  <span class="small mt-2 d-none"
+        data-native-link-share-target="message"
+        aria-live="polite"></span>
+</div>

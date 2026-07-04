@@ -23,14 +23,21 @@ class User
   field :name, type: String, default: ''
   field :share_token, type: String
   field :sharing_enabled, type: Boolean, default: false
+  field :wishlist_share_token, type: String
+  field :wishlist_sharing_enabled, type: Boolean, default: false
+  field :wishlist_public_title, type: String
+  field :wishlist_public_show_status, type: Boolean, default: true
+  field :wishlist_public_show_priority, type: Boolean, default: true
   field :ai_upscaling_enabled, type: Boolean, default: true
   field :bulk_ai_upscaling_enabled, type: Boolean, default: false
   field :initial_setup_completed, type: Boolean, default: true
 
   index({ sharing_enabled: 1 }, { background: true })
+  index({ wishlist_sharing_enabled: 1 }, { background: true })
   index({ name: 'text', email: 'text' }, { name: 'UserTextIndex', background: true })
 
   index({ share_token: 1 }, { unique: true, sparse: true, background: true })
+  index({ wishlist_share_token: 1 }, { unique: true, sparse: true, background: true })
 
   ## Admin flag
   field :admin, type: Boolean, default: false
@@ -38,6 +45,7 @@ class User
   validates :name, presence: true
 
   before_save :ensure_share_token, if: :sharing_enabled?
+  before_save :ensure_wishlist_share_token, if: :wishlist_sharing_enabled?
   after_create :track_creation
 
   def initial_setup_pending?
@@ -50,11 +58,16 @@ class User
     self.share_token ||= SecureRandom.uuid
   end
 
+  def ensure_wishlist_share_token
+    self.wishlist_share_token ||= SecureRandom.uuid
+  end
+
   def track_creation
     UsageMetric.record!('users_created')
   end
 
   has_many :cars, class_name: 'Car', dependent: :destroy
+  has_many :wishlist_items, dependent: :destroy
   has_many :autodetections, dependent: :destroy
   has_many :collection_exports, dependent: :destroy
 

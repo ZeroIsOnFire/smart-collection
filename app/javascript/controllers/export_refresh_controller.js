@@ -3,6 +3,7 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static values = {
     format: String,
+    exportType: { type: String, default: "collection" },
     status: String
   }
 
@@ -31,7 +32,11 @@ export default class extends Controller {
   }
 
   async refresh() {
-    const url = `/collection_exports/status?format_type=${this.formatValue}`
+    const params = new URLSearchParams({
+      format_type: this.formatValue,
+      export_type: this.exportTypeValue
+    })
+    const url = `/collection_exports/status?${params.toString()}`
     const response = await fetch(url, {
       headers: { "Accept": "text/html" }
     })

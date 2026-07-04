@@ -11,6 +11,9 @@ class PublicCollectionsController < ApplicationController
       @page = @cars.current_page
       @total_count = @cars.total_count
       @has_more = @cars.next_page.present?
+      @brands = @user.cars.distinct(:brand).compact_blank.sort
+      @years = @user.cars.distinct(:year).compact_blank.sort.reverse
+      @filter_params = index_params.except(:page, :per_page).to_h.compact_blank
 
       respond_to do |format|
         format.html
@@ -37,7 +40,7 @@ class PublicCollectionsController < ApplicationController
   private
 
   def index_params
-    params.permit(:q, :page, :per_page)
+    params.permit(:q, :page, :per_page, :brand, :size, :year, :color)
   end
 
   def render_not_found

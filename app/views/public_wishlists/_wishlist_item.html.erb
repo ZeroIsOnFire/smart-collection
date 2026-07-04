@@ -1,0 +1,34 @@
+<div class="col animate-fade-in car-card-wrapper">
+  <article class="card premium-card h-100 shadow-sm border-0 position-relative rounded-3 overflow-hidden">
+    <%= link_to public_wishlist_item_path(user.wishlist_share_token, wishlist_item),
+                class: "text-decoration-none public-wishlist-card-content",
+                data: { turbo_frame: "modal" } do %>
+      <div class="car-photo-container bg-light d-flex align-items-center justify-content-center text-muted" style="height: 180px; overflow: hidden;">
+        <% if wishlist_item.photo? %>
+          <%= image_tag wishlist_item.photo.url,
+                        alt: wishlist_item.name,
+                        loading: "lazy",
+                        style: "width: 100%; height: 100%; object-fit: cover;" %>
+        <% else %>
+          <div class="text-center">
+            <i class="bi bi-camera fs-3 opacity-30 d-block mb-1"></i>
+            <small class="opacity-50"><%= t('wishlist_items.card.no_photo') %></small>
+          </div>
+        <% end %>
+      </div>
+
+      <div class="card-body px-3 pb-3 pt-2">
+        <h2 class="card-title mb-0 fw-bold text-dark text-truncate fs-6"><%= wishlist_item.name %></h2>
+        <p class="card-text text-muted small mb-2"><%= [wishlist_item.brand, wishlist_item.scale].compact_blank.join(' | ') %></p>
+        <div class="d-flex flex-wrap gap-1">
+          <% if user.wishlist_public_show_status? %>
+            <span class="metadata-chip"><i class="bi bi-flag"></i><%= wishlist_item.status_label %></span>
+          <% end %>
+          <% if user.wishlist_public_show_priority? %>
+            <span class="metadata-chip"><i class="bi bi-star"></i><%= wishlist_item.priority_label %></span>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </article>
+</div>

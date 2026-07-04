@@ -1,0 +1,110 @@
+<div class="row car-showcase-row g-3" data-controller="photo-lightbox">
+  <div class="col-lg-7 mb-2 mb-lg-0">
+    <div class="card car-detail-card shadow-sm rounded-3 overflow-hidden bg-white h-100 position-relative">
+      <% if wishlist_item.photo? %>
+        <button type="button"
+                class="public-detail-photo p-4 d-flex align-items-center justify-content-center h-100 w-100 border-0 bg-light bg-opacity-50 position-relative"
+                data-action="click->photo-lightbox#open"
+                aria-label="<%= t('cars.show.view_full_photo') %>">
+          <%= image_tag wishlist_item.photo.url,
+                        class: "img-fluid w-100 rounded-3 shadow-sm",
+                        alt: wishlist_item.name %>
+          <div class="position-absolute bottom-0 end-0 m-4">
+            <span class="badge bg-dark bg-opacity-75 rounded-3 px-3 py-2 text-white shadow-sm">
+              <i class="bi bi-zoom-in me-1"></i> <%= t('cars.show.view_full_photo') %>
+            </span>
+          </div>
+        </button>
+      <% else %>
+        <div class="public-detail-empty-photo bg-light d-flex align-items-center justify-content-center text-muted h-100">
+          <div class="text-center">
+            <i class="bi bi-camera display-1 opacity-20 d-block mb-3"></i>
+            <span class="fs-5 fw-medium text-muted opacity-75"><%= t('wishlist_items.card.no_photo') %></span>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card car-detail-card shadow-sm rounded-3 bg-white h-100">
+      <div class="card-body p-4 p-xl-5 d-flex flex-column">
+        <div class="car-showcase-actions d-flex align-items-center justify-content-end gap-2 mb-4">
+          <%= link_to public_wishlist_item_share_image_path(user.wishlist_share_token, wishlist_item),
+                      class: "btn btn-premium rounded-3 d-inline-flex align-items-center justify-content-center",
+                      data: { turbo_frame: "modal" } do %>
+            <i class="bi bi-image me-2"></i><%= t('wishlist_items.actions.share_item_image') %>
+          <% end %>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
+          <div>
+            <h1 class="h4 fw-bold mb-1 text-dark"><%= wishlist_item.name %></h1>
+            <% if wishlist_item.brand? %>
+              <span class="badge bg-primary bg-opacity-10 text-primary fw-semibold fs-6 rounded-3"><%= wishlist_item.brand %></span>
+            <% end %>
+          </div>
+        </div>
+
+        <hr class="my-3">
+
+        <div class="text-muted small d-flex flex-wrap gap-3 mb-3">
+          <% if wishlist_item.scale? %>
+            <span class="d-inline-flex align-items-center gap-1 text-dark">
+              <i class="bi bi-arrows-fullscreen"></i><%= wishlist_item.scale %>
+            </span>
+          <% end %>
+          <% if user.wishlist_public_show_status? %>
+            <span class="d-inline-flex align-items-center gap-1 text-dark">
+              <i class="bi bi-flag"></i><%= wishlist_item.status_label %>
+            </span>
+          <% end %>
+          <% if user.wishlist_public_show_priority? %>
+            <span class="d-inline-flex align-items-center gap-1 text-dark">
+              <i class="bi bi-star"></i><%= wishlist_item.priority_label %>
+            </span>
+          <% end %>
+        </div>
+
+        <div class="row g-3 mb-3 car-details-stats">
+          <div class="col-12">
+            <div class="d-flex flex-column">
+              <small class="text-uppercase fw-semibold text-muted tracking-wide mb-1"><%= t('mongoid.attributes.wishlist_item.observations') %></small>
+              <div class="mb-0 text-dark public-detail-notes">
+                <%= simple_format(wishlist_item.observations.presence || t('cars.show.fallback_name'), {}, wrapper_tag: "span") %>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="public-detail-footer car-details-timestamps mt-auto pt-4 border-top text-muted small">
+          <div class="car-details-timestamp">
+            <i class="bi bi-clock"></i>
+            <span><%= t('cars.show.added_at', date: l(wishlist_item.created_at.to_date, format: :numeric)) %></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <% if wishlist_item.photo? %>
+    <div class="photo-lightbox-overlay d-none"
+         data-photo-lightbox-target="overlay"
+         data-action="click->photo-lightbox#close keydown@window->photo-lightbox#closeWithKeyboard"
+         role="dialog"
+         aria-modal="true"
+         aria-label="<%= t('cars.show.view_full_photo') %>">
+      <div class="photo-lightbox-stage" data-action="click->photo-lightbox#keepOpen">
+        <%= image_tag wishlist_item.photo.url,
+                      class: "photo-lightbox-image rounded-3 shadow-lg",
+                      alt: wishlist_item.name %>
+        <button type="button"
+                class="btn btn-dark btn-sm rounded-circle shadow photo-lightbox-close"
+                data-action="click->photo-lightbox#close"
+                aria-label="<%= t('actions.close') %>">
+          <i class="bi bi-x-lg small"></i>
+        </button>
+      </div>
+    </div>
+  <% end %>
+</div>

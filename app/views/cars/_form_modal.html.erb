@@ -5,4 +5,4 @@
            dialog_class: "turbo-car-modal-dialog",
            frame: local_assigns.fetch(:frame, true),
            body_partial: "cars/form",
-           body_locals: { car: car, modal: true } %>
+           body_locals: { car: car, modal: true, wishlist_item: local_assigns[:wishlist_item] } %>

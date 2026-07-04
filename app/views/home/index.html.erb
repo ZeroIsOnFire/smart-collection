@@ -1,4 +1,4 @@
-<% cache [I18n.locale, :home_catalog_landing_v3, user_signed_in?] do %>
+<% cache [I18n.locale, :home_catalog_landing_v4, user_signed_in?] do %>
 <section class="hero-section">
   <%= image_tag "hero_car_collection_1775696111841.png",
                 class: "hero-bg-image",
@@ -19,7 +19,7 @@
         <div class="d-flex flex-wrap gap-3">
           <% if user_signed_in? %>
             <%= link_to cars_path, class: "btn btn-primary btn-lg rounded-3 px-5 py-3 fs-5 fw-semibold d-flex align-items-center" do %>
-              <i class="bi bi-grid-1x2 me-2 fs-4"></i>
+              <i class="bi bi-car-front me-2 fs-4"></i>
               <%= t("home.hero.open_catalog") %> <i class="bi bi-arrow-right ms-2 mt-1"></i>
             <% end %>
             <%= link_to new_car_path, class: "btn btn-outline-light btn-lg rounded-3 px-5 py-3 fs-5" do %>
@@ -52,7 +52,7 @@
 </section>
 <% end %>
 
-<% cache [I18n.locale, :home_catalog_features_v2] do %>
+<% cache [I18n.locale, :home_catalog_features_v3] do %>
 <section id="features" class="py-5" style="background-color: var(--card-bg);">
   <div class="container py-5">
     <div class="text-center mb-5 animate-fade-up">
@@ -83,7 +83,7 @@
   <div class="container py-5">
     <div class="row align-items-center">
       <div class="col-lg-6 mb-5 mb-lg-0">
-        <% cache [I18n.locale, :home_catalog_cta_v2, user_signed_in?] do %>
+        <% cache [I18n.locale, :home_catalog_cta_v3, user_signed_in?] do %>
         <h2 class="display-6 fw-bold mb-4"><%= t("home.cta.title") %></h2>
         <p class="lead text-muted mb-5"><%= t("home.cta.subtitle") %></p>
         <% end %>
@@ -93,7 +93,7 @@
            <%= link_to t("home.cta.open_catalog"), cars_path, class: "btn btn-primary btn-lg rounded-3 px-5 py-3 fw-bold" %>
         <% end %>
       </div>
-      <% cache [I18n.locale, :home_catalog_cta_items_v2] do %>
+      <% cache [I18n.locale, :home_catalog_cta_items_v3] do %>
       <div class="col-lg-6">
         <div class="p-4 shadow-sm rounded-3 border" style="background-color: var(--card-bg);">
           <% t("home.cta.items").each do |item| %>

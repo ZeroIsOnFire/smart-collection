@@ -77,4 +77,24 @@ RSpec.describe Car, type: :model do
       expect(car.photo_upscaled_by_ai?).to be true
     end
   end
+
+  describe 'share image cache' do
+    it 'clears the cached share image when updated' do
+      persisted_car = create(:car, user: user)
+      allow(ShareImageCacheService).to receive(:clear)
+
+      persisted_car.update!(name: 'Updated car')
+
+      expect(ShareImageCacheService).to have_received(:clear).with(record: persisted_car, kind: :car)
+    end
+
+    it 'clears the cached share image when destroyed' do
+      persisted_car = create(:car, user: user)
+      allow(ShareImageCacheService).to receive(:clear)
+
+      persisted_car.destroy!
+
+      expect(ShareImageCacheService).to have_received(:clear).with(record: persisted_car, kind: :car)
+    end
+  end
 end

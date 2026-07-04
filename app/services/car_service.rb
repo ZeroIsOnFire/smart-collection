@@ -79,19 +79,29 @@ class CarService
     per_page = params[:per_page] || 20
     query = params[:q]
 
-    scope = query.present? ? search(query) : user.cars.all
+    scope = filtered_scope(params)
+    scope = search(query, scope:) if query.present?
 
     scope.desc(:created_at).page(page).per(per_page)
   end
 
-  def search(query)
+  def search(query, scope: user.cars)
     words = query.to_s.strip
-    return user.cars if words.empty?
+    return scope if words.empty?
 
-    user.cars.any_of(*search_conditions(words))
+    scope.any_of(*search_conditions(words))
   end
 
   private
+
+  def filtered_scope(params)
+    scope = user.cars.all
+    scope = scope.where(brand: params[:brand]) if params[:brand].present?
+    scope = scope.where(size: params[:size]) if Car::SCALES.include?(params[:size])
+    scope = scope.where(color: params[:color]) if Car::COLORS.key?(params[:color])
+    scope = scope.where(year: params[:year].to_i) if params[:year].to_s.match?(/\A\d+\z/)
+    scope
+  end
 
   def search_conditions(words)
     pattern = /#{Regexp.escape(words)}/i

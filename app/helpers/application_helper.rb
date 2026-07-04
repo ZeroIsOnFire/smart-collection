@@ -50,6 +50,13 @@ module ApplicationHelper
     "#{normalized_path}?v=#{version}"
   end
 
+  def new_car_from_wishlist_item_path(wishlist_item)
+    new_car_path(
+      wishlist_item_id: wishlist_item.id.to_s,
+      car: WishlistItemToCarAttributesService.new(wishlist_item).to_params
+    )
+  end
+
   private
 
   def deep_stringify_translation_tree(value)
