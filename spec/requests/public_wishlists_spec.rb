@@ -27,6 +27,8 @@ RSpec.describe 'PublicWishlists', type: :request do
       expect(response.body).to include('data-controller="search-form"')
       expect(response.body).to include('data-turbo-frame="public_wishlist_grid"')
       expect(response.body).to include(I18n.t('wishlist_items.index.filter_menu'))
+      expect(response.body).to include('data-controller="native-link-share"')
+      expect(response.body).to include(I18n.t('javascript.native_link_share.share'))
     end
 
     it 'filters public wishlist by query, status, priority, brand and scale without searching notes' do

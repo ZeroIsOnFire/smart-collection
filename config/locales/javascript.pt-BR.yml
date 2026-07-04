@@ -32,6 +32,12 @@ pt-BR:
       errors:
         share_console: "Erro ao compartilhar imagem:"
         share_failed: "Não foi possível abrir o compartilhamento. Tente abrir o PNG."
+    native_link_share:
+      share: "Compartilhar"
+      sharing: "Compartilhando..."
+      errors:
+        share_console: "Erro ao compartilhar link:"
+        share_failed: "Não foi possível abrir o compartilhamento."
     modal:
       loading: "Carregando..."
       submitting: "Carregando..."

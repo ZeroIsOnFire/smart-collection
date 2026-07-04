@@ -8,11 +8,22 @@
         </h1>
         <p class="lead fs-4 opacity-75 mb-0 fw-light"><%= t('public_wishlists.show.subtitle') %></p>
         <% if @user.sharing_enabled? && @user.share_token.present? %>
-          <%= link_to public_share_url(@user.share_token),
-                      class: "btn btn-light rounded-3 px-4 mt-4 d-inline-flex align-items-center gap-2" do %>
-            <i class="bi bi-car-front"></i>
-            <%= t('public_wishlists.show.open_collection') %>
-          <% end %>
+          <div class="d-flex flex-column flex-sm-row align-items-start gap-2 mt-4">
+            <%= link_to public_share_url(@user.share_token),
+                        class: "btn btn-light rounded-3 px-4 d-inline-flex align-items-center gap-2" do %>
+              <i class="bi bi-car-front"></i>
+              <%= t('public_wishlists.show.open_collection') %>
+            <% end %>
+            <%= render "shared/native_link_share_button",
+                       title: @user.wishlist_public_title.presence || t('public_wishlists.show.title', name: display_name(@user)),
+                       text: t('public_wishlists.show.subtitle') %>
+          </div>
+        <% else %>
+          <div class="mt-4">
+            <%= render "shared/native_link_share_button",
+                       title: @user.wishlist_public_title.presence || t('public_wishlists.show.title', name: display_name(@user)),
+                       text: t('public_wishlists.show.subtitle') %>
+          </div>
         <% end %>
       </div>
       <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">

@@ -11,6 +11,7 @@ import ImageCropperController from "./image_cropper_controller"
 import InfiniteScrollController from "./infinite_scroll_controller"
 import ManualSelectionController from "./manual_selection_controller"
 import ModalFrameController from "./modal_frame_controller"
+import NativeLinkShareController from "./native_link_share_controller"
 import NumericMaskController from "./numeric_mask_controller"
 import PhotoLightboxController from "./photo_lightbox_controller"
 import PhotoUploadController from "./photo_upload_controller"
@@ -36,6 +37,7 @@ application.register("image-cropper", ImageCropperController)
 application.register("infinite-scroll", InfiniteScrollController)
 application.register("manual-selection", ManualSelectionController)
 application.register("modal-frame", ModalFrameController)
+application.register("native-link-share", NativeLinkShareController)
 application.register("numeric-mask", NumericMaskController)
 application.register("photo-lightbox", PhotoLightboxController)
 application.register("photo-upload", PhotoUploadController)

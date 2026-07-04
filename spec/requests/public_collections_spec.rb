@@ -12,6 +12,8 @@ RSpec.describe 'Public Collections', type: :request do
       expect(response).to have_http_status(:success)
       expect(response.body).to include(I18n.t('public_collections.index.title', name: user.name))
       expect(response.body).to include('Public Car')
+      expect(response.body).to include('data-controller="native-link-share"')
+      expect(response.body).to include(I18n.t('javascript.native_link_share.share'))
     end
 
     it 'links to the public wishlist when both public shares are enabled' do
@@ -163,6 +165,8 @@ RSpec.describe 'Public Collections', type: :request do
       get public_share_car_path(user.share_token, car.id)
       expect(response).to have_http_status(:success)
       expect(response.body).to include('Public Car')
+      expect(response.body).to include('data-controller="native-link-share"')
+      expect(response.body).to include(I18n.t('javascript.native_link_share.share'))
     end
 
     it 'renders public car details inside the global modal frame' do
