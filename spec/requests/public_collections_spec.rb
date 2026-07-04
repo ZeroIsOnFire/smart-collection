@@ -129,7 +129,7 @@ RSpec.describe 'Public Collections', type: :request do
       expect(response.body).to include('Porsche')
       expect(response.body).to include('2024')
       expect(response.body).to include('1:64')
-      expect(response.body).to include('Azul')
+      expect(response.body).to include(I18n.t('colors.Azul', locale: :en))
       expect(response.body).to include('Premium, Destaque')
       expect(response.body).to include('Miniatura com pintura especial')
       expect(document.at_css('.public-gallery-thumbnails')).to be_present
@@ -214,7 +214,7 @@ RSpec.describe 'Public Collections', type: :request do
       expect(document.at_css("a[href='#{public_car_share_image_path(user.share_token, car)}']")).to be_present
       expect(response.body).to include(I18n.t('activerecord.attributes.car.color'))
       expect(response.body).not_to include(I18n.t('cars.show.view_original_photo'))
-      expect(response.body).to include('Azul')
+      expect(response.body).to include(I18n.t('colors.Azul', locale: :en))
       expect(response.body).to include('1:64')
       expect(response.body).to include(I18n.l(car.created_at.to_date, format: :numeric))
       expect(response.body).not_to include(I18n.t('cars.show.updated_at', date: I18n.l(car.updated_at, format: :short)))

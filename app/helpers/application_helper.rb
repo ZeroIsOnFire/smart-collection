@@ -42,6 +42,18 @@ module ApplicationHelper
     record.errors[attribute].to_sentence.presence
   end
 
+  def car_scale_label(scale)
+    return if scale.blank?
+
+    scale == 'Outra' ? I18n.t('scales.other', default: scale) : scale
+  end
+
+  def car_color_label(color)
+    return if color.blank?
+
+    I18n.t("colors.#{color}", default: color)
+  end
+
   def versioned_public_path(path)
     normalized_path = path.to_s.start_with?('/') ? path.to_s : "/#{path}"
     file_path = Rails.public_path.join(normalized_path.delete_prefix('/'))

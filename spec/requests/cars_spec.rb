@@ -121,7 +121,7 @@ RSpec.describe 'Cars', type: :request do
 
     it 'renders brand and AI indicator as metadata pills in the same badge list' do
       allow(ImageUpscalerService).to receive(:upscale_needed?).and_return(true)
-      ai_car = create(:car, user: user, brand: 'Mini GT', size: '1:64', photo_upscale_strategy: 'ai')
+      ai_car = create(:car, user: user, brand: 'Mini GT', size: '1:64', color: 'Azul', photo_upscale_strategy: 'ai')
       ai_car.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
       ai_car.save!
 
@@ -133,6 +133,7 @@ RSpec.describe 'Cars', type: :request do
 
       expect(badge_list.at_css('.collection-brand-badge.metadata-chip-brand').text).to include('Mini GT')
       expect(badge_list.at_css('.metadata-chip.metadata-chip-scale').text).to include('1:64')
+      expect(badge_list.at_css('.metadata-chip.metadata-chip-color').text).to include(I18n.t('colors.Azul', locale: :en))
       expect(badge_list.at_css('.metadata-chip.metadata-chip-ai').text).to include(I18n.t('cars.show.photo_upscaled_by_ai'))
     end
 
@@ -362,6 +363,28 @@ RSpec.describe 'Cars', type: :request do
 
       expect(brand_field['value']).to eq('Matchbox')
       expect(selected_scale['value']).to eq('1:43')
+    end
+
+    it 'renders scale and color options translated in the current locale' do
+      get new_car_path
+
+      document = Nokogiri::HTML(response.body)
+      other_scale = document.at_css("#car_size option[value='Outra']")
+      blue_color = document.at_css("#car_color option[value='Azul']")
+
+      expect(other_scale.text).to eq(I18n.t('scales.other', locale: :en))
+      expect(blue_color.text).to eq(I18n.t('colors.Azul', locale: :en))
+
+      user.set(locale: 'pt-BR')
+
+      get new_car_path
+
+      document = Nokogiri::HTML(response.body)
+      other_scale = document.at_css("#car_size option[value='Outra']")
+      blue_color = document.at_css("#car_color option[value='Azul']")
+
+      expect(other_scale.text).to eq(I18n.t('scales.other', locale: :'pt-BR'))
+      expect(blue_color.text).to eq(I18n.t('colors.Azul', locale: :'pt-BR'))
     end
 
     it 'shows the AI upscaling notice when enabled and configured' do
@@ -745,7 +768,7 @@ RSpec.describe 'Cars', type: :request do
       expect(response.body).to include(I18n.t('activerecord.attributes.car.size'))
       expect(response.body).to include(I18n.t('activerecord.attributes.car.color'))
       expect(response.body).to include(I18n.t('activerecord.attributes.car.observations'))
-      expect(response.body).to include('Azul')
+      expect(response.body).to include(I18n.t('colors.Azul', locale: :en))
       expect(response.body).to include('1:64')
       expect(response.body).to include(I18n.t('cars.show.photo_upscaled_by_ai'))
       expect(response.body).to include(I18n.t('cars.show.photo_upscaled_by_ai_tooltip'))
