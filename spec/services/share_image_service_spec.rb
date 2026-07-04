@@ -3,6 +3,13 @@
 require 'rails_helper'
 
 RSpec.describe ShareImageService do
+  describe '.font_path' do
+    it 'uses an existing font for ImageMagick annotations' do
+      expect(described_class.font_path).to be_present
+      expect(File).to exist(described_class.font_path)
+    end
+  end
+
   describe '#generate' do
     it 'generates a PNG for a car' do
       car = create(:car, name: 'Share Porsche')

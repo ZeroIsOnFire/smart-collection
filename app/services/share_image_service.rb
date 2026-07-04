@@ -19,6 +19,18 @@ class ShareImageService
     line: '#2A363B',
     soft: '#151B1F'
   }.freeze
+  FONT_PATHS = [
+    '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
+    '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
+    '/usr/share/fonts/truetype/liberation2/LiberationSans-Regular.ttf',
+    '/usr/share/fonts/truetype/freefont/FreeSans.ttf',
+    '/System/Library/Fonts/Supplemental/Arial.ttf',
+    'C:/Windows/Fonts/arial.ttf'
+  ].freeze
+
+  def self.font_path
+    @font_path ||= FONT_PATHS.find { |path| File.exist?(path) }
+  end
 
   def initialize(record:, kind:, title: nil)
     @record = record
@@ -123,6 +135,7 @@ class ShareImageService
   def annotate_line(image, line)
     image.combine_options do |convert|
       convert.gravity 'NorthWest'
+      convert.font self.class.font_path if self.class.font_path
       convert.fill line[:color]
       convert.pointsize line[:size]
       convert.annotate "+#{line[:left]}+#{line[:top]}", safe_text(line[:text])
