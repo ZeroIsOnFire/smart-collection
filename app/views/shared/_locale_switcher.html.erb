@@ -1,0 +1,18 @@
+<%= form_with url: locale_path,
+              method: :patch,
+              class: "locale-switcher d-inline-flex align-items-center",
+              data: { turbo: false } do |f| %>
+  <%= hidden_field_tag :return_to, request.fullpath %>
+  <label class="visually-hidden" for="header_locale"><%= t('nav.language') %></label>
+  <span class="locale-switcher-icon" aria-hidden="true">
+    <i class="bi bi-globe2"></i>
+  </span>
+  <%= f.select :locale,
+               [[t('devise.ui.registrations.edit.locales.en'), 'en'],
+                [t('devise.ui.registrations.edit.locales.pt-BR'), 'pt-BR']],
+               { selected: I18n.locale.to_s },
+               id: "header_locale",
+               class: "form-select form-select-sm locale-switcher-select",
+               aria: { label: t('nav.language') },
+               onchange: "this.form.requestSubmit()" %>
+<% end %>

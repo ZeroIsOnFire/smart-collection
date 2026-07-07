@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 class ApplicationController < ActionController::Base
+  PORTUGUESE_LANGUAGE_PREFIX = 'pt'
+  LOCALE_COOKIE_KEY = :locale
+
   helper :all
   layout :set_layout
   around_action :switch_locale
@@ -55,7 +58,7 @@ class ApplicationController < ActionController::Base
   end
 
   def resolved_locale
-    requested_locale.presence || user_locale.presence || I18n.default_locale
+    requested_locale.presence || user_locale.presence || cookie_locale.presence || browser_locale.presence || I18n.default_locale
   end
 
   def requested_locale
@@ -64,6 +67,18 @@ class ApplicationController < ActionController::Base
 
   def user_locale
     normalized_locale(current_user&.locale)
+  end
+
+  def cookie_locale
+    normalized_locale(cookies[LOCALE_COOKIE_KEY])
+  end
+
+  def browser_locale
+    browser_languages = request.get_header('HTTP_ACCEPT_LANGUAGE').to_s.split(',').map do |language|
+      language.split(';').first.to_s.strip.downcase
+    end
+
+    browser_languages.find { |language| language.start_with?(PORTUGUESE_LANGUAGE_PREFIX) }.presence && 'pt-BR'
   end
 
   def normalized_locale(locale)

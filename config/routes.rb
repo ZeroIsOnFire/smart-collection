@@ -3,6 +3,8 @@
 Rails.application.routes.draw do
   devise_for :users, controllers: { registrations: 'registrations' }
 
+  patch '/locale', to: 'locales#update', as: :locale
+
   resource :initial_setup, only: %i[show update]
 
   # Removendo o redirecionamento automático para cars#index para que a landing page seja sempre a home

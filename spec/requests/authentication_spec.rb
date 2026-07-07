@@ -200,20 +200,20 @@ RSpec.describe 'Authentications', type: :request do
       expect(response.body).not_to include('user_ai_upscaling_enabled')
     end
 
-    it 'renders the language selector with the current locale selected' do
+    it 'renders the header language selector with the current locale selected' do
       user.update!(locale: 'pt-BR')
 
       get edit_user_registration_path
 
       document = Nokogiri::HTML(response.body)
-      locale_select = document.at_css('#user_locale')
+      locale_select = document.at_css('#header_locale')
       selected_option = locale_select.at_css('option[selected]')
 
       expect(locale_select).to be_present
-      expect(locale_select['aria-describedby']).to eq('user_locale_help')
       expect(selected_option['value']).to eq('pt-BR')
       expect(locale_select.text).to include(I18n.t('devise.ui.registrations.edit.locales.en', locale: :'pt-BR'))
       expect(locale_select.text).to include(I18n.t('devise.ui.registrations.edit.locales.pt-BR', locale: :'pt-BR'))
+      expect(document.at_css('#user_locale')).to be_nil
     end
 
     it 'uses the user locale when no URL locale is present' do
@@ -239,7 +239,7 @@ RSpec.describe 'Authentications', type: :request do
       sign_in user
     end
 
-    it 'does not update the AI upscaling preference through the account form' do
+    it 'does not update AI upscaling or locale through the account form' do
       patch user_registration_path, params: {
         user: {
           name: user.name,
@@ -251,7 +251,48 @@ RSpec.describe 'Authentications', type: :request do
       }
 
       expect(user.reload.ai_upscaling_enabled).to be true
-      expect(user.locale).to eq('pt-BR')
+      expect(user.locale).to eq('en')
+    end
+  end
+
+  describe 'PATCH /locale' do
+    it 'stores the selected locale in a cookie for anonymous users' do
+      patch locale_path, params: { locale: 'pt-BR', return_to: root_path }
+
+      expect(response).to redirect_to(root_path(locale: 'pt-BR'))
+      expect(response.cookies['locale']).to eq('pt-BR')
+    end
+
+    it 'stores the selected locale on the signed-in user' do
+      sign_in user
+
+      patch locale_path, params: { locale: 'pt-BR', return_to: cars_path }
+
+      expect(response).to redirect_to(cars_path(locale: 'pt-BR'))
+      expect(user.reload.locale).to eq('pt-BR')
+      expect(response.cookies['locale']).to eq('pt-BR')
+    end
+
+    it 'uses the locale cookie for anonymous requests' do
+      cookies[:locale] = 'pt-BR'
+
+      get root_path
+
+      document = Nokogiri::HTML(response.body)
+      selected_option = document.at_css('#header_locale option[selected]')
+
+      expect(selected_option['value']).to eq('pt-BR')
+      expect(response.body).to include(I18n.t('home.hero.create_catalog', locale: :'pt-BR'))
+    end
+
+    it 'uses Portuguese for browser languages from Portuguese-speaking regions' do
+      get root_path, headers: { 'HTTP_ACCEPT_LANGUAGE' => 'pt-PT,pt;q=0.9,en;q=0.8' }
+
+      document = Nokogiri::HTML(response.body)
+      selected_option = document.at_css('#header_locale option[selected]')
+
+      expect(selected_option['value']).to eq('pt-BR')
+      expect(response.body).to include(I18n.t('home.hero.create_catalog', locale: :'pt-BR'))
     end
   end
 

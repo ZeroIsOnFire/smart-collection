@@ -20,6 +20,6 @@ class RegistrationsController < Devise::RegistrationsController
   end
 
   def account_update_params
-    params.expect(user: %i[name email locale password password_confirmation current_password])
+    params.expect(user: %i[name email password password_confirmation current_password])
   end
 end
