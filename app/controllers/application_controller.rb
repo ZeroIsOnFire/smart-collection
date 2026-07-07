@@ -3,6 +3,7 @@
 class ApplicationController < ActionController::Base
   PORTUGUESE_LANGUAGE_PREFIX = 'pt'
   LOCALE_COOKIE_KEY = :locale
+  COOKIE_CONSENT_KEY = :cookie_consent
 
   helper :all
   layout :set_layout
@@ -70,6 +71,8 @@ class ApplicationController < ActionController::Base
   end
 
   def cookie_locale
+    return unless cookies[COOKIE_CONSENT_KEY] == 'accepted'
+
     normalized_locale(cookies[LOCALE_COOKIE_KEY])
   end
 
@@ -90,5 +93,16 @@ class ApplicationController < ActionController::Base
 
   def current_locale_param
     { locale: I18n.locale.to_s }
+  end
+
+  def localized_return_path(locale)
+    target = url_from(params[:return_to]) || root_path
+    uri = URI.parse(target)
+    query = Rack::Utils.parse_nested_query(uri.query)
+    query['locale'] = locale
+    uri.query = query.to_query.presence
+    uri.to_s
+  rescue URI::InvalidURIError
+    root_path(locale: locale)
   end
 end

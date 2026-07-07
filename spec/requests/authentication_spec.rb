@@ -210,6 +210,7 @@ RSpec.describe 'Authentications', type: :request do
       selected_option = locale_select.at_css('option[selected]')
 
       expect(locale_select).to be_present
+      expect(locale_select['name']).to eq('locale')
       expect(selected_option['value']).to eq('pt-BR')
       expect(locale_select.text).to include(I18n.t('devise.ui.registrations.edit.locales.en', locale: :'pt-BR'))
       expect(locale_select.text).to include(I18n.t('devise.ui.registrations.edit.locales.pt-BR', locale: :'pt-BR'))
@@ -256,7 +257,16 @@ RSpec.describe 'Authentications', type: :request do
   end
 
   describe 'PATCH /locale' do
-    it 'stores the selected locale in a cookie for anonymous users' do
+    it 'redirects anonymous users with the selected locale without storing cookies before consent' do
+      patch locale_path, params: { locale: 'pt-BR', return_to: root_path }
+
+      expect(response).to redirect_to(root_path(locale: 'pt-BR'))
+      expect(response.cookies['locale']).to be_nil
+    end
+
+    it 'stores the selected locale in a cookie for anonymous users after consent' do
+      cookies[:cookie_consent] = 'accepted'
+
       patch locale_path, params: { locale: 'pt-BR', return_to: root_path }
 
       expect(response).to redirect_to(root_path(locale: 'pt-BR'))
@@ -270,10 +280,14 @@ RSpec.describe 'Authentications', type: :request do
 
       expect(response).to redirect_to(cars_path(locale: 'pt-BR'))
       expect(user.reload.locale).to eq('pt-BR')
-      expect(response.cookies['locale']).to eq('pt-BR')
+      follow_redirect!
+
+      document = Nokogiri::HTML(response.body)
+      expect(document.at_css('#header_locale option[selected]')['value']).to eq('pt-BR')
     end
 
     it 'uses the locale cookie for anonymous requests' do
+      cookies[:cookie_consent] = 'accepted'
       cookies[:locale] = 'pt-BR'
 
       get root_path
@@ -293,6 +307,23 @@ RSpec.describe 'Authentications', type: :request do
 
       expect(selected_option['value']).to eq('pt-BR')
       expect(response.body).to include(I18n.t('home.hero.create_catalog', locale: :'pt-BR'))
+    end
+  end
+
+  describe 'POST /cookie-consent' do
+    it 'renders a cookie consent notice before acceptance' do
+      get root_path
+
+      expect(response.body).to include(I18n.t('cookie_consent.title', locale: :en))
+      expect(response.body).to include(I18n.t('cookie_consent.accept', locale: :en))
+    end
+
+    it 'stores consent and the current locale preference' do
+      post cookie_consent_path, params: { locale: 'pt-BR', return_to: root_path(locale: 'pt-BR') }
+
+      expect(response).to redirect_to(root_path(locale: 'pt-BR'))
+      expect(response.cookies['cookie_consent']).to eq('accepted')
+      expect(response.cookies['locale']).to eq('pt-BR')
     end
   end
 

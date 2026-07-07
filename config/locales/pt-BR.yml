@@ -33,6 +33,11 @@ pt-BR:
     toggle_theme: "Alternar tema"
     user_menu: "Menu do usuário"
 
+  cookie_consent:
+    title: "Preferências de cookies"
+    message: "Usamos cookies para lembrar sua preferência de idioma e manter o site funcionando corretamente."
+    accept: "Aceitar cookies"
+
   # ── Ações comuns ───────────────────────────────────────
   actions:
     save: "Salvar"

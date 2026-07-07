@@ -4,6 +4,7 @@ Rails.application.routes.draw do
   devise_for :users, controllers: { registrations: 'registrations' }
 
   patch '/locale', to: 'locales#update', as: :locale
+  post '/cookie-consent', to: 'cookie_consents#create', as: :cookie_consent
 
   resource :initial_setup, only: %i[show update]
 

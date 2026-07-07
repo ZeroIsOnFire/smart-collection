@@ -31,6 +31,11 @@ en:
     toggle_theme: "Toggle theme"
     user_menu: "User menu"
 
+  cookie_consent:
+    title: "Cookie preferences"
+    message: "We use cookies to remember your language preference and keep the site working correctly."
+    accept: "Accept cookies"
+
   actions:
     save: "Save"
     edit: "Edit"
