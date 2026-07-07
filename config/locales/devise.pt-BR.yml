@@ -44,8 +44,8 @@ pt-BR:
           locale_label: "Idioma"
           locale_help: "Este idioma sera usado depois que voce entrar. Links publicos tambem podem incluir um parametro de idioma."
           locales:
-            en: "Ingles"
-            pt-BR: "Portugues do Brasil"
+            en: "English"
+            pt-BR: "Português do Brasil"
           pending_confirmation: "Aguardando confirmação para: %{email}"
           ai_upscaling_title: "Tratamento de fotos pequenas"
           ai_upscaling_label: "Usar upscaler por IA em imagens pequenas"

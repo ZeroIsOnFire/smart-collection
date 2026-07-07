@@ -45,7 +45,7 @@ en:
           locale_help: "This language is used after you sign in. Public links can also include a locale parameter."
           locales:
             en: "English"
-            pt-BR: "Portuguese (Brazil)"
+            pt-BR: "Português do Brasil"
           pending_confirmation: "Waiting for confirmation for: %{email}"
           ai_upscaling_title: "Small photo processing"
           ai_upscaling_label: "Use AI upscaling for small images"

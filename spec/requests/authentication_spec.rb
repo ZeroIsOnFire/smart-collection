@@ -212,8 +212,8 @@ RSpec.describe 'Authentications', type: :request do
       expect(locale_select).to be_present
       expect(locale_select['name']).to eq('locale')
       expect(selected_option['value']).to eq('pt-BR')
-      expect(locale_select.text).to include(I18n.t('devise.ui.registrations.edit.locales.en', locale: :'pt-BR'))
-      expect(locale_select.text).to include(I18n.t('devise.ui.registrations.edit.locales.pt-BR', locale: :'pt-BR'))
+      expect(locale_select.text).to include('English')
+      expect(locale_select.text).to include('Português do Brasil')
       expect(document.at_css('#user_locale')).to be_nil
     end
 
