@@ -1,7 +1,7 @@
 <%= form_with url: locale_path,
               method: :patch,
               class: "locale-switcher d-inline-flex align-items-center",
-              data: { turbo: false } do %>
+              data: { controller: "locale-switcher", turbo: false } do %>
   <%= hidden_field_tag :return_to, request.fullpath %>
   <label class="visually-hidden" for="header_locale"><%= t('nav.language') %></label>
   <span class="locale-switcher-icon" aria-hidden="true">
@@ -14,5 +14,5 @@
                  id: "header_locale",
                  class: "form-select form-select-sm locale-switcher-select",
                  aria: { label: t('nav.language') },
-                 onchange: "this.form.requestSubmit()" %>
+                 data: { action: "change->locale-switcher#submit" } %>
 <% end %>

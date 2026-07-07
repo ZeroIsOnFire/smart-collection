@@ -211,6 +211,8 @@ RSpec.describe 'Authentications', type: :request do
 
       expect(locale_select).to be_present
       expect(locale_select['name']).to eq('locale')
+      expect(locale_select['data-action']).to eq('change->locale-switcher#submit')
+      expect(locale_select['onchange']).to be_nil
       expect(selected_option['value']).to eq('pt-BR')
       expect(locale_select.text).to include('English')
       expect(locale_select.text).to include('Português do Brasil')
