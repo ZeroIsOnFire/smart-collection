@@ -132,7 +132,7 @@ RSpec.describe 'Autodetections', type: :request do
       end.to enqueue_job(AutodetectJob)
 
       expect(response).to redirect_to(root_path)
-      expect(flash[:notice]).to eq('Processo reiniciado.')
+      expect(flash[:notice]).to eq(I18n.t('autodetections.messages.restarted'))
     end
   end
 

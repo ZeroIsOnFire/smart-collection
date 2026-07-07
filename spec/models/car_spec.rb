@@ -14,7 +14,7 @@ RSpec.describe Car, type: :model do
     it 'is not valid without a name' do
       car.name = nil
       expect(car).not_to be_valid
-      expect(car.errors[:name]).to include('não pode ficar em branco')
+      expect(car.errors[:name]).to include(I18n.t('errors.messages.blank'))
     end
 
     it 'is valid without a brand' do
