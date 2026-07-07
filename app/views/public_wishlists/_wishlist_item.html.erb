@@ -1,6 +1,6 @@
 <div class="col animate-fade-in car-card-wrapper">
   <article class="card premium-card h-100 shadow-sm border-0 position-relative rounded-3 overflow-hidden">
-    <%= link_to public_wishlist_item_path(user.wishlist_share_token, wishlist_item),
+    <%= link_to public_wishlist_item_path(user.wishlist_share_token, wishlist_item, current_locale_param),
                 class: "text-decoration-none public-wishlist-card-content",
                 data: { turbo_frame: "modal" } do %>
       <div class="car-photo-container bg-light d-flex align-items-center justify-content-center text-muted" style="height: 180px; overflow: hidden;">

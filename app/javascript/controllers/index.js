@@ -9,6 +9,7 @@ import ExportRefreshController from "./export_refresh_controller"
 import HelloController from "./hello_controller"
 import ImageCropperController from "./image_cropper_controller"
 import InfiniteScrollController from "./infinite_scroll_controller"
+import LocaleSwitcherController from "./locale_switcher_controller"
 import ManualSelectionController from "./manual_selection_controller"
 import ModalFrameController from "./modal_frame_controller"
 import NativeLinkShareController from "./native_link_share_controller"
@@ -35,6 +36,7 @@ application.register("export-refresh", ExportRefreshController)
 application.register("hello", HelloController)
 application.register("image-cropper", ImageCropperController)
 application.register("infinite-scroll", InfiniteScrollController)
+application.register("locale-switcher", LocaleSwitcherController)
 application.register("manual-selection", ManualSelectionController)
 application.register("modal-frame", ModalFrameController)
 application.register("native-link-share", NativeLinkShareController)

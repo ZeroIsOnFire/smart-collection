@@ -68,6 +68,30 @@
         background: var(--public-surface);
         border-top: 1px solid var(--border-color);
       }
+      .locale-switcher {
+        background-color: var(--public-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 999px;
+        gap: 0.35rem;
+        padding: 0.15rem 0.45rem;
+      }
+      .locale-switcher-icon {
+        color: var(--public-text-muted);
+        display: inline-flex;
+        font-size: 0.95rem;
+      }
+      .locale-switcher-select {
+        background-color: transparent;
+        border: 0;
+        box-shadow: none;
+        color: var(--public-text);
+        font-weight: 700;
+        min-width: 5.7rem;
+        padding-left: 0;
+      }
+      .locale-switcher-select:focus {
+        box-shadow: none;
+      }
     </style>
   </head>
 
@@ -87,14 +111,18 @@
           <span class="brand-text">Smart<span style="color: var(--public-primary);">Collection</span></span>
         <% end %>
 
-        <button class="btn btn-link text-decoration-none p-2 rounded-circle theme-toggle-btn"
-                data-action="click->theme#toggle"
-                data-theme-target="button"
-                title="<%= t("public_collections.layout.toggle_theme") %>"
-                aria-label="<%= t("public_collections.layout.toggle_theme") %>"
-                aria-pressed="false">
-          <i class="bi bi-moon-stars-fill fs-5" data-theme-target="icon"></i>
-        </button>
+        <div class="d-flex align-items-center gap-2">
+          <%= render "shared/locale_switcher" %>
+
+          <button class="btn btn-link text-decoration-none p-2 rounded-circle theme-toggle-btn"
+                  data-action="click->theme#toggle"
+                  data-theme-target="button"
+                  title="<%= t("public_collections.layout.toggle_theme") %>"
+                  aria-label="<%= t("public_collections.layout.toggle_theme") %>"
+                  aria-pressed="false">
+            <i class="bi bi-moon-stars-fill fs-5" data-theme-target="icon"></i>
+          </button>
+        </div>
       </div>
     </header>
 
@@ -103,6 +131,7 @@
     </main>
 
     <%= turbo_frame_tag "modal", data: { controller: "modal-frame" } %>
+    <%= render "shared/cookie_consent" %>
 
     <footer class="py-5 footer-glass mt-5">
       <div class="container-fluid app-container public-container text-center">

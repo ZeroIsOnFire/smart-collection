@@ -10,7 +10,8 @@ RSpec.describe 'Public Collections', type: :request do
     it 'allows access without login' do
       get public_share_path(user.share_token)
       expect(response).to have_http_status(:success)
-      expect(response.body).to include(I18n.t('public_collections.index.title', name: user.name))
+      document = Nokogiri::HTML(response.body)
+      expect(document.at_css('h1').text).to include(I18n.t('public_collections.index.title', name: user.name))
       expect(response.body).to include('Public Car')
       expect(response.body).to include('data-controller="native-link-share"')
       expect(response.body).to include(I18n.t('javascript.native_link_share.share'))
@@ -24,6 +25,14 @@ RSpec.describe 'Public Collections', type: :request do
       expect(response.body).to include(public_wishlist_url(user.wishlist_share_token))
       expect(response.body).to include(I18n.t('public_collections.index.open_wishlist'))
       expect(response.body).not_to include('target="_blank"')
+    end
+
+    it 'renders the public collection in the URL locale' do
+      get public_share_path(user.share_token), params: { locale: 'pt-BR' }
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include(I18n.t('public_collections.index.title', name: user.name, locale: :'pt-BR'))
+      expect(response.body).to include(I18n.t('public_collections.index.cataloged_count', locale: :'pt-BR'))
     end
 
     it 'renders the cataloged count with theme-safe contrast classes' do
@@ -102,8 +111,9 @@ RSpec.describe 'Public Collections', type: :request do
       view_toggle = document.at_css('[data-view-toggle-storage-key-value="public_collection_view_preference"]')
       carousel = document.at_css('#publicCollectionCarousel')
       gallery_button = document.at_css('[data-action="click->view-toggle#setGallery"]')
-      public_card_link = document.at_css("#cars_grid_inner a[href='#{public_share_car_path(user.share_token, car)}']")
-      gallery_slide_link = document.at_css(".public-gallery-slide a[href='#{public_share_car_path(user.share_token, car)}']")
+      localized_car_path = public_share_car_path(user.share_token, car, locale: 'en')
+      public_card_link = document.at_css("#cars_grid_inner a[href='#{localized_car_path}']")
+      gallery_slide_link = document.at_css(".public-gallery-slide a[href='#{localized_car_path}']")
 
       expect(view_toggle['data-view-toggle-storage-key-value']).to eq('public_collection_view_preference')
       expect(carousel).to be_present
@@ -119,7 +129,7 @@ RSpec.describe 'Public Collections', type: :request do
       expect(response.body).to include('Porsche')
       expect(response.body).to include('2024')
       expect(response.body).to include('1:64')
-      expect(response.body).to include('Azul')
+      expect(response.body).to include(I18n.t('colors.Azul', locale: :en))
       expect(response.body).to include('Premium, Destaque')
       expect(response.body).to include('Miniatura com pintura especial')
       expect(document.at_css('.public-gallery-thumbnails')).to be_present
@@ -130,12 +140,15 @@ RSpec.describe 'Public Collections', type: :request do
     it 'paginates the public collection' do
       create_list(:car, 20, user: user)
 
-      get public_share_path(user.share_token)
+      get public_share_path(user.share_token), params: { locale: 'pt-BR' }
 
       expect(response).to have_http_status(:success)
       expect(response.body.scan('id="cars_sentinel"').size).to eq(1)
+      document = Nokogiri::HTML(response.body)
+      sentinel_url = document.at_css('#cars_sentinel')['data-infinite-scroll-url-value']
+      expect(sentinel_url).to include('locale=pt-BR')
 
-      get public_share_path(user.share_token), params: { page: 2 }, as: :turbo_stream
+      get public_share_path(user.share_token), params: { page: 2, locale: 'pt-BR' }, as: :turbo_stream
 
       expect(response).to have_http_status(:success)
       expect(response.body).to include('turbo-stream action="append" target="public_gallery_slides"')
@@ -150,21 +163,22 @@ RSpec.describe 'Public Collections', type: :request do
       user.update(sharing_enabled: false)
       get public_share_path(user.share_token)
       expect(response).to redirect_to(root_path)
-      expect(flash[:alert]).to eq(I18n.t('errors.messages.page_not_found', default: 'Página ou item não encontrado.'))
+      expect(flash[:alert]).to eq(I18n.t('errors.messages.page_not_found'))
     end
 
     it 'redirects to landing page for invalid token' do
       get public_share_path('invalid-token')
       expect(response).to redirect_to(root_path)
-      expect(flash[:alert]).to eq(I18n.t('errors.messages.page_not_found', default: 'Página ou item não encontrado.'))
+      expect(flash[:alert]).to eq(I18n.t('errors.messages.page_not_found'))
     end
   end
 
   describe 'GET /s/:share_token/car/:id' do
     it 'allows access to car details without login' do
-      get public_share_car_path(user.share_token, car.id)
+      get public_share_car_path(user.share_token, car.id), params: { locale: 'pt-BR' }
       expect(response).to have_http_status(:success)
       expect(response.body).to include('Public Car')
+      expect(response.body).to include(public_share_path(user.share_token, locale: 'pt-BR'))
       expect(response.body).to include('data-controller="native-link-share"')
       expect(response.body).to include(I18n.t('javascript.native_link_share.share'))
     end
@@ -200,7 +214,7 @@ RSpec.describe 'Public Collections', type: :request do
       expect(document.at_css("a[href='#{public_car_share_image_path(user.share_token, car)}']")).to be_present
       expect(response.body).to include(I18n.t('activerecord.attributes.car.color'))
       expect(response.body).not_to include(I18n.t('cars.show.view_original_photo'))
-      expect(response.body).to include('Azul')
+      expect(response.body).to include(I18n.t('colors.Azul', locale: :en))
       expect(response.body).to include('1:64')
       expect(response.body).to include(I18n.l(car.created_at.to_date, format: :numeric))
       expect(response.body).not_to include(I18n.t('cars.show.updated_at', date: I18n.l(car.updated_at, format: :short)))

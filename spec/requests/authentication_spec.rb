@@ -73,7 +73,6 @@ RSpec.describe 'Authentications', type: :request do
         error_text = Nokogiri::HTML(response.body).at_css('#error_explanation').text.squish
 
         expect(error_text).to include(I18n.t('errors.messages.too_short.other', count: 6))
-        expect(error_text).not_to include('is too short')
       end
 
       it 'does not create a user with mismatched passwords' do
@@ -86,18 +85,24 @@ RSpec.describe 'Authentications', type: :request do
         error_text = Nokogiri::HTML(response.body).at_css('#error_explanation').text.squish
 
         expect(error_text).to include(I18n.t('errors.messages.confirmation', attribute: User.human_attribute_name(:password)))
-        expect(error_text).not_to include("doesn't match")
       end
     end
   end
 
   describe 'POST /users/sign_in' do
-    it 'shows the unauthenticated warning in Portuguese' do
+    it 'shows the unauthenticated warning in English by default' do
       get cars_path
 
       expect(response).to redirect_to(new_user_session_path)
-      expect(flash[:alert]).to eq(I18n.t('devise.failure.unauthenticated'))
-      expect(flash[:alert]).not_to include('You need to sign in')
+      expect(flash[:alert]).to eq(I18n.t('devise.failure.unauthenticated', locale: :en))
+      expect(flash[:alert]).to include('You need to sign in')
+    end
+
+    it 'uses the URL locale when present' do
+      get cars_path, params: { locale: 'pt-BR' }
+
+      expect(response).to redirect_to(new_user_session_path)
+      expect(flash[:alert]).to eq(I18n.t('devise.failure.unauthenticated', locale: :'pt-BR'))
     end
 
     it 'renders dark autofill overrides for the email field' do
@@ -142,18 +147,18 @@ RSpec.describe 'Authentications', type: :request do
       expect(response).to redirect_to(cars_path)
     end
 
-    it 'shows invalid credentials warning in Portuguese for a wrong password' do
+    it 'shows invalid credentials warning in English for a wrong password by default' do
       post user_session_path, params: { user: { email: user.email, password: 'wrong-password' } }
 
-      expect(flash[:alert]).to eq(I18n.t('devise.failure.invalid'))
-      expect(flash[:alert]).not_to include('Invalid')
+      expect(flash[:alert]).to eq(I18n.t('devise.failure.invalid', locale: :en))
+      expect(flash[:alert]).to include('Invalid')
     end
 
-    it 'shows invalid credentials warning in Portuguese for an unknown email' do
+    it 'shows invalid credentials warning in English for an unknown email by default' do
       post user_session_path, params: { user: { email: 'missing@example.com', password: 'password123' } }
 
-      expect(flash[:alert]).to eq(I18n.t('devise.failure.not_found_in_database'))
-      expect(flash[:alert]).not_to include('Invalid')
+      expect(flash[:alert]).to eq(I18n.t('devise.failure.not_found_in_database', locale: :en))
+      expect(flash[:alert]).to include('Invalid')
     end
 
     it 'redirects a user with pending setup to initial setup' do
@@ -194,6 +199,42 @@ RSpec.describe 'Authentications', type: :request do
       expect(response.body).not_to include('ai_upscaling_settings_toggle')
       expect(response.body).not_to include('user_ai_upscaling_enabled')
     end
+
+    it 'renders the header language selector with the current locale selected' do
+      user.update!(locale: 'pt-BR')
+
+      get edit_user_registration_path
+
+      document = Nokogiri::HTML(response.body)
+      locale_select = document.at_css('#header_locale')
+      selected_option = locale_select.at_css('option[selected]')
+
+      expect(locale_select).to be_present
+      expect(locale_select['name']).to eq('locale')
+      expect(locale_select['data-action']).to eq('change->locale-switcher#submit')
+      expect(locale_select['onchange']).to be_nil
+      expect(selected_option['value']).to eq('pt-BR')
+      expect(locale_select.text).to include('English')
+      expect(locale_select.text).to include('Português do Brasil')
+      expect(document.at_css('#user_locale')).to be_nil
+    end
+
+    it 'uses the user locale when no URL locale is present' do
+      user.update!(locale: 'pt-BR')
+
+      get edit_user_registration_path
+
+      expect(response.body).to include(I18n.t('devise.ui.registrations.edit.title', locale: :'pt-BR'))
+    end
+
+    it 'gives URL locale precedence over the user locale' do
+      user.update!(locale: 'pt-BR')
+
+      get edit_user_registration_path, params: { locale: 'en' }
+
+      document = Nokogiri::HTML(response.body)
+      expect(document.at_css('h1').text).to include(I18n.t('devise.ui.registrations.edit.title', locale: :en))
+    end
   end
 
   describe 'PATCH /users' do
@@ -201,17 +242,90 @@ RSpec.describe 'Authentications', type: :request do
       sign_in user
     end
 
-    it 'does not update the AI upscaling preference through the account form' do
+    it 'does not update AI upscaling or locale through the account form' do
       patch user_registration_path, params: {
         user: {
           name: user.name,
           email: user.email,
+          locale: 'pt-BR',
           ai_upscaling_enabled: '0',
           current_password: 'password123'
         }
       }
 
       expect(user.reload.ai_upscaling_enabled).to be true
+      expect(user.locale).to eq('en')
+    end
+  end
+
+  describe 'PATCH /locale' do
+    it 'redirects anonymous users with the selected locale without storing cookies before consent' do
+      patch locale_path, params: { locale: 'pt-BR', return_to: root_path }
+
+      expect(response).to redirect_to(root_path(locale: 'pt-BR'))
+      expect(response.cookies['locale']).to be_nil
+    end
+
+    it 'stores the selected locale in a cookie for anonymous users after consent' do
+      cookies[:cookie_consent] = 'accepted'
+
+      patch locale_path, params: { locale: 'pt-BR', return_to: root_path }
+
+      expect(response).to redirect_to(root_path(locale: 'pt-BR'))
+      expect(response.cookies['locale']).to eq('pt-BR')
+    end
+
+    it 'stores the selected locale on the signed-in user' do
+      sign_in user
+
+      patch locale_path, params: { locale: 'pt-BR', return_to: cars_path }
+
+      expect(response).to redirect_to(cars_path(locale: 'pt-BR'))
+      expect(user.reload.locale).to eq('pt-BR')
+      follow_redirect!
+
+      document = Nokogiri::HTML(response.body)
+      expect(document.at_css('#header_locale option[selected]')['value']).to eq('pt-BR')
+    end
+
+    it 'uses the locale cookie for anonymous requests' do
+      cookies[:cookie_consent] = 'accepted'
+      cookies[:locale] = 'pt-BR'
+
+      get root_path
+
+      document = Nokogiri::HTML(response.body)
+      selected_option = document.at_css('#header_locale option[selected]')
+
+      expect(selected_option['value']).to eq('pt-BR')
+      expect(response.body).to include(I18n.t('home.hero.create_catalog', locale: :'pt-BR'))
+    end
+
+    it 'uses Portuguese for browser languages from Portuguese-speaking regions' do
+      get root_path, headers: { 'HTTP_ACCEPT_LANGUAGE' => 'pt-PT,pt;q=0.9,en;q=0.8' }
+
+      document = Nokogiri::HTML(response.body)
+      selected_option = document.at_css('#header_locale option[selected]')
+
+      expect(selected_option['value']).to eq('pt-BR')
+      expect(response.body).to include(I18n.t('home.hero.create_catalog', locale: :'pt-BR'))
+    end
+  end
+
+  describe 'POST /cookie-consent' do
+    it 'renders a cookie consent notice before acceptance' do
+      get root_path
+
+      expect(response.body).to include(I18n.t('cookie_consent.title', locale: :en))
+      expect(response.body).to include(I18n.t('cookie_consent.accept', locale: :en))
+    end
+
+    it 'stores consent and the current locale preference' do
+      post cookie_consent_path, params: { locale: 'pt-BR', return_to: root_path(locale: 'pt-BR') }
+
+      expect(response).to redirect_to(root_path(locale: 'pt-BR'))
+      expect(response.cookies['cookie_consent']).to eq('accepted')
+      expect(response.cookies['locale']).to eq('pt-BR')
     end
   end
 
@@ -220,7 +334,7 @@ RSpec.describe 'Authentications', type: :request do
       sign_in user
       get admin_dashboard_path
       expect(response).to redirect_to(root_path)
-      expect(flash[:alert]).to eq('Not authorized')
+      expect(flash[:alert]).to eq(I18n.t('admin.messages.not_authorized'))
     end
 
     it 'allows admin user to access admin dashboard' do

@@ -31,6 +31,7 @@ class User
   field :ai_upscaling_enabled, type: Boolean, default: true
   field :bulk_ai_upscaling_enabled, type: Boolean, default: false
   field :initial_setup_completed, type: Boolean, default: true
+  field :locale, type: String, default: 'en'
 
   index({ sharing_enabled: 1 }, { background: true })
   index({ wishlist_sharing_enabled: 1 }, { background: true })
@@ -43,6 +44,7 @@ class User
   field :admin, type: Boolean, default: false
 
   validates :name, presence: true
+  validates :locale, inclusion: { in: ->(_user) { I18n.available_locales.map(&:to_s) } }
 
   before_save :ensure_share_token, if: :sharing_enabled?
   before_save :ensure_wishlist_share_token, if: :wishlist_sharing_enabled?

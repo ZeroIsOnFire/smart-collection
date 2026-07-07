@@ -17,13 +17,13 @@
     <% end %>
     <% if car.size? %>
       <span class="<%= item_class %> metadata-chip-scale" title="<%= t('activerecord.attributes.car.size') %>" aria-label="<%= t('activerecord.attributes.car.size') %>">
-        <i class="bi bi-arrows-fullscreen"></i><%= car.size %>
+        <i class="bi bi-arrows-fullscreen"></i><%= car_scale_label(car.size) %>
       </span>
     <% end %>
     <% if car.color? %>
       <span class="<%= item_class %> metadata-chip-color" title="<%= t('activerecord.attributes.car.color') %>" aria-label="<%= t('activerecord.attributes.car.color') %>">
         <span class="metadata-color-dot" style="background-color:<%= Car::COLORS[car.color] || '#ccc' %>;"></span>
-        <%= car.color %>
+        <%= car_color_label(car.color) %>
       </span>
     <% end %>
     <% if photo_upscaled_by_ai %>

@@ -35,7 +35,7 @@ module Admin
       @user.assign_attributes(user_params)
       @user.admin = params[:user][:admin] if params.dig(:user, :admin).present? || params[:user].key?(:admin)
       if @user.save
-        redirect_to admin_user_path(@user), notice: 'Usuário atualizado com sucesso.'
+        redirect_to admin_user_path(@user), notice: t('admin.messages.user_updated')
       else
         render :edit, status: :unprocessable_content
       end
@@ -44,10 +44,10 @@ module Admin
     # DELETE /admin/users/1
     def destroy
       if @user == current_user
-        redirect_to admin_users_path, alert: 'Você não pode deletar seu próprio usuário.'
+        redirect_to admin_users_path, alert: t('admin.messages.self_delete')
       else
         @user.destroy
-        redirect_to admin_users_path, notice: 'Usuário removido com sucesso.'
+        redirect_to admin_users_path, notice: t('admin.messages.user_deleted')
       end
     end
 

@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import { Turbo } from "@hotwired/turbo-rails"
+import { t } from "../i18n"
 
 export default class extends Controller {
   static targets = ["image"]
@@ -51,7 +52,7 @@ export default class extends Controller {
 
   initCropper() {
     if (typeof Cropper === "undefined") {
-      console.error("Cropper.js not found!")
+      console.error(t("javascript.selection_adjustment.errors.cropper_missing_console"))
       return
     }
 
@@ -94,7 +95,7 @@ export default class extends Controller {
   async save(event) {
     const btn = event.currentTarget
     const originalText = btn.innerHTML
-    const loadingText = this.loadingTextValue || "Saving..."
+    const loadingText = this.loadingTextValue || t("javascript.selection_adjustment.loading")
     
     btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> ${loadingText}`
     btn.disabled = true
@@ -155,13 +156,13 @@ export default class extends Controller {
         const html = await response.text()
         Turbo.renderStreamMessage(html)
       } else {
-        const errorMsg = this.saveErrorTextValue || "Error saving selection"
-        alert(`${errorMsg} (${response.status})`)
+        const errorMsg = this.saveErrorTextValue || t("javascript.selection_adjustment.errors.save_failed", { status: response.status })
+        alert(this.saveErrorTextValue ? `${errorMsg} (${response.status})` : errorMsg)
       }
     } catch (error) {
-      console.error("Error saving adjustment:", error)
-      const unexpectedMsg = this.unexpectedErrorTextValue || "An unexpected error occurred"
-      alert(`${unexpectedMsg}: ${error.message}`)
+      console.error(t("javascript.selection_adjustment.errors.save_unexpected_console"), error)
+      const unexpectedMsg = this.unexpectedErrorTextValue || t("javascript.selection_adjustment.errors.save_unexpected", { message: error.message })
+      alert(this.unexpectedErrorTextValue ? `${unexpectedMsg}: ${error.message}` : unexpectedMsg)
     } finally {
       if (document.body.contains(btn)) {
         btn.innerHTML = originalText

@@ -64,6 +64,8 @@
           </ul>
 
           <div class="d-flex align-items-center gap-2">
+            <%= render "shared/locale_switcher" %>
+
             <!-- Theme Toggle -->
             <button class="btn btn-link text-decoration-none p-2 rounded-circle hover-bg-light theme-toggle-btn"
                     data-action="click->theme#toggle"
@@ -138,6 +140,7 @@
     </main>
 
     <%= turbo_frame_tag "modal", data: { controller: "modal-frame" } %>
+    <%= render "shared/cookie_consent" %>
 
 
     <style>
@@ -161,6 +164,30 @@
       }
       .extra-small {
         font-size: 0.75rem;
+      }
+      .locale-switcher {
+        background-color: var(--input-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 999px;
+        gap: 0.35rem;
+        padding: 0.15rem 0.45rem;
+      }
+      .locale-switcher-icon {
+        color: var(--text-muted);
+        display: inline-flex;
+        font-size: 0.95rem;
+      }
+      .locale-switcher-select {
+        background-color: transparent;
+        border: 0;
+        box-shadow: none;
+        color: var(--text-main);
+        font-weight: 700;
+        min-width: 5.7rem;
+        padding-left: 0;
+      }
+      .locale-switcher-select:focus {
+        box-shadow: none;
       }
     </style>
   </body>

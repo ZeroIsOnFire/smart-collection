@@ -9,7 +9,7 @@
         <p class="lead fs-4 opacity-75 mb-0 fw-light"><%= t('public_wishlists.show.subtitle') %></p>
         <% if @user.sharing_enabled? && @user.share_token? %>
           <div class="d-flex flex-column flex-sm-row align-items-start gap-2 mt-4">
-            <%= link_to public_share_url(@user.share_token),
+            <%= link_to public_share_url(@user.share_token, current_locale_param),
                         class: "btn btn-light rounded-3 px-4 d-inline-flex align-items-center gap-2" do %>
               <i class="bi bi-car-front"></i>
               <%= t('public_wishlists.show.open_collection') %>
@@ -52,6 +52,7 @@
                       turbo_frame: "public_wishlist_grid",
                       search_form_results_container_id_value: "cars_list_container"
                     } do |f| %>
+        <%= f.hidden_field :locale, value: I18n.locale.to_s %>
         <div class="wishlist-search-controls d-flex gap-2 align-items-stretch">
           <div class="input-group input-group-lg premium-search-container shadow-sm border border-light border-opacity-50 rounded-3 overflow-hidden bg-white flex-grow-1">
             <span class="input-group-text border-0 bg-transparent ps-4 pe-2">
@@ -78,7 +79,7 @@
             </div>
 
             <% if params.slice(:q, :status, :priority, :brand, :scale).values.any?(&:present?) %>
-              <%= link_to public_wishlist_path(@user.wishlist_share_token),
+              <%= link_to public_wishlist_path(@user.wishlist_share_token, current_locale_param),
                           class: "btn border-0 bg-transparent text-muted px-3 d-flex align-items-center search-clear-button",
                           title: t('wishlist_items.index.clear_filters'),
                           aria: { label: t('wishlist_items.index.clear_filters') } do %>
@@ -147,7 +148,7 @@
                   <i class="bi bi-funnel me-1"></i>
                   <%= t('actions.filter') %>
                 </button>
-                <%= link_to public_wishlist_path(@user.wishlist_share_token),
+                <%= link_to public_wishlist_path(@user.wishlist_share_token, current_locale_param),
                             class: "btn btn-soft-secondary rounded-3",
                             title: t('wishlist_items.index.clear_filters'),
                             aria: { label: t('wishlist_items.index.clear_filters') } do %>

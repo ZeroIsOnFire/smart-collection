@@ -50,7 +50,7 @@
           <div class="public-gallery-spec">
             <i class="bi bi-arrows-fullscreen"></i>
             <span><%= t("activerecord.attributes.car.size") %></span>
-            <strong><%= car.size %></strong>
+            <strong><%= car_scale_label(car.size) %></strong>
           </div>
         <% end %>
 
@@ -58,7 +58,7 @@
           <div class="public-gallery-spec">
             <span class="public-gallery-color" style="background-color:<%= Car::COLORS[car.color] || '#ccc' %>;"></span>
             <span><%= t("activerecord.attributes.car.color") %></span>
-            <strong><%= car.color %></strong>
+            <strong><%= car_color_label(car.color) %></strong>
           </div>
         <% end %>
 

@@ -18,6 +18,17 @@ RSpec.describe User, type: :model do
     expect(user.ai_upscaling_enabled).to be true
   end
 
+  it 'defaults locale to English' do
+    user = described_class.new(name: 'Test', email: 'test@example.com', password: 'password123')
+    expect(user.locale).to eq('en')
+  end
+
+  it 'rejects unavailable locales' do
+    user = described_class.new(name: 'Test', email: 'test@example.com', password: 'password123', locale: 'es')
+    expect(user).not_to be_valid
+    expect(user.errors[:locale]).to be_present
+  end
+
   it 'treats existing users as setup-completed by default' do
     user = described_class.new(name: 'Test', email: 'test@example.com', password: 'password123')
     expect(user.initial_setup_completed).to be true

@@ -52,6 +52,6 @@ class PublicWishlistsController < ApplicationController
   end
 
   def render_not_found
-    render plain: '404 Not Found', status: :not_found
+    render plain: t('errors.messages.page_not_found'), status: :not_found
   end
 end

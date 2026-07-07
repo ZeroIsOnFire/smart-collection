@@ -16,13 +16,13 @@ RSpec.describe 'Admin::Users', type: :request do
       get admin_users_path
 
       expect(response).to have_http_status(:success)
-      expect(response.body).to include('Página 1 de 2')
+      expect(response.body).to include(I18n.t('admin.users.index.page_info', page: 1, total: 2))
       expect(response.body).to include('/admin/users?page=2')
 
       get admin_users_path, params: { page: 2 }
 
       expect(response).to have_http_status(:success)
-      expect(response.body).to include('Página 2 de 2')
+      expect(response.body).to include(I18n.t('admin.users.index.page_info', page: 2, total: 2))
       expect(response.body).to include('/admin/users')
       expect(response.body).not_to include('/admin/users?page=3')
     end

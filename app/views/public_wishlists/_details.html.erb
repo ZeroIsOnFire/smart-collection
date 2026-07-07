@@ -30,7 +30,7 @@
     <div class="card car-detail-card shadow-sm rounded-3 bg-white h-100">
       <div class="card-body p-4 p-xl-5 d-flex flex-column">
         <div class="car-showcase-actions d-flex align-items-center justify-content-end gap-2 mb-4">
-          <%= link_to public_wishlist_item_share_image_path(user.wishlist_share_token, wishlist_item),
+          <%= link_to public_wishlist_item_share_image_path(user.wishlist_share_token, wishlist_item, current_locale_param),
                       class: "btn btn-premium rounded-3 d-inline-flex align-items-center justify-content-center",
                       data: { turbo_frame: "modal" } do %>
             <i class="bi bi-image me-2"></i><%= t('wishlist_items.actions.share_item_image') %>
