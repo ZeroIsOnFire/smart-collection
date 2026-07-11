@@ -1,5 +1,9 @@
 # Smart Collection Catalog
 
+<p align="center">
+  <img src="public/logo/logo.png" alt="Logo do Smart Collection Catalog" width="160">
+</p>
+
 [Read in English](README.md)
 
 O **Smart Collection Catalog** é uma aplicação Rails privada para catalogar itens colecionáveis, com foco forte em miniaturas de carros. O projeto combina gestão manual de acervo, preparação local de imagens com IA, autodetecção baseada em YOLO, lista de desejos, compartilhamento público seguro e exportações em PDF/CSV.
