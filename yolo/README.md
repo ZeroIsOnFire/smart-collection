@@ -1,31 +1,32 @@
 # SCC YOLO Detection Service
 
-[Leia em portugues](README.pt-BR.md)
+[Leia em português](README.pt-BR.md)
 
-FastAPI microservice responsible for local vehicle detection and simple color classification in Smart Collection Catalog autodetection flows.
+FastAPI microservice responsible for local YOLO11s object detection and simple color classification in Smart Collection Catalog autodetection flows.
 
-## HTTP Endpoints
+## Endpoints
 
-- `GET /health`: returns service status and loaded model information.
-- `POST /detect`: receives multipart `file` and returns detections with `label`, `score`, normalized `vertices`, and `color`.
-- `POST /classify_color`: receives multipart `file` and returns only the detected color.
-- `POST /classify`: receives multipart `file` and returns vehicle label plus color.
+- `GET /health`: returns service status.
+- `POST /detect`: receives multipart `file`; returns detected objects with normalized vertex coordinates.
+- `POST /classify`: receives multipart `file`; returns the main object label and detected color.
+- `POST /classify_color`: receives multipart `file`; returns the dominant color classification.
 
 When `YOLO_API_KEY` is configured, send the `X-API-Key` header.
 
-## Model And Detection
+## Model And Output Contract
 
 - Default model: `yolo11s.pt`.
 - Override with `YOLO_MODEL`.
-- The service uses COCO vehicle classes (`1..8`) for detection and classification.
-- Coordinates are returned as normalized vertices (`0.0` to `1.0`) in the shape expected by Rails.
-- The service is designed for local CPU usage; do not assume CUDA/GPU support.
+- The service is optimized for CPU and must not assume GPU availability.
+- Coordinates return as normalized vertices (`0.0` to `1.0`) in the shape expected by Rails.
+- Rails must not use YOLO labels to automatically fill item name/model. Newly detected items use translated generic labels.
+- Color classification uses local HSV/K-Means logic in `main.py`; it does not depend on a second ML model.
 
 ## Docker Compose
 
 The service is built from `yolo/Dockerfile` and runs on the internal Docker network. It does not need to expose a host port.
 
-Typical `docker-compose.yml` service:
+Example service entry:
 
 ```yaml
 yolo-service:
@@ -33,53 +34,40 @@ yolo-service:
     context: ./yolo
   environment:
     - YOLO_API_KEY=${YOLO_API_KEY}
-  healthcheck:
-    test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+  restart: unless-stopped
 ```
 
 Start only YOLO:
 
-```sh
+```bash
 docker compose up -d --build yolo-service
 ```
 
-View logs:
+Inside Compose, Rails and Sidekiq should call:
 
-```sh
-docker compose logs --tail=80 yolo-service
+```text
+http://yolo-service:8000
 ```
 
 ## Environment Variables
 
 - `YOLO_API_KEY`: optional key required by the `X-API-Key` header.
 - `YOLO_MODEL`: model path/name; defaults to `yolo11s.pt`.
-- `ULTRALYTICS_OFFLINE=True`: required to avoid Ultralytics network/analytics calls in the container.
+- `ULTRALYTICS_OFFLINE`: must stay `True` to avoid network calls from isolated containers.
 
-## Color Detection
+## Development Notes
 
-Color detection does not use an extra model. `ColorDetector`:
+- Keep the `torch.load(weights_only=False)` monkeypatch before importing `ultralytics`; PyTorch 2.6+ otherwise breaks model deserialization.
+- Keep output coordinates normalized and compatible with the Rails cropper.
+- Do not add Python dependencies unless explicitly approved.
+- If tests are added, they must not download models or require GPU access.
 
-- resizes the image to speed up processing;
-- uses the crop center to avoid background noise;
-- converts pixels to HSV;
-- filters shadows and highlights;
-- applies K-Means;
-- classifies simple names such as `Vermelho`, `Azul`, `Preto`, `Branco`, `Prata`, `Cinza`, and `Dourado`.
+## Manual Request Example
 
-## Caveats
-
-- The `torch.load(weights_only=False)` monkeypatch must run before importing `ultralytics`, because of PyTorch 2.6+.
-- Keep `ULTRALYTICS_OFFLINE=True` in the container.
-- Rails must not use the YOLO label to automatically fill item name/model. Newly detected items use a translated generic label.
-
-## Manual Test
-
-With the service running and a local image:
-
-```sh
+```bash
 curl -H "X-API-Key: $YOLO_API_KEY" \
-  -F "file=@/path/to/image.jpg" \
+  -F "file=@sample.jpg" \
   http://localhost:8000/detect
 ```
 
-Inside Compose, Rails and Sidekiq containers should call `http://yolo-service:8000`.
+In the default project setup, call the service from Rails/Sidekiq through `http://yolo-service:8000`, not through a host port.

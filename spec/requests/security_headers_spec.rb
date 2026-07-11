@@ -10,6 +10,7 @@ RSpec.describe 'Security headers', type: :request do
     expect(response.headers['Content-Security-Policy']).to include("default-src 'self'")
     expect(response.headers['Content-Security-Policy']).not_to include('connect-src *')
     expect(response.headers['Permissions-Policy']).to include('camera=()')
+    expect(response.headers['Cross-Origin-Embedder-Policy']).to eq('require-corp')
     expect(response.headers['Cross-Origin-Opener-Policy']).to eq('same-origin')
     expect(response.headers['Cross-Origin-Resource-Policy']).to eq('same-origin')
     expect(response.headers['Referrer-Policy']).to eq('strict-origin-when-cross-origin')
@@ -25,6 +26,7 @@ RSpec.describe 'Security headers', type: :request do
 
     expect(response).to have_http_status(:ok)
     expect(response.headers['Permissions-Policy']).to include('camera=()')
+    expect(response.headers['Cross-Origin-Embedder-Policy']).to eq('require-corp')
     expect(response.headers['Cross-Origin-Opener-Policy']).to eq('same-origin')
     expect(response.headers['Cross-Origin-Resource-Policy']).to eq('same-origin')
     expect(response.headers['Referrer-Policy']).to eq('strict-origin-when-cross-origin')

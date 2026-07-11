@@ -2,18 +2,34 @@
 
 [Read in English](README.md)
 
-O **Smart Collection Catalog** é um serviço Rails premium para registro e gerenciamento de coleções privadas, focado inicialmente em miniaturas de carros. O sistema permite cadastro manual, preparação local de imagens com IA, autodetecção com YOLO, compartilhamento público seguro e exportação em PDF/CSV.
+O **Smart Collection Catalog** é uma aplicação Rails privada para catalogar itens colecionáveis, com foco forte em miniaturas de carros. O projeto combina gestão manual de acervo, preparação local de imagens com IA, autodetecção baseada em YOLO, lista de desejos, compartilhamento público seguro e exportações em PDF/CSV.
 
 ## Tecnologias
 
-- **Backend**: Ruby on Rails 8.1
-- **Banco de dados**: MongoDB 7 com Mongoid
+- **Backend**: Ruby on Rails 8.1.3 e Ruby 3.3.10
+- **Banco de dados**: MongoDB 7 com Mongoid 9
 - **Autenticação**: Devise
-- **Frontend**: Hotwire (Turbo + Stimulus) e Bootstrap 5
-- **Tempo real**: Action Cable via Redis
-- **Jobs em background**: Sidekiq
+- **Frontend**: Hotwire (Turbo + Stimulus), Bootstrap 5.3, Bootstrap Icons, Cropper.js e esbuild
+- **Uploads e imagens**: CarrierWave, MiniMagick, metadados de recorte manual, conversão para JPG e geração de imagens de compartilhamento
+- **Tempo real e jobs**: Action Cable, Redis 7, Sidekiq e Active Job
 - **IA local**: detecção YOLO11s e upscale Real-ESRGAN
+- **Testes e qualidade**: RSpec, FactoryBot, RuboCop, rails_best_practices, Flay, Playwright, ESLint e Bundler Audit
 - **Infraestrutura**: Docker e Docker Compose
+
+## Funcionalidades principais
+
+- **Coleções privadas por padrão**: dados do usuário ficam escopados à conta autenticada.
+- **Catálogo de carros**: cadastre marca, nome, ano, escala, cor, tags, observações, fotos, dados de recorte e metadados de IA.
+- **Configuração inicial**: fluxo de preferências no primeiro acesso, incluindo opções como upscale por IA.
+- **Autodetecção por IA**: envie uma foto com vários itens, deixe o serviço YOLO local detectar candidatos e revise os itens encontrados antes de salvá-los.
+- **Preparação de imagens**: upscale local opcional por IA para fotos de carros, com variantes original/aprimorada e comportamento de fallback.
+- **Recorte manual**: armazene coordenadas de recorte e processe fotos de forma assíncrona.
+- **Lista de desejos**: gerencie itens desejados, prioridade, status, fotos, compartilhamento público da wishlist e exportações.
+- **Compartilhamento público seguro**: coleções e wishlists só ficam públicas quando o compartilhamento está habilitado e o acesso usa um token explícito.
+- **Imagens de compartilhamento**: gere PNGs de prévia/compartilhamento para carros, carros públicos, wishlists e itens da wishlist.
+- **Exportações**: gere relatórios PDF e CSV para coleções e wishlists.
+- **Área administrativa**: dashboard de uso, gestão de usuários e ações de manutenção para administradores autorizados.
+- **UI em tempo real**: estados de processamento e atualizações de interface usam Turbo Streams.
 
 ## Configuração
 
@@ -36,19 +52,32 @@ O **Smart Collection Catalog** é um serviço Rails premium para registro e gere
    cp .env.example .env
    ```
 
-3. Suba os containers:
+3. Crie o arquivo Compose local a partir do template oficial:
+
+   ```bash
+   cp docker-compose.example.yml docker-compose.yml
+   ```
+
+4. Revise o `.env` e escolha o Dockerfile do `upscale-service` em `docker-compose.yml`:
+
+   - `upscale/Dockerfile.cpu` para o caminho padrão no Docker Desktop.
+   - `upscale/Dockerfile.nvidia` para hosts NVIDIA/CUDA com NVIDIA Container Toolkit.
+   - `upscale/Dockerfile.amd` para ambientes Linux AMD/ROCm validados.
+   - `upscale/Dockerfile.vulkan` para testes experimentais com Vulkan/ncnn no Linux.
+
+5. Suba os containers:
 
    ```bash
    docker compose up -d --build
    ```
 
-4. Popule o banco:
+6. Popule o banco:
 
    ```bash
    docker compose exec web bin/rails db:seed
    ```
 
-5. Acesse a aplicação:
+7. Acesse a aplicação:
 
    ```text
    http://localhost:3000
@@ -58,34 +87,48 @@ O **Smart Collection Catalog** é um serviço Rails premium para registro e gere
 
 A aplicação possui arquivos de locale em português (`pt-BR`) e inglês (`en`). O português é o locale padrão atual em tempo de execução em `config/initializers/locale.rb`.
 
-## Funcionalidades principais
-
-- **Coleções privadas por padrão**: dados de usuário permanecem escopados ao dono autenticado.
-- **Autodetecção por IA**: envie uma foto com vários itens e deixe o YOLO local detectar, recortar e montar a fila de revisão.
-- **Gestão de acervo**: controle marca, nome, ano, escala, cor, fotos e metadados de cada item.
-- **Preparação de imagens**: upscale local opcional prepara fotos de carros para salvamento final.
-- **Feedback em tempo real**: estados de processamento e atualizações de interface usam Turbo Streams.
-- **Compartilhamento público seguro**: coleções podem ser compartilhadas apenas com token público explícito e compartilhamento habilitado.
-- **Exportações**: gere relatórios PDF e CSV da coleção.
-
 ## Microserviços
 
-O projeto inclui microserviços locais de IA executados pelo Docker Compose:
+O projeto inclui microserviços locais de IA via Docker Compose:
 
 - `yolo-service`: detecção local YOLO11s e classificação simples de cor para fluxos de autodetecção. Veja [`yolo/README.md`](yolo/README.md).
-- `upscale-service`: serviço local de upscale/preparação de imagem usado por uploads de fotos de carros. O setup Docker padrão usa `upscale/Dockerfile.cpu`; veja [`upscale/README.md`](upscale/README.md).
+- `upscale-service`: serviço local de upscale/preparação de imagem usado por uploads de fotos de carros quando `IMAGE_UPSCALE_SERVICE_URL` está configurada e o usuário permite upscale por IA. O setup padrão usa `upscale/Dockerfile.cpu`; veja [`upscale/README.md`](upscale/README.md).
 
-Os limites de preparação de imagem são configurados no `.env` com `IMAGE_UPSCALE_DEFAULT_MINIMUM_SIDE` para fotos de carros.
+Variáveis de ambiente importantes:
 
-## Testes
+- `YOLO_SERVICE_URL`: URL interna do serviço YOLO, normalmente `http://yolo-service:8000`.
+- `YOLO_API_KEY`: chave opcional enviada pelo header `X-API-Key`.
+- `IMAGE_UPSCALE_SERVICE_URL`: URL interna do serviço de upscale, normalmente `http://upscale-service:8000`.
+- `IMAGE_UPSCALE_API_KEY`: chave opcional enviada pelo header `X-API-Key`.
+- `IMAGE_UPSCALE_DEFAULT_MINIMUM_SIDE`: lado mínimo para preparação de fotos de carros, com padrão `360`.
 
-Rode a suíte Rails pelo wrapper seguro:
+## Desenvolvimento
+
+Comandos Rails, RSpec, RuboCop e QA do projeto devem rodar dentro do container `web`:
 
 ```bash
+docker compose exec web bin/rails routes
 docker compose exec web bin/safe_rspec
+docker compose exec web bundle exec rubocop
 ```
 
-O wrapper valida que o ambiente de teste está ativo antes de executar o RSpec.
+Compile assets JavaScript e CSS com:
+
+```bash
+docker compose exec web npm run build
+```
+
+Rode testes Playwright focados dentro do container `web`:
+
+```bash
+docker compose exec web npm run test:e2e -- caminho/do/teste.spec.js --browser=chromium
+```
+
+Use `http://127.0.0.1:3000` para verificações de navegador executadas dentro do container `web`.
+
+## Orientações do repositório
+
+As regras específicas de agentes e qualidade do projeto ficam em [`AGENTS.md`](AGENTS.md). As definições locais de skills ficam em `.skills/`, com wrappers mínimos específicos de agente em `.codex/skills/` e `.gemini/skills/`.
 
 ## Licença
 

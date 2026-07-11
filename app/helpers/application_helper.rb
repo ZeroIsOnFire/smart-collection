@@ -42,6 +42,13 @@ module ApplicationHelper
     record.errors[attribute].to_sentence.presence
   end
 
+  def locale_switcher_options
+    [
+      [t('devise.ui.registrations.edit.locales.en'), 'en'],
+      [t('devise.ui.registrations.edit.locales.pt-BR'), 'pt-BR']
+    ]
+  end
+
   def car_scale_label(scale)
     return if scale.blank?
 

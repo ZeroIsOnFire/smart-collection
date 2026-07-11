@@ -1,100 +1,111 @@
 # AGENTS.md - SCC Image Upscale Service
 
-## Visao Geral
-Microservico local para upscale inteligente de imagens com Real-ESRGAN e fallback Lanczos. Ele melhora nitidez e resolucao de fotos/recortes antes da autodeteccao ou do salvamento final.
+## Overview
 
-## Stack Tecnologica
-- **CPU**: `python:3.11-slim` em `Dockerfile.cpu`
-- **NVIDIA/CUDA**: `pytorch/pytorch:*-cuda*-runtime` em `Dockerfile.nvidia`
-- **AMD/ROCm**: `rocm/pytorch:latest` em `Dockerfile.amd`
-- **Vulkan/ncnn experimental**: `python:3.11-slim` em `Dockerfile.vulkan`
+Local microservice for intelligent image upscaling with Real-ESRGAN and Lanczos fallback. In the current Rails flow, it prepares car photos for final storage when AI upscaling is enabled and configured. Autodetection analysis itself must continue to use the original uploaded image.
+
+## Technology Stack
+
+- **CPU**: `python:3.11-slim` in `Dockerfile.cpu`
+- **NVIDIA/CUDA**: `pytorch/pytorch:*-cuda*-runtime` in `Dockerfile.nvidia`
+- **AMD/ROCm**: `rocm/pytorch:latest` in `Dockerfile.amd`
+- **Experimental Vulkan/ncnn**: `python:3.11-slim` in `Dockerfile.vulkan`
 - **API**: FastAPI + Uvicorn
-- **Inferencia**: Real-ESRGAN via PyTorch/torchvision
+- **Inference**: Real-ESRGAN through PyTorch/torchvision or ncnn for Vulkan
 - **Fallbacks**: `cv2.INTER_LANCZOS4`
-- **Modelos por imagem**:
-  - CPU baixa `realesr-general-x4v3.pth`
-  - NVIDIA baixa somente `4x_NMKD-Siax_200k.pth`
-  - AMD baixa somente `4x_NMKD-Siax_200k.pth`
-  - Vulkan baixa o pacote oficial `realesrgan-ncnn-vulkan-20220424-ubuntu.zip`, com binario e modelos ncnn
+- **Models by image**:
+  - CPU downloads `realesr-general-x4v3.pth`
+  - NVIDIA downloads only `4x_NMKD-Siax_200k.pth`
+  - AMD downloads only `4x_NMKD-Siax_200k.pth`
+  - Vulkan downloads the official `realesrgan-ncnn-vulkan-20220424-ubuntu.zip` package, including the binary and ncnn models
 
-## Contrato HTTP
-- `GET /health`: retorna status, runtime ativo, modelo ativo e parametros de tier/denoise.
-- `POST /upscale?minimum_side=<px>`: recebe multipart `file` e retorna `image/jpeg`.
-- `minimum_side` deve ser positivo. Arquivos vazios ou invalidos retornam erro `422`.
-- A saida preserva proporcao; nao force saida quadrada.
+## HTTP Contract
 
-## Regras e Funcionamento
+- `GET /health`: returns status, active runtime, active model, and tier/denoise parameters.
+- `POST /upscale?minimum_side=<px>`: receives multipart `file` and returns `image/jpeg`.
+- `minimum_side` must be positive. Empty or invalid files return `422`.
+- Output preserves aspect ratio; do not force square output.
+
+## Rules And Behavior
 
 ### Runtime
-O runtime e definido pela imagem Docker.
 
-| Dockerfile | Runtime interno | Modelo baixado |
+The runtime is selected by the Docker image.
+
+| Dockerfile | Internal runtime | Downloaded model |
 | --- | --- | --- |
 | `Dockerfile.cpu` | `cpu` | `realesr-general-x4v3.pth` |
 | `Dockerfile.nvidia` | `nvidia` | `4x_NMKD-Siax_200k.pth` |
 | `Dockerfile.amd` | `amd` | `4x_NMKD-Siax_200k.pth` |
 | `Dockerfile.vulkan` | `vulkan` | `realesrgan-x4plus` |
 
-Nao reintroduza modelos antigos nem baixe pesos que nao pertencam ao Dockerfile escolhido.
-Nao divida `Dockerfile.amd` entre Windows e Linux sem uma alternativa ROCm comprovadamente mais leve; o caminho validado continua sendo a imagem ROCm/PyTorch. Para AMD, prefira Linux nativo com ROCm quando possivel ou `Dockerfile.cpu` quando o tamanho/compatibilidade forem prioridade.
-O runtime Vulkan e experimental, opt-in, e deve manter fallback Lanczos em qualquer falha do binario ncnn.
+Do not reintroduce old models or download weights that do not belong to the selected Dockerfile.
+Do not split `Dockerfile.amd` between Windows and Linux without a proven lighter ROCm alternative; the validated path remains the ROCm/PyTorch image. For AMD, prefer native Linux with ROCm when possible or `Dockerfile.cpu` when size/compatibility matter more.
+The Vulkan runtime is experimental, opt-in, and must keep Lanczos fallback for any ncnn binary failure.
 
-### Modelos Customizados
-Os runtimes GPU usam `RRDBNet(num_feat=64, num_block=23, num_grow_ch=32, scale=4)`.
-Qualquer modelo customizado via `REAL_ESRGAN_MODEL_PATH` deve ser um peso ESRGAN/RRDB 4x compativel com essa arquitetura.
-Modelos SRVGG, compactos, 2x/8x ou com outra topologia exigem alteracao explicita de codigo e testes.
+### Custom Models
 
-Modelos RRDB 4x ja testados no backend AMD e compativeis:
+GPU runtimes use `RRDBNet(num_feat=64, num_block=23, num_grow_ch=32, scale=4)`.
+Any custom model supplied through `REAL_ESRGAN_MODEL_PATH` must be an ESRGAN/RRDB 4x weight compatible with that architecture.
+SRVGG, compact, 2x/8x, or other topology models require explicit code changes and tests.
+
+RRDB 4x models already tested on the AMD backend and compatible:
+
 - `4x-UltraSharp.pth`
 - `RealESRGAN_x4plus.pth`
 - `4x_foolhardy_Remacri.pth`
 - `4x_NMKD-Siax_200k.pth`
 - `4xNomos8kSC.pth`
 
-O runtime CPU atual usa `SRVGGNetCompact(num_feat=64, num_conv=32, upscale=4, act_type=prelu)`.
-O modelo CPU compativel com o caminho atual e `realesr-general-x4v3.pth`.
-Os modelos RRDB acima nao rodam no caminho CPU atual sem alterar codigo para instanciar `RRDBNet` em CPU.
-O `realesr-general-x4v3.pth` tambem nao roda no caminho GPU/RRDB atual sem alterar codigo para usar `SRVGGNetCompact` na GPU.
+The current CPU runtime uses `SRVGGNetCompact(num_feat=64, num_conv=32, upscale=4, act_type=prelu)`.
+The CPU-compatible model for the current path is `realesr-general-x4v3.pth`.
+The RRDB models above do not run on the current CPU path without changing the code to instantiate `RRDBNet` on CPU.
+`realesr-general-x4v3.pth` also does not run on the current GPU/RRDB path without changing the code to use `SRVGGNetCompact` on GPU.
 
-### Sistema de 3 Camadas
-O motor de decisao usa o ratio entre o lado menor atual e o `minimum_side` solicitado:
+### Three-Tier System
+
+The decision engine uses the ratio between the current shortest side and the requested `minimum_side`:
 
 ```text
 ratio = current_min_side / minimum_side
 ```
 
-| Tier | Condicao | Acao |
+| Tier | Condition | Action |
 | --- | --- | --- |
-| Tier 1 - 4x AI | `ratio < TIER_4X_THRESHOLD` (padrao `0.50`) | Real-ESRGAN 4x |
-| Tier 2 - 2x AI | `TIER_4X_THRESHOLD <= ratio < TIER_2X_THRESHOLD` (padrao `0.75`) | Real-ESRGAN 2x |
+| Tier 1 - 4x AI | `ratio < TIER_4X_THRESHOLD` (default `0.50`) | Real-ESRGAN 4x |
+| Tier 2 - 2x AI | `TIER_4X_THRESHOLD <= ratio < TIER_2X_THRESHOLD` (default `0.75`) | Real-ESRGAN 2x |
 | Tier 3 - Lanczos | `ratio >= TIER_2X_THRESHOLD` | Lanczos4 |
 
-- Apos os Tiers 1 e 2, sempre aplique `downscale_to_target()`.
-- Qualquer falha de Real-ESRGAN deve cair para Lanczos4, mantendo o endpoint funcional.
-- Nao faca fallback entre modelos CPU/GPU dentro do runtime; se a imagem GPU falhar, use Lanczos.
+- After Tiers 1 and 2, always apply `downscale_to_target()`.
+- Any Real-ESRGAN failure must fall back to Lanczos4, keeping the endpoint functional.
+- Do not fall back between CPU/GPU models inside a runtime; if the GPU path fails, use Lanczos.
 
-### Autenticacao
-Quando `IMAGE_UPSCALE_API_KEY` estiver configurada, as chamadas exigem o header `X-API-Key`.
+### Authentication
 
-## Testes e Qualidade
-- Testes vivem em `upscale/test_main.py` e usam `unittest` + `fastapi.testclient`.
-- Antes de concluir mudancas neste servico, rode `python -m unittest upscale/test_main.py` a partir da raiz do repositorio ou equivalente no container.
-- Testes devem mockar os upscalers pesados; nao baixe modelos nem dependa de GPU em testes unitarios.
+When `IMAGE_UPSCALE_API_KEY` is configured, calls require the `X-API-Key` header.
 
-## Variaveis de Ambiente
+## Tests And Quality
 
-| Variavel | Padrao | Descricao |
+- Tests live in `upscale/test_main.py` and use `unittest` + `fastapi.testclient`.
+- Before completing changes in this service, run `python -m unittest upscale/test_main.py` from the repository root or the equivalent container command.
+- Tests must mock heavy upscalers; do not download models or depend on GPU in unit tests.
+
+## Environment Variables
+
+| Variable | Default | Description |
 | --- | --- | --- |
-| `IMAGE_UPSCALE_API_KEY` | vazio | Chave do header `X-API-Key`. Sem ela, qualquer chamada e aceita. |
-| `IMAGE_UPSCALE_DEFAULT_MINIMUM_SIDE` | `360` | Lado minimo usado quando o endpoint `/upscale` recebe chamada sem `minimum_side`. |
-| `REAL_ESRGAN_MODEL_PATH` | por runtime | Caminho customizado opcional para pesos dentro do container. |
-| `VULKAN_BINARY_PATH` | `/app/bin/realesrgan-ncnn-vulkan` | Caminho do binario ncnn no runtime Vulkan. |
-| `VULKAN_MODEL_DIR` | `/app/models/realesrgan-ncnn-vulkan` | Diretorio de modelos ncnn no runtime Vulkan. |
-| `VULKAN_MODEL_NAME` | `realesrgan-x4plus` | Modelo ncnn usado no runtime Vulkan. |
-| `TIER_4X_THRESHOLD` | `0.50` | Ratio abaixo do qual o Real-ESRGAN 4x e acionado. |
-| `TIER_2X_THRESHOLD` | `0.75` | Ratio abaixo do qual o Real-ESRGAN 2x e acionado. Acima, usa Lanczos. |
+| `IMAGE_UPSCALE_API_KEY` | empty | Key for the `X-API-Key` header. Without it, any call is accepted. |
+| `IMAGE_UPSCALE_DEFAULT_MINIMUM_SIDE` | `360` | Minimum side used when `/upscale` receives no explicit `minimum_side`. |
+| `REAL_ESRGAN_MODEL_PATH` | runtime-specific | Optional custom weight path inside the container. |
+| `VULKAN_BINARY_PATH` | `/app/bin/realesrgan-ncnn-vulkan` | ncnn binary path in the Vulkan runtime. |
+| `VULKAN_MODEL_DIR` | `/app/models/realesrgan-ncnn-vulkan` | ncnn model directory in the Vulkan runtime. |
+| `VULKAN_MODEL_NAME` | `realesrgan-x4plus` | ncnn model used by the Vulkan runtime. |
+| `TIER_4X_THRESHOLD` | `0.50` | Ratio below which Real-ESRGAN 4x is triggered. |
+| `TIER_2X_THRESHOLD` | `0.75` | Ratio below which Real-ESRGAN 2x is triggered. Above it, use Lanczos. |
+
 ## Gotchas
-- Mantenha o monkeypatch de `torch.load(weights_only=False)` antes de importar Real-ESRGAN.
-- Mantenha o shim `torchvision.transforms.functional_tensor` para compatibilidade do `basicsr`.
-- AMD/ROCm no Windows Docker Desktop nao tem passthrough simples via `/dev/kfd`; prefira Linux nativo ou WSL2 com ROCm suportado.
-- Se faltarem pesos ou GPU, o startup deve logar o erro e o endpoint deve continuar com fallback Lanczos.
+
+- Keep the `torch.load(weights_only=False)` monkeypatch before importing Real-ESRGAN.
+- Keep the `torchvision.transforms.functional_tensor` shim for `basicsr` compatibility.
+- AMD/ROCm on Windows Docker Desktop has no simple `/dev/kfd` passthrough; prefer native Linux or supported ROCm on WSL2.
+- If weights or GPU are missing, startup should log the error and the endpoint should continue with Lanczos fallback.

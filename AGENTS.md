@@ -1,105 +1,105 @@
 # AGENTS.md - Smart Collection Catalog
 
-## Contexto
+## Context
 
-Servico Rails premium para registro e gerenciamento de colecoes: itens, fotos, autodeteccao local via YOLO, recorte manual, upscale local, compartilhamento publico seguro e exportacao PDF/CSV. Stack principal: Rails 8.1, Ruby 3.3.10, MongoDB/Mongoid, Devise, Hotwire/Turbo/Stimulus, Bootstrap 5, CarrierWave/MiniMagick, Sidekiq/Redis, RSpec e Docker Compose.
+Premium Rails service for registering and managing private collections: items, photos, local YOLO autodetection, manual cropping, local upscaling, secure public sharing, wishlist management, and PDF/CSV exports. Main stack: Rails 8.1, Ruby 3.3.10, MongoDB/Mongoid, Devise, Hotwire/Turbo/Stimulus, Bootstrap 5, CarrierWave/MiniMagick, Sidekiq/Redis, RSpec, Playwright, and Docker Compose.
 
-## Uso de Contexto
+## Context Usage
 
-- Antes de abrir arquivos grandes, use `rg` com padroes especificos e leia apenas faixas de linhas relevantes.
-- Evite abrir artefatos gerados, minificados, compilados, logs extensos ou dumps completos quando uma busca focada resolver.
-- Resuma outputs grandes antes de continuar a investigacao.
-- Ao repetir comando que falhou, mude a hipotese, o escopo ou o ambiente e registre a causa provavel da falha.
-- Prefira comandos filtrados para validar o sintoma observado; aumente timeout apenas quando houver motivo concreto.
+- Before opening large files, use `rg` with specific patterns and read only the relevant line ranges.
+- Avoid opening generated, minified, compiled, long log, or full dump artifacts when a focused search is enough.
+- Summarize large outputs before continuing the investigation.
+- When repeating a failed command, change the hypothesis, scope, or environment and record the likely cause of the failure.
+- Prefer filtered commands to validate the observed symptom; increase timeouts only when there is a concrete reason.
 
-## Prioridades Inviolaveis
+## Inviolable Priorities
 
-- Seguranca e segregacao de dados vem primeiro: dados de usuario sempre escopados por `current_user` ou pelo dono publico validado. Nunca use busca global para recursos privados.
-- Colecoes sao privadas por padrao. Visao publica exige `sharing_enabled` e `share_token` UUID imprevisivel.
-- Nao exponha secrets, tokens, senhas, parametros sensiveis ou logs com credenciais.
-- Todo input externo, formulario, parametro de IA ou request deve passar por Strong Parameters/sanitizacao adequada.
-- Nao apague dados locais sem pedido explicito: nada de `Mongoid.purge!`, `db:drop`, limpeza em massa, remocao de volumes ou `docker compose down -v` fora do fluxo seguro de testes.
+- Security and data segregation come first: user data must always be scoped through `current_user` or through a validated public owner. Never use global lookup for private resources.
+- Collections are private by default. Public views require `sharing_enabled` and an unpredictable UUID `share_token`.
+- Do not expose secrets, tokens, passwords, sensitive parameters, or credential-bearing logs.
+- Every external input, form parameter, AI parameter, or request must go through Strong Parameters or appropriate sanitization.
+- Do not delete local data without an explicit request: no `Mongoid.purge!`, `db:drop`, mass cleanup, volume removal, or `docker compose down -v` outside a safe test flow.
 
-## Arquitetura
+## Architecture
 
-- Use MVC com services em `app/services/` para regra de negocio complexa ou reutilizavel.
-- Controllers devem ser finos, RESTful quando possivel, delegando para services e respondendo HTML/Turbo Stream.
-- Models ficam com validacoes, associacoes, indices/scopes simples e callbacks essenciais.
-- Evite dependencias novas. Gems, libs npm ou pacotes Python exigem autorizacao explicita.
-- Preserve compatibilidade com Sidekiq/Redis para jobs assincronos.
-- Em rotas Rails com `resource :nome_singular`, o controller ainda segue pluralizacao Rails por padrao. Exemplo: `resource :initial_setup` roteia para `InitialSetupsController` e views em `app/views/initial_setups/`. Confirme com `docker compose exec web bin/rails routes -g termo` antes de criar controller/view singular.
+- Use MVC with services in `app/services/` for complex or reusable business rules.
+- Controllers should stay thin, RESTful when possible, delegate to services, and respond with HTML/Turbo Stream.
+- Models should hold validations, associations, simple indexes/scopes, and essential callbacks.
+- Avoid new dependencies. Gems, npm libraries, or Python packages require explicit authorization.
+- Preserve Sidekiq/Redis compatibility for asynchronous jobs.
+- In Rails routes declared with singular `resource :singular_name`, the controller still follows Rails pluralization by default. Example: `resource :initial_setup` routes to `InitialSetupsController` and views in `app/views/initial_setups/`. Confirm with `docker compose exec web bin/rails routes -g term` before creating a singular controller/view.
 
-## UI, Frontend e i18n
+## UI, Frontend, And i18n
 
-- A UI segue visual premium: paleta existente, glassmorphism, Bootstrap Icons, modais polidos, Grid/List, infinite scroll e transicoes suaves.
-- Ao editar views, mantenha responsividade, acessibilidade basica e consistencia com os componentes existentes.
-- Ao alterar funcionalidades visiveis de frontend, fluxos Hotwire/Turbo/Stimulus, formularios, modais, navegacao, estados interativos ou responsividade, valide o comportamento com Playwright em navegador real.
-- E proibido texto hardcoded em views, controllers, Turbo Streams, JS, toasts, botoes e erros. Use I18n Rails e `config/locales/javascript.*.yml` para textos do JavaScript.
-- Stimulus fica em `app/javascript/controllers/`; registre novos controllers em `app/javascript/controllers/index.js`.
-- Assets usam jsbundling/cssbundling com esbuild e Propshaft: `npm run build` deve compilar JavaScript e CSS; use `npm run build:js` ou `npm run build:css` apenas para validacoes focadas.
+- The UI follows the existing premium visual language: current palette, glassmorphism, Bootstrap Icons, polished modals, grid/list views, infinite scroll, and smooth transitions.
+- When editing views, preserve responsiveness, basic accessibility, and consistency with existing components.
+- When changing visible frontend functionality, Hotwire/Turbo/Stimulus flows, forms, modals, navigation, interactive states, or responsiveness, validate behavior with Playwright in a real browser.
+- Hardcoded text is forbidden in views, controllers, Turbo Streams, JavaScript, toasts, buttons, and errors. Use Rails I18n and `config/locales/javascript.*.yml` for JavaScript text.
+- Stimulus controllers live in `app/javascript/controllers/`; register new controllers in `app/javascript/controllers/index.js`.
+- Assets use jsbundling/cssbundling with esbuild and Propshaft: `npm run build` must compile JavaScript and CSS; use `npm run build:js` or `npm run build:css` only for focused validation.
 
-## Docker e Testes
+## Docker And Tests
 
-- Rode o projeto via Docker Compose. O `docker-compose.yml` local nao e versionado; use `docker-compose.example.yml` como template.
-- Comandos Rails, RSpec e RuboCop devem rodar no container `web`.
-- Testes Playwright devem rodar dentro do Docker, no container `web`, com `docker compose exec web npm run test:e2e -- caminho/do/teste.spec.js --browser=chromium`. Use `http://127.0.0.1:3000` quando o teste roda no proprio container `web`.
-- RSpec deve usar `docker compose exec web bin/safe_rspec`; nunca rode `bundle exec rspec` direto. O wrapper valida `Rails.env=test` e banco Mongoid com `test` no nome.
-- Em falhas de CRLF, timeout ou `Layout/EndOfLine`, aplique o workaround focado documentado em `$quality-check-rails` e registre o resultado parcial sem repetir a mesma etapa indefinidamente.
-- Durante a implementacao, rode specs focados no que foi alterado. No fechamento de tarefa Rails relevante, rode a suite suficiente para dar confianca; QA amplo/lint/audit fica para o final do processo ou quando o usuario pedir.
-- TDD e esperado: teste antes da implementacao quando houver mudanca de comportamento. Use RSpec, FactoryBot, Shoulda e VCR para HTTP externo.
+- Run the project through Docker Compose. The local `docker-compose.yml` is not versioned; use `docker-compose.example.yml` as the template.
+- Rails, RSpec, and RuboCop commands must run in the `web` container.
+- Playwright tests must run inside Docker, in the `web` container, with `docker compose exec web npm run test:e2e -- path/to/test.spec.js --browser=chromium`. Use `http://127.0.0.1:3000` when the test runs from the `web` container.
+- RSpec must use `docker compose exec web bin/safe_rspec`; never run `bundle exec rspec` directly. The wrapper validates `Rails.env=test` and a Mongoid database name containing `test`.
+- For CRLF, timeout, or `Layout/EndOfLine` failures, apply the focused workaround documented in `$quality-check-rails` and record the partial result instead of repeating the same step indefinitely.
+- During implementation, run focused specs for the changed area. For relevant Rails work, finish with a suite broad enough to give confidence; broad QA, lint, and audit are final-stage checks or explicit user requests.
+- TDD is expected when behavior changes. Use RSpec, FactoryBot, Shoulda, and VCR for external HTTP.
 
-## Qualidade e Skills
+## Quality And Skills
 
-- Use skills de qualidade/seguranca principalmente no fechamento, em pedidos explicitos de QA/audit, ou quando a alteracao tocar fortemente a area da skill.
-- A fonte canonica das skills locais fica em `.skills/<nome-da-skill>/SKILL.md`.
-- Adaptadores especificos de agentes devem ser wrappers minimos apontando para a fonte canonica. No Codex, cada `.codex/skills/<nome-da-skill>/SKILL.md` deve conter apenas `@../../../.skills/<nome-da-skill>/SKILL.md`.
-- Os padroes futuros para agentes genericos (`.agents`) e Claude (`.claude`) devem reutilizar `.skills/` como fonte unica; a adaptacao funcional desses agentes fica para item futuro.
-- Rails: use `$quality-check-rails` para QA amplo, lint/testes gerais ou preparacao de CI.
-- JavaScript: use `$quality-check-javascript` para mudancas em `app/javascript`, npm, esbuild/jsbundling ou layouts que carregam JS.
-- Python: use `$quality-check-python` para mudancas em `yolo/` ou `upscale/`.
-- Seguranca: use `$security-check` para auditoria, vulnerabilidades ou correcoes de dependencias vulneraveis.
-- Se `brakeman --no-pager` estourar timeout sem retornar resultado, registre o timeout no documento de PR e nao invente status de seguranca verde. Reexecute com timeout maior ou em ambiente externo quando o usuario pedir fechamento de auditoria completo.
-- Ao executar uma tarefa originada de plano ou goal, faca no fechamento uma checagem de qualidade proporcional ao codigo alterado antes do commit. Para Rails, rode specs focados via `bin/safe_rspec` e RuboCop focado; para JS, rode lint/build quando alterar `app/javascript` ou assets carregados por JS; para funcionalidades visiveis de frontend, rode Playwright dentro do Docker; para Python/microservicos, rode testes/lint correspondentes em `yolo/` ou `upscale/`; para mudancas sensiveis ou dependencias, rode Brakeman/Bundler Audit quando aplicavel.
-- Se o QA amplo (`bin/qa`) estourar timeout ou falhar por CRLF, divida em etapas conforme a secao Docker e Testes, registre o resultado parcial no documento local de PR e nao declare status verde para uma etapa que nao concluiu.
-- Commits devem ser atomicos, em portugues, no formato Conventional Commits.
-- Ao criar commit, gere ou atualize um arquivo em `docs/` com dados do PR dos commits atuais. A pasta `docs/` e ignorada pelo Git; mantenha os arquivos locais, mas fora do versionamento.
+- Use quality/security skills mainly at closing, for explicit QA/audit requests, or when a change strongly touches a skill's area.
+- The canonical source for local skills is `.skills/<skill-name>/SKILL.md`.
+- Agent-specific adapters should be minimal wrappers pointing to the canonical source. In Codex, each `.codex/skills/<skill-name>/SKILL.md` must contain only `@../../../.skills/<skill-name>/SKILL.md`.
+- Future generic-agent (`.agents`) and Claude (`.claude`) patterns should reuse `.skills/` as the single source of truth; functional adaptation for those agents is future work.
+- Rails: use `$quality-check-rails` for broad QA, general lint/tests, or CI preparation.
+- JavaScript: use `$quality-check-javascript` for changes in `app/javascript`, npm, esbuild/jsbundling, or layouts that load JavaScript.
+- Python: use `$quality-check-python` for changes in `yolo/` or `upscale/`.
+- Security: use `$security-check` for audits, vulnerabilities, or vulnerable dependency fixes.
+- If `brakeman --no-pager` times out without returning a result, record the timeout in the PR document and do not invent a green security status. Rerun with a longer timeout or in an external environment when the user asks for a complete audit closeout.
+- When executing a task from a plan or goal, close with a quality check proportional to the changed code before committing. For Rails, run focused specs through `bin/safe_rspec` and focused RuboCop; for JS, run lint/build when changing `app/javascript` or JS-loaded assets; for visible frontend functionality, run Playwright inside Docker; for Python/microservices, run the corresponding tests/lint in `yolo/` or `upscale/`; for sensitive changes or dependencies, run Brakeman/Bundler Audit when applicable.
+- If broad QA (`bin/qa`) times out or fails because of CRLF, split it into steps as described in Docker And Tests, record the partial result in the local PR document, and do not declare a green status for a step that did not finish.
+- Commits must be atomic, in Portuguese, and use Conventional Commits.
+- When creating a commit, generate or update a file under `docs/` with PR details for the current commits. The `docs/` directory is ignored by Git; keep those files local and unversioned.
 
-## Imagens, YOLO e Upscale
+## Images, YOLO, And Upscale
 
-- Uploads usam CarrierWave, nao ActiveStorage. Uploaders ficam em `app/uploaders/`; fotos sao convertidas para JPG.
-- `ImageUpscalerService` centraliza upscale e deve afetar apenas o fluxo/model `Car`. IA depende de `User#ai_upscaling_enabled` e so chama `IMAGE_UPSCALE_SERVICE_URL` quando configurado.
-- Minimo por env: `IMAGE_UPSCALE_DEFAULT_MINIMUM_SIDE` (padrao 360) vale para fotos de `Car`.
-- Autodeteccao principal, recortes automaticos, recortes manuais e registros de verificacao nao usam upscaler, nem IA nem fallback local. O YOLO deve analisar a foto original enviada.
-- O toggle da verificacao de autodeteccao deve ser mantido apenas como preferencia para o `Car` criado receber ou nao upscale quando salvo.
-- Preserve limpeza de `Tempfile` e cubra `ImageUpscalerService::UpscaleError` em specs quando alterar fluxo de imagem de `Car`.
-- YOLO local e preferencial. Nao use label do YOLO como nome/modelo do item; use label generico traduzido.
-- Antes de mexer em microservicos, leia `yolo/AGENTS.md` ou `upscale/AGENTS.md`.
-- Gotchas YOLO: manter `ULTRALYTICS_OFFLINE=True`, monkeypatch de `torch.load(weights_only=False)` para PyTorch 2.6+ e algoritmo HSV/K-Means de cor.
-- Gotchas upscale: endpoint `POST /upscale?minimum_side=<px>` multipart `file`, resposta JPEG; manter monkeypatch de `torch.load`, compatibilidade `torchvision.transforms.functional_tensor` e tiers anti-distorcao.
+- Uploads use CarrierWave, not ActiveStorage. Uploaders live in `app/uploaders/`; photos are converted to JPG.
+- `ImageUpscalerService` centralizes upscaling and must affect only the `Car` flow/model. AI depends on `User#ai_upscaling_enabled` and calls `IMAGE_UPSCALE_SERVICE_URL` only when configured.
+- Environment minimum: `IMAGE_UPSCALE_DEFAULT_MINIMUM_SIDE` (default `360`) applies to `Car` photos.
+- Main autodetection, automatic crops, manual crops, and verification records do not use the upscaler, AI, or local fallback. YOLO must analyze the original uploaded photo.
+- The autodetection verification toggle must remain only a preference for whether the created `Car` receives upscaling when saved.
+- Preserve `Tempfile` cleanup and cover `ImageUpscalerService::UpscaleError` in specs when changing the `Car` image flow.
+- Local YOLO is preferred. Do not use the YOLO label as the item name/model; use a translated generic label.
+- Before changing microservices, read `yolo/AGENTS.md` or `upscale/AGENTS.md`.
+- YOLO gotchas: keep `ULTRALYTICS_OFFLINE=True`, the `torch.load(weights_only=False)` monkeypatch for PyTorch 2.6+, and the HSV/K-Means color algorithm.
+- Upscale gotchas: endpoint `POST /upscale?minimum_side=<px>` receives multipart `file` and returns JPEG; keep the `torch.load` monkeypatch, `torchvision.transforms.functional_tensor` compatibility shim, and anti-distortion tiers.
 
-## Banco, Busca e Compartilhamento
+## Database, Search, And Sharing
 
-- Toda query privada deve preservar escopo por usuario. Public sharing deve validar token e `sharing_enabled`.
-- Text search de carros depende de indice MongoDB atualizado; ao mexer em busca, cubra isolamento por usuario e indices.
-- Jobs de processamento de fotos/autodeteccao devem manter estados `pending/completed/error`, Turbo Streams e retries seguros.
+- Every private query must preserve user scoping. Public sharing must validate the token and `sharing_enabled`.
+- Car text search depends on an updated MongoDB index; when changing search, cover user isolation and indexes.
+- Photo/autodetection processing jobs must preserve `pending/completed/error` states, Turbo Streams, and safe retries.
 
 ## Windows
 
-- Se PowerShell falhar com `windows sandbox: spawn setup refresh`, a falha costuma estar na camada de sandbox; repita o mesmo comando com `sandbox_permissions: "require_escalated"` quando for necessario usar PowerShell.
-- Para leitura simples de arquivos, prefira evitar nova aprovacao usando o container: `docker compose exec web sed -n '1,120p' caminho`.
-- Fallback secundario para leitura: `wsl.exe sed -n '1,120p' caminho`.
-- Evite pipes do PowerShell ao combinar `docker compose exec` com comandos Unix (`| sed`, `| grep`, etc.), porque o pipe pode ser interpretado no host e falhar. Prefira colocar a pipeline inteira dentro de `sh -lc` no container ou use `wsl.exe sed -n ...` para leituras simples.
-- Nem toda imagem Docker do projeto possui utilitarios basicos como `ps`. Para diagnostico de containers, prefira `docker compose ps`, `docker compose logs --tail=N servico` ou comandos especificos disponiveis no container em vez de `docker compose exec web ps ...`.
+- If PowerShell fails with `windows sandbox: spawn setup refresh`, the failure is usually in the sandbox layer; repeat the same command with `sandbox_permissions: "require_escalated"` when PowerShell is necessary.
+- For simple file reads, prefer avoiding new approval by using the container: `docker compose exec web sed -n '1,120p' path`.
+- Secondary read fallback: `wsl.exe sed -n '1,120p' path`.
+- Avoid PowerShell pipes when combining `docker compose exec` with Unix commands (`| sed`, `| grep`, etc.), because the pipe may be interpreted on the host and fail. Prefer putting the entire pipeline inside `sh -lc` in the container or use `wsl.exe sed -n ...` for simple reads.
+- Not every project Docker image has basic utilities like `ps`. For container diagnostics, prefer `docker compose ps`, `docker compose logs --tail=N service`, or service-specific commands available in the container instead of `docker compose exec web ps ...`.
 
-## Branches, PR e CI
+## Branches, PRs, And CI
 
-- Branches: `feature/`, `fix/`, `chore/`, `hotfix/`, `test/`, em kebab-case portugues, a partir de `main`.
-- No primeiro plano ou goal implementavel de uma sessao, crie um branch novo a partir de `main`, salvo se o usuario pedir explicitamente para usar o branch atual. Para continuacoes do mesmo plano/goal na mesma sessao, mantenha o branch ja criado. Se o usuario disser "neste branch", nao troque de branch.
-- CI de PR para `main`: build Docker, RSpec, RuboCop e Bundler Audit. PR com CI vermelho nao deve ser mergeado.
-- PRs devem ser pequenos e focados, com descricao do que foi feito, por que e como testar. Ao fechar plano/goal, atualize/crie um arquivo local em `docs/` com resumo, testes, riscos, timeouts e QA parcial antes do commit.
-- Checklist de review: escopo por usuario, testes adequados, arquitetura preservada, sem duplicacao desnecessaria, sem secrets e sem dependencias nao autorizadas.
+- Branches: `feature/`, `fix/`, `chore/`, `hotfix/`, `test/`, in Portuguese kebab-case, starting from `main`.
+- On the first implementable plan or goal of a session, create a new branch from `main` unless the user explicitly asks to use the current branch. For continuations of the same plan/goal in the same session, keep the branch already created. If the user says "neste branch", do not switch branches.
+- PR CI for `main`: Docker build, RSpec, RuboCop, and Bundler Audit. PRs with red CI must not be merged.
+- PRs should be small and focused, with a description of what changed, why, and how to test. When closing a plan/goal, update/create a local file in `docs/` with summary, tests, risks, timeouts, and partial QA before committing.
+- Review checklist: user scoping, adequate tests, preserved architecture, no unnecessary duplication, no secrets, and no unauthorized dependencies.
 
-## Fechamento
+## Closeout
 
-- Informe testes executados, comandos inconclusivos e riscos restantes de forma objetiva, sem colar saidas longas.
-- Mantenha o resumo final curto e priorize mudancas feitas, validacao e bloqueios reais.
+- Report tests run, inconclusive commands, and remaining risks objectively, without pasting long outputs.
+- Keep the final summary short and prioritize changes made, validation, and real blockers.
