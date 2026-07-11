@@ -109,7 +109,7 @@ en:
         - "PDF/CSV export for offline reference"
         - "Controlled public sharing by link"
     footer:
-      copyright: "(c) %{year} Smart Collection Catalog. All rights reserved."
+      copyright: "(c) %{year} Eli Fachin Junior. Smart Collection Catalog is licensed under AGPL-3.0-or-later."
   initial_setup:
     badge: "Initial setup"
     title: "Before you start"

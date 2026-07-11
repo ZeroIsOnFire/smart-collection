@@ -132,4 +132,8 @@ Project-specific agent and quality rules live in [`AGENTS.md`](AGENTS.md). Local
 
 ## License
 
-This is a private-use project. Follow the repository rules in [`AGENTS.md`](AGENTS.md).
+Smart Collection Catalog is licensed under the GNU Affero General Public License v3.0 or later. See [`LICENSE`](LICENSE).
+
+Copyright (c) 2026 Eli Fachin Junior.
+
+The project name, logo, and visual identity are not licensed for use in a way that suggests an unofficial fork, hosted instance, or derivative is the original project or is endorsed by the author.
