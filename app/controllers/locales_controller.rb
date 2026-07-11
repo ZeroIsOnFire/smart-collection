@@ -8,7 +8,7 @@ class LocalesController < ApplicationController
       if user_signed_in?
         current_user.set(locale: locale)
       elsif cookies[COOKIE_CONSENT_KEY] == 'accepted'
-        cookies.permanent[LOCALE_COOKIE_KEY] = { value: locale, same_site: :lax }
+        cookies.permanent[LOCALE_COOKIE_KEY] = { value: locale, httponly: true, same_site: :lax }
       end
     end
 

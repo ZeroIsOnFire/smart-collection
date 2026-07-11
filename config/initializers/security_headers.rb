@@ -3,6 +3,7 @@
 Rails.application.config.action_dispatch.default_headers.merge!(
   'X-Content-Type-Options' => 'nosniff',
   'Referrer-Policy' => 'strict-origin-when-cross-origin',
+  'Cross-Origin-Embedder-Policy' => 'require-corp',
   'Cross-Origin-Opener-Policy' => 'same-origin',
   'Cross-Origin-Resource-Policy' => 'same-origin',
   'Permissions-Policy' => 'accelerometer=(), autoplay=(), camera=(), display-capture=(), ' \
@@ -13,6 +14,7 @@ Rails.application.config.action_dispatch.default_headers.merge!(
 STATIC_SECURITY_HEADERS = {
   'X-Content-Type-Options' => 'nosniff',
   'Referrer-Policy' => 'strict-origin-when-cross-origin',
+  'Cross-Origin-Embedder-Policy' => 'require-corp',
   'Cross-Origin-Opener-Policy' => 'same-origin',
   'Cross-Origin-Resource-Policy' => 'same-origin',
   'Permissions-Policy' => Rails.application.config.action_dispatch.default_headers['Permissions-Policy']

@@ -112,7 +112,7 @@ pt-BR:
         - "Exportação PDF/CSV para consulta fora do sistema"
         - "Compartilhamento público por link controlado"
     footer:
-      copyright: "(c) %{year} Smart Collection Catalog. Todos os direitos reservados."
+      copyright: "(c) %{year} Eli Fachin Junior. Smart Collection Catalog é licenciado sob AGPL-3.0-or-later."
   initial_setup:
     badge: "Configuração inicial"
     title: "Antes de começar"

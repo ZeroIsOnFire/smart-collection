@@ -1,40 +1,40 @@
-# AGENTS.md — SCC YOLO Detection Service
+# AGENTS.md - SCC YOLO Detection Service
 
-## Visão Geral
-Este é um microserviço especializado em detecção de objetos utilizando o modelo YOLO11s. Ele foi concebido para rodar localmente (CPU) dentro do ecossistema do Smart Collection Catalog, permitindo a detecção de itens sem dependência obrigatória de APIs externas.
+## Overview
 
----
+This is a specialized object-detection microservice using the YOLO11s model. It is designed to run locally, usually CPU-only, inside the Smart Collection Catalog ecosystem so item detection does not depend on external APIs.
 
-## 🛡️ Segurança
-A segurança deste serviço é garantida por:
-- **Isolamento de Rede**: O serviço não expõe portas para o host; é acessível apenas internamente via rede Docker pelo serviço Rails/Sidekiq.
-- **Autenticação via API Key**: Todas as requisições para `/detect` devem incluir o header `X-API-Key` validado contra a variável de ambiente `YOLO_API_KEY`.
+## Security
 
----
+This service is protected by:
 
-## Stack Tecnológica
-- **Base**: `ultralytics/ultralytics:latest-cpu` (Imagem oficial)
-- **Framework API**: FastAPI (Python 3.10+)
-- **Modelo**: YOLO11s (Small)
-- **Servidor**: Uvicorn
+- **Network isolation**: the service does not expose ports to the host; Rails and Sidekiq reach it through the internal Docker network.
+- **API key authentication**: every request to `/detect`, `/classify`, or `/classify_color` must include the `X-API-Key` header when `YOLO_API_KEY` is configured.
 
----
+## Technology Stack
 
-## Estrutura de Arquivos
-- `main.py`: Lógica da API, carregamento do modelo e autenticação.
-- `Dockerfile`: Configuração do container.
-- `requirements.txt`: Dependências adicionais (fastapi, uvicorn).
+- **Base image**: `ultralytics/ultralytics:latest-cpu`
+- **API framework**: FastAPI on Python 3.10+
+- **Model**: YOLO11s
+- **Server**: Uvicorn
+- **Color detection**: HSV/K-Means logic implemented locally in `main.py`
 
----
+## File Structure
 
-## Convenções de Desenvolvimento
-- **Manutenção de Modelo**: O modelo `yolo11s.pt` é baixado automaticamente no primeiro boot se não estiver presente.
-- **Formato de Resposta**: Sempre retornar coordenadas normalizadas (0.0 a 1.0) no formato de vértices para compatibilidade com o `ImageCropperService` do Rails.
-- **Hardware**: Otimizado para execução em CPU. Não assumir presença de CUDA/GPU NVIDIA.
+- `main.py`: API logic, model loading, authentication, detection parsing, and color classification.
+- `Dockerfile`: container configuration.
+- `requirements.txt`: additional dependencies.
 
----
+## Development Conventions
 
-## ⚠️ Troubleshooting & Gotchas (Problemas Conhecidos)
-- **PyTorch 2.6+ Crash**: A partir do PyTorch 2.6, a função `torch.load` adota `weights_only=True` por padrão, o que quebra a desserialização do pacote `ultralytics`. Para corrigir isso, **deve-se realizar um monkeypatch** na função `torch.load` antes de importar o `ultralytics`, forçando `weights_only=False`.
-- **Dependência de Rede Ultralytics**: O pacote ultralytics tenta fazer chamadas de rede para verificar atualizações ou analytics, o que pode travar o container ou falhar em redes isoladas. Por isso, a variável de ambiente `ULTRALYTICS_OFFLINE=True` **deve** estar definida.
-- **Detecção de Cor**: A detecção de cor não usa um modelo ML adicional. Ela emprega K-Means clustering no espaço HSV em um recorte do centro da imagem, filtrando reflexos brancos/pretos para achar a cor dominante. A lógica completa vive em `main.py` na classe `ColorDetector`.
+- The `yolo11s.pt` model is downloaded automatically on first boot when it is not already present.
+- Always return normalized coordinates (`0.0` to `1.0`) as vertices for compatibility with the Rails `ImageCropperService`.
+- Optimize for CPU execution. Do not assume CUDA or NVIDIA GPU availability.
+- Keep `ULTRALYTICS_OFFLINE=True` to avoid network checks and analytics calls from isolated containers.
+- Rails must not use YOLO labels as item names/models. Detected items use translated generic labels.
+
+## Troubleshooting And Gotchas
+
+- **PyTorch 2.6+ crash**: starting with PyTorch 2.6, `torch.load` defaults to `weights_only=True`, which breaks `ultralytics` package deserialization. Keep the monkeypatch that forces `weights_only=False` before importing `ultralytics`.
+- **Ultralytics network dependency**: `ultralytics` may try network calls for update checks or analytics. Keep `ULTRALYTICS_OFFLINE=True`.
+- **Color detection**: color detection does not use another ML model. It uses K-Means clustering in HSV space on a central crop, filtering white/black reflections to identify the dominant color. The full logic lives in `main.py` in `ColorDetector`.

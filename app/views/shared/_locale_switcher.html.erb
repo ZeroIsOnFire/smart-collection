@@ -8,9 +8,7 @@
     <i class="bi bi-globe2"></i>
   </span>
   <%= select_tag :locale,
-                 options_for_select([[t('devise.ui.registrations.edit.locales.en'), 'en'],
-                                     [t('devise.ui.registrations.edit.locales.pt-BR'), 'pt-BR']],
-                                    I18n.locale.to_s),
+                 options_for_select(locale_switcher_options, I18n.locale.to_s),
                  id: "header_locale",
                  class: "form-select form-select-sm locale-switcher-select",
                  aria: { label: t('nav.language') },
