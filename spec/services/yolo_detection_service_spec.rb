@@ -26,6 +26,7 @@ RSpec.describe YoloDetectionService do
             {
               label: 'car',
               score: 0.95,
+              color: 'blue',
               vertices: [
                 { x: 0.1, y: 0.1 },
                 { x: 0.4, y: 0.1 },
@@ -45,6 +46,7 @@ RSpec.describe YoloDetectionService do
       it 'returns processed detections' do
         result = described_class.analyze(photo_path.to_s)
         expect(result.first[:label]).to eq('car')
+        expect(result.first[:color]).to eq('blue')
         expect(result.first[:vertices].size).to eq(4)
         expect(result.first[:vertices].first[:x]).to eq(0.1)
       end
@@ -70,6 +72,24 @@ RSpec.describe YoloDetectionService do
         expect(Rails.logger).to receive(:error).with(/YoloDetectionService Exception: Network error/)
         expect(described_class.analyze(photo_path.to_s)).to eq([])
       end
+    end
+  end
+
+  describe '.classify_color' do
+    it 'returns the normalized color returned by the service' do
+      stub_request(:post, "#{service_url}/classify_color")
+        .to_return(status: 200, body: { color: 'blue' }.to_json, headers: { 'Content-Type' => 'application/json' })
+
+      expect(described_class.classify_color(photo_path.to_s)).to eq('blue')
+    end
+  end
+
+  describe '.classify' do
+    it 'returns normalized classification attributes' do
+      stub_request(:post, "#{service_url}/classify")
+        .to_return(status: 200, body: { label: 'car', color: 'blue' }.to_json, headers: { 'Content-Type' => 'application/json' })
+
+      expect(described_class.classify(photo_path.to_s)).to eq(label: 'car', color: 'blue')
     end
   end
 

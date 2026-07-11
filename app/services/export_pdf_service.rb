@@ -367,7 +367,7 @@ class ExportPdfService
     pdf.stroke_circle [label_width + 9, y], 4
 
     pdf.fill_color COLORS[:text_muted]
-    pdf.draw_text safe_text(car.color), at: [label_width + 18, y - 3], size: 8
+    pdf.draw_text safe_text(I18n.t("colors.#{car.color}", default: car.color)), at: [label_width + 18, y - 3], size: 8
     pdf.move_down 14
   end
 

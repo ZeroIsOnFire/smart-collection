@@ -17,7 +17,7 @@ class ExportCsvService
           car.brand,
           car.size,
           car.year,
-          car.color,
+          I18n.t("colors.#{car.color}", default: car.color),
           car.observations.to_s.squish,
           car.created_at.strftime('%Y-%m-%d %H:%M')
         ]

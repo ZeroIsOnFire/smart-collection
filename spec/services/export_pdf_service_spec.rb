@@ -29,6 +29,15 @@ RSpec.describe ExportPdfService do
       expect(I18n).to have_received(:l).with(generated_at, format: :export_timestamp).at_least(:once)
     end
 
+    it 'uses the translated color label in the catalog' do
+      car = create(:car, user: user, color: 'blue')
+      allow(I18n).to receive(:t).and_call_original
+
+      described_class.new(user, [car]).generate
+
+      expect(I18n).to have_received(:t).with('colors.blue', default: 'blue').at_least(:once)
+    end
+
     it 'draws a cover page with collection summary before the catalog' do
       expect(service).to receive(:draw_cover_page).ordered.and_call_original
       expect(service).to receive(:draw_catalog_pages).ordered.and_call_original

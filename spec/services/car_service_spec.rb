@@ -367,13 +367,12 @@ RSpec.describe CarService do
       expect(results).not_to include(car2)
     end
 
-    it 'returns cars matching the query in color' do
-      car2.update!(color: 'Azul')
+    it 'does not search cars by color' do
+      car2.update!(color: 'blue')
 
-      results = described_class.new(user).search('azul')
+      results = described_class.new(user).search('blue')
 
-      expect(results).to include(car2)
-      expect(results).not_to include(car1)
+      expect(results).to be_empty
     end
 
     it 'returns cars matching the query in year' do

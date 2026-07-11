@@ -197,7 +197,7 @@ class ShareImageService
       [I18n.t('share_images.car_fields.brand'), @record.brand],
       [I18n.t('share_images.car_fields.scale'), @record.size],
       [I18n.t('share_images.car_fields.year'), @record.year],
-      [I18n.t('share_images.car_fields.color'), @record.color],
+      [I18n.t('share_images.car_fields.color'), I18n.t("colors.#{@record.color}", default: @record.color)],
       [I18n.t('share_images.car_fields.tags'), @record.tags.to_a.join(', ')]
     ].filter_map do |label, value|
       text = value.to_s.squish

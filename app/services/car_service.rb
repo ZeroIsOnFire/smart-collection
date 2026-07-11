@@ -105,7 +105,7 @@ class CarService
 
   def search_conditions(words)
     pattern = /#{Regexp.escape(words)}/i
-    conditions = %i[name brand size color observations tags].map do |field|
+    conditions = %i[name brand size observations tags].map do |field|
       { field => pattern }
     end
 
