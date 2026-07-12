@@ -33,7 +33,7 @@ RSpec.describe CarImageProcessingJob do
       expect(ImageUpscalerService).to receive(:upscale_if_needed)
         .with(anything, minimum_side: ImageUpscalerService.default_minimum_side, use_ai: true, local_fallback: false)
         .and_return(upscaled_file)
-      expect(YoloDetectionService).to receive(:classify_color).and_return('Azul')
+      expect(YoloDetectionService).to receive(:classify_color).and_return('blue')
 
       described_class.new.perform(user.id.to_s, car.id.to_s)
 
@@ -43,7 +43,7 @@ RSpec.describe CarImageProcessingJob do
       expect(saved_image.height).to eq(280)
       expect(processed_car.photo_variant).to eq('original')
       expect(processed_car).not_to be_photo_upscaled_by_ai
-      expect(processed_car.color).to eq('Azul')
+      expect(processed_car.color).to eq('blue')
       expect(processed_car.photo_processing_status).to eq('completed')
       expect(processed_car.photo_processing_error).to be_nil
       expect(processed_car.photo_processing_crop?).to be false

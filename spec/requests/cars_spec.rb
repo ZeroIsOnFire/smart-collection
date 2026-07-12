@@ -121,7 +121,7 @@ RSpec.describe 'Cars', type: :request do
 
     it 'renders brand and AI indicator as metadata pills in the same badge list' do
       allow(ImageUpscalerService).to receive(:upscale_needed?).and_return(true)
-      ai_car = create(:car, user: user, brand: 'Mini GT', size: '1:64', color: 'Azul', photo_upscale_strategy: 'ai')
+      ai_car = create(:car, user: user, brand: 'Mini GT', size: '1:64', color: 'blue', photo_upscale_strategy: 'ai')
       ai_car.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
       ai_car.save!
 
@@ -133,7 +133,7 @@ RSpec.describe 'Cars', type: :request do
 
       expect(badge_list.at_css('.collection-brand-badge.metadata-chip-brand').text).to include('Mini GT')
       expect(badge_list.at_css('.metadata-chip.metadata-chip-scale').text).to include('1:64')
-      expect(badge_list.at_css('.metadata-chip.metadata-chip-color').text).to include(I18n.t('colors.Azul', locale: :en))
+      expect(badge_list.at_css('.metadata-chip.metadata-chip-color').text).to include(I18n.t('colors.blue', locale: :en))
       expect(badge_list.at_css('.metadata-chip.metadata-chip-ai').text).to include(I18n.t('cars.show.photo_upscaled_by_ai'))
     end
 
@@ -203,12 +203,12 @@ RSpec.describe 'Cars', type: :request do
         expect(response.body).not_to include('Other Car')
       end
 
-      it 'filters cars by color' do
-        car_matching.update!(color: 'Azul')
+      it 'does not search cars by color' do
+        car_matching.update!(color: 'blue')
 
-        get cars_path, params: { q: 'azul' }
+        get cars_path, params: { q: 'blue' }
 
-        expect(response.body).to include('Searchable Car')
+        expect(response.body).not_to include('Searchable Car')
         expect(response.body).not_to include('Other Car')
       end
 
@@ -222,10 +222,10 @@ RSpec.describe 'Cars', type: :request do
       end
 
       it 'filters cars by scale, brand, year and color menu parameters' do
-        car_matching.update!(brand: 'Mini GT', size: '1:64', year: 2024, color: 'Azul')
-        car_not_matching.update!(brand: 'Hot Wheels', size: '1:18', year: 2023, color: 'Vermelho')
+        car_matching.update!(brand: 'Mini GT', size: '1:64', year: 2024, color: 'blue')
+        car_not_matching.update!(brand: 'Hot Wheels', size: '1:18', year: 2023, color: 'red')
 
-        get cars_path, params: { brand: 'Mini GT', size: '1:64', year: '2024', color: 'Azul' }
+        get cars_path, params: { brand: 'Mini GT', size: '1:64', year: '2024', color: 'blue' }
 
         expect(response.body).to include('Searchable Car')
         expect(response.body).not_to include('Other Car')
@@ -370,10 +370,10 @@ RSpec.describe 'Cars', type: :request do
 
       document = Nokogiri::HTML(response.body)
       other_scale = document.at_css("#car_size option[value='Outra']")
-      blue_color = document.at_css("#car_color option[value='Azul']")
+      blue_color = document.at_css("#car_color option[value='blue']")
 
       expect(other_scale.text).to eq(I18n.t('scales.other', locale: :en))
-      expect(blue_color.text).to eq(I18n.t('colors.Azul', locale: :en))
+      expect(blue_color.text).to eq(I18n.t('colors.blue', locale: :en))
 
       user.set(locale: 'pt-BR')
 
@@ -381,10 +381,10 @@ RSpec.describe 'Cars', type: :request do
 
       document = Nokogiri::HTML(response.body)
       other_scale = document.at_css("#car_size option[value='Outra']")
-      blue_color = document.at_css("#car_color option[value='Azul']")
+      blue_color = document.at_css("#car_color option[value='blue']")
 
       expect(other_scale.text).to eq(I18n.t('scales.other', locale: :'pt-BR'))
-      expect(blue_color.text).to eq(I18n.t('colors.Azul', locale: :'pt-BR'))
+      expect(blue_color.text).to eq(I18n.t('colors.blue', locale: :'pt-BR'))
     end
 
     it 'shows the AI upscaling notice when enabled and configured' do
@@ -732,7 +732,7 @@ RSpec.describe 'Cars', type: :request do
   describe 'GET /show' do
     it 'renders the detail view inside the global modal frame' do
       updated_at = Time.zone.local(2026, 6, 11, 2, 22)
-      car.update!(color: 'Azul', size: '1:64')
+      car.update!(color: 'blue', size: '1:64')
       car.set(updated_at: updated_at)
       car.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/test_image.png'), 'image/png')
       car.original_photo = uploaded_resized_fixture(width: 240, height: 240, filename: 'small_original.jpg')
@@ -768,7 +768,7 @@ RSpec.describe 'Cars', type: :request do
       expect(response.body).to include(I18n.t('activerecord.attributes.car.size'))
       expect(response.body).to include(I18n.t('activerecord.attributes.car.color'))
       expect(response.body).to include(I18n.t('activerecord.attributes.car.observations'))
-      expect(response.body).to include(I18n.t('colors.Azul', locale: :en))
+      expect(response.body).to include(I18n.t('colors.blue', locale: :en))
       expect(response.body).to include('1:64')
       expect(response.body).to include(I18n.t('cars.show.photo_upscaled_by_ai'))
       expect(response.body).to include(I18n.t('cars.show.photo_upscaled_by_ai_tooltip'))

@@ -60,16 +60,16 @@ RSpec.describe 'Public Collections', type: :request do
       expect(search_input['placeholder']).to eq(I18n.t('cars.index.search_placeholder'))
     end
 
-    it 'filters public cars by scale, color and year' do
-      car.update!(name: 'Filtered Public Car', size: '1:64', color: 'Azul', year: 1988)
-      create(:car, user: user, name: 'Other Public Car', size: '1:18', color: 'Vermelho', year: 1970)
+    it 'filters public cars by scale and year, but not by textual color queries' do
+      car.update!(name: 'Filtered Public Car', size: '1:64', color: 'blue', year: 1988)
+      create(:car, user: user, name: 'Other Public Car', size: '1:18', color: 'red', year: 1970)
 
       get public_share_path(user.share_token), params: { q: '1:64' }
       expect(response.body).to include('Filtered Public Car')
       expect(response.body).not_to include('Other Public Car')
 
-      get public_share_path(user.share_token), params: { q: 'azul' }
-      expect(response.body).to include('Filtered Public Car')
+      get public_share_path(user.share_token), params: { q: 'blue' }
+      expect(response.body).not_to include('Filtered Public Car')
       expect(response.body).not_to include('Other Public Car')
 
       get public_share_path(user.share_token), params: { q: '1988' }
@@ -78,12 +78,12 @@ RSpec.describe 'Public Collections', type: :request do
     end
 
     it 'renders and applies public car filters by scale, brand, year and color' do
-      car.update!(name: 'Filtered Public Car', brand: 'Mini GT', size: '1:64', color: 'Azul', year: 1988)
+      car.update!(name: 'Filtered Public Car', brand: 'Mini GT', size: '1:64', color: 'blue', year: 1988)
       create(:car, user: user, name: 'Other Public Car', brand: 'Hot Wheels',
-                   size: '1:18', color: 'Vermelho', year: 1970)
+                   size: '1:18', color: 'red', year: 1970)
 
       get public_share_path(user.share_token),
-          params: { brand: 'Mini GT', size: '1:64', year: '1988', color: 'Azul' }
+          params: { brand: 'Mini GT', size: '1:64', year: '1988', color: 'blue' }
 
       expect(response.body).to include(I18n.t('public_collections.index.filter_menu'))
       expect(response.body).to include('name="size"')
@@ -99,7 +99,7 @@ RSpec.describe 'Public Collections', type: :request do
         brand: 'Porsche',
         year: 2024,
         size: '1:64',
-        color: 'Azul',
+        color: 'blue',
         tags: %w[Premium Destaque],
         observations: 'Miniatura com pintura especial e caixa preservada.',
         photo: fixture_file_upload(Rails.root.join('spec/fixtures/files/car_sample.jpg'), 'image/jpeg')
@@ -129,7 +129,7 @@ RSpec.describe 'Public Collections', type: :request do
       expect(response.body).to include('Porsche')
       expect(response.body).to include('2024')
       expect(response.body).to include('1:64')
-      expect(response.body).to include(I18n.t('colors.Azul', locale: :en))
+      expect(response.body).to include(I18n.t('colors.blue', locale: :en))
       expect(response.body).to include('Premium, Destaque')
       expect(response.body).to include('Miniatura com pintura especial')
       expect(document.at_css('.public-gallery-thumbnails')).to be_present
@@ -185,7 +185,7 @@ RSpec.describe 'Public Collections', type: :request do
 
     it 'renders public car details inside the global modal frame' do
       car.update!(
-        color: 'Azul',
+        color: 'blue',
         size: '1:64',
         observations: 'Versão especial com pintura azul e caixa preservada.'
       )
@@ -214,7 +214,7 @@ RSpec.describe 'Public Collections', type: :request do
       expect(document.at_css("a[href='#{public_car_share_image_path(user.share_token, car)}']")).to be_present
       expect(response.body).to include(I18n.t('activerecord.attributes.car.color'))
       expect(response.body).not_to include(I18n.t('cars.show.view_original_photo'))
-      expect(response.body).to include(I18n.t('colors.Azul', locale: :en))
+      expect(response.body).to include(I18n.t('colors.blue', locale: :en))
       expect(response.body).to include('1:64')
       expect(response.body).to include(I18n.l(car.created_at.to_date, format: :numeric))
       expect(response.body).not_to include(I18n.t('cars.show.updated_at', date: I18n.l(car.updated_at, format: :short)))

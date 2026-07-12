@@ -231,7 +231,7 @@ RSpec.describe 'DetectedItems', type: :request do
       @detected_item.update!(
         brand: 'Hot Wheels',
         label: 'Porsche 911',
-        color: 'Azul',
+        color: 'blue',
         cropped_photo_upscale_strategy: 'ai'
       )
 
@@ -239,7 +239,7 @@ RSpec.describe 'DetectedItems', type: :request do
         post cars_path,
              params: {
                detected_item_id: @detected_item.id,
-               car: { name: 'Porsche 911', brand: 'Hot Wheels', color: 'Azul' }
+               car: { name: 'Porsche 911', brand: 'Hot Wheels', color: 'blue' }
              },
              as: :turbo_stream
       end.to change(Car, :count).by(1)
@@ -256,7 +256,7 @@ RSpec.describe 'DetectedItems', type: :request do
       @detected_item.update!(
         brand: 'Hot Wheels',
         label: 'Test Car',
-        color: 'Prata',
+        color: 'silver',
         skip_upscaler: false,
         cropped_photo_upscale_strategy: nil
       )
@@ -265,7 +265,7 @@ RSpec.describe 'DetectedItems', type: :request do
         post cars_path,
              params: {
                detected_item_id: @detected_item.id,
-               car: { name: 'Test Car', brand: 'Hot Wheels', color: 'Prata' }
+               car: { name: 'Test Car', brand: 'Hot Wheels', color: 'silver' }
              },
              as: :turbo_stream
       end.to change(Car, :count).by(1)

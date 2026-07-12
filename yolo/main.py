@@ -39,7 +39,7 @@ class ColorDetector:
         if len(filtered) == 0:
             # If all filtered out, check original data for Black/White
             avg_v = np.mean(data[:, 2])
-            return "Preto" if avg_v < 128 else "Branco"
+            return "black" if avg_v < 128 else "white"
         
         # KMeans with 3 clusters to separate color from remaining reflections/shadows
         n_clusters = min(3, len(filtered))
@@ -73,38 +73,38 @@ class ColorDetector:
         # Achromatic check (Black, White, Gray, Silver)
         if s_norm < 15:
             if v_norm > 90:
-                return "Branco"
+                return "white"
             if v_norm < 20:
-                return "Preto"
+                return "black"
             if v_norm > 75:
-                return "Prata"
+                return "silver"
             if v_norm > 35:
-                return "Cinza"
-            return "Preto"
+                return "gray"
+            return "black"
         
         # Chromatic colors
         if h_norm < 12 or h_norm > 345:
-            return "Vermelho"
+            return "red"
         if h_norm < 30:
             if v_norm < 50:
-                return "Marrom"
-            return "Laranja"
+                return "brown"
+            return "orange"
         if h_norm < 65:
             if s_norm < 30 and v_norm > 70:
-                return "Bege"
+                return "beige"
             if s_norm < 60 and v_norm < 85:
-                return "Dourado"
-            return "Amarelo"
+                return "gold"
+            return "yellow"
         if h_norm < 165:
-            return "Verde"
+            return "green"
         if h_norm < 265:
-            return "Azul"
+            return "blue"
         if h_norm < 300:
-            return "Roxo"
+            return "purple"
         if h_norm < 345:
-            return "Rosa"
+            return "pink"
         
-        return "Cinza"
+        return "gray"
 
 color_detector = ColorDetector()
 

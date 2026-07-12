@@ -532,20 +532,20 @@ pt-BR:
 
   # ── Cores ──────────────────────────────────────────────
   colors:
-    Branco: "Branco"
-    Preto: "Preto"
-    Prata: "Prata"
-    Cinza: "Cinza"
-    Vermelho: "Vermelho"
-    Azul: "Azul"
-    Amarelo: "Amarelo"
-    Verde: "Verde"
-    Laranja: "Laranja"
-    Roxo: "Roxo"
-    Rosa: "Rosa"
-    Marrom: "Marrom"
-    Dourado: "Dourado"
-    Bege: "Bege"
+    white: "Branco"
+    black: "Preto"
+    silver: "Prata"
+    gray: "Cinza"
+    red: "Vermelho"
+    blue: "Azul"
+    yellow: "Amarelo"
+    green: "Verde"
+    orange: "Laranja"
+    purple: "Roxo"
+    pink: "Rosa"
+    brown: "Marrom"
+    gold: "Dourado"
+    beige: "Bege"
 
   # ── Escalas ────────────────────────────────────────────
   scales:

@@ -36,20 +36,37 @@ class Car
   PHOTO_PROCESSING_STATUSES = %w[pending processing completed error].freeze
 
   COLORS = {
-    'Branco' => '#FFFFFF',
-    'Preto' => '#000000',
-    'Prata' => '#C0C0C0',
-    'Cinza' => '#808080',
-    'Vermelho' => '#FF0000',
-    'Azul' => '#0000FF',
-    'Amarelo' => '#FFFF00',
-    'Verde' => '#008000',
-    'Laranja' => '#FFA500',
-    'Roxo' => '#800080',
-    'Rosa' => '#FFC0CB',
-    'Marrom' => '#A52A2A',
-    'Dourado' => '#FFD700',
-    'Bege' => '#F5F5DC'
+    'white' => '#FFFFFF',
+    'black' => '#000000',
+    'silver' => '#C0C0C0',
+    'gray' => '#808080',
+    'red' => '#FF0000',
+    'blue' => '#0000FF',
+    'yellow' => '#FFFF00',
+    'green' => '#008000',
+    'orange' => '#FFA500',
+    'purple' => '#800080',
+    'pink' => '#FFC0CB',
+    'brown' => '#A52A2A',
+    'gold' => '#FFD700',
+    'beige' => '#F5F5DC'
+  }.freeze
+
+  LEGACY_COLOR_KEYS = {
+    'Branco' => 'white',
+    'Preto' => 'black',
+    'Prata' => 'silver',
+    'Cinza' => 'gray',
+    'Vermelho' => 'red',
+    'Azul' => 'blue',
+    'Amarelo' => 'yellow',
+    'Verde' => 'green',
+    'Laranja' => 'orange',
+    'Roxo' => 'purple',
+    'Rosa' => 'pink',
+    'Marrom' => 'brown',
+    'Dourado' => 'gold',
+    'Bege' => 'beige'
   }.freeze
 
   SCALES = [

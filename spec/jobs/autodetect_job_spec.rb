@@ -18,6 +18,7 @@ RSpec.describe AutodetectJob do
           {
             label: 'YOLO car',
             score: 0.99,
+            color: 'blue',
             vertices: [{ x: 0.1, y: 0.1 }, { x: 0.9, y: 0.9 }]
           }
         ]
@@ -49,6 +50,7 @@ RSpec.describe AutodetectJob do
       expect(autodetection.photo_upscale_strategy).to be_nil
       expect(autodetection.enhanced_photo).not_to be_present
       expect(detected_item.label).to eq(I18n.t('autodetections.detected_item.new_item'))
+      expect(detected_item.color).to eq('blue')
       expect(detected_item.skip_upscaler).to be false
       expect(detected_item.cropped_photo_upscale_strategy).to be_nil
       expect(detected_item.cropped_photo_variant).to be_nil

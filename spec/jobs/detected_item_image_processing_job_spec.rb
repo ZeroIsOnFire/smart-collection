@@ -33,13 +33,13 @@ RSpec.describe DetectedItemImageProcessingJob do
         .and_return(file)
       expect(YoloDetectionService).to receive(:classify)
         .with(file.path)
-        .and_return(label: 'Manual car', color: 'Azul')
+        .and_return(label: 'Manual car', color: 'blue')
 
       described_class.new.perform(user.id.to_s, detected_item.id.to_s)
 
       processed_item = DetectedItem.find(detected_item.id)
       expect(processed_item.label).to eq('Manual car')
-      expect(processed_item.color).to eq('Azul')
+      expect(processed_item.color).to eq('blue')
       expect(processed_item.cropped_photo).to be_present
       expect(processed_item.original_cropped_photo).not_to be_present
       expect(processed_item.enhanced_cropped_photo).not_to be_present
@@ -50,16 +50,16 @@ RSpec.describe DetectedItemImageProcessingJob do
 
     it 'preserves submitted attributes when processing an adjusted selection' do
       file = cropped_file
-      detected_item.update!(color: 'Vermelho')
+      detected_item.update!(color: 'red')
 
       allow(ImageCropperService).to receive(:crop).and_return(file)
-      allow(YoloDetectionService).to receive(:classify).and_return(label: 'AI label', color: 'Azul')
+      allow(YoloDetectionService).to receive(:classify).and_return(label: 'AI label', color: 'blue')
 
       described_class.new.perform(
         user.id.to_s,
         detected_item.id.to_s,
         name: 'User name',
-        color: 'Verde',
+        color: 'green',
         brand: 'Hot Wheels',
         year: '1998',
         size: '1:64',
@@ -68,7 +68,7 @@ RSpec.describe DetectedItemImageProcessingJob do
 
       processed_item = DetectedItem.find(detected_item.id)
       expect(processed_item.label).to eq('User name')
-      expect(processed_item.color).to eq('Verde')
+      expect(processed_item.color).to eq('green')
       expect(processed_item.brand).to eq('Hot Wheels')
       expect(processed_item.year).to eq(1998)
       expect(processed_item.size).to eq('1:64')

@@ -55,7 +55,7 @@ class YoloDetectionService
 
       if response.is_a?(Net::HTTPSuccess)
         data = JSON.parse(response.body)
-        data['color']
+        normalize_color(data['color'])
       else
         Rails.logger.error "YoloDetectionService classify_color Error: #{response.code} - #{response.body}"
         nil
@@ -84,7 +84,9 @@ class YoloDetectionService
       end
 
       if response.is_a?(Net::HTTPSuccess)
-        JSON.parse(response.body).symbolize_keys
+        result = JSON.parse(response.body).symbolize_keys
+        result[:color] = normalize_color(result[:color]) if result.key?(:color)
+        result
       else
         Rails.logger.error "YoloDetectionService classify Error: #{response.code} - #{response.body}"
         {}
@@ -104,11 +106,15 @@ class YoloDetectionService
       {
         label: det['label'],
         score: det['score'],
-        color: det['color'],
+        color: normalize_color(det['color']),
         vertices: det['vertices'].map { |v| { x: v['x'], y: v['y'] } }
       }
     end
   end
 
-  private_class_method :process_detections
+  def self.normalize_color(color)
+    Car::LEGACY_COLOR_KEYS.fetch(color, color)
+  end
+
+  private_class_method :process_detections, :normalize_color
 end

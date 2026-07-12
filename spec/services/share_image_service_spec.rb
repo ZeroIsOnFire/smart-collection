@@ -34,7 +34,7 @@ RSpec.describe ShareImageService do
         brand: 'Mini GT',
         size: '1:64',
         year: 2024,
-        color: 'Azul',
+        color: 'blue',
         tags: %w[premium coupe],
         observations: 'Edicao especial',
         photo_upscale_strategy: 'ai',
@@ -46,7 +46,7 @@ RSpec.describe ShareImageService do
         "#{I18n.t('share_images.car_fields.brand')} Mini GT",
         "#{I18n.t('share_images.car_fields.scale')} 1:64",
         "#{I18n.t('share_images.car_fields.year')} 2024",
-        "#{I18n.t('share_images.car_fields.color')} Azul",
+        "#{I18n.t('share_images.car_fields.color')} #{I18n.t('colors.blue')}",
         "#{I18n.t('share_images.car_fields.tags')} premium, coupe"
       ].join('  |  ')
 
