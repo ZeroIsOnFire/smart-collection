@@ -35,6 +35,12 @@ Smart Collection Catalog is a private Rails application for cataloging collectib
 - **Admin area**: usage dashboard, user management, and maintenance actions for authorized admins.
 - **Realtime UI**: processing states and interface updates use Turbo Streams.
 
+## Screenshots
+
+![Smart Collection Catalog home screen](public/readme/home.png)
+
+![New car form with photographed miniature cars already registered](public/readme/car-registration.png)
+
 ## Setup
 
 ### Requirements
