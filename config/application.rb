@@ -23,12 +23,20 @@ Bundler.require(*Rails.groups)
 
 module SmartCollectionCatalog
   class Application < Rails::Application
+    require Rails.root.join('app/middleware/observability_metrics_middleware')
+
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 8.1
 
     if Rails.env.test?
       config.hosts = [/.*/] # Permite qualquer Host header em CI (evita DNS rebinding errors)
       config.action_controller.allow_forgery_protection = false
+    else
+      allowed_hosts = ENV.fetch('RAILS_ALLOWED_HOSTS', '').split(',').filter_map do |host|
+        normalized_host = host.strip
+        normalized_host.presence
+      end
+      config.hosts.concat(allowed_hosts)
     end
 
     # Please, add to the `ignore` list any other `lib` subdirectories that do
@@ -66,5 +74,6 @@ module SmartCollectionCatalog
     end
 
     config.active_job.queue_adapter = :sidekiq
+    config.middleware.insert_before 0, ObservabilityMetricsMiddleware
   end
 end

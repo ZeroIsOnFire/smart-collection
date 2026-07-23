@@ -1,5 +1,6 @@
 import os
 import io
+import time
 import torch
 
 # Monkeypatch torch.load BEFORE importing ultralytics
@@ -11,11 +12,19 @@ def patched_load(*args, **kwargs):
     return original_load(*args, **kwargs)
 torch.load = patched_load
 
-from fastapi import FastAPI, File, UploadFile, HTTPException, Header, Depends
+from fastapi import FastAPI, File, UploadFile, HTTPException, Header, Depends, Request
+from fastapi.responses import PlainTextResponse
 from ultralytics import YOLO
 from PIL import Image
 import numpy as np
 from sklearn.cluster import KMeans
+from prometheus_client import CONTENT_TYPE_LATEST, Counter, Gauge, Histogram, generate_latest
+from opentelemetry import trace
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.propagate import extract
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
 class ColorDetector:
     def detect(self, image):
@@ -113,6 +122,40 @@ os.environ["ULTRALYTICS_OFFLINE"] = "True"
 
 app = FastAPI(title="SCC YOLO Detection Service")
 
+OBSERVABILITY_ENABLED = os.getenv("OBSERVABILITY_ENABLED", "false").lower() == "true"
+REQUESTS = Counter("smart_collection_yolo_http_requests_total", "HTTP requests", ["method", "status"])
+DURATION = Histogram("smart_collection_yolo_http_request_duration_seconds", "HTTP request duration", ["method"])
+PROCESS_START = Gauge("smart_collection_yolo_process_start_time_seconds", "Process start time")
+PROCESS_START.set(time.time())
+
+if OBSERVABILITY_ENABLED:
+    provider = TracerProvider(resource=Resource.create({"service.name": os.getenv("OTEL_SERVICE_NAME", "smart-collection-yolo")}))
+    provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter(endpoint=os.getenv("OTEL_EXPORTER_OTLP_GRPC_ENDPOINT", "alloy:4317"), insecure=True)))
+    trace.set_tracer_provider(provider)
+
+tracer = trace.get_tracer("smart_collection.yolo")
+
+
+@app.middleware("http")
+async def observe_request(request: Request, call_next):
+    if request.url.path == "/metrics":
+        return await call_next(request)
+
+    started_at = time.monotonic()
+    with tracer.start_as_current_span(f"HTTP {request.method}", context=extract(request.headers)) as span:
+        span.set_attribute("http.request.method", request.method)
+        try:
+            response = await call_next(request)
+            span.set_attribute("http.response.status_code", response.status_code)
+            REQUESTS.labels(request.method, str(response.status_code)).inc()
+            return response
+        except Exception as error:
+            span.record_exception(error)
+            REQUESTS.labels(request.method, "500").inc()
+            raise
+        finally:
+            DURATION.labels(request.method).observe(time.monotonic() - started_at)
+
 # Load model (it will download on first run if not present)
 MODEL_NAME = os.getenv("YOLO_MODEL", "yolo11s.pt")
 model = YOLO(MODEL_NAME)
@@ -128,6 +171,11 @@ async def verify_api_key(x_api_key: str = Header(None)):
 @app.get("/health")
 async def health():
     return {"status": "ok", "model": MODEL_NAME}
+
+
+@app.get("/metrics", include_in_schema=False)
+async def metrics():
+    return PlainTextResponse(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 @app.post("/detect", dependencies=[Depends(verify_api_key)])
 async def detect(file: UploadFile = File(...)):
