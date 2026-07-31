@@ -6,6 +6,8 @@ class ObservabilityMetricsMiddleware
   end
 
   def call(env)
+    return @app.call(env) if env['PATH_INFO'] == '/metrics'
+
     started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     method = env.fetch('REQUEST_METHOD', 'UNKNOWN')
 
