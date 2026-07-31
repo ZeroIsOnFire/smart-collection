@@ -6,8 +6,8 @@ class MetricsController < ApplicationController
   def show
     return head :not_found unless Observability.enabled?
 
-    ObservabilityMetrics.refresh_sidekiq!
+    sidekiq_snapshot = ObservabilityMetrics.refresh_sidekiq!
     self.content_type = 'text/plain; version=0.0.4'
-    self.response_body = Prometheus::Client::Formats::Text.marshal(ObservabilityMetrics::REGISTRY)
+    self.response_body = Prometheus::Client::Formats::Text.marshal(ObservabilityMetrics::REGISTRY) + ObservabilityMetrics.sidekiq_execution_metrics(sidekiq_snapshot)
   end
 end
