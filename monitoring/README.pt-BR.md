@@ -32,6 +32,19 @@ Para a versão em inglês, veja [README.md](README.md).
 4. Abra o Grafana em `http://127.0.0.1:3001` (ou `GRAFANA_PORT`) e entre com
    `GRAFANA_ADMIN_USER` e `GRAFANA_ADMIN_PASSWORD`.
 
+## Dashboards
+
+Os dashboards em `monitoring/grafana/dashboards/` são provisionados
+automaticamente na pasta **Smart Collection** quando o Grafana é iniciado.
+Eles são versionados com o projeto e, por isso, ficam disponíveis após um clone
+ou `git pull` em outra máquina.
+
+Dashboards criados ou alterados somente pela interface do Grafana ficam no
+volume do Grafana e não são copiados pelo Git. Exporte-os como JSON e adicione
+o arquivo a `monitoring/grafana/dashboards/` para preservar a alteração.
+Mantenha o UID do dashboard na exportação para que o provisionamento atualize
+o dashboard existente, em vez de criar um duplicado.
+
 ## Sinais incluídos
 
 - O Prometheus coleta métricas de Rails, YOLO, Upscale, MongoDB, Redis,
