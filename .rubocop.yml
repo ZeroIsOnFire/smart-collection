@@ -5,11 +5,23 @@ plugins:
 AllCops:
   NewCops: enable
   SuggestExtensions: false
+  Include:
+    - 'app/**/*.rb'
+    - 'config/**/*.rb'
+    - 'db/**/*.rb'
+    - 'lib/**/*.rb'
+    - 'spec/**/*.rb'
+    - 'Gemfile'
+    - 'Rakefile'
+    - 'config.ru'
   Exclude:
     - 'vendor/**/*'
     - 'db/schema.rb'
     - 'bin/**/*'
     - 'node_modules/**/*'
+    - 'public/**/*'
+    - 'log/**/*'
+    - 'storage/**/*'
     - 'tmp/**/*'
 
 Style/Documentation:

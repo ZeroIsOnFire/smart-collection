@@ -11,11 +11,11 @@ echo "========================================="
 
 echo ""
 echo "👉 1. Rodando Rubocop (Autocorreção Segura)"
-bundle exec rubocop -a || true # Evita falhar o script se o rubocop encontrar ofensas
+bundle exec rubocop -a app config db lib spec Gemfile Rakefile config.ru || true # Evita falhar o script se o rubocop encontrar ofensas
 
 echo ""
 echo "👉 2. Rodando Rails Best Practices"
-bundle exec rails_best_practices || true
+bundle exec rails_best_practices -x 'public,tmp,log,storage,node_modules' || true
 
 echo ""
 echo "👉 3. Rodando Flay (Duplicação de Código)"
