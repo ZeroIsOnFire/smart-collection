@@ -3,7 +3,7 @@ FROM ultralytics/ultralytics:latest-cpu
 WORKDIR /app
 
 # Install additional requirements
-COPY requirements.txt .
+COPY requirements.lock requirements.txt
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
 # Copy application code
