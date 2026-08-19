@@ -1,16 +1,20 @@
 # =============================================================================
-# docker-compose.example.yml - Template de configuracao do Smart Collection
+# docker-compose.example.yml - Template de configuração / configuration template
 # =============================================================================
 #
-# Uso:
-#   1. Copie este arquivo para docker-compose.yml.
-#   2. Ajuste o .env a partir de .env.example.
-#   3. Escolha o Dockerfile do upscale-service:
-#        - CPU:    Dockerfile.cpu (padrao para Docker Desktop)
+# PT-BR: Uso:
+# EN: Usage:
+#   1. PT-BR: Copie este arquivo para docker-compose.yml.
+#      EN: Copy this file to docker-compose.yml.
+#   2. PT-BR: Ajuste o .env a partir de .env.example.
+#      EN: Configure .env from .env.example.
+#   3. PT-BR/EN: Escolha / choose the upscale-service Dockerfile:
+#        - CPU:    Dockerfile.cpu (PT-BR: padrão Docker Desktop; EN: Docker Desktop default)
 #        - NVIDIA: Dockerfile.nvidia + NVIDIA Container Toolkit
-#        - AMD:    Dockerfile.amd + dispositivos ROCm
+#        - AMD:    Dockerfile.amd + dispositivos / devices ROCm
 #
-# O docker-compose.yml local nao e versionado; este arquivo e o template oficial.
+# PT-BR: O docker-compose.yml local não é versionado; este é o template oficial.
+# EN: The local docker-compose.yml is unversioned; this is the official template.
 # =============================================================================
 
 name: smart-collection
@@ -36,10 +40,14 @@ services:
       - .env
     environment:
       - RAILS_ENV=development
+      - RAILS_ALLOWED_HOSTS=${RAILS_ALLOWED_HOSTS:-localhost,127.0.0.1,web}
       - REDIS_URL=redis://redis:6379/1
       - MONGODB_URI=mongodb://${MONGODB_USERNAME:-scc_admin}:${MONGODB_PASSWORD:-scc_dev}@mongodb:27017/smart_collection_catalog_development?authSource=admin
       - IMAGE_UPSCALE_SERVICE_URL=http://upscale-service:8000
       - IMAGE_UPSCALE_API_KEY=${IMAGE_UPSCALE_API_KEY:-}
+      - OBSERVABILITY_ENABLED=${OBSERVABILITY_ENABLED:-false}
+      - OTEL_SERVICE_NAME=smart-collection-web
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://alloy:4318}
     restart: unless-stopped
 
   sidekiq:
@@ -66,6 +74,9 @@ services:
       - MONGODB_URI=mongodb://${MONGODB_USERNAME:-scc_admin}:${MONGODB_PASSWORD:-scc_dev}@mongodb:27017/smart_collection_catalog_development?authSource=admin
       - IMAGE_UPSCALE_SERVICE_URL=http://upscale-service:8000
       - IMAGE_UPSCALE_API_KEY=${IMAGE_UPSCALE_API_KEY:-}
+      - OBSERVABILITY_ENABLED=${OBSERVABILITY_ENABLED:-false}
+      - OTEL_SERVICE_NAME=smart-collection-sidekiq
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://alloy:4318}
     restart: unless-stopped
 
   yolo-service:
@@ -73,6 +84,9 @@ services:
       context: ./yolo
     environment:
       - YOLO_API_KEY=${YOLO_API_KEY}
+      - OBSERVABILITY_ENABLED=${OBSERVABILITY_ENABLED:-false}
+      - OTEL_SERVICE_NAME=smart-collection-yolo
+      - OTEL_EXPORTER_OTLP_GRPC_ENDPOINT=${OTEL_EXPORTER_OTLP_GRPC_ENDPOINT:-alloy:4317}
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
@@ -85,7 +99,7 @@ services:
       context: ./upscale
       dockerfile: Dockerfile.cpu
 
-    # NVIDIA:
+    # NVIDIA / NVIDIA:
     # build:
     #   context: ./upscale
     #   dockerfile: Dockerfile.nvidia
@@ -97,12 +111,14 @@ services:
     #           count: all
     #           capabilities: [gpu]
 
-    # AMD/ROCm:
+    # AMD/ROCm / AMD/ROCm:
     # build:
     #   context: ./upscale
     #   dockerfile: Dockerfile.amd
-    # Recomendado para AMD com GPU compativel em Linux nativo.
-    # No Windows/WSL2, a imagem pode consumir perto de 90 GB; use CPU se precisar de um caminho menor.
+    # PT-BR: Recomendado para AMD com GPU compatível em Linux nativo.
+    # EN: Recommended for AMD with a compatible GPU on native Linux.
+    # PT-BR: No Windows/WSL2, a imagem pode consumir perto de 90 GB; use CPU para um caminho menor.
+    # EN: On Windows/WSL2, the image can use nearly 90 GB; use CPU for a smaller path.
     # devices:
     #   - "/dev/kfd:/dev/kfd"
     #   - "/dev/dri:/dev/dri"
@@ -112,7 +128,8 @@ services:
     # security_opt:
     #   - seccomp=unconfined
 
-    # Vulkan/ncnn experimental (Linux com Vulkan funcional):
+    # PT-BR: Vulkan/ncnn experimental (Linux com Vulkan funcional).
+    # EN: Experimental Vulkan/ncnn (Linux with working Vulkan).
     # build:
     #   context: ./upscale
     #   dockerfile: Dockerfile.vulkan
@@ -130,7 +147,7 @@ services:
       - VULKAN_BINARY_PATH=${VULKAN_BINARY_PATH:-}
       - VULKAN_MODEL_DIR=${VULKAN_MODEL_DIR:-}
       - VULKAN_MODEL_NAME=${VULKAN_MODEL_NAME:-}
-      # Upscale tiers: ratio = current_min_side / minimum_side
+      # PT-BR/EN: Níveis de upscale / Upscale tiers: ratio = current_min_side / minimum_side
       # < TIER_4X_THRESHOLD     -> Real-ESRGAN 4x
       # < TIER_2X_THRESHOLD     -> Real-ESRGAN 2x
       # >= TIER_2X_THRESHOLD    -> Denoise + Lanczos4
@@ -140,6 +157,9 @@ services:
       - DENOISE_TEMPLATE_WINDOW=${DENOISE_TEMPLATE_WINDOW:-7}
       - DENOISE_SEARCH_WINDOW=${DENOISE_SEARCH_WINDOW:-21}
       - LANCZOS_CAS_AMOUNT=${LANCZOS_CAS_AMOUNT:-0.35}
+      - OBSERVABILITY_ENABLED=${OBSERVABILITY_ENABLED:-false}
+      - OTEL_SERVICE_NAME=smart-collection-upscale
+      - OTEL_EXPORTER_OTLP_GRPC_ENDPOINT=${OTEL_EXPORTER_OTLP_GRPC_ENDPOINT:-alloy:4317}
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
@@ -179,8 +199,115 @@ services:
       start_period: 5s
     restart: unless-stopped
 
+  grafana:
+    image: grafana/grafana:12.0.0
+    profiles: [observability]
+    depends_on:
+      prometheus:
+        condition: service_started
+      loki:
+        condition: service_started
+      tempo:
+        condition: service_started
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-change-this-local-password}
+      GF_USERS_ALLOW_SIGN_UP: 'false'
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "127.0.0.1:${GRAFANA_PORT:-3001}:3000"
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v3.0.1
+    profiles: [observability]
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=${PROMETHEUS_RETENTION:-15d}
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    restart: unless-stopped
+
+  loki:
+    image: grafana/loki:3.3.2
+    profiles: [observability]
+    command: -config.file=/etc/loki/config.yml
+    volumes:
+      - ./monitoring/loki/config.yml:/etc/loki/config.yml:ro
+      - loki_data:/loki
+    restart: unless-stopped
+
+  tempo:
+    image: grafana/tempo:2.6.1
+    profiles: [observability]
+    command: -config.file=/etc/tempo/config.yml
+    volumes:
+      - ./monitoring/tempo/config.yml:/etc/tempo/config.yml:ro
+      - tempo_data:/var/tempo
+    restart: unless-stopped
+
+  alloy:
+    image: grafana/alloy:v1.6.1
+    profiles: [observability]
+    command: run --server.http.listen-addr=0.0.0.0:12345 /etc/alloy/config.alloy
+    volumes:
+      - ./monitoring/alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - alloy_data:/var/lib/alloy/data
+    restart: unless-stopped
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    profiles: [observability]
+    privileged: true
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    restart: unless-stopped
+
+  node-exporter:
+    image: prom/node-exporter:v1.8.2
+    profiles: [observability]
+    command: --path.rootfs=/host
+    volumes:
+      - /:/host:ro
+    restart: unless-stopped
+
+  mongodb-exporter:
+    image: percona/mongodb_exporter:0.43.1
+    profiles: [observability]
+    command:
+      - --mongodb.uri=mongodb://${MONGODB_USERNAME:-scc_admin}:${MONGODB_PASSWORD:-scc_dev}@mongodb:27017/admin?authSource=admin
+      - --collect-all
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    restart: unless-stopped
+
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.67.0
+    profiles: [observability]
+    environment:
+      REDIS_ADDR: redis://redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
 volumes:
   mongodb_data:
   redis_data:
   bundle_cache_rails:
   node_modules:
+  grafana_data:
+  prometheus_data:
+  loki_data:
+  tempo_data:
+  alloy_data:

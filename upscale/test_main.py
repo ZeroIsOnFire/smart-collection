@@ -32,6 +32,12 @@ class UpscaleServiceTests(unittest.TestCase):
         self.addCleanup(self.tier_4x_patcher.stop)
         self.addCleanup(self.tier_2x_patcher.stop)
 
+    def test_metrics_endpoint_exposes_prometheus_format(self):
+        response = self.client.get("/metrics")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("smart_collection_upscale_process_start_time_seconds", response.text)
+
     # ── env helpers ─────────────────────────────────────────────────────────
 
     def test_runtime_defaults_to_cpu(self):
