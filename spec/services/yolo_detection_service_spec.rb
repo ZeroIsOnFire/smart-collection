@@ -10,6 +10,7 @@ RSpec.describe YoloDetectionService do
   before do
     allow(ENV).to receive(:fetch).with('YOLO_SERVICE_URL').and_return(service_url)
     allow(ENV).to receive(:fetch).with('YOLO_API_KEY').and_return(api_key)
+    allow(ENV).to receive(:fetch).with('OBSERVABILITY_ENABLED', 'false').and_return('false')
     allow(ENV).to receive(:[]).with('YOLO_SERVICE_URL').and_return(service_url)
     allow(ENV).to receive(:[]).with('YOLO_API_KEY').and_return(api_key)
 
