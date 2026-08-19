@@ -14,13 +14,14 @@ class YoloDetectionService
     begin
       request = Net::HTTP::Post.new(url)
       request['X-API-Key'] = api_key
+      Observability.inject_trace_context!(request)
 
       # Use multipart form data for file upload
       form_data = [['file', File.open(photo_path)]]
       request.set_form(form_data, 'multipart/form-data')
 
-      response = Net::HTTP.start(url.host, url.port) do |http|
-        http.request(request)
+      response = Observability.in_span('YOLO detect') do
+        Net::HTTP.start(url.host, url.port) { |http| http.request(request) }
       end
 
       if response.is_a?(Net::HTTPSuccess)
@@ -45,12 +46,13 @@ class YoloDetectionService
     begin
       request = Net::HTTP::Post.new(url)
       request['X-API-Key'] = api_key
+      Observability.inject_trace_context!(request)
 
       form_data = [['file', File.open(photo_path)]]
       request.set_form(form_data, 'multipart/form-data')
 
-      response = Net::HTTP.start(url.host, url.port) do |http|
-        http.request(request)
+      response = Observability.in_span('YOLO classify color') do
+        Net::HTTP.start(url.host, url.port) { |http| http.request(request) }
       end
 
       if response.is_a?(Net::HTTPSuccess)
@@ -75,12 +77,13 @@ class YoloDetectionService
     begin
       request = Net::HTTP::Post.new(url)
       request['X-API-Key'] = api_key
+      Observability.inject_trace_context!(request)
 
       form_data = [['file', File.open(photo_path)]]
       request.set_form(form_data, 'multipart/form-data')
 
-      response = Net::HTTP.start(url.host, url.port) do |http|
-        http.request(request)
+      response = Observability.in_span('YOLO classify') do
+        Net::HTTP.start(url.host, url.port) { |http| http.request(request) }
       end
 
       if response.is_a?(Net::HTTPSuccess)

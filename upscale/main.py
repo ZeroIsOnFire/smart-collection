@@ -3,6 +3,7 @@ import logging
 import os
 import subprocess
 import tempfile
+import time
 from collections import OrderedDict
 from functools import lru_cache
 
@@ -12,9 +13,16 @@ logger = logging.getLogger("upscale-service")
 
 import cv2
 import numpy as np
-from fastapi import Depends, FastAPI, File, Header, HTTPException, UploadFile
-from fastapi.responses import Response
+from fastapi import Depends, FastAPI, File, Header, HTTPException, Request, UploadFile
+from fastapi.responses import PlainTextResponse, Response
 from PIL import Image, ImageOps
+from prometheus_client import CONTENT_TYPE_LATEST, Counter, Gauge, Histogram, generate_latest
+from opentelemetry import trace
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.propagate import extract
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
 try:
     import torch
@@ -120,6 +128,40 @@ DENOISE_SEARCH_WINDOW = int(os.getenv("DENOISE_SEARCH_WINDOW", "21"))
 LANCZOS_CAS_AMOUNT = float(os.getenv("LANCZOS_CAS_AMOUNT", "0.35"))
 
 app = FastAPI(title="SCC Image Upscale Service")
+
+OBSERVABILITY_ENABLED = os.getenv("OBSERVABILITY_ENABLED", "false").lower() == "true"
+REQUESTS = Counter("smart_collection_upscale_http_requests_total", "HTTP requests", ["method", "status"])
+DURATION = Histogram("smart_collection_upscale_http_request_duration_seconds", "HTTP request duration", ["method"])
+PROCESS_START = Gauge("smart_collection_upscale_process_start_time_seconds", "Process start time")
+PROCESS_START.set(time.time())
+
+if OBSERVABILITY_ENABLED:
+    provider = TracerProvider(resource=Resource.create({"service.name": os.getenv("OTEL_SERVICE_NAME", "smart-collection-upscale")}))
+    provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter(endpoint=os.getenv("OTEL_EXPORTER_OTLP_GRPC_ENDPOINT", "alloy:4317"), insecure=True)))
+    trace.set_tracer_provider(provider)
+
+tracer = trace.get_tracer("smart_collection.upscale")
+
+
+@app.middleware("http")
+async def observe_request(request: Request, call_next):
+    if request.url.path == "/metrics":
+        return await call_next(request)
+
+    started_at = time.monotonic()
+    with tracer.start_as_current_span(f"HTTP {request.method}", context=extract(request.headers)) as span:
+        span.set_attribute("http.request.method", request.method)
+        try:
+            response = await call_next(request)
+            span.set_attribute("http.response.status_code", response.status_code)
+            REQUESTS.labels(request.method, str(response.status_code)).inc()
+            return response
+        except Exception as error:
+            span.record_exception(error)
+            REQUESTS.labels(request.method, "500").inc()
+            raise
+        finally:
+            DURATION.labels(request.method).observe(time.monotonic() - started_at)
 
 
 def upscale_runtime():
@@ -495,6 +537,11 @@ async def health():
         "lanczos_sharpen_method": "cas",
         "lanczos_cas_amount": LANCZOS_CAS_AMOUNT,
     }
+
+
+@app.get("/metrics", include_in_schema=False)
+async def metrics():
+    return PlainTextResponse(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
 @app.post("/upscale", dependencies=[Depends(verify_api_key)])

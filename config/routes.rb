@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
+  get '/metrics', to: 'metrics#show'
   devise_for :users, controllers: { registrations: 'registrations' }
 
   patch '/locale', to: 'locales#update', as: :locale

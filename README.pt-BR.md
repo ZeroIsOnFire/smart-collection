@@ -6,6 +6,8 @@
 
 [Read in English](README.md)
 
+Configuração do Grafana: [English](monitoring/README.md) | [Português](monitoring/README.pt-BR.md)
+
 O **Smart Collection Catalog** é uma aplicação Rails privada para catalogar itens colecionáveis, com foco forte em miniaturas de carros. O projeto combina gestão manual de acervo, preparação local de imagens com IA, autodetecção baseada em YOLO, lista de desejos, compartilhamento público seguro e exportações em PDF/CSV.
 
 ## Tecnologias

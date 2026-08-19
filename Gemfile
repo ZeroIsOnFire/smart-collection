@@ -48,6 +48,9 @@ gem 'sidekiq'
 gem 'simple_form'
 gem 'stimulus-rails'
 gem 'turbo-rails'
+gem 'opentelemetry-exporter-otlp'
+gem 'opentelemetry-sdk'
+gem 'prometheus-client'
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem

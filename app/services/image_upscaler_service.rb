@@ -72,21 +72,24 @@ class ImageUpscalerService
   def self.upscale_via_service(source_path, minimum_side)
     service_url = ENV.fetch('IMAGE_UPSCALE_SERVICE_URL')
     url = URI.parse("#{service_url}/upscale?minimum_side=#{minimum_side}")
-    Rails.logger.info "ImageUpscalerService: sending upscale request to #{url} for #{source_path} (min side: #{minimum_side})"
+    Rails.logger.info "ImageUpscalerService: sending upscale request (min side: #{minimum_side})"
     api_key = ENV['IMAGE_UPSCALE_API_KEY'].presence
 
     request = Net::HTTP::Post.new(url)
     request['X-API-Key'] = api_key if api_key.present?
+    Observability.inject_trace_context!(request)
     response = File.open(source_path) do |file|
       request.set_form([
                          ['file', file]
                        ], 'multipart/form-data')
 
-      Net::HTTP.start(url.host, url.port, use_ssl: url.scheme == 'https') do |http|
-        http.open_timeout = timeout_from_env('IMAGE_UPSCALE_OPEN_TIMEOUT', DEFAULT_OPEN_TIMEOUT)
-        http.read_timeout = timeout_from_env('IMAGE_UPSCALE_READ_TIMEOUT', DEFAULT_READ_TIMEOUT)
-        http.write_timeout = timeout_from_env('IMAGE_UPSCALE_WRITE_TIMEOUT', DEFAULT_WRITE_TIMEOUT) if http.respond_to?(:write_timeout=)
-        http.request(request)
+      Observability.in_span('Image upscale') do
+        Net::HTTP.start(url.host, url.port, use_ssl: url.scheme == 'https') do |http|
+          http.open_timeout = timeout_from_env('IMAGE_UPSCALE_OPEN_TIMEOUT', DEFAULT_OPEN_TIMEOUT)
+          http.read_timeout = timeout_from_env('IMAGE_UPSCALE_READ_TIMEOUT', DEFAULT_READ_TIMEOUT)
+          http.write_timeout = timeout_from_env('IMAGE_UPSCALE_WRITE_TIMEOUT', DEFAULT_WRITE_TIMEOUT) if http.respond_to?(:write_timeout=)
+          http.request(request)
+        end
       end
     end
 

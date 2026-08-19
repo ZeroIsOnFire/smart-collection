@@ -6,6 +6,8 @@
 
 [Leia em português](README.pt-BR.md)
 
+Grafana setup: [English](monitoring/README.md) | [Português](monitoring/README.pt-BR.md)
+
 Smart Collection Catalog is a private Rails application for cataloging collectible items, with a strong focus on miniature and die-cast cars. It combines manual collection management, local AI-assisted photo preparation, YOLO-based autodetection, wishlist tracking, secure public sharing, and PDF/CSV exports.
 
 ## Technology Stack
