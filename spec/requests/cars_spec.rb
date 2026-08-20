@@ -670,6 +670,22 @@ RSpec.describe 'Cars', type: :request do
       expect(toggle['class']).to include('d-none')
     end
 
+    it 'hides the AI photo choice when a sufficiently large original has no enhanced variant' do
+      allow(ImageUpscalerService).to receive(:service_configured?).and_return(true)
+      car.original_photo = uploaded_resized_fixture(width: 420, height: 420, filename: 'large_original.jpg')
+      car.photo = fixture_file_upload(Rails.root.join('spec/fixtures/files/car_sample.jpg'), 'image/jpeg')
+      car.save!
+
+      get edit_car_path(car), headers: { 'Turbo-Frame' => 'modal' }
+
+      document = Nokogiri::HTML(response.body)
+      toggle = document.at_css('.car-upscaler-toggle[data-photo-upload-target="upscalerToggle"]')
+
+      expect(toggle).to be_present
+      expect(toggle['class']).to include('d-none')
+      expect(document.at_css('.car-ai-variant-comparison')).to be_nil
+    end
+
     it 'shows original and AI choices when saved variants exist after processing' do
       allow(ImageUpscalerService).to receive(:service_configured?).and_return(true)
       car.original_photo = uploaded_resized_fixture(width: 360, height: 360, filename: 'processed_original.jpg')
