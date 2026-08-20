@@ -154,7 +154,7 @@ class Car
   end
 
   def selectable_photo_variant?
-    original_photo_available? || enhanced_photo_available?
+    original_photo_available? && enhanced_photo_available?
   end
 
   def crop_x
