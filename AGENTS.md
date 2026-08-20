@@ -43,6 +43,7 @@ Premium Rails service for registering and managing private collections: items, p
 - Run the project through Docker Compose. The local `docker-compose.yml` is not versioned; use `docker-compose.example.yml` as the template.
 - Rails, RSpec, and RuboCop commands must run in the `web` container.
 - Playwright tests must run inside Docker, in the `web` container, with `docker compose exec web npm run test:e2e -- path/to/test.spec.js --browser=chromium`. Use `http://127.0.0.1:3000` when the test runs from the `web` container.
+- For E2E validation, use Playwright; if no Playwright configuration or versioned scenario exists, validate the scenario through Docker instead of skipping browser coverage.
 - RSpec must use `docker compose exec web bin/safe_rspec`; never run `bundle exec rspec` directly. The wrapper validates `Rails.env=test` and a Mongoid database name containing `test`.
 - For CRLF, timeout, or `Layout/EndOfLine` failures, apply the focused workaround documented in `$quality-check-rails` and record the partial result instead of repeating the same step indefinitely.
 - During implementation, run focused specs for the changed area. For relevant Rails work, finish with a suite broad enough to give confidence; broad QA, lint, and audit are final-stage checks or explicit user requests.
@@ -62,7 +63,7 @@ Premium Rails service for registering and managing private collections: items, p
 - When executing a task from a plan or goal, close with a quality check proportional to the changed code before committing. For Rails, run focused specs through `bin/safe_rspec` and focused RuboCop; for JS, run lint/build when changing `app/javascript` or JS-loaded assets; for visible frontend functionality, run Playwright inside Docker; for Python/microservices, run the corresponding tests/lint in `yolo/` or `upscale/`; for sensitive changes or dependencies, run Brakeman/Bundler Audit when applicable.
 - If broad QA (`bin/qa`) times out or fails because of CRLF, split it into steps as described in Docker And Tests, record the partial result in the local PR document, and do not declare a green status for a step that did not finish.
 - Commits must be atomic, in Portuguese, and use Conventional Commits.
-- When creating a commit, generate or update a file under `docs/` with PR details for the current commits. The `docs/` directory is ignored by Git; keep those files local and unversioned.
+- When creating a commit, generate or update a local `.md` file under `docs/` with the PR title, a short list of changes, and observations (tests, risks, timeouts, or partial QA). The `docs/` directory is ignored by Git; keep those files local and unversioned.
 
 ## Images, YOLO, And Upscale
 
@@ -96,7 +97,7 @@ Premium Rails service for registering and managing private collections: items, p
 - Branches: `feature/`, `fix/`, `chore/`, `hotfix/`, `test/`, in Portuguese kebab-case, starting from `main`.
 - On the first implementable plan or goal of a session, create a new branch from `main` unless the user explicitly asks to use the current branch. For continuations of the same plan/goal in the same session, keep the branch already created. If the user says "neste branch", do not switch branches.
 - PR CI for `main`: Docker build, RSpec, RuboCop, and Bundler Audit. PRs with red CI must not be merged.
-- PRs should be small and focused, with a description of what changed, why, and how to test. When closing a plan/goal, update/create a local file in `docs/` with summary, tests, risks, timeouts, and partial QA before committing.
+- PRs should be small and focused, with a description of what changed, why, and how to test. Before committing, update/create the local PR `.md` in `docs/` with its title, short changes, and observations.
 - Review checklist: user scoping, adequate tests, preserved architecture, no unnecessary duplication, no secrets, and no unauthorized dependencies.
 
 ## Closeout
