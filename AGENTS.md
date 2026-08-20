@@ -63,7 +63,7 @@ Premium Rails service for registering and managing private collections: items, p
 - When executing a task from a plan or goal, close with a quality check proportional to the changed code before committing. For Rails, run focused specs through `bin/safe_rspec` and focused RuboCop; for JS, run lint/build when changing `app/javascript` or JS-loaded assets; for visible frontend functionality, run Playwright inside Docker; for Python/microservices, run the corresponding tests/lint in `yolo/` or `upscale/`; for sensitive changes or dependencies, run Brakeman/Bundler Audit when applicable.
 - If broad QA (`bin/qa`) times out or fails because of CRLF, split it into steps as described in Docker And Tests, record the partial result in the local PR document, and do not declare a green status for a step that did not finish.
 - Commits must be atomic, in Portuguese, and use Conventional Commits.
-- When creating a commit, generate or update a local `.md` file under `docs/` with the PR title, a short list of changes, and observations (tests, risks, timeouts, or partial QA). The `docs/` directory is ignored by Git; keep those files local and unversioned.
+- When creating a commit, generate or update a local `.md` file under `docs/` following `.github/pull_request_template.md`: use the sections `Resumo`, `Alterações`, `Validação`, and `Observações`. The `docs/` directory is ignored by Git; keep those files local and unversioned.
 
 ## Images, YOLO, And Upscale
 
@@ -97,7 +97,7 @@ Premium Rails service for registering and managing private collections: items, p
 - Branches: `feature/`, `fix/`, `chore/`, `hotfix/`, `test/`, in Portuguese kebab-case, starting from `main`.
 - On the first implementable plan or goal of a session, create a new branch from `main` unless the user explicitly asks to use the current branch. For continuations of the same plan/goal in the same session, keep the branch already created. If the user says "neste branch", do not switch branches.
 - PR CI for `main`: Docker build, RSpec, RuboCop, and Bundler Audit. PRs with red CI must not be merged.
-- PRs should be small and focused, with a description of what changed, why, and how to test. Before committing, update/create the local PR `.md` in `docs/` with its title, short changes, and observations.
+- PRs should be small and focused, with a description of what changed, why, and how to test. Before committing, update/create the local PR `.md` in `docs/` using the GitHub PR template as its standard.
 - Review checklist: user scoping, adequate tests, preserved architecture, no unnecessary duplication, no secrets, and no unauthorized dependencies.
 
 ## Closeout
