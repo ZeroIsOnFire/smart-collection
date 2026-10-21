@@ -1,4 +1,4 @@
-FROM pytorch/pytorch:2.5.1-cuda12.4-cudnn9-runtime
+FROM pytorch/pytorch:2.13.0-cuda12.6-cudnn9-runtime@sha256:6acf597eeb8e376a96580dde4952f37cc017fef732bb40bfc73f28f25e3f64b4
 
 WORKDIR /app
 
@@ -7,13 +7,22 @@ ENV PIP_NO_CACHE_DIR=1
 ENV UPSCALE_RUNTIME=nvidia
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends libgl1 libglib2.0-0 libgomp1 curl \
-    && rm -rf /var/lib/apt/lists/*
+    && apt-get install -y --no-install-recommends libgl1 libglib2.0-0 libgomp1 curl python3-venv \
+    && rm -rf /var/lib/apt/lists/* \
+    && python -m venv --system-site-packages /opt/venv
+
+# Reuse the image's CUDA packages without modifying its managed system Python.
+ENV VIRTUAL_ENV=/opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
 COPY requirements.lock requirements.txt
-RUN pip install --upgrade pip \
+COPY constraints.txt .
+RUN python -c "import sys; assert sys.version_info >= (3, 11), 'Pillow 13 requires Python 3.11+'" \
+    && python -m pip install --upgrade -c constraints.txt pip setuptools uv==0.13.4 \
     && sed -i '/^torch/d;/^torchvision/d' requirements.txt \
-    && pip install -r requirements.txt
+    # BasicSR setup_requires must reuse the selected PyTorch runtime.
+    && python -m pip install --no-build-isolation -r requirements.txt \
+    && python -m pip check
 
 COPY main.py .
 

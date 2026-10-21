@@ -23,9 +23,12 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.lock requirements.txt
-RUN pip install --upgrade pip \
-    && sed -i '/torch/d;/torchvision/d;/realesrgan/d' requirements.txt \
-    && pip install -r requirements.txt
+COPY constraints.txt .
+RUN python -c "import sys; assert sys.version_info >= (3, 11), 'Pillow 13 requires Python 3.11+'" \
+    && python -m pip install --upgrade -c constraints.txt pip setuptools \
+    && sed -i '/^torch/d;/^torchvision/d;/^realesrgan/d' requirements.txt \
+    && python -m pip install -r requirements.txt \
+    && python -m pip check
 
 RUN mkdir -p /app/bin /app/models/realesrgan-ncnn-vulkan /tmp/realesrgan-ncnn-vulkan \
     && curl -L --fail -o /tmp/realesrgan-ncnn-vulkan.zip \
