@@ -1,10 +1,20 @@
-FROM ultralytics/ultralytics:latest-cpu
+FROM ultralytics/ultralytics:8.4.113-cpu@sha256:584fc79cae5890a81ee8abd91417ec797de0dc43c0261b33b59a721bf070d76b
 
 WORKDIR /app
 
+# OpenCV imported by Ultralytics requires these shared libraries on the CPU image.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libgl1 libglib2.0-0 libxcb1 \
+    && rm -rf /var/lib/apt/lists/*
+
 # Install additional requirements
 COPY requirements.lock requirements.txt
-RUN pip install --no-cache-dir --upgrade -r requirements.txt
+COPY constraints.txt .
+RUN python -c "import sys; assert sys.version_info >= (3, 11), 'Pillow 13 requires Python 3.11+'" \
+    && python -m pip install --no-cache-dir --upgrade -c constraints.txt pip uv pillow \
+    && python -m pip install --no-cache-dir -c constraints.txt torch torchvision --index-url https://download.pytorch.org/whl/cpu \
+    && python -m pip install --no-cache-dir --upgrade -r requirements.txt \
+    && python -m pip check
 
 # Copy application code
 COPY main.py .
